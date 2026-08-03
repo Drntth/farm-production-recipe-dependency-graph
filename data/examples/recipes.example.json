@@ -1,0 +1,83 @@
+{
+  "schema": "Recipe",
+
+  "fields": {
+    "id": {
+      "type": "string",
+      "description": "Recept egyedi azonosító",
+      "example": "cream_recipe"
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Előállított termék neve",
+      "example": "Cream"
+    },
+
+    "building": {
+      "type": "string",
+      "description": "Gyártó épület ID",
+      "example": "dairy"
+    },
+
+    "production_time": {
+      "type": "integer",
+      "description": "Elkészítési idő másodpercben vagy percben tárolva",
+      "example": 30
+    },
+
+    "inputs": {
+      "type": "array",
+      "description": "Bemeneti erőforrások listája",
+      "items": {
+        "resource": {
+          "type": "string",
+          "description": "Resource ID",
+          "example": "milk"
+        },
+
+        "amount": {
+          "type": "integer",
+          "description": "Szükséges mennyiség",
+          "example": 2
+        }
+      }
+    },
+
+    "output": {
+      "type": "object",
+      "description": "Előállított erőforrás",
+
+      "resource": {
+        "type": "string",
+        "description": "Előállított resource ID",
+        "example": "cream"
+      },
+
+      "amount": {
+        "type": "integer",
+        "description": "Előállított mennyiség",
+        "example": 1
+      }
+    }
+  },
+
+  "example_object": {
+    "id": "cream_recipe",
+    "name": "Cream",
+    "building": "dairy",
+    "production_time": 30,
+
+    "inputs": [
+      {
+        "resource": "milk",
+        "amount": 1
+      }
+    ],
+
+    "output": {
+      "resource": "cream",
+      "amount": 1
+    }
+  }
+}

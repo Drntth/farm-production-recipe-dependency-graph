@@ -1,0 +1,43 @@
+{
+  "schema": "Building",
+
+  "fields": {
+    "id": {
+      "type": "string",
+      "description": "Egyedi azonosító",
+      "example": "dairy"
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Megjelenítési név",
+      "example": "Dairy"
+    },
+
+    "type": {
+      "type": "enum",
+      "description": "Épület vagy entitás típusa",
+      "allowed_values": [
+        "production",
+        "animal",
+        "crop",
+        "storage",
+        "other"
+      ],
+      "example": "production"
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Opcionális leírás",
+      "example": "Processes milk into dairy products"
+    }
+  },
+
+  "example_object": {
+    "id": "dairy",
+    "name": "Dairy",
+    "type": "production",
+    "description": "Processes milk into dairy products"
+  }
+}

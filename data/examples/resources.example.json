@@ -1,0 +1,35 @@
+{
+  "schema": "Resource",
+
+  "fields": {
+    "id": {
+      "type": "string",
+      "description": "Egyedi azonosító",
+      "example": "milk"
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Megjelenítési név",
+      "example": "Milk"
+    },
+
+    "type": {
+      "type": "enum",
+      "description": "Erőforrás típusa",
+      "allowed_values": [
+        "crop",
+        "raw_material",
+        "processed_material",
+        "animal_product"
+      ],
+      "example": "animal_product"
+    }
+  },
+
+  "example_object": {
+    "id": "milk",
+    "name": "Milk",
+    "type": "animal_product"
+  }
+}
