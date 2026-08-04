@@ -253,10 +253,20 @@ Mandatory fields:
 `source_location_id` is **mandatory** for `crop`, `animal_product` and `ore`.
 Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_material`, `ore`.
 
+### External Resources
+
+Some recipe inputs from the wiki represent external dependencies rather than farm-produced resources (for example vouchers or premium materials).
+
+These items are allowed as recipe inputs but are not required to exist in `resources.json`, because they do not participate in the internal farm production dependency chain.
+
 ### Recipes
 
 Only transformations that happen inside production locations.
 Animal products and raw crops are resources (produced by their source location), not recipes.
+
+Recipes may contain zero or more inputs.
+Most production recipes consume resources, but some wiki-defined production entries (such as lure crafting) have no explicit input requirements.
+
 Mandatory fields:
 
 ```json
@@ -359,6 +369,25 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+---
+
+### Testing
+
+Run the loader validation tests:
+
+```bash
+python -m pytest tests/test_json_loader.py
+```
+
+The test verifies:
+
+- JSON files can be loaded
+- Pydantic models validate the data
+- Referential integrity rules are applied
+- External recipe inputs are handled correctly
+
+---
+
 ### Usage
 
 Example:
@@ -404,7 +433,11 @@ farm-production-recipe-dependency-graph/
 │       └── recipes.example.json
 ├── src/
 │   ├── models/
+│   │   ├── location.py
+│   │   ├── resource.py
+│   │   └── recipe.py
 │   ├── loaders/
+│   │   └── json_loader.py
 │   ├── graph/
 │   └── exporters/
 ├── output/
@@ -413,24 +446,60 @@ farm-production-recipe-dependency-graph/
 └── README.md
 ```
 
+### Implemented: Data models & loaders
+
+The core entities are defined as **Pydantic v2** models under `src/models/`:
+
+| Module        | Class                                   | Notes                                                          |
+| ------------- | --------------------------------------- | -------------------------------------------------------------- |
+| `location.py` | `Location`, `LocationType`              | Enum-validated type, snake_case id                             |
+| `resource.py` | `Resource`, `ResourceType`              | `source_location_id` mandatory for crop / animal_product / ore |
+| `recipe.py`   | `Recipe`, `RecipeInput`, `RecipeOutput` | Supports recipes with zero or more inputs                      |
+
+The loader (`src/loaders/json_loader.py`) provides:
+
+- `load_data(data_dir, max_level=None) → DataSet`
+- Automatic Pydantic validation
+- Referential integrity validation
+  - location references must exist
+  - recipe outputs must exist as resources
+  - external recipe inputs (e.g. vouchers, premium items) are allowed
+- Optional `--max-level` filtering
+- Fast id-based lookup via `DataSet.locations / .resources / .recipes`
+
+Example usage:
+
+```python
+from pathlib import Path
+from src.loaders import load_data
+
+ds = load_data(Path("data"), max_level=52)
+print(ds.summary())
+# DataSet(locations=…, resources=…, recipes=…)
+```
+
 ### Development Priorities (current phase)
 
-- Finalize minimal JSON data model for Layout Planner (`locations`, `resources`, `recipes`)
-- Make `source_location_id` mandatory for raw resources
-- Implement / refine the wiki scraper according to the final schema
-- Implement graph generation that includes source-location → resource edges
-- Add exporters (JSON, CSV, GraphML)
-- Validate graph quality with real Hay Day production chains up to level 52
+- [x] Finalize minimal JSON data model for Layout Planner (`locations`, `resources`, `recipes`)
+- [x] Make `source_location_id` mandatory for raw resources
+- [x] Implement data models + JSON loaders (`src/models/`, `src/loaders/`)
+- [ ] Implement / refine the wiki scraper according to the final schema
+- [ ] Implement graph generation that includes source-location → resource edges
+- [ ] Add exporters (JSON, CSV, GraphML)
+- [ ] Validate graph quality with real Hay Day production chains up to level 52
 - Keep JSON files in 3NF-ready shape for later shared PostgreSQL usage
 
 ### Roadmap
 
 #### v0.1 - Layout Planner foundation
 
-- Initial Python project
-- JSON data loading
-- Basic graph generation
-- Wiki scraper (level 52)
+- [x] Initial Python project structure
+- [x] Pydantic data models (`Location`, `Resource`, `Recipe`)
+- [x] JSON data loading + referential integrity (`src/loaders`)
+- [x] Support recipes without explicit inputs
+- [x] Support external recipe dependencies
+- [ ] Basic graph generation
+- [ ] Wiki scraper (level 52)
 
 #### v0.3 - Layout Planner usable
 
