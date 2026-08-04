@@ -1,0 +1,230 @@
+[
+  {
+    "id": "chicken_coop",
+    "name": "Chicken Coop",
+    "type": "animal",
+    "unlock_level": 1
+  },
+  {
+    "id": "field",
+    "name": "Field",
+    "type": "field",
+    "unlock_level": 1
+  },
+  {
+    "id": "feed_mill",
+    "name": "Feed mill",
+    "type": "production",
+    "unlock_level": 2
+  },
+  {
+    "id": "bakery",
+    "name": "Bakery",
+    "type": "production",
+    "unlock_level": 4
+  },
+  {
+    "id": "cow_pasture",
+    "name": "Cow Pasture",
+    "type": "animal",
+    "unlock_level": 6
+  },
+  {
+    "id": "dairy",
+    "name": "Dairy",
+    "type": "production",
+    "unlock_level": 6
+  },
+  {
+    "id": "sugar_mill",
+    "name": "Sugar mill",
+    "type": "production",
+    "unlock_level": 7
+  },
+  {
+    "id": "popcorn_pot",
+    "name": "Popcorn pot",
+    "type": "production",
+    "unlock_level": 8
+  },
+  {
+    "id": "bbq_grill",
+    "name": "BBQ grill",
+    "type": "production",
+    "unlock_level": 9
+  },
+  {
+    "id": "pig_pen",
+    "name": "Pig Pen",
+    "type": "animal",
+    "unlock_level": 10
+  },
+  {
+    "id": "pie_oven",
+    "name": "Pie oven",
+    "type": "production",
+    "unlock_level": 14
+  },
+  {
+    "id": "tree",
+    "name": "Tree",
+    "type": "tree",
+    "unlock_level": 15
+  },
+  {
+    "id": "sheep_pasture",
+    "name": "Sheep Pasture",
+    "type": "animal",
+    "unlock_level": 16
+  },
+  {
+    "id": "loom",
+    "name": "Loom",
+    "type": "production",
+    "unlock_level": 17
+  },
+  {
+    "id": "bush",
+    "name": "Bush",
+    "type": "bush",
+    "unlock_level": 19
+  },
+  {
+    "id": "sewing_machine",
+    "name": "Sewing machine",
+    "type": "production",
+    "unlock_level": 19
+  },
+  {
+    "id": "cake_oven",
+    "name": "Cake oven",
+    "type": "production",
+    "unlock_level": 21
+  },
+  {
+    "id": "mine",
+    "name": "Mine",
+    "type": "other",
+    "unlock_level": 24
+  },
+  {
+    "id": "smelter",
+    "name": "Smelter",
+    "type": "production",
+    "unlock_level": 24
+  },
+  {
+    "id": "lamb_pasture",
+    "name": "Lamb Pasture",
+    "type": "animal",
+    "unlock_level": 25
+  },
+  {
+    "id": "juice_press",
+    "name": "Juice press",
+    "type": "production",
+    "unlock_level": 26
+  },
+  {
+    "id": "fishing_lake",
+    "name": "Fishing Lake",
+    "type": "other",
+    "unlock_level": 27
+  },
+  {
+    "id": "lure_workbench",
+    "name": "Lure workbench",
+    "type": "production",
+    "unlock_level": 27
+  },
+  {
+    "id": "ice_cream_maker",
+    "name": "Ice cream maker",
+    "type": "production",
+    "unlock_level": 29
+  },
+  {
+    "id": "net_maker",
+    "name": "Net maker",
+    "type": "production",
+    "unlock_level": 30
+  },
+  {
+    "id": "doner_kebab_stand",
+    "name": "Doner kebab stand",
+    "type": "production",
+    "unlock_level": 32
+  },
+  {
+    "id": "goat_yard",
+    "name": "Goat Yard",
+    "type": "animal",
+    "unlock_level": 32
+  },
+  {
+    "id": "jam_maker",
+    "name": "Jam maker",
+    "type": "production",
+    "unlock_level": 35
+  },
+  {
+    "id": "jeweler",
+    "name": "Jeweler",
+    "type": "production",
+    "unlock_level": 38
+  },
+  {
+    "id": "beehive_tree",
+    "name": "Beehive Tree",
+    "type": "animal",
+    "unlock_level": 39
+  },
+  {
+    "id": "honey_extractor",
+    "name": "Honey extractor",
+    "type": "production",
+    "unlock_level": 39
+  },
+  {
+    "id": "coffee_kiosk",
+    "name": "Coffee kiosk",
+    "type": "production",
+    "unlock_level": 42
+  },
+  {
+    "id": "lobster_pool",
+    "name": "Lobster pool",
+    "type": "animal",
+    "unlock_level": 44
+  },
+  {
+    "id": "soup_kitchen",
+    "name": "Soup kitchen",
+    "type": "production",
+    "unlock_level": 46
+  },
+  {
+    "id": "candle_maker",
+    "name": "Candle maker",
+    "type": "production",
+    "unlock_level": 48
+  },
+  {
+    "id": "flower_shop",
+    "name": "Flower shop",
+    "type": "production",
+    "unlock_level": 49
+  },
+  {
+    "id": "duck_salon",
+    "name": "Duck salon",
+    "type": "animal",
+    "unlock_level": 50
+  },
+  {
+    "id": "candy_machine",
+    "name": "Candy machine",
+    "type": "production",
+    "unlock_level": 51
+  }
+]

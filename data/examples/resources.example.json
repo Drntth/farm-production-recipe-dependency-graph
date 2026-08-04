@@ -1,35 +1,44 @@
 {
   "schema": "Resource",
-
   "fields": {
     "id": {
       "type": "string",
-      "description": "Egyedi azonosító",
+      "description": "Unique identifier (snake_case English)",
       "example": "milk"
     },
-
     "name": {
       "type": "string",
-      "description": "Megjelenítési név",
+      "description": "Display name",
       "example": "Milk"
     },
-
     "type": {
       "type": "enum",
-      "description": "Erőforrás típusa",
+      "description": "Resource category",
       "allowed_values": [
         "crop",
-        "raw_material",
+        "animal_product",
         "processed_material",
-        "animal_product"
+        "raw_material",
+        "ore"
       ],
       "example": "animal_product"
+    },
+    "unlock_level": {
+      "type": "integer",
+      "description": "Minimum player level required to unlock",
+      "example": 6
+    },
+    "source_location_id": {
+      "type": "string",
+      "description": "ID of the location that produces this resource (mandatory for all resources). For crops/animal products/ores this is the primary source (field, pasture, mine…). For processed materials this is the production location (bakery, dairy…).",
+      "example": "cow_pasture"
     }
   },
-
   "example_object": {
     "id": "milk",
     "name": "Milk",
-    "type": "animal_product"
+    "type": "animal_product",
+    "unlock_level": 6,
+    "source_location_id": "cow_pasture"
   }
 }

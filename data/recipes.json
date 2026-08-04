@@ -1,0 +1,2490 @@
+[
+  {
+    "id": "chicken_feed",
+    "name": "Chicken feed",
+    "location_id": "feed_mill",
+    "unlock_level": 2,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "chicken_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "bread",
+    "name": "Bread",
+    "location_id": "bakery",
+    "unlock_level": 4,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "bread",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cow_feed",
+    "name": "Cow feed",
+    "location_id": "feed_mill",
+    "unlock_level": 6,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 1
+      },
+      {
+        "resource_id": "soybean",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cow_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cream",
+    "name": "Cream",
+    "location_id": "dairy",
+    "unlock_level": 6,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cream",
+      "amount": 1
+    }
+  },
+  {
+    "id": "brown_sugar",
+    "name": "Brown sugar",
+    "location_id": "sugar_mill",
+    "unlock_level": 7,
+    "inputs": [
+      {
+        "resource_id": "sugarcane",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "brown_sugar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "corn_bread",
+    "name": "Corn bread",
+    "location_id": "bakery",
+    "unlock_level": 7,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "corn_bread",
+      "amount": 1
+    }
+  },
+  {
+    "id": "popcorn",
+    "name": "Popcorn",
+    "location_id": "popcorn_pot",
+    "unlock_level": 8,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "popcorn",
+      "amount": 1
+    }
+  },
+  {
+    "id": "butter",
+    "name": "Butter",
+    "location_id": "dairy",
+    "unlock_level": 9,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "butter",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pancake",
+    "name": "Pancake",
+    "location_id": "bbq_grill",
+    "unlock_level": 9,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "pancake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cookie",
+    "name": "Cookie",
+    "location_id": "bakery",
+    "unlock_level": 10,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cookie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pig_feed",
+    "name": "Pig feed",
+    "location_id": "feed_mill",
+    "unlock_level": 10,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "soybean",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "pig_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "bacon_and_eggs",
+    "name": "Bacon and eggs",
+    "location_id": "bbq_grill",
+    "unlock_level": 11,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_and_eggs",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cheese",
+    "name": "Cheese",
+    "location_id": "dairy",
+    "unlock_level": 12,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "cheese",
+      "amount": 1
+    }
+  },
+  {
+    "id": "white_sugar",
+    "name": "White sugar",
+    "location_id": "sugar_mill",
+    "unlock_level": 13,
+    "inputs": [
+      {
+        "resource_id": "sugarcane",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "white_sugar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "carrot_pie",
+    "name": "Carrot pie",
+    "location_id": "pie_oven",
+    "unlock_level": 14,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "carrot_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pumpkin_pie",
+    "name": "Pumpkin pie",
+    "location_id": "pie_oven",
+    "unlock_level": 15,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "pumpkin",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "pumpkin_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "buttered_popcorn",
+    "name": "Buttered popcorn",
+    "location_id": "popcorn_pot",
+    "unlock_level": 16,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "corn",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "buttered_popcorn",
+      "amount": 1
+    }
+  },
+  {
+    "id": "sheep_feed",
+    "name": "Sheep feed",
+    "location_id": "feed_mill",
+    "unlock_level": 16,
+    "inputs": [
+      {
+        "resource_id": "soybean",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "sheep_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "sweater",
+    "name": "Sweater",
+    "location_id": "loom",
+    "unlock_level": 17,
+    "inputs": [
+      {
+        "resource_id": "wool",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "sweater",
+      "amount": 1
+    }
+  },
+  {
+    "id": "bacon_pie",
+    "name": "Bacon pie",
+    "location_id": "pie_oven",
+    "unlock_level": 18,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cotton_fabric",
+    "name": "Cotton fabric",
+    "location_id": "loom",
+    "unlock_level": 18,
+    "inputs": [
+      {
+        "resource_id": "cotton",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "cotton_fabric",
+      "amount": 1
+    }
+  },
+  {
+    "id": "hamburger",
+    "name": "Hamburger",
+    "location_id": "bbq_grill",
+    "unlock_level": 18,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "bread",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "hamburger",
+      "amount": 1
+    }
+  },
+  {
+    "id": "syrup",
+    "name": "Syrup",
+    "location_id": "sugar_mill",
+    "unlock_level": 18,
+    "inputs": [
+      {
+        "resource_id": "sugarcane",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "syrup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blue_woolly_hat",
+    "name": "Blue woolly hat",
+    "location_id": "loom",
+    "unlock_level": 19,
+    "inputs": [
+      {
+        "resource_id": "indigo",
+        "amount": 1
+      },
+      {
+        "resource_id": "wool",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "blue_woolly_hat",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cotton_shirt",
+    "name": "Cotton shirt",
+    "location_id": "sewing_machine",
+    "unlock_level": 19,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cotton_shirt",
+      "amount": 1
+    }
+  },
+  {
+    "id": "raspberry_muffin",
+    "name": "Raspberry muffin",
+    "location_id": "bakery",
+    "unlock_level": 19,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "raspberry_muffin",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blue_sweater",
+    "name": "Blue sweater",
+    "location_id": "loom",
+    "unlock_level": 20,
+    "inputs": [
+      {
+        "resource_id": "indigo",
+        "amount": 2
+      },
+      {
+        "resource_id": "wool",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "blue_sweater",
+      "amount": 1
+    }
+  },
+  {
+    "id": "carrot_cake",
+    "name": "Carrot cake",
+    "location_id": "cake_oven",
+    "unlock_level": 21,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "carrot_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "wooly_chaps",
+    "name": "Wooly chaps",
+    "location_id": "sewing_machine",
+    "unlock_level": 21,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 1
+      },
+      {
+        "resource_id": "wool",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "wooly_chaps",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cream_cake",
+    "name": "Cream cake",
+    "location_id": "cake_oven",
+    "unlock_level": 23,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "cream_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "red_berry_cake",
+    "name": "Red berry cake",
+    "location_id": "cake_oven",
+    "unlock_level": 23,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "red_berry_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cheesecake",
+    "name": "Cheesecake",
+    "location_id": "cake_oven",
+    "unlock_level": 24,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "cookie",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cheesecake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "silver_bar",
+    "name": "Silver bar",
+    "location_id": "smelter",
+    "unlock_level": 24,
+    "inputs": [
+      {
+        "resource_id": "silver_ore",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "silver_bar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "chili_popcorn",
+    "name": "Chili popcorn",
+    "location_id": "popcorn_pot",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "chili_popcorn",
+      "amount": 1
+    }
+  },
+  {
+    "id": "gold_bar",
+    "name": "Gold bar",
+    "location_id": "smelter",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "gold_ore",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "gold_bar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "grilled_lamb_skewer",
+    "name": "Grilled lamb skewer",
+    "location_id": "bbq_grill",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "lamb_chop",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "grilled_lamb_skewer",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lamb_feed",
+    "name": "Lamb feed",
+    "location_id": "feed_mill",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "black_bean",
+        "amount": 2
+      },
+      {
+        "resource_id": "soybean",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "lamb_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "platinum_bar",
+    "name": "Platinum bar",
+    "location_id": "smelter",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "platinum_ore",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "platinum_bar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "violet_dress",
+    "name": "Violet dress",
+    "location_id": "sewing_machine",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 2
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "violet_dress",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blackberry_muffin",
+    "name": "Blackberry muffin",
+    "location_id": "bakery",
+    "unlock_level": 26,
+    "inputs": [
+      {
+        "resource_id": "blackberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "blackberry_muffin",
+      "amount": 1
+    }
+  },
+  {
+    "id": "carrot_juice",
+    "name": "Carrot juice",
+    "location_id": "juice_press",
+    "unlock_level": 26,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "carrot_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blue_lure",
+    "name": "Blue lure",
+    "location_id": "lure_workbench",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "voucher",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "blue_lure",
+      "amount": 1
+    }
+  },
+  {
+    "id": "fish_burger",
+    "name": "Fish burger",
+    "location_id": "bbq_grill",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "fish_burger",
+      "amount": 1
+    }
+  },
+  {
+    "id": "gold_lure",
+    "name": "Gold lure",
+    "location_id": "lure_workbench",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "voucher",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "gold_lure",
+      "amount": 1
+    }
+  },
+  {
+    "id": "green_lure",
+    "name": "Green lure",
+    "location_id": "lure_workbench",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "voucher",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "green_lure",
+      "amount": 1
+    }
+  },
+  {
+    "id": "purple_lure",
+    "name": "Purple lure",
+    "location_id": "lure_workbench",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "voucher",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "purple_lure",
+      "amount": 1
+    }
+  },
+  {
+    "id": "red_lure",
+    "name": "Red lure",
+    "location_id": "lure_workbench",
+    "unlock_level": 27,
+    "inputs": [],
+    "output": {
+      "resource_id": "red_lure",
+      "amount": 1
+    }
+  },
+  {
+    "id": "apple_juice",
+    "name": "Apple juice",
+    "location_id": "juice_press",
+    "unlock_level": 28,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "apple_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "apple_pie",
+    "name": "Apple pie",
+    "location_id": "pie_oven",
+    "unlock_level": 28,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "apple_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "fish_pie",
+    "name": "Fish pie",
+    "location_id": "pie_oven",
+    "unlock_level": 28,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "fish_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "vanilla_ice_cream",
+    "name": "Vanilla ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 29,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "vanilla_ice_cream",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cherry_juice",
+    "name": "Cherry juice",
+    "location_id": "juice_press",
+    "unlock_level": 30,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cherry_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "fishing_net",
+    "name": "Fishing net",
+    "location_id": "net_maker",
+    "unlock_level": 30,
+    "inputs": [],
+    "output": {
+      "resource_id": "fishing_net",
+      "amount": 1
+    }
+  },
+  {
+    "id": "mystery_net",
+    "name": "Mystery net",
+    "location_id": "net_maker",
+    "unlock_level": 30,
+    "inputs": [
+      {
+        "resource_id": "diamond",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "mystery_net",
+      "amount": 1
+    }
+  },
+  {
+    "id": "roasted_tomatoes",
+    "name": "Roasted tomatoes",
+    "location_id": "bbq_grill",
+    "unlock_level": 30,
+    "inputs": [
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "roasted_tomatoes",
+      "amount": 1
+    }
+  },
+  {
+    "id": "berry_juice",
+    "name": "Berry juice",
+    "location_id": "juice_press",
+    "unlock_level": 31,
+    "inputs": [
+      {
+        "resource_id": "blackberry",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "berry_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blueberry_cheesecake",
+    "name": "Blueberry cheesecake",
+    "location_id": "cake_oven",
+    "unlock_level": 31,
+    "inputs": [
+      {
+        "resource_id": "cheesecake",
+        "amount": 1
+      },
+      {
+        "resource_id": "blueberries",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "blueberry_cheesecake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "tomato_juice",
+    "name": "Tomato juice",
+    "location_id": "juice_press",
+    "unlock_level": 31,
+    "inputs": [
+      {
+        "resource_id": "tomato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "tomato_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "goat_feed",
+    "name": "Goat feed",
+    "location_id": "feed_mill",
+    "unlock_level": 32,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "goat_feed",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lamb_doner_wrap",
+    "name": "Lamb doner wrap",
+    "location_id": "doner_kebab_stand",
+    "unlock_level": 32,
+    "inputs": [
+      {
+        "resource_id": "grilled_lamb_skewer",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      },
+      {
+        "resource_id": "bread",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lamb_doner_wrap",
+      "amount": 1
+    }
+  },
+  {
+    "id": "spicy_bean_doner",
+    "name": "Spicy bean doner",
+    "location_id": "doner_kebab_stand",
+    "unlock_level": 32,
+    "inputs": [
+      {
+        "resource_id": "black_bean",
+        "amount": 3
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn_bread",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "spicy_bean_doner",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blueberry_muffin",
+    "name": "Blueberry muffin",
+    "location_id": "bakery",
+    "unlock_level": 33,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "blueberries",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "blueberry_muffin",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cherry_popsicle",
+    "name": "Cherry popsicle",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 33,
+    "inputs": [
+      {
+        "resource_id": "cherry_juice",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cherry_popsicle",
+      "amount": 1
+    }
+  },
+  {
+    "id": "goat_cheese",
+    "name": "Goat cheese",
+    "location_id": "dairy",
+    "unlock_level": 33,
+    "inputs": [
+      {
+        "resource_id": "goat_milk",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "goat_cheese",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pizza",
+    "name": "Pizza",
+    "location_id": "bakery",
+    "unlock_level": 33,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "pizza",
+      "amount": 1
+    }
+  },
+  {
+    "id": "refined_coal",
+    "name": "Refined coal",
+    "location_id": "smelter",
+    "unlock_level": 33,
+    "inputs": [
+      {
+        "resource_id": "coal",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "refined_coal",
+      "amount": 1
+    }
+  },
+  {
+    "id": "feta_pie",
+    "name": "Feta pie",
+    "location_id": "pie_oven",
+    "unlock_level": 34,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "feta_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "iron_bar",
+    "name": "Iron bar",
+    "location_id": "smelter",
+    "unlock_level": 34,
+    "inputs": [
+      {
+        "resource_id": "iron_ore",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "iron_bar",
+      "amount": 1
+    }
+  },
+  {
+    "id": "meat_bucket",
+    "name": "Meat bucket",
+    "location_id": "feed_mill",
+    "unlock_level": 34,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 3
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "meat_bucket",
+      "amount": 1
+    }
+  },
+  {
+    "id": "strawberry_ice_cream",
+    "name": "Strawberry ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 34,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "strawberry_ice_cream",
+      "amount": 1
+    }
+  },
+  {
+    "id": "wheat_bundle",
+    "name": "Wheat bundle",
+    "location_id": "feed_mill",
+    "unlock_level": 34,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 75
+      }
+    ],
+    "output": {
+      "resource_id": "wheat_bundle",
+      "amount": 1
+    }
+  },
+  {
+    "id": "apple_jam",
+    "name": "Apple jam",
+    "location_id": "jam_maker",
+    "unlock_level": 35,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "apple_jam",
+      "amount": 1
+    }
+  },
+  {
+    "id": "baked_potato",
+    "name": "Baked potato",
+    "location_id": "bbq_grill",
+    "unlock_level": 35,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "baked_potato",
+      "amount": 1
+    }
+  },
+  {
+    "id": "strawberry_cake",
+    "name": "Strawberry cake",
+    "location_id": "cake_oven",
+    "unlock_level": 35,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "strawberry_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "casserole",
+    "name": "Casserole",
+    "location_id": "pie_oven",
+    "unlock_level": 36,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "casserole",
+      "amount": 1
+    }
+  },
+  {
+    "id": "chocolate_cake",
+    "name": "Chocolate cake",
+    "location_id": "cake_oven",
+    "unlock_level": 36,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "raspberry_jam",
+    "name": "Raspberry jam",
+    "location_id": "jam_maker",
+    "unlock_level": 36,
+    "inputs": [
+      {
+        "resource_id": "raspberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "raspberry_jam",
+      "amount": 1
+    }
+  },
+  {
+    "id": "blackberry_jam",
+    "name": "Blackberry jam",
+    "location_id": "jam_maker",
+    "unlock_level": 37,
+    "inputs": [
+      {
+        "resource_id": "blackberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "blackberry_jam",
+      "amount": 1
+    }
+  },
+  {
+    "id": "spicy_pizza",
+    "name": "Spicy pizza",
+    "location_id": "bakery",
+    "unlock_level": 37,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "spicy_pizza",
+      "amount": 1
+    }
+  },
+  {
+    "id": "bracelet",
+    "name": "Bracelet",
+    "location_id": "jeweler",
+    "unlock_level": 38,
+    "inputs": [
+      {
+        "resource_id": "gold_bar",
+        "amount": 1
+      },
+      {
+        "resource_id": "silver_bar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "bracelet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "cherry_jam",
+    "name": "Cherry jam",
+    "location_id": "jam_maker",
+    "unlock_level": 38,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "cherry_jam",
+      "amount": 1
+    }
+  },
+  {
+    "id": "potato_feta_cake",
+    "name": "Potato feta cake",
+    "location_id": "cake_oven",
+    "unlock_level": 38,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 4
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "potato_feta_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "chocolate_ice_cream",
+    "name": "Chocolate ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 39,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_ice_cream",
+      "amount": 1
+    }
+  },
+  {
+    "id": "honey",
+    "name": "Honey",
+    "location_id": "honey_extractor",
+    "unlock_level": 39,
+    "inputs": [
+      {
+        "resource_id": "honeycomb",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "honey",
+      "amount": 1
+    }
+  },
+  {
+    "id": "necklace",
+    "name": "Necklace",
+    "location_id": "jeweler",
+    "unlock_level": 39,
+    "inputs": [
+      {
+        "resource_id": "gold_bar",
+        "amount": 1
+      },
+      {
+        "resource_id": "platinum_bar",
+        "amount": 1
+      },
+      {
+        "resource_id": "silver_bar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "necklace",
+      "amount": 1
+    }
+  },
+  {
+    "id": "potato_bread",
+    "name": "Potato bread",
+    "location_id": "bakery",
+    "unlock_level": 39,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 3
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "potato_bread",
+      "amount": 1
+    }
+  },
+  {
+    "id": "shepherd_s_pie",
+    "name": "Shepherd's pie",
+    "location_id": "pie_oven",
+    "unlock_level": 39,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      },
+      {
+        "resource_id": "pumpkin",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "shepherd_s_pie",
+      "amount": 1
+    }
+  },
+  {
+    "id": "diamond_ring",
+    "name": "Diamond ring",
+    "location_id": "jeweler",
+    "unlock_level": 40,
+    "inputs": [
+      {
+        "resource_id": "diamond",
+        "amount": 1
+      },
+      {
+        "resource_id": "gold_bar",
+        "amount": 2
+      },
+      {
+        "resource_id": "platinum_bar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "diamond_ring",
+      "amount": 1
+    }
+  },
+  {
+    "id": "honey_popcorn",
+    "name": "Honey popcorn",
+    "location_id": "popcorn_pot",
+    "unlock_level": 40,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "honey_popcorn",
+      "amount": 1
+    }
+  },
+  {
+    "id": "fish_and_chips",
+    "name": "Fish and chips",
+    "location_id": "bbq_grill",
+    "unlock_level": 41,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fish_and_chips",
+      "amount": 1
+    }
+  },
+  {
+    "id": "iron_bracelet",
+    "name": "Iron bracelet",
+    "location_id": "jeweler",
+    "unlock_level": 41,
+    "inputs": [
+      {
+        "resource_id": "iron_bar",
+        "amount": 2
+      },
+      {
+        "resource_id": "refined_coal",
+        "amount": 2
+      },
+      {
+        "resource_id": "silver_bar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "iron_bracelet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "espresso",
+    "name": "Espresso",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 42,
+    "inputs": [
+      {
+        "resource_id": "coffee_bean",
+        "amount": 3
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "espresso",
+      "amount": 1
+    }
+  },
+  {
+    "id": "honey_apple_cake",
+    "name": "Honey apple cake",
+    "location_id": "cake_oven",
+    "unlock_level": 42,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "honey_apple_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "caff_latte",
+    "name": "Caffè latte",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 43,
+    "inputs": [
+      {
+        "resource_id": "coffee_bean",
+        "amount": 2
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "caff_latte",
+      "amount": 1
+    }
+  },
+  {
+    "id": "chocolate_popcorn",
+    "name": "Chocolate popcorn",
+    "location_id": "popcorn_pot",
+    "unlock_level": 44,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_popcorn",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lobster_trap",
+    "name": "Lobster trap",
+    "location_id": "net_maker",
+    "unlock_level": 44,
+    "inputs": [],
+    "output": {
+      "resource_id": "lobster_trap",
+      "amount": 1
+    }
+  },
+  {
+    "id": "caff_mocha",
+    "name": "Caffè mocha",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 45,
+    "inputs": [
+      {
+        "resource_id": "coffee_bean",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "caff_mocha",
+      "amount": 1
+    }
+  },
+  {
+    "id": "frutti_di_mare_pizza",
+    "name": "Frutti di Mare pizza",
+    "location_id": "bakery",
+    "unlock_level": 45,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "lobster_tail",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "frutti_di_mare_pizza",
+      "amount": 1
+    }
+  },
+  {
+    "id": "soothing_pad",
+    "name": "Soothing pad",
+    "location_id": "sewing_machine",
+    "unlock_level": 45,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      },
+      {
+        "resource_id": "chamomile",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "soothing_pad",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lamb_soup",
+    "name": "Lamb soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 46,
+    "inputs": [
+      {
+        "resource_id": "grilled_lamb_skewer",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 1
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "lamb_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lobster_soup",
+    "name": "Lobster soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 46,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "lobster_tail",
+        "amount": 2
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lobster_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "raspberry_mocha",
+    "name": "Raspberry mocha",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 46,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 1
+      },
+      {
+        "resource_id": "coffee_bean",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "raspberry_mocha",
+      "amount": 1
+    }
+  },
+  {
+    "id": "hot_chocolate",
+    "name": "Hot chocolate",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 47,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "hot_chocolate",
+      "amount": 1
+    }
+  },
+  {
+    "id": "tomato_soup",
+    "name": "Tomato soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 47,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato_juice",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tomato_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "beeswax",
+    "name": "Beeswax",
+    "location_id": "honey_extractor",
+    "unlock_level": 48,
+    "inputs": [
+      {
+        "resource_id": "honeycomb",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "beeswax",
+      "amount": 1
+    }
+  },
+  {
+    "id": "lobster_skewer",
+    "name": "Lobster skewer",
+    "location_id": "bbq_grill",
+    "unlock_level": 48,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "lobster_tail",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lobster_skewer",
+      "amount": 1
+    }
+  },
+  {
+    "id": "red_scarf",
+    "name": "Red scarf",
+    "location_id": "loom",
+    "unlock_level": 48,
+    "inputs": [
+      {
+        "resource_id": "strawberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "wool",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "red_scarf",
+      "amount": 1
+    }
+  },
+  {
+    "id": "strawberry_candle",
+    "name": "Strawberry candle",
+    "location_id": "candle_maker",
+    "unlock_level": 48,
+    "inputs": [
+      {
+        "resource_id": "beeswax",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "strawberry_candle",
+      "amount": 1
+    }
+  },
+  {
+    "id": "asparagus_quiche",
+    "name": "Asparagus quiche",
+    "location_id": "pie_oven",
+    "unlock_level": 49,
+    "inputs": [
+      {
+        "resource_id": "asparagus",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "asparagus_quiche",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pumpkin_soup",
+    "name": "Pumpkin soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 49,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "pumpkin",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "pumpkin_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "rustic_bouquet",
+    "name": "Rustic bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 49,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 3
+      },
+      {
+        "resource_id": "cotton",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "rustic_bouquet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "duck_trap",
+    "name": "Duck trap",
+    "location_id": "net_maker",
+    "unlock_level": 50,
+    "inputs": [],
+    "output": {
+      "resource_id": "duck_trap",
+      "amount": 1
+    }
+  },
+  {
+    "id": "sesame_ice_cream",
+    "name": "Sesame ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 50,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 3
+      },
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "sesame_ice_cream",
+      "amount": 1
+    }
+  },
+  {
+    "id": "strawberry_jam",
+    "name": "Strawberry jam",
+    "location_id": "jam_maker",
+    "unlock_level": 50,
+    "inputs": [
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "strawberry_jam",
+      "amount": 1
+    }
+  },
+  {
+    "id": "asparagus_soup",
+    "name": "Asparagus soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 51,
+    "inputs": [
+      {
+        "resource_id": "asparagus",
+        "amount": 3
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "asparagus_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "caramel_apple",
+    "name": "Caramel apple",
+    "location_id": "candy_machine",
+    "unlock_level": 51,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "caramel_apple",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pillow",
+    "name": "Pillow",
+    "location_id": "sewing_machine",
+    "unlock_level": 51,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 2
+      },
+      {
+        "resource_id": "duck_feather",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "pillow",
+      "amount": 1
+    }
+  },
+  {
+    "id": "pineapple_juice",
+    "name": "Pineapple juice",
+    "location_id": "juice_press",
+    "unlock_level": 52,
+    "inputs": [
+      {
+        "resource_id": "pineapple",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "pineapple_juice",
+      "amount": 1
+    }
+  },
+  {
+    "id": "raspberry_candle",
+    "name": "Raspberry candle",
+    "location_id": "candle_maker",
+    "unlock_level": 52,
+    "inputs": [
+      {
+        "resource_id": "beeswax",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "raspberry_candle",
+      "amount": 1
+    }
+  },
+  {
+    "id": "toffee",
+    "name": "Toffee",
+    "location_id": "candy_machine",
+    "unlock_level": 52,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "toffee",
+      "amount": 1
+    }
+  }
+]

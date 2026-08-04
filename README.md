@@ -1,87 +1,139 @@
 # Farm Production Graph
 
-A graph-based dependency analysis system for farming and crafting production chains.
+A graph-based dependency analysis and layout planning system for farming and crafting production chains.
 
-The project converts buildings, resources, and recipes into a weighted directed graph.
-The generated graph can be used to analyze production dependencies, identify important nodes, and support optimized layout planning for complex production systems.
+The project converts locations, resources, and recipes into a weighted directed graph.
+The generated graph supports production dependency analysis, identification of important nodes, clustering of related production processes, and optimized farm layout planning.
 
-The initial target use case is modeling Hay Day production chains, but the architecture is designed to support other crafting and farming systems.
+The primary use case is modeling **Hay Day** production chains.
+The architecture is designed so that the same data model can later power a second tool (Production Planner) and eventually a full-stack application.
+
+---
+
+## Project Goals (Two Complementary Tools)
+
+### 1. Layout Planner (current focus - v0.x)
+
+**Goal:** Help design an efficient farm layout.
+
+- Builds a weighted dependency graph from recipes.
+- Shows which locations and resources are tightly coupled.
+- Suggests production “blocks” (clusters) that should be placed close to each other.
+- Helps decide how many fields should be near a given location and which other locations belong to the same processing group.
+
+Implementation stage: **JSON data + pure Python scripts**.
+
+### 2. Production Planner (planned - later v0.x / v0.5+)
+
+**Goal:** Calculate an optimized production schedule.
+
+- Given a player level, barn/silo capacity and current orders (truck, boat, town, events).
+- Determines what to plant, harvest and put into production machines.
+- Calculates exact quantities that should be kept in the barn so that orders can be fulfilled efficiently.
+
+Will reuse the same core data model and later share the PostgreSQL database with the Layout Planner.
+
+### 3. Version 1.0 - Full Application Platform
+
+Full-stack application that unifies both tools behind a web UI, with persistent storage and interactive visualization.
 
 ---
 
 ## Features
 
-### Current features (v0.x)
+### Current features (Layout Planner - v0.x)
 
-- JSON based data input
-- Recipe-driven dependency graph generation
-- Weighted relationship calculation
+- JSON-based data input (locations, resources, recipes)
+- Recipe-driven weighted dependency graph generation
+- Multi-level dependency propagation
 - Directed graph representation
 - Multiple export formats:
   - JSON
   - CSV
   - GraphML
+- Data loading from Hay Day Fandom Wiki via a dedicated scraper script
 
 ### Planned features
 
-- Interactive graph visualization
-- Production chain analysis
-- Dependency clustering
+**Layout Planner enhancements**:
+
+- Dependency clustering / production block detection
 - Bottleneck detection
-- Farm layout optimization
+- Layout suggestion heuristics
+
+**Production Planner**:
+
+- Order-aware quantity calculation
+- Barn / silo capacity constraints
+- Planting & production schedule generation
+
+**Version 1.0**:
+
+- Interactive graph visualization
 - Database-backed data management
 - Web-based user interface
+- Unified Layout + Production Planner experience
 
 ---
 
 ## Project Status
 
-### Version 0.x - Python Graph Generator
+### Version 0.x - Layout Planner (Python)
 
-The current implementation is a standalone Python application.
+Standalone Python application focused on the Layout Planner.
 
 Architecture:
 
 ```text
-JSON data
-|
-v
+Hay Day Fandom Wiki
+        |
+        v
+Scraper script (parameterizable)
+        |
+        v
+JSON data (data/*.json)
+        |
+        v
 Python graph generator
-|
-v
+        |
+        v
 Weighted dependency graph
-|
-+--> JSON export
-+--> CSV export
-+--> GraphML export
+        |
+        +--> JSON export
+        +--> CSV export
+        +--> GraphML export
 ```
 
-The purpose of version 0.x is:
+Purpose of the current version:
 
-- validate the data model
-- test dependency calculation algorithms
-- generate production graphs
-- establish the foundation for future versions
+- Validate the normalized data model
+- Test dependency calculation and weighting algorithms
+- Generate usable production graphs for layout analysis
+- Establish the foundation for the Production Planner and v1.0
+
+Data is currently limited to **level 52** (hard-coded in the JSON files).
+Level-parameterized generation (`--max-level`) will be added later when the full dataset and the Production Planner are introduced.
 
 ---
 
 ## Version 1.0 - Full Application Platform
 
-The planned 1.0 architecture will replace the standalone script with a full-stack application.
+The planned 1.0 architecture replaces the standalone scripts with a full-stack application.
+Both the Layout Planner and the Production Planner will share the same PostgreSQL database.
 
 Architecture:
 
 ```text
 TypeScript Frontend
-|
-v
+        |
+        v
 Java Backend API
-|
-v
+        |
+        v
 PostgreSQL Database
-|
-v
-Graph calculation engine
+        |
+        v
+Graph calculation + planning engine
 ```
 
 Planned technologies:
@@ -92,46 +144,47 @@ Planned technologies:
 | Backend          | Java            |
 | Database         | PostgreSQL      |
 | API              | REST            |
-| Graph processing | Backend service |
+| Graph / Planning | Backend service |
 
 The goal of version 1.0 is to provide:
 
-- persistent data storage
-- user interface
-- editable production graphs
-- dynamic graph calculation
-- visualization tools
-- scalable architecture
+- Persistent shared data storage
+- User interface for both planners
+- Editable production graphs
+- Dynamic graph calculation and layout suggestions
+- Production schedule optimization
+- Visualization tools
+- Scalable architecture
 
 ---
 
 ## Architecture
 
-### Current architecture (v0.x)
-
-The current system is designed around three main layers:
+### Current architecture (Layout Planner - v0.x)
 
 ```text
 Data Layer
-|
-v
+    |
+    v
 Graph Processing Layer
-|
-v
+    |
+    v
 Export Layer
 ```
 
 #### Data Layer
 
-Stores:
+Stores production-chain entities in normalized JSON files.
+These files are designed to map directly to future database tables (shared by both planners in v1.0).
 
-- buildings
-- resources
-- recipes
+Current files:
 
-Format:
+- `data/locations.json`
+- `data/resources.json`
+- `data/recipes.json`
 
-- JSON
+Data source: **Hay Day Fandom Wiki** (scraped by a dedicated Python script).
+Only the fields required by the Layout Planner are mandatory at this stage.
 
 ---
 
@@ -140,9 +193,9 @@ Format:
 Responsible for:
 
 - loading input data
-- creating graph nodes
-- generating relationships
-- calculating connection weights
+- creating graph nodes (locations + resources)
+- generating relationships from recipes
+- calculating connection weights (including multi-level propagation)
 
 ---
 
@@ -160,62 +213,66 @@ The export layer is separated from graph generation to allow future integrations
 
 ## Data Model
 
-The system uses three main entities.
+The system uses three main entities.  
+All identifiers are **snake_case English**.
 
-### Buildings
+All goods (including intermediate items such as Bread and final items such as cakes) are modeled as **resources**.  
+Whether an item is intermediate or final is derived from the dependency graph (presence of outgoing edges).
 
-Production locations or entities.
+### Locations
 
-Example:
+Everything that occupies space on the farm (production locations, animal shelters, fields, trees, bushes, storage…).
+Mandatory fields:
 
 ```json
 {
   "id": "dairy",
   "name": "Dairy",
-  "type": "production"
+  "type": "production",
+  "unlock_level": 6
 }
 ```
 
+Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.
+
 ### Resources
 
-Raw materials and intermediate products.
-
-Example:
+Crops, animal products, intermediate/processed goods and ores.
+Mandatory fields:
 
 ```json
 {
   "id": "milk",
   "name": "Milk",
-  "type": "resource"
+  "type": "animal_product",
+  "unlock_level": 6,
+  "source_location_id": "cow_pasture"
 }
 ```
 
+`source_location_id` is **mandatory** for `crop`, `animal_product` and `ore`.
+Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_material`, `ore`.
+
 ### Recipes
 
-Every produced item is represented by a recipe.
-
-A recipe contains:
-
-- production building
-- required inputs
-- output resource
-- production time
-
-Example:
+Only transformations that happen inside production locations.
+Animal products and raw crops are resources (produced by their source location), not recipes.
+Mandatory fields:
 
 ```json
 {
   "id": "cream",
-  "building": "dairy",
-  "time": 30,
+  "name": "Cream",
+  "location_id": "dairy",
+  "unlock_level": 6,
   "inputs": [
     {
-      "resource": "milk",
+      "resource_id": "milk",
       "amount": 1
     }
   ],
   "output": {
-    "resource": "cream",
+    "resource_id": "cream",
     "amount": 1
   }
 }
@@ -223,55 +280,45 @@ Example:
 
 ### Graph Generation
 
-The system creates a directed weighted dependency graph.
-
-Example:
+The system creates a directed weighted dependency graph that includes both production transformations and the origin of raw resources.
+Example of a correct chain:
 
 ```text
-Milk
- |
- v
-Dairy
- |
- v
-Cream
- |
- v
-Ice Cream Machine
+field (soybean + corn)
+        ↓
+feed_mill → cow_feed
+        ↓
+cow_pasture → milk
+        ↓
+dairy → cream / butter / cheese
+        ↓
+downstream users (ice_cream_maker, cake_oven…)
 ```
 
-Connection strength is calculated from resource dependencies.
+Connection strength is calculated from resource amounts and propagated through multi-level chains.
+This allows the Layout Planner to form meaningful production blocks (e.g. the entire Dairy cluster including pastures and feed fields).
 
-Example:
+---
 
-Butter requires:
+### Data Source & Scraper
 
-- 2x Milk
+All production data is sourced from the Hay Day Fandom Wiki:
 
-Result:
+- <https://hayday.fandom.com/wiki/Goods_List>
+- <https://hayday.fandom.com/wiki/Production_locations_List>
+- Individual location and product pages
 
-Milk -> Dairy
+A dedicated Python scraper script (located under `src/scraper/`) is responsible for:
 
-weight +2
+- fetching the relevant wiki pages
+- extracting locations, resources and recipes
+- normalizing the data into the JSON format expected by the Layout Planner
+- writing the files into `data/`
 
-Multi-level dependencies are propagated through the production chain.
+The scraper is parameterizable (target level, which entity types to extract, etc.).
+Current data files are limited to **level 52**.
 
-Example:
-
-Ice Cream:
-
-- 1x Milk
-- 2x Cream
-
-Cream requires:
-
-- 1x Milk
-
-Final Milk dependency:
-
-1 + (2 \* 1)
-
-= 3
+---
 
 ### Export Formats
 
@@ -320,6 +367,20 @@ Example:
 python -m src.main
 ```
 
+Filter by maximum unlock level:
+
+```bash
+python -m src.main --max-level 52
+```
+
+Only locations, resources and recipes whose `unlock_level <= 52` are included in the generated graph.
+
+Update data from the wiki (example):
+
+```bash
+python -m src.scraper --max-level 52
+```
+
 Output:
 
 ```bash
@@ -334,9 +395,13 @@ output/
 ```bash
 farm-production-recipe-dependency-graph/
 ├── data/
-│   ├── buildings.json
+│   ├── locations.json
 │   ├── resources.json
-│   └── recipes.json
+│   ├── recipes.json
+│   └── examples/
+│       ├── locations.example.json
+│       ├── resources.example.json
+│       └── recipes.example.json
 ├── src/
 │   ├── models/
 │   ├── loaders/
@@ -348,37 +413,45 @@ farm-production-recipe-dependency-graph/
 └── README.md
 ```
 
-### Development
+### Development Priorities (current phase)
 
-Development priorities:
-
-- Finalize JSON data model
-- Implement graph generation
-- Implement dependency weighting
-- Add exporters
-- Validate graph quality with real production chains
+- Finalize minimal JSON data model for Layout Planner (`locations`, `resources`, `recipes`)
+- Make `source_location_id` mandatory for raw resources
+- Implement / refine the wiki scraper according to the final schema
+- Implement graph generation that includes source-location → resource edges
+- Add exporters (JSON, CSV, GraphML)
+- Validate graph quality with real Hay Day production chains up to level 52
+- Keep JSON files in 3NF-ready shape for later shared PostgreSQL usage
 
 ### Roadmap
 
-#### v0.1
+#### v0.1 - Layout Planner foundation
 
 - Initial Python project
 - JSON data loading
 - Basic graph generation
+- Wiki scraper (level 52)
 
-#### v0.5
+#### v0.3 - Layout Planner usable
 
-- Advanced dependency calculation
-- Improved weighting algorithms
-- Graph analysis features
+- Weighted multi-level dependencies
+- Clustering / production block detection
+- Graph exports and basic analysis
 
-#### v1.0
+#### v0.5 - Production Planner (script level)
 
-- Java backend
-- PostgreSQL database
+- Full (or significantly extended) dataset
+- Level-parameterized generation
+- Quantity & capacity aware planning scripts
+- Shared data model preparation
+
+#### v1.0 - Full Application Platform
+
+- Java backend + PostgreSQL (shared DB for both planners)
 - TypeScript frontend
-- Persistent data management
 - Interactive visualization
+- Unified Layout + Production Planner experience
+- Persistent data management
 
 ### License
 

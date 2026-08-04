@@ -1,43 +1,40 @@
 {
-  "schema": "Building",
-
+  "schema": "Location",
   "fields": {
     "id": {
       "type": "string",
-      "description": "Egyedi azonosító",
+      "description": "Unique identifier (snake_case English)",
       "example": "dairy"
     },
-
     "name": {
       "type": "string",
-      "description": "Megjelenítési név",
+      "description": "Display name",
       "example": "Dairy"
     },
-
     "type": {
       "type": "enum",
-      "description": "Épület vagy entitás típusa",
+      "description": "Location category – everything that occupies space on the farm",
       "allowed_values": [
         "production",
         "animal",
-        "crop",
+        "field",
+        "tree",
+        "bush",
         "storage",
         "other"
       ],
       "example": "production"
     },
-
-    "description": {
-      "type": "string",
-      "description": "Opcionális leírás",
-      "example": "Processes milk into dairy products"
+    "unlock_level": {
+      "type": "integer",
+      "description": "Minimum player level required to unlock",
+      "example": 6
     }
   },
-
   "example_object": {
     "id": "dairy",
     "name": "Dairy",
     "type": "production",
-    "description": "Processes milk into dairy products"
+    "unlock_level": 6
   }
 }

@@ -1,82 +1,70 @@
 {
   "schema": "Recipe",
-
   "fields": {
     "id": {
       "type": "string",
-      "description": "Recept egyedi azonosító",
-      "example": "cream_recipe"
+      "description": "Unique recipe identifier (snake_case English)",
+      "example": "cream"
     },
-
     "name": {
       "type": "string",
-      "description": "Előállított termék neve",
+      "description": "Name of the produced item",
       "example": "Cream"
     },
-
-    "building": {
+    "location_id": {
       "type": "string",
-      "description": "Gyártó épület ID",
+      "description": "ID of the production location where this recipe is crafted",
       "example": "dairy"
     },
-
-    "production_time": {
+    "unlock_level": {
       "type": "integer",
-      "description": "Elkészítési idő másodpercben vagy percben tárolva",
-      "example": 30
+      "description": "Minimum player level required to unlock the recipe",
+      "example": 6
     },
-
     "inputs": {
       "type": "array",
-      "description": "Bemeneti erőforrások listája",
+      "description": "List of required resources",
       "items": {
-        "resource": {
+        "resource_id": {
           "type": "string",
           "description": "Resource ID",
           "example": "milk"
         },
-
         "amount": {
           "type": "integer",
-          "description": "Szükséges mennyiség",
-          "example": 2
+          "description": "Required quantity",
+          "example": 1
         }
       }
     },
-
     "output": {
       "type": "object",
-      "description": "Előállított erőforrás",
-
-      "resource": {
+      "description": "Produced resource",
+      "resource_id": {
         "type": "string",
-        "description": "Előállított resource ID",
+        "description": "Produced resource ID",
         "example": "cream"
       },
-
       "amount": {
         "type": "integer",
-        "description": "Előállított mennyiség",
+        "description": "Produced quantity",
         "example": 1
       }
     }
   },
-
   "example_object": {
-    "id": "cream_recipe",
+    "id": "cream",
     "name": "Cream",
-    "building": "dairy",
-    "production_time": 30,
-
+    "location_id": "dairy",
+    "unlock_level": 6,
     "inputs": [
       {
-        "resource": "milk",
+        "resource_id": "milk",
         "amount": 1
       }
     ],
-
     "output": {
-      "resource": "cream",
+      "resource_id": "cream",
       "amount": 1
     }
   }
