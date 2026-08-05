@@ -25,8 +25,9 @@ Edge model
 Three edge kinds (see relationship.EdgeType):
 
 1. PRODUCES  location  → resource
-   Created for every resource that has a source_location_id.
-   Captures “this building/field/animal produces this raw good”.
+   Created for raw resources only (crop, animal_product, ore) that have a
+   source_location_id. Processed goods are linked via OUTPUTS from recipes
+   so the two edge kinds do not collide / merge.
 
 2. CONSUMES  resource  → location
    Created for every recipe input.
@@ -58,6 +59,7 @@ from typing import Any
 import networkx as nx
 
 from src.loaders.json_loader import DataSet
+from src.models.resource import ResourceType
 
 from .relationship import (
     ATTR_AMOUNT,
@@ -168,9 +170,18 @@ def _add_resource_nodes(G: nx.DiGraph, dataset: DataSet) -> None:
 # ---------------------------------------------------------------------------
 
 
+_RAW_RESOURCE_TYPES = {
+    ResourceType.CROP,
+    ResourceType.ANIMAL_PRODUCT,
+    ResourceType.ORE,
+}
+
+
 def _add_produces_edges(G: nx.DiGraph, dataset: DataSet) -> None:
-    """location ─PRODUCES→ resource  for every raw resource."""
+    """location ─PRODUCES→ resource  for raw resources only (crop / animal / ore)."""
     for res in dataset.resource_list:
+        if res.type not in _RAW_RESOURCE_TYPES:
+            continue
         if not res.source_location_id:
             continue
         if res.source_location_id not in G:
@@ -252,7 +263,6 @@ def _add_or_merge_edge(
     if G.has_edge(u, v):
         existing = G[u][v]
         existing[ATTR_WEIGHT] = existing.get(ATTR_WEIGHT, 0.0) + attrs[ATTR_WEIGHT]
-
         old_rid = existing.get(ATTR_RECIPE_ID)
         new_rid = attrs.get(ATTR_RECIPE_ID)
         if new_rid:
@@ -262,13 +272,17 @@ def _add_or_merge_edge(
                 existing[ATTR_RECIPE_ID] = ",".join(sorted(ids))
             else:
                 existing[ATTR_RECIPE_ID] = new_rid
-
         if attrs.get(ATTR_AMOUNT, 0) > existing.get(ATTR_AMOUNT, 0):
             existing[ATTR_AMOUNT] = attrs[ATTR_AMOUNT]
         if "ratio" in attrs:
             existing["ratio"] = max(existing.get("ratio", 0.0), attrs["ratio"])
     else:
         G.add_edge(u, v, **attrs)
+
+
+# ---------------------------------------------------------------------------
+# Convenience helpers used by tests / main / future analysis
+# ---------------------------------------------------------------------------
 
 
 def location_nodes(G: nx.DiGraph) -> list[str]:

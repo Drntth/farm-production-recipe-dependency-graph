@@ -48,10 +48,13 @@ Full-stack application that unifies both tools behind a web UI, with persistent 
 - Three edge kinds: PRODUCES, CONSUMES, OUTPUTS (source-location edges included)
 - Stoichiometry-based edge weights (input/output ratio)
 - Directed graph representation ready for clustering & layout heuristics
-- Multiple export formats (planned / next step):
-  - JSON
-  - CSV
-  - GraphML
+- Multiple export formats:
+  - JSON - nodes + edges + meta (web / API)
+  - CSV - separate nodes and edges tables (spreadsheet analysis)
+  - GraphML - yEd-compatible with visible labels (Gephi, yEd Live, Cytoscape)
+- Location proximity graph with multi-level weight propagation
+- Production block detection (Louvain clustering)
+- Centrality / bottleneck ranking and dependency path queries
 - Data loading from Hay Day Fandom Wiki via a dedicated scraper script
 
 ### Planned features
@@ -386,13 +389,32 @@ Edge attributes stored on every edge:
 ```python
 from pathlib import Path
 from src.loaders import load_data
-from src.graph import build_graph, graph_summary
+from src.graph import build_graph, graph_summary, analysis_summary
 
 ds = load_data(Path("data"), max_level=52)
 G = build_graph(ds)
 print(graph_summary(G))
 # DiGraph(nodes=… [locations=…, resources=…], edges=…)
+
+summary = analysis_summary(G)
+print(summary["production_blocks"][:3])
 ```
+
+#### Analysis layer (v0.3)
+
+| Capability         | Function                                  | Purpose                                                                             |
+| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| Location proximity | `location_proximity_graph(G)`             | Undirected weighted graph of locations only; multi-level hop propagation with decay |
+| Production blocks  | `detect_production_blocks(G)`             | Louvain communities on the proximity graph - clusters to place close on the farm    |
+| Centrality         | `centrality_report(G)`                    | Degree + betweenness ranking (bottleneck resources / buildings)                     |
+| Path queries       | `dependency_path` / `has_dependency_path` | Shortest directed dependency path between any two nodes                             |
+| Full payload       | `analysis_summary(G)`                     | Blocks + centrality + top couplings → written as `output/analysis.json`             |
+
+Proximity construction sketch:
+
+1. For each CONSUMES edge `resource → location_B`, find producing locations of that resource (via `source_location_id` or OUTPUTS edges).
+2. Add undirected weight between producer and `location_B`.
+3. Propagate weights up to `max_hops` (default 3) with per-hop `decay` (default 0.5) so upstream fields couple to downstream dairies / bakeries.
 
 ---
 
@@ -434,14 +456,34 @@ Used for:
 - spreadsheet analysis
 - manual inspection
 
-#### GraphML
+#### GraphML (yEd-compatible)
 
 Used for:
 
+- **yEd Live** / yEd Desktop (recommended for interactive viewing)
 - Gephi
-- yEd
 - Cytoscape
 - NetworkX
+
+The GraphML export embeds **yFiles node/edge graphics** so labels are
+visible on the canvas without extra configuration:
+
+| Node kind               | Label example                   | Colour (dark & light friendly) |
+| ----------------------- | ------------------------------- | ------------------------------ |
+| location                | `Dairy [location]`              | blue fill, white text          |
+| resource with source    | `Milk ← cow_pasture [resource]` | orange fill, white text        |
+| resource without source | `Cream [resource]`              | orange fill, white text        |
+
+Edges show a short label such as `consumes w=3.0` or `produces`.
+
+**How to view in yEd Live**:
+
+1. Open [https://www.yworks.com/yed-live/](https://www.yworks.com/yed-live/)
+2. Open → select `output/graph.graphml`
+3. Layout → **Organic** or **Hierarchical**
+4. Node text is visible immediately; locations are blue, resources orange
+
+JSON and CSV also include a `label` column/field with the same text.
 
 ### Installation
 
@@ -488,11 +530,33 @@ python -m pytest tests/test_graph_builder.py
 - Continuous dependency paths (e.g. field → … → cream)
 - External inputs are skipped without creating nodes
 
+**Exporter tests** verify:
+
+- JSON structure (nodes, edges, meta counts) and human-readable `label` fields
+- CSV node/edge column sets (including `label`) and row counts
+- GraphML contains yFiles NodeLabel graphics and standard attributes
+
+**Graph quality tests** verify:
+
+- Node count = locations + resources
+- PRODUCES edges for every raw resource
+- Known dependency paths (dairy, bakery, feed chains)
+- Stoichiometry weights
+- External inputs (voucher, diamond) never become nodes
+- Optional real `data/` checks (197 nodes / 313 edges at level 52) when files are present
+
+**Analysis tests** verify:
+
+- Proximity graph contains only locations and expected direct couplings
+- Multi-level hops do not drop edges
+- Production blocks cover all locations
+- Centrality ranking and dependency path helpers
+
 ---
 
 ### Usage
 
-Example:
+Build the graph and export all formats:
 
 ```bash
 python -m src.main
@@ -506,6 +570,25 @@ python -m src.main --max-level 52
 
 Only locations, resources and recipes whose `unlock_level <= 52` are included in the generated graph.
 
+Select specific export formats:
+
+```bash
+python -m src.main --formats json graphml
+python -m src.main --formats csv
+```
+
+Custom data / output directories:
+
+```bash
+python -m src.main --data-dir data --output-dir output --max-level 30
+```
+
+Skip analysis (blocks / centrality) if you only need the graph exports:
+
+```bash
+python -m src.main --no-analysis
+```
+
 Update data from the wiki (example):
 
 ```bash
@@ -516,9 +599,11 @@ Output:
 
 ```bash
 output/
-├── graph.json
-├── graph.csv
-└── graph.graphml
+├── graph.json           # nodes + edges + meta
+├── graph_nodes.csv      # one row per node
+├── graph_edges.csv      # one row per edge
+├── graph.graphml        # for Gephi / yEd / Cytoscape
+└── analysis.json        # production blocks, centrality, top couplings
 ```
 
 ### Project Structure
@@ -536,13 +621,15 @@ farm-production-recipe-dependency-graph/
 ├── output/                            # generated graph exports land here
 ├── src/
 │   ├── exporters/
-│   │   ├── csv_exporter.py
-│   │   ├── graphml_exporter.py
-│   │   └── json_exporter.py
+│   │   ├── csv_exporter.py            # → graph_nodes.csv + graph_edges.csv
+│   │   ├── graphml_exporter.py        # → graph.graphml (yEd labels + colours)
+│   │   ├── json_exporter.py           # → graph.json (nodes + edges + meta + label)
+│   │   └── labels.py                  # human-readable node/edge label helpers
 │   ├── graph/
 │   │   ├── graph_builder.py           # build_graph(DataSet) → nx.DiGraph
 │   │   ├── relationship.py            # EdgeType enum + edge attribute helpers
-│   │   └── weighting.py               # weight calculation rules (stoichiometry)
+│   │   ├── weighting.py               # weight calculation rules (stoichiometry)
+│   │   └── analysis.py                # proximity, clustering, centrality, paths
 │   ├── loaders/
 │   │   └── json_loader.py             # load_data() → validated DataSet
 │   ├── models/
@@ -561,7 +648,10 @@ farm-production-recipe-dependency-graph/
 │   └── main.py                        # CLI entry: load → build graph
 ├── tests/
 │   ├── test_json_loader.py            # loader + referential integrity tests
-│   └── test_graph_builder.py          # graph construction & weighting tests
+│   ├── test_graph_builder.py          # graph construction & weighting tests
+│   ├── test_exporters.py              # JSON / CSV / GraphML export tests
+│   ├── test_graph_quality.py          # real-chain / level-52 quality checks
+│   └── test_analysis.py               # proximity, blocks, centrality tests
 ├── LICENSE
 ├── README.md
 └── requirements.txt
@@ -606,8 +696,8 @@ print(ds.summary())
 - [x] Implement data models + JSON loaders (`src/models/`, `src/loaders/`)
 - [x] Implement / refine the wiki scraper according to the final schema
 - [x] Implement graph generation that includes source-location → resource edges
-- [ ] Add exporters (JSON, CSV, GraphML)
-- [ ] Validate graph quality with real Hay Day production chains up to level 52
+- [x] Add exporters (JSON, CSV, GraphML)
+- [x] Validate graph quality with real Hay Day production chains up to level 52
 - Keep JSON files in 3NF-ready shape for later shared PostgreSQL usage
 
 ### Roadmap
@@ -621,12 +711,14 @@ print(ds.summary())
 - [x] Support external recipe dependencies
 - [x] Basic graph generation (NetworkX DiGraph, PRODUCES / CONSUMES / OUTPUTS edges, stoichiometry weights)
 - [x] Wiki scraper (level 52)
+- [x] Graph exporters (JSON, CSV, GraphML)
 
 #### v0.3 - Layout Planner usable
 
-- Weighted multi-level dependencies
-- Clustering / production block detection
-- Graph exports and basic analysis
+- [x] Weighted multi-level dependencies (location proximity graph + hop decay)
+- [x] Clustering / production block detection (Louvain on proximity graph)
+- [x] Graph exports
+- [x] Basic analysis (degree / betweenness centrality, path queries, analysis.json)
 
 #### v0.5 - Production Planner (script level)
 
