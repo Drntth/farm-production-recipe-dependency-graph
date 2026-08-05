@@ -44,10 +44,11 @@ Full-stack application that unifies both tools behind a web UI, with persistent 
 ### Current features (Layout Planner - v0.x)
 
 - JSON-based data input (locations, resources, recipes)
-- Recipe-driven weighted dependency graph generation
-- Multi-level dependency propagation
-- Directed graph representation
-- Multiple export formats:
+- Recipe-driven weighted dependency graph generation (NetworkX DiGraph)
+- Three edge kinds: PRODUCES, CONSUMES, OUTPUTS (source-location edges included)
+- Stoichiometry-based edge weights (input/output ratio)
+- Directed graph representation ready for clustering & layout heuristics
+- Multiple export formats (planned / next step):
   - JSON
   - CSV
   - GraphML
@@ -290,23 +291,108 @@ Mandatory fields:
 
 ### Graph Generation
 
-The system creates a directed weighted dependency graph that includes both production transformations and the origin of raw resources.
-Example of a correct chain:
+The system creates a **directed weighted dependency graph** (NetworkX `DiGraph`) that includes both production transformations and the origin of raw resources.
+
+#### Technology choice
+
+| Decision              | Choice                         | Rationale                                                                                                                                                                                      |
+| --------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Graph library         | **NetworkX** (`DiGraph`)       | Mature, pure-Python, rich algorithm suite (shortest paths, centrality, community detection), native GraphML export, spring/Kamada-Kawai layouts usable later for visual proximity suggestions. |
+| Node identity         | Original snake_case entity ids | Locations and resources already have unique ids; collisions are detected at build time.                                                                                                        |
+| Edge multiplicity     | Single edge per ordered pair   | If several recipes would create the same edge, weights are summed and recipe ids collected.                                                                                                    |
+| External dependencies | Silently omitted               | Vouchers / premium items never become nodes; they do not participate in farm-layout decisions.                                                                                                 |
+
+#### Node model
+
+Every `Location` and every `Resource` becomes a node.
+
+| Attribute            | Present on       | Description                           |
+| -------------------- | ---------------- | ------------------------------------- |
+| `kind`               | all              | `"location"` or `"resource"`          |
+| `id`                 | all              | Original entity id                    |
+| `name`               | all              | Human-readable name                   |
+| `type`               | all              | `LocationType` / `ResourceType` value |
+| `unlock_level`       | all              | Player level required                 |
+| `source_location_id` | resources (raw)  | Producing location                    |
+| `max_slots`          | locations (opt.) | Production slots                      |
+
+#### Edge model - three semantic kinds
 
 ```text
-field (soybean + corn)
-        ↓
-feed_mill → cow_feed
-        ↓
-cow_pasture → milk
-        ↓
-dairy → cream / butter / cheese
-        ↓
-downstream users (ice_cream_maker, cake_oven…)
+                    ┌──────────────────────────────────────────────┐
+                    │                                              │
+   location  ──PRODUCES──►  resource  ──CONSUMES──►  location  ──OUTPUTS──►  resource …
+   (field)                  (soybean)                (feed_mill)             (cow_feed)
 ```
 
-Connection strength is calculated from resource amounts and propagated through multi-level chains.
-This allows the Layout Planner to form meaningful production blocks (e.g. the entire Dairy cluster including pastures and feed fields).
+1. **PRODUCES** (`location → resource`)  
+   Created for every resource that has a `source_location_id`.  
+   Captures “this field / animal shelter / mine produces this raw good”.
+
+2. **CONSUMES** (`resource → location`)  
+   Created for every recipe input that exists in `resources.json`.  
+   Captures “this resource is consumed at this production building”.
+
+3. **OUTPUTS** (`location → resource`)  
+   Created for every recipe output.  
+   Captures “this building produces this (processed) good”.
+
+Together they form continuous dependency paths, e.g.:
+
+```text
+field ─PRODUCES→ soybean ─CONSUMES→ feed_mill ─OUTPUTS→ cow_feed
+     ─CONSUMES→ cow_pasture ─OUTPUTS→ milk ─CONSUMES→ dairy
+     ─OUTPUTS→ cream / butter / cheese
+     ─CONSUMES→ ice_cream_maker / cake_oven …
+```
+
+#### Weighting rules (v0.1)
+
+Higher weight ⇒ stronger coupling ⇒ the two nodes (or their owning locations) should be placed closer together on the farm map.
+
+| Edge kind | Weight formula                                | Default                               |
+| --------- | --------------------------------------------- | ------------------------------------- |
+| PRODUCES  | constant                                      | `1.0`                                 |
+| CONSUMES  | `input_amount / output_amount` (recipe ratio) | e.g. 3 milk → 1 cheese ⇒ weight `3.0` |
+| OUTPUTS   | constant                                      | `1.0`                                 |
+
+Rationale for the stoichiometry-based CONSUMES weight: a recipe that consumes three units of an upstream good pulls that good’s producing location more strongly toward the processing building than a 1-to-1 recipe.
+
+Edge attributes stored on every edge:
+
+- `edge_type` - one of `produces` / `consumes` / `outputs`
+- `weight` - float (see table above)
+- `amount` - the recipe quantity (or 1 for PRODUCES)
+- `recipe_id` - present on CONSUMES / OUTPUTS edges
+- `ratio` - present on CONSUMES edges (`input/output`)
+
+#### Why this model supports farm-layout planning
+
+- **Direct proximity signals** - high-weight CONSUMES edges tell the layout engine that a resource’s source location and the consuming building belong together.
+- **Cluster detection** - community-detection algorithms (Louvain, label propagation …) run on the undirected projection of the graph will surface natural production blocks (Dairy cluster, Bakery cluster, Feed + Animal cluster, etc.).
+- **Distance usable by later optimisers** - shortest-path lengths or effective multi-level weights between location pairs become the “desired distance” cost term in a placement heuristic.
+- **Level-aware** - the same builder accepts a `DataSet` already filtered by `--max-level`, so a level-30 farm and a level-52 farm produce different graphs.
+- **Reusable by Production Planner** - the identical graph (plus quantity annotations) will later drive schedule optimisation.
+
+#### Future extensions (already designed for)
+
+- Multi-level weight propagation (sum / max of path weights between any two locations).
+- Collapse of resource nodes into a pure location-location proximity graph for the placement solver.
+- Bottleneck detection via betweenness centrality on the weighted graph.
+- Integration with force-directed layouts (`spring_layout`, `kamada_kawai_layout`) for interactive visualisation.
+
+#### Usage (code)
+
+```python
+from pathlib import Path
+from src.loaders import load_data
+from src.graph import build_graph, graph_summary
+
+ds = load_data(Path("data"), max_level=52)
+G = build_graph(ds)
+print(graph_summary(G))
+# DiGraph(nodes=… [locations=…, resources=…], edges=…)
+```
 
 ---
 
@@ -373,18 +459,34 @@ pip install -r requirements.txt
 
 ### Testing
 
-Run the loader validation tests:
+Run the full test suite:
+
+```bash
+python -m pytest tests/
+```
+
+Or individually:
 
 ```bash
 python -m pytest tests/test_json_loader.py
+python -m pytest tests/test_graph_builder.py
 ```
 
-The test verifies:
+**Loader tests** verify:
 
 - JSON files can be loaded
 - Pydantic models validate the data
 - Referential integrity rules are applied
 - External recipe inputs are handled correctly
+
+**Graph-builder tests** verify:
+
+- Correct node counts and attributes for locations & resources
+- PRODUCES edges for every raw resource (`source_location_id`)
+- CONSUMES / OUTPUTS edges derived from recipes
+- Stoichiometry weights (`input_amount / output_amount`)
+- Continuous dependency paths (e.g. field → … → cream)
+- External inputs are skipped without creating nodes
 
 ---
 
@@ -424,26 +526,45 @@ output/
 ```bash
 farm-production-recipe-dependency-graph/
 ├── data/
-│   ├── locations.json
-│   ├── resources.json
-│   ├── recipes.json
+│   ├── locations.json                 # farm locations (buildings, fields, animals…)
+│   ├── resources.json                 # crops, animal products, processed goods, ores
+│   ├── recipes.json                   # production transformations inside locations
 │   └── examples/
-│       ├── locations.example.json
+│       ├── locations.example.json     # minimal example data for tests / docs
 │       ├── resources.example.json
 │       └── recipes.example.json
+├── output/                            # generated graph exports land here
 ├── src/
-│   ├── models/
-│   │   ├── location.py
-│   │   ├── resource.py
-│   │   └── recipe.py
-│   ├── loaders/
-│   │   └── json_loader.py
+│   ├── exporters/
+│   │   ├── csv_exporter.py
+│   │   ├── graphml_exporter.py
+│   │   └── json_exporter.py
 │   ├── graph/
-│   └── exporters/
-├── output/
+│   │   ├── graph_builder.py           # build_graph(DataSet) → nx.DiGraph
+│   │   ├── relationship.py            # EdgeType enum + edge attribute helpers
+│   │   └── weighting.py               # weight calculation rules (stoichiometry)
+│   ├── loaders/
+│   │   └── json_loader.py             # load_data() → validated DataSet
+│   ├── models/
+│   │   ├── location.py                # Location + LocationType (Pydantic)
+│   │   ├── recipe.py                  # Recipe, RecipeInput, RecipeOutput (Pydantic)
+│   │   └── resource.py                # Resource + ResourceType (Pydantic)
+│   ├── scraper/                       # Hay Day Fandom Wiki scraper
+│   │   ├── parsers/
+│   │   │   ├── locations.py           # parse production locations list pages
+│   │   │   ├── recipes.py             # parse recipe / goods pages
+│   │   │   └── resources.py           # parse resource / goods pages
+│   │   ├── cli.py                     # scraper CLI argument parsing
+│   │   ├── normalizer.py              # normalize raw wiki data → schema
+│   │   ├── wiki_client.py             # HTTP client for Fandom wiki pages
+│   │   └── writer.py                  # write normalized JSON into data/
+│   └── main.py                        # CLI entry: load → build graph
 ├── tests/
-├── requirements.txt
-└── README.md
+│   ├── test_json_loader.py            # loader + referential integrity tests
+│   └── test_graph_builder.py          # graph construction & weighting tests
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
 
 ### Implemented: Data models & loaders
@@ -483,8 +604,8 @@ print(ds.summary())
 - [x] Finalize minimal JSON data model for Layout Planner (`locations`, `resources`, `recipes`)
 - [x] Make `source_location_id` mandatory for raw resources
 - [x] Implement data models + JSON loaders (`src/models/`, `src/loaders/`)
-- [ ] Implement / refine the wiki scraper according to the final schema
-- [ ] Implement graph generation that includes source-location → resource edges
+- [x] Implement / refine the wiki scraper according to the final schema
+- [x] Implement graph generation that includes source-location → resource edges
 - [ ] Add exporters (JSON, CSV, GraphML)
 - [ ] Validate graph quality with real Hay Day production chains up to level 52
 - Keep JSON files in 3NF-ready shape for later shared PostgreSQL usage
@@ -498,8 +619,8 @@ print(ds.summary())
 - [x] JSON data loading + referential integrity (`src/loaders`)
 - [x] Support recipes without explicit inputs
 - [x] Support external recipe dependencies
-- [ ] Basic graph generation
-- [ ] Wiki scraper (level 52)
+- [x] Basic graph generation (NetworkX DiGraph, PRODUCES / CONSUMES / OUTPUTS edges, stoichiometry weights)
+- [x] Wiki scraper (level 52)
 
 #### v0.3 - Layout Planner usable
 
