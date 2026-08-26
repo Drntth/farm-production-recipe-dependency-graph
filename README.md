@@ -1,232 +1,107 @@
 # Farm Production Graph
 
-A graph-based dependency analysis and layout planning system for farming and crafting production chains.
+A graph-based system for analysing Hay Day production chains, designing farm layouts around reusable production blocks, and generating capacity-aware production schedules.
 
-The project converts locations, resources, and recipes into a weighted directed graph.
-The generated graph supports production dependency analysis, identification of important nodes, clustering of related production processes, and optimized farm layout planning.
+The system converts locations, resources and recipes into a weighted directed graph. From this graph it identifies tightly coupled production blocks, supports expansion-friendly farm arrangement, and (using only static player data) produces practical production quantities and login schedules.
 
-The primary use case is modeling **Hay Day** production chains.
-The architecture is designed so that the same data model can later power a second tool (Production Planner) and eventually a full-stack application.
+Planning is organised in two layers:
 
----
-
-## Project Goals (Two Complementary Tools)
-
-### 1. Layout Planner (current focus - v0.x)
-
-**Goal:** Help design an efficient farm layout.
-
-- Builds a weighted dependency graph from recipes.
-- Shows which locations and resources are tightly coupled.
-- Suggests production “blocks” (clusters) that should be placed close to each other.
-- Helps decide how many fields should be near a given location and which other locations belong to the same processing group.
-
-Implementation stage: **JSON data + pure Python scripts**.
-
-### 2. Production Planner (planned - later v0.x / v0.5+)
-
-**Goal:** Calculate an optimized production schedule.
-
-- Given a player level, barn/silo capacity and current orders (truck, boat, town, events).
-- Determines what to plant, harvest and put into production machines.
-- Calculates exact quantities that should be kept in the barn so that orders can be fulfilled efficiently.
-
-Will reuse the same core data model and later share the PostgreSQL database with the Layout Planner.
-
-### 3. Version 1.0 - Full Application Platform
-
-Full-stack application that unifies both tools behind a web UI, with persistent storage and interactive visualization.
+- **Functional planning** (always active) - production logic, blocks, quantities, schedules, capacities and processing order.
+- **Design planning** (optional) - decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
 ---
 
-## Features
+## 1. Layout Planner
 
-### Current features (Layout Planner - v0.x)
+### Purpose
 
-- JSON-based data input (locations, resources, recipes)
-- Recipe-driven weighted dependency graph generation (NetworkX DiGraph)
-- Three edge kinds: PRODUCES, CONSUMES, OUTPUTS (source-location edges included)
-- Stoichiometry-based edge weights (input/output ratio)
-- Directed graph representation ready for clustering & layout heuristics
-- Multiple export formats:
-  - JSON - nodes + edges + meta (web / API)
-  - CSV - separate nodes and edges tables (spreadsheet analysis)
-  - GraphML - yEd-compatible with visible labels (Gephi, yEd Live, Cytoscape)
-- Location proximity graph with multi-level weight propagation
-- Production block detection (Louvain clustering)
-- Centrality / bottleneck ranking and dependency path queries
-- Data loading from Hay Day Fandom Wiki via a dedicated scraper script
+Help the player design an efficient and expandable farm layout by discovering natural groups of buildings and fields that belong together.
 
-### Planned features
+### How it works
 
-**Layout Planner enhancements**:
+1. Loads the normalised JSON data (locations, resources, recipes).
+2. Builds a weighted directed dependency graph with three edge kinds:
+   - PRODUCES (location → resource)
+   - CONSUMES (resource → location, weight = input/output ratio)
+   - OUTPUTS (location → resource)
+3. Derives a location-proximity graph (multi-level weight propagation with decay).
+4. Detects **production blocks** via community detection on the proximity graph.
 
-- Dependency clustering / production block detection
-- Bottleneck detection
-- Layout suggestion heuristics
+A production block is a movable logical unit, for example:
 
-**Production Planner**:
+- 1× Dairy
+- related Cow Pasture(s)
+- Feed Mill
+- the appropriate number of fields
 
-- Order-aware quantity calculation
-- Barn / silo capacity constraints
-- Planting & production schedule generation
+### Evolution
 
-**Version 1.0**:
-
-- Interactive graph visualization
-- Database-backed data management
-- Web-based user interface
-- Unified Layout + Production Planner experience
+| Horizon     | Output                                                                                                                                                                                                                             |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Short term  | Weighted graph + detected production blocks                                                                                                                                                                                        |
+| Medium term | Explicit block definitions that can be placed relative to each other                                                                                                                                                               |
+| Long term   | Complete farm layout with relative positions and distances, expansion-friendly so the farm does not need full rebuilds at every level. When Design planning is enabled, space is also reserved for paths and optional decorations. |
 
 ---
 
-## Project Status
+## 2. Production Planner
 
-### Version 0.x - Layout Planner (Python)
+### Purpose
 
-Standalone Python application focused on the Layout Planner.
+Produce a sustainable production plan and a practical action/login schedule for a given player level, using only static data.
 
-Architecture:
+### Inputs (static only)
 
-```text
-Hay Day Fandom Wiki
-        |
-        v
-Scraper script (parameterizable)
-        |
-        v
-JSON data (data/*.json)
-        |
-        v
-Python graph generator
-        |
-        v
-Weighted dependency graph
-        |
-        +--> JSON export
-        +--> CSV export
-        +--> GraphML export
-```
+- Player level
+- Barn capacity
+- Silo capacity
+- Maximum available fields, animal shelters, animals and production buildings at that level
+- Optional current progress (owned counts, machine star levels / unlocked slots)
 
-Purpose of the current version:
+Live truck, boat, town or event orders are intentionally ignored.
 
-- Validate the normalized data model
-- Test dependency calculation and weighting algorithms
-- Generate usable production graphs for layout analysis
-- Establish the foundation for the Production Planner and v1.0
+### Outputs
 
-Data is currently limited to **level 52** (hard-coded in the JSON files).
-Level-parameterized generation (`--max-level`) will be added later when the full dataset and the Production Planner are introduced.
+- Recommended production quantities and ratios
+- What to produce, how much, and in which order
+- So that available space is well utilised and raw materials stay available for both further production and order fulfilment
+- Suggested login frequency derived from crop growth times and machine processing times
+- Ordered action sequences (plant → harvest → feed → process …)
+
+### Data requirements
+
+Timing data (growth time, production time), maximum counts per level, and machine slot information must be present in the data model (see Data Model section).
 
 ---
 
-## Version 1.0 - Full Application Platform
+## 3. Combiner / Layout Finetuner
 
-The planned 1.0 architecture replaces the standalone scripts with a full-stack application.
-Both the Layout Planner and the Production Planner will share the same PostgreSQL database.
+### Purpose
 
-Architecture:
+Merge the results of the Layout Planner and the Production Planner into one coordinated, usable farm plan.
 
-```text
-TypeScript Frontend
-        |
-        v
-Java Backend API
-        |
-        v
-PostgreSQL Database
-        |
-        v
-Graph calculation + planning engine
-```
+### How it works
 
-Planned technologies:
+- Takes production blocks and the recommended quantities/schedule.
+- Places the blocks in a logical order that respects the A→B processing flow.
+- Applies expansion-friendly rules (leave room for later buildings and animals).
+- When **Design planning** is enabled:
+  - reserves walkable paths between blocks and key producers
+  - optionally inserts decorative elements inside or around blocks
+- Produces a single combined output (textual description, data file, and later visual representations).
 
-| Component        | Technology      |
-| ---------------- | --------------- |
-| Frontend         | TypeScript      |
-| Backend          | Java            |
-| Database         | PostgreSQL      |
-| API              | REST            |
-| Graph / Planning | Backend service |
-
-The goal of version 1.0 is to provide:
-
-- Persistent shared data storage
-- User interface for both planners
-- Editable production graphs
-- Dynamic graph calculation and layout suggestions
-- Production schedule optimization
-- Visualization tools
-- Scalable architecture
-
----
-
-## Architecture
-
-### Current architecture (Layout Planner - v0.x)
-
-```text
-Data Layer
-    |
-    v
-Graph Processing Layer
-    |
-    v
-Export Layer
-```
-
-#### Data Layer
-
-Stores production-chain entities in normalized JSON files.
-These files are designed to map directly to future database tables (shared by both planners in v1.0).
-
-Current files:
-
-- `data/locations.json`
-- `data/resources.json`
-- `data/recipes.json`
-
-Data source: **Hay Day Fandom Wiki** (scraped by a dedicated Python script).
-Only the fields required by the Layout Planner are mandatory at this stage.
-
----
-
-#### Graph Processing Layer
-
-Responsible for:
-
-- loading input data
-- creating graph nodes (locations + resources)
-- generating relationships from recipes
-- calculating connection weights (including multi-level propagation)
-
----
-
-#### Export Layer
-
-Generates:
-
-- JSON
-- CSV
-- GraphML
-
-The export layer is separated from graph generation to allow future integrations.
+Functional planning is always present. Design planning is a selectable option.
 
 ---
 
 ## Data Model
 
-The system uses three main entities.  
-All identifiers are **snake_case English**.
+All identifiers are snake_case English.  
+The model is kept close to 3NF so the same structure can later be loaded into PostgreSQL.
 
-All goods (including intermediate items such as Bread and final items such as cakes) are modeled as **resources**.  
-Whether an item is intermediate or final is derived from the dependency graph (presence of outgoing edges).
+### locations.json
 
-### Locations
-
-Everything that occupies space on the farm (production locations, animal shelters, fields, trees, bushes, storage…).
-Mandatory fields:
+Everything that occupies space on the farm (production buildings, animal shelters, fields, trees, bushes, storage…).
 
 ```json
 {
@@ -239,10 +114,9 @@ Mandatory fields:
 
 Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.
 
-### Resources
+### resources.json
 
 Crops, animal products, intermediate/processed goods and ores.
-Mandatory fields:
 
 ```json
 {
@@ -254,24 +128,13 @@ Mandatory fields:
 }
 ```
 
-`source_location_id` is **mandatory** for `crop`, `animal_product` and `ore`.
+`source_location_id` is mandatory for `crop`, `animal_product` and `ore`.  
 Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_material`, `ore`.
 
-### External Resources
+### recipes.json
 
-Some recipe inputs from the wiki represent external dependencies rather than farm-produced resources (for example vouchers or premium materials).
-
-These items are allowed as recipe inputs but are not required to exist in `resources.json`, because they do not participate in the internal farm production dependency chain.
-
-### Recipes
-
-Only transformations that happen inside production locations.
-Animal products and raw crops are resources (produced by their source location), not recipes.
-
-Recipes may contain zero or more inputs.
-Most production recipes consume resources, but some wiki-defined production entries (such as lure crafting) have no explicit input requirements.
-
-Mandatory fields:
+Transformations that happen inside production locations.  
+Animal products and raw crops are resources, not recipes.
 
 ```json
 {
@@ -292,40 +155,49 @@ Mandatory fields:
 }
 ```
 
-### Graph Generation
+Recipes may contain zero or more inputs. External/premium inputs (vouchers, diamonds, etc.) are allowed but never become graph nodes.
 
-The system creates a **directed weighted dependency graph** (NetworkX `DiGraph`) that includes both production transformations and the origin of raw resources.
+### level_limits.json
 
-#### Technology choice
+Maximum number of fields, animal shelters, animals and production buildings available at each player level.  
+Kept in a separate file to preserve 3NF.
 
-| Decision              | Choice                         | Rationale                                                                                                                                                                                      |
-| --------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Graph library         | **NetworkX** (`DiGraph`)       | Mature, pure-Python, rich algorithm suite (shortest paths, centrality, community detection), native GraphML export, spring/Kamada-Kawai layouts usable later for visual proximity suggestions. |
-| Node identity         | Original snake_case entity ids | Locations and resources already have unique ids; collisions are detected at build time.                                                                                                        |
-| Edge multiplicity     | Single edge per ordered pair   | If several recipes would create the same edge, weights are summed and recipe ids collected.                                                                                                    |
-| External dependencies | Silently omitted               | Vouchers / premium items never become nodes; they do not participate in farm-layout decisions.                                                                                                 |
+### Timing and capacity fields
 
-#### Node model
+- `growth_time_minutes` on resources (crops)
+- `production_time_minutes` on recipes
+- `max_slots` / slot-related data on locations
+- Player-specific progress (owned counts, star levels, unlocked slots) lives in a separate player-config file, not in the shared data.
 
-Every `Location` and every `Resource` becomes a node.
+### External resources
 
-| Attribute            | Present on       | Description                           |
-| -------------------- | ---------------- | ------------------------------------- |
-| `kind`               | all              | `"location"` or `"resource"`          |
-| `id`                 | all              | Original entity id                    |
-| `name`               | all              | Human-readable name                   |
-| `type`               | all              | `LocationType` / `ResourceType` value |
-| `unlock_level`       | all              | Player level required                 |
-| `source_location_id` | resources (raw)  | Producing location                    |
-| `max_slots`          | locations (opt.) | Production slots                      |
+Recipe inputs that represent external dependencies (vouchers, premium materials) are permitted in recipes but are omitted from the graph because they do not affect farm-layout decisions.
 
-#### Edge model - three semantic kinds
+---
+
+## Graph Model
+
+The system builds a directed weighted dependency graph (NetworkX `DiGraph`).
+
+### Nodes
+
+Every Location and every Resource becomes a node.
+
+| Attribute            | Present on       | Description                       |
+| -------------------- | ---------------- | --------------------------------- |
+| `kind`               | all              | `"location"` or `"resource"`      |
+| `id`                 | all              | Original entity id                |
+| `name`               | all              | Human-readable name               |
+| `type`               | all              | LocationType / ResourceType value |
+| `unlock_level`       | all              | Player level required             |
+| `source_location_id` | resources (raw)  | Producing location                |
+| `max_slots`          | locations (opt.) | Production slots                  |
+
+### Edges - three semantic kinds
 
 ```text
-                    ┌──────────────────────────────────────────────┐
-                    │                                              │
-   location  ──PRODUCES──►  resource  ──CONSUMES──►  location  ──OUTPUTS──►  resource …
-   (field)                  (soybean)                (feed_mill)             (cow_feed)
+location  ──PRODUCES──►  resource  ──CONSUMES──►  location  ──OUTPUTS──►  resource
+(field)                  (soybean)                (feed_mill)             (cow_feed)
 ```
 
 1. **PRODUCES** (`location → resource`)  
@@ -334,412 +206,216 @@ Every `Location` and every `Resource` becomes a node.
 
 2. **CONSUMES** (`resource → location`)  
    Created for every recipe input that exists in `resources.json`.  
+   Weight = `input_amount / output_amount` (stoichiometry).  
    Captures “this resource is consumed at this production building”.
 
 3. **OUTPUTS** (`location → resource`)  
    Created for every recipe output.  
    Captures “this building produces this (processed) good”.
 
-Together they form continuous dependency paths, e.g.:
+### Weighting rules
 
-```text
-field ─PRODUCES→ soybean ─CONSUMES→ feed_mill ─OUTPUTS→ cow_feed
-     ─CONSUMES→ cow_pasture ─OUTPUTS→ milk ─CONSUMES→ dairy
-     ─OUTPUTS→ cream / butter / cheese
-     ─CONSUMES→ ice_cream_maker / cake_oven …
-```
+| Edge kind | Weight formula               | Default  |
+| --------- | ---------------------------- | -------- |
+| PRODUCES  | constant                     | 1.0      |
+| CONSUMES  | input_amount / output_amount | e.g. 3.0 |
+| OUTPUTS   | constant                     | 1.0      |
 
-#### Weighting rules (v0.1)
+Higher weight means stronger coupling → the two locations should be placed closer together on the farm.
 
-Higher weight ⇒ stronger coupling ⇒ the two nodes (or their owning locations) should be placed closer together on the farm map.
+### Why this model supports layout planning
 
-| Edge kind | Weight formula                                | Default                               |
-| --------- | --------------------------------------------- | ------------------------------------- |
-| PRODUCES  | constant                                      | `1.0`                                 |
-| CONSUMES  | `input_amount / output_amount` (recipe ratio) | e.g. 3 milk → 1 cheese ⇒ weight `3.0` |
-| OUTPUTS   | constant                                      | `1.0`                                 |
+- High-weight CONSUMES edges give direct proximity signals.
+- Community detection on the undirected location-proximity graph yields natural production blocks.
+- Shortest-path lengths and multi-level weights become the “desired distance” cost for later placement heuristics.
+- The same builder accepts a level-filtered `DataSet`, so different player levels produce different graphs.
+- The identical graph (plus quantity annotations) is later reused by the Production Planner and the Combiner.
 
-Rationale for the stoichiometry-based CONSUMES weight: a recipe that consumes three units of an upstream good pulls that good’s producing location more strongly toward the processing building than a 1-to-1 recipe.
+### Analysis capabilities (already implemented)
 
-Edge attributes stored on every edge:
-
-- `edge_type` - one of `produces` / `consumes` / `outputs`
-- `weight` - float (see table above)
-- `amount` - the recipe quantity (or 1 for PRODUCES)
-- `recipe_id` - present on CONSUMES / OUTPUTS edges
-- `ratio` - present on CONSUMES edges (`input/output`)
-
-#### Why this model supports farm-layout planning
-
-- **Direct proximity signals** - high-weight CONSUMES edges tell the layout engine that a resource’s source location and the consuming building belong together.
-- **Cluster detection** - community-detection algorithms (Louvain, label propagation …) run on the undirected projection of the graph will surface natural production blocks (Dairy cluster, Bakery cluster, Feed + Animal cluster, etc.).
-- **Distance usable by later optimisers** - shortest-path lengths or effective multi-level weights between location pairs become the “desired distance” cost term in a placement heuristic.
-- **Level-aware** - the same builder accepts a `DataSet` already filtered by `--max-level`, so a level-30 farm and a level-52 farm produce different graphs.
-- **Reusable by Production Planner** - the identical graph (plus quantity annotations) will later drive schedule optimisation.
-
-#### Future extensions (already designed for)
-
-- Multi-level weight propagation (sum / max of path weights between any two locations).
-- Collapse of resource nodes into a pure location-location proximity graph for the placement solver.
-- Bottleneck detection via betweenness centrality on the weighted graph.
-- Integration with force-directed layouts (`spring_layout`, `kamada_kawai_layout`) for interactive visualisation.
-
-#### Usage (code)
-
-```python
-from pathlib import Path
-from src.loaders import load_data
-from src.graph import build_graph, graph_summary, analysis_summary
-
-ds = load_data(Path("data"), max_level=52)
-G = build_graph(ds)
-print(graph_summary(G))
-# DiGraph(nodes=… [locations=…, resources=…], edges=…)
-
-summary = analysis_summary(G)
-print(summary["production_blocks"][:3])
-```
-
-#### Analysis layer (v0.3)
-
-| Capability         | Function                                  | Purpose                                                                             |
-| ------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------- |
-| Location proximity | `location_proximity_graph(G)`             | Undirected weighted graph of locations only; multi-level hop propagation with decay |
-| Production blocks  | `detect_production_blocks(G)`             | Louvain communities on the proximity graph - clusters to place close on the farm    |
-| Centrality         | `centrality_report(G)`                    | Degree + betweenness ranking (bottleneck resources / buildings)                     |
-| Path queries       | `dependency_path` / `has_dependency_path` | Shortest directed dependency path between any two nodes                             |
-| Full payload       | `analysis_summary(G)`                     | Blocks + centrality + top couplings → written as `output/analysis.json`             |
-
-Proximity construction sketch:
-
-1. For each CONSUMES edge `resource → location_B`, find producing locations of that resource (via `source_location_id` or OUTPUTS edges).
-2. Add undirected weight between producer and `location_B`.
-3. Propagate weights up to `max_hops` (default 3) with per-hop `decay` (default 0.5) so upstream fields couple to downstream dairies / bakeries.
+- Location proximity graph with multi-level hop propagation and decay
+- Production-block detection (Louvain / community detection)
+- Degree and betweenness centrality (bottleneck ranking)
+- Dependency path queries
+- Full analysis payload written to `output/analysis.json`
 
 ---
 
-### Data Source & Scraper
+## Roadmap
 
-All production data is sourced from the Hay Day Fandom Wiki:
+### v0.3 - Layout Planner usable (done)
 
-- <https://hayday.fandom.com/wiki/Goods_List>
-- <https://hayday.fandom.com/wiki/Production_locations_List>
-- Individual location and product pages
+- [x] Weighted multi-level proximity
+- [x] Production-block detection
+- [x] Centrality and path analysis
+- [x] JSON / CSV / GraphML exporters
+- [x] Wiki scraper (level 52)
 
-A dedicated Python scraper script (located under `src/scraper/`) is responsible for:
+### v0.5 - Production Planner foundation
 
-- fetching the relevant wiki pages
-- extracting locations, resources and recipes
-- normalizing the data into the JSON format expected by the Layout Planner
-- writing the files into `data/`
+- [ ] Review all relevant wiki data
+- [ ] Extend the JSON model with timing and capacity fields while keeping 3NF
+- [ ] Introduce `level_limits.json`
+- [ ] Capacity model (barn, silo, fields, animals, machine slots)
+- [ ] Steady-state quantity calculation tuned to barn/silo limits
+- [ ] Basic ordered action list
+- [ ] Suggested login frequency from critical growth/processing times
+- [ ] `output/schedule.json` export
+- [ ] Unit tests for the new planner modules
 
-The scraper is parameterizable (target level, which entity types to extract, etc.).
-Current data files are limited to **level 52**.
+### v0.6 - Richer Production Planner
+
+- [ ] Machine star-level and unlocked-slot awareness
+- [ ] Improved critical-path timing
+- [ ] Support for player-config files (owned buildings/animals, current stars)
+- [ ] Additional tests and validation against known level-52 chains
+
+### v0.7 - Production blocks as first-class units
+
+- [ ] Explicit, named production-block definitions (Dairy block, Bakery block, Feed+Animals block, …)
+- [ ] Expansion-friendly placement heuristics (reserve space for later unlocks)
+- [ ] Textual layout description: block list + recommended neighbourhoods and relative order
+- [ ] Alignment of block sizes with Production Planner quantities
+
+### v0.8 - Visual output and optional Design planning
+
+- [ ] Coloured frames + labels on a blank farm map
+- [ ] Simple diagram export of individual blocks
+- [ ] Design-planning switch:
+  - reserve walkable paths between blocks and key producers
+  - optional inclusion of decorative elements inside/around blocks
+- [ ] Independent outputs from both planners still available
+
+### v0.9 - Combiner (third tool)
+
+- [ ] Merge Layout + Production results into one coordinated plan
+- [ ] Respect A→B processing order in the physical arrangement
+- [ ] Functional plan always present; Design plan applied only when requested
+- [ ] Single combined report / data file
+- [ ] Expansion-friendly full-farm suggestion
+
+### v1.0 - Local usable platform
+
+- [ ] Unified CLI with Functional / Design toggle (e.g. `--design`)
+- [ ] Expansion-friendly complete farm layout
+- [ ] Visual outputs (frames, block collages, optional whole-map collage)
+- [ ] Ready-to-use configuration examples for common player levels
+- [ ] Documentation and example player-config files
+
+### v2.0+ - Full application (future)
+
+- Web UI
+- Persistent database (PostgreSQL)
+- Interactive drag-and-drop layout editor
+- Real-time visualisation
+- Optional live-order import (still secondary to the static capacity-driven core)
 
 ---
 
-### Export Formats
-
-Supported:
-
-#### JSON
-
-Used for:
-
-- web visualization
-- application communication
-
-#### CSV
-
-Used for:
-
-- spreadsheet analysis
-- manual inspection
-
-#### GraphML (yEd-compatible)
-
-Used for:
-
-- **yEd Live** / yEd Desktop (recommended for interactive viewing)
-- Gephi
-- Cytoscape
-- NetworkX
-
-The GraphML export embeds **yFiles node/edge graphics** so labels are
-visible on the canvas without extra configuration:
-
-| Node kind               | Label example                   | Colour (dark & light friendly) |
-| ----------------------- | ------------------------------- | ------------------------------ |
-| location                | `Dairy [location]`              | blue fill, white text          |
-| resource with source    | `Milk ← cow_pasture [resource]` | orange fill, white text        |
-| resource without source | `Cream [resource]`              | orange fill, white text        |
-
-Edges show a short label such as `consumes w=3.0` or `produces`.
-
-**How to view in yEd Live**:
-
-1. Open [https://www.yworks.com/yed-live/](https://www.yworks.com/yed-live/)
-2. Open → select `output/graph.graphml`
-3. Layout → **Organic** or **Hierarchical**
-4. Node text is visible immediately; locations are blue, resources orange
-
-JSON and CSV also include a `label` column/field with the same text.
-
-### Installation
-
-Requirements:
-
-- Python 3.11+
-
-Install dependencies:
+## Usage
 
 ```bash
+# install
 pip install -r requirements.txt
-```
 
----
-
-### Testing
-
-Run the full test suite:
-
-```bash
-python -m pytest tests/
-```
-
-Or individually:
-
-```bash
-python -m pytest tests/test_json_loader.py
-python -m pytest tests/test_graph_builder.py
-```
-
-**Loader tests** verify:
-
-- JSON files can be loaded
-- Pydantic models validate the data
-- Referential integrity rules are applied
-- External recipe inputs are handled correctly
-
-**Graph-builder tests** verify:
-
-- Correct node counts and attributes for locations & resources
-- PRODUCES edges for every raw resource (`source_location_id`)
-- CONSUMES / OUTPUTS edges derived from recipes
-- Stoichiometry weights (`input_amount / output_amount`)
-- Continuous dependency paths (e.g. field → … → cream)
-- External inputs are skipped without creating nodes
-
-**Exporter tests** verify:
-
-- JSON structure (nodes, edges, meta counts) and human-readable `label` fields
-- CSV node/edge column sets (including `label`) and row counts
-- GraphML contains yFiles NodeLabel graphics and standard attributes
-
-**Graph quality tests** verify:
-
-- Node count = locations + resources
-- PRODUCES edges for every raw resource
-- Known dependency paths (dairy, bakery, feed chains)
-- Stoichiometry weights
-- External inputs (voucher, diamond) never become nodes
-- Optional real `data/` checks (197 nodes / 313 edges at level 52) when files are present
-
-**Analysis tests** verify:
-
-- Proximity graph contains only locations and expected direct couplings
-- Multi-level hops do not drop edges
-- Production blocks cover all locations
-- Centrality ranking and dependency path helpers
-
----
-
-### Usage
-
-Build the graph and export all formats:
-
-```bash
-python -m src.main
-```
-
-Filter by maximum unlock level:
-
-```bash
+# build graph + analysis
 python -m src.main --max-level 52
-```
 
-Only locations, resources and recipes whose `unlock_level <= 52` are included in the generated graph.
+# choose formats
+python -m src.main --formats json graphml csv
 
-Select specific export formats:
-
-```bash
-python -m src.main --formats json graphml
-python -m src.main --formats csv
-```
-
-Custom data / output directories:
-
-```bash
+# custom paths
 python -m src.main --data-dir data --output-dir output --max-level 30
-```
 
-Skip analysis (blocks / centrality) if you only need the graph exports:
-
-```bash
+# skip analysis if only the graph is needed
 python -m src.main --no-analysis
 ```
 
-Update data from the wiki (example):
+Output lands in `output/`:
+
+```text
+output/
+├── graph.json
+├── graph_nodes.csv
+├── graph_edges.csv
+├── graph.graphml
+└── analysis.json
+```
+
+Later versions will add `schedule.json`, layout descriptions and visual files to the same directory.  
+A future flag (e.g. `--design`) will enable the optional Design planning layer.
+
+Update data from the wiki:
 
 ```bash
 python -m src.scraper --max-level 52
 ```
 
-Output:
+---
 
-```bash
-output/
-├── graph.json           # nodes + edges + meta
-├── graph_nodes.csv      # one row per node
-├── graph_edges.csv      # one row per edge
-├── graph.graphml        # for Gephi / yEd / Cytoscape
-└── analysis.json        # production blocks, centrality, top couplings
-```
+## Project Structure
 
-### Project Structure
-
-```bash
+```text
 farm-production-recipe-dependency-graph/
 ├── data/
 │   ├── locations.json                 # farm locations (buildings, fields, animals…)
 │   ├── resources.json                 # crops, animal products, processed goods, ores
 │   ├── recipes.json                   # production transformations inside locations
+│   ├── level_limits.json              # (planned) max counts per player level
 │   └── examples/
-│       ├── locations.example.json     # minimal example data for tests / docs
+│       ├── locations.example.json
 │       ├── resources.example.json
 │       └── recipes.example.json
-├── output/                            # generated graph exports land here
+├── output/                            # generated exports land here
 ├── src/
 │   ├── exporters/
-│   │   ├── csv_exporter.py            # → graph_nodes.csv + graph_edges.csv
-│   │   ├── graphml_exporter.py        # → graph.graphml (yEd labels + colours)
-│   │   ├── json_exporter.py           # → graph.json (nodes + edges + meta + label)
-│   │   └── labels.py                  # human-readable node/edge label helpers
+│   │   ├── csv_exporter.py
+│   │   ├── graphml_exporter.py
+│   │   ├── json_exporter.py
+│   │   └── labels.py
 │   ├── graph/
-│   │   ├── graph_builder.py           # build_graph(DataSet) → nx.DiGraph
-│   │   ├── relationship.py            # EdgeType enum + edge attribute helpers
-│   │   ├── weighting.py               # weight calculation rules (stoichiometry)
-│   │   └── analysis.py                # proximity, clustering, centrality, paths
+│   │   ├── analysis.py                # proximity, clustering, centrality, paths
+│   │   ├── graph_builder.py
+│   │   ├── relationship.py
+│   │   └── weighting.py
 │   ├── loaders/
-│   │   └── json_loader.py             # load_data() → validated DataSet
+│   │   └── json_loader.py
 │   ├── models/
-│   │   ├── location.py                # Location + LocationType (Pydantic)
-│   │   ├── recipe.py                  # Recipe, RecipeInput, RecipeOutput (Pydantic)
-│   │   └── resource.py                # Resource + ResourceType (Pydantic)
-│   ├── scraper/                       # Hay Day Fandom Wiki scraper
+│   │   ├── location.py
+│   │   ├── recipe.py
+│   │   └── resource.py
+│   ├── planner/                       # (v0.5+) Production Planner
+│   │   ├── capacity.py
+│   │   ├── quantities.py
+│   │   └── schedule.py
+│   ├── scraper/
 │   │   ├── parsers/
-│   │   │   ├── locations.py           # parse production locations list pages
-│   │   │   ├── recipes.py             # parse recipe / goods pages
-│   │   │   └── resources.py           # parse resource / goods pages
-│   │   ├── cli.py                     # scraper CLI argument parsing
-│   │   ├── normalizer.py              # normalize raw wiki data → schema
-│   │   ├── wiki_client.py             # HTTP client for Fandom wiki pages
-│   │   └── writer.py                  # write normalized JSON into data/
-│   └── main.py                        # CLI entry: load → build graph
+│   │   │   ├── locations.py
+│   │   │   ├── recipes.py
+│   │   │   └── resources.py
+│   │   ├── cli.py
+│   │   ├── normalizer.py
+│   │   ├── wiki_client.py
+│   │   └── writer.py
+│   └── main.py
 ├── tests/
-│   ├── test_json_loader.py            # loader + referential integrity tests
-│   ├── test_graph_builder.py          # graph construction & weighting tests
-│   ├── test_exporters.py              # JSON / CSV / GraphML export tests
-│   ├── test_graph_quality.py          # real-chain / level-52 quality checks
-│   └── test_analysis.py               # proximity, blocks, centrality tests
+│   ├── test_analysis.py
+│   ├── test_exporters.py
+│   ├── test_graph_builder.py
+│   ├── test_graph_quality.py
+│   └── test_json_loader.py
 ├── LICENSE
 ├── README.md
 └── requirements.txt
 ```
 
-### Implemented: Data models & loaders
+---
 
-The core entities are defined as **Pydantic v2** models under `src/models/`:
-
-| Module        | Class                                   | Notes                                                          |
-| ------------- | --------------------------------------- | -------------------------------------------------------------- |
-| `location.py` | `Location`, `LocationType`              | Enum-validated type, snake_case id                             |
-| `resource.py` | `Resource`, `ResourceType`              | `source_location_id` mandatory for crop / animal_product / ore |
-| `recipe.py`   | `Recipe`, `RecipeInput`, `RecipeOutput` | Supports recipes with zero or more inputs                      |
-
-The loader (`src/loaders/json_loader.py`) provides:
-
-- `load_data(data_dir, max_level=None) → DataSet`
-- Automatic Pydantic validation
-- Referential integrity validation
-  - location references must exist
-  - recipe outputs must exist as resources
-  - external recipe inputs (e.g. vouchers, premium items) are allowed
-- Optional `--max-level` filtering
-- Fast id-based lookup via `DataSet.locations / .resources / .recipes`
-
-Example usage:
-
-```python
-from pathlib import Path
-from src.loaders import load_data
-
-ds = load_data(Path("data"), max_level=52)
-print(ds.summary())
-# DataSet(locations=…, resources=…, recipes=…)
-```
-
-### Development Priorities (current phase)
-
-- [x] Finalize minimal JSON data model for Layout Planner (`locations`, `resources`, `recipes`)
-- [x] Make `source_location_id` mandatory for raw resources
-- [x] Implement data models + JSON loaders (`src/models/`, `src/loaders/`)
-- [x] Implement / refine the wiki scraper according to the final schema
-- [x] Implement graph generation that includes source-location → resource edges
-- [x] Add exporters (JSON, CSV, GraphML)
-- [x] Validate graph quality with real Hay Day production chains up to level 52
-- Keep JSON files in 3NF-ready shape for later shared PostgreSQL usage
-
-### Roadmap
-
-#### v0.1 - Layout Planner foundation
-
-- [x] Initial Python project structure
-- [x] Pydantic data models (`Location`, `Resource`, `Recipe`)
-- [x] JSON data loading + referential integrity (`src/loaders`)
-- [x] Support recipes without explicit inputs
-- [x] Support external recipe dependencies
-- [x] Basic graph generation (NetworkX DiGraph, PRODUCES / CONSUMES / OUTPUTS edges, stoichiometry weights)
-- [x] Wiki scraper (level 52)
-- [x] Graph exporters (JSON, CSV, GraphML)
-
-#### v0.3 - Layout Planner usable
-
-- [x] Weighted multi-level dependencies (location proximity graph + hop decay)
-- [x] Clustering / production block detection (Louvain on proximity graph)
-- [x] Graph exports
-- [x] Basic analysis (degree / betweenness centrality, path queries, analysis.json)
-
-#### v0.5 - Production Planner (script level)
-
-- Full (or significantly extended) dataset
-- Level-parameterized generation
-- Quantity & capacity aware planning scripts
-- Shared data model preparation
-
-#### v1.0 - Full Application Platform
-
-- Java backend + PostgreSQL (shared DB for both planners)
-- TypeScript frontend
-- Interactive visualization
-- Unified Layout + Production Planner experience
-- Persistent data management
-
-### License
+## License
 
 MIT License
 
-### Disclaimer
+## Disclaimer
 
 This project is an independent fan-made analysis tool.
 
