@@ -226,5 +226,17 @@
     "name": "Candy machine",
     "type": "production",
     "unlock_level": 51
+  },
+  {
+    "id": "sauce_maker",
+    "name": "Sauce maker",
+    "type": "production",
+    "unlock_level": 54
+  },
+  {
+    "id": "sushi_bar",
+    "name": "Sushi bar",
+    "type": "production",
+    "unlock_level": 56
   }
 ]

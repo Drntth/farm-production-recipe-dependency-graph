@@ -125,7 +125,7 @@ def _classify_type_and_source(
     return "processed_material", loc_id or "unknown"
 
 
-def parse_resources(client: WikiClient, max_level: int = 52) -> list[dict[str, Any]]:
+def parse_resources(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     """
     Parse the Goods List table and return raw resource dicts.
 

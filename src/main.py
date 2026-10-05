@@ -3,9 +3,9 @@ Farm Production Graph - Layout Planner entry point.
 
 Usage
 -----
-    python -m src.main
-    python -m src.main --max-level 52
-    python -m src.main --data-dir data --max-level 30 --output-dir output
+    python -m src.main                      # level from config/player.json
+    python -m src.main --level 30
+    python -m src.main --data-dir data --level 30 --output-dir output
     python -m src.main --formats json --no-analysis
 """
 
@@ -17,6 +17,7 @@ import logging
 import sys
 from pathlib import Path
 
+from src.config import load_player_config
 from src.exporters import export_csv, export_graphml, export_json
 from src.graph import analysis_summary, build_graph, graph_summary
 from src.loaders.json_loader import load_data
@@ -39,10 +40,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Directory containing locations.json, resources.json, recipes.json",
     )
     parser.add_argument(
+        "--level",
         "--max-level",
+        dest="level",
         type=int,
         default=None,
-        help="Only include entities with unlock_level <= this value",
+        help="Player level: only include entities with unlock_level <= this value "
+        "(default: level from the player config)",
+    )
+    parser.add_argument(
+        "--player-config",
+        type=Path,
+        default=None,
+        help="Player config file (default: config/player.json, "
+        "falling back to config/player.example.json)",
     )
     parser.add_argument(
         "--output-dir",
@@ -100,7 +111,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        dataset = load_data(args.data_dir, max_level=args.max_level)
+        level = args.level
+        if level is None:
+            level = load_player_config(args.player_config).level
+        logger.info("Player level: %d", level)
+        dataset = load_data(args.data_dir, max_level=level)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Failed to load data: %s", exc)
         return 1

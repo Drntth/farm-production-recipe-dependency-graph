@@ -322,7 +322,7 @@ def _parse_generic_sources_from_goods(
     return results
 
 
-def parse_locations(client: WikiClient, max_level: int = 52) -> list[dict[str, Any]]:
+def parse_locations(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     """
     Return raw list of locations up to max_level.
 

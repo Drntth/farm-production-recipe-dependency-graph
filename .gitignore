@@ -224,3 +224,6 @@ __marimo__/
 # Generated files
 output/*
 !output/.gitkeep
+
+# Local player config (personal level / progress)
+config/player.json

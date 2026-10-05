@@ -1111,5 +1111,61 @@
     "type": "processed_material",
     "unlock_level": 52,
     "source_location_id": "candy_machine"
+  },
+  {
+    "id": "fish_soup",
+    "name": "Fish soup",
+    "type": "processed_material",
+    "unlock_level": 53,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "lily",
+    "name": "Lily",
+    "type": "crop",
+    "unlock_level": 53,
+    "source_location_id": "field"
+  },
+  {
+    "id": "bean_dip",
+    "name": "Bean dip",
+    "type": "processed_material",
+    "unlock_level": 54,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "chocolate",
+    "name": "Chocolate",
+    "type": "processed_material",
+    "unlock_level": 54,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "fancy_cake",
+    "name": "Fancy cake",
+    "type": "processed_material",
+    "unlock_level": 54,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "soy_sauce",
+    "name": "Soy sauce",
+    "type": "processed_material",
+    "unlock_level": 54,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "rice",
+    "name": "Rice",
+    "type": "crop",
+    "unlock_level": 56,
+    "source_location_id": "field"
+  },
+  {
+    "id": "sushi_roll",
+    "name": "Sushi roll",
+    "type": "processed_material",
+    "unlock_level": 56,
+    "source_location_id": "sushi_bar"
   }
 ]

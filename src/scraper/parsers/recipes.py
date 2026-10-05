@@ -39,7 +39,7 @@ def _is_recipe_source(source_text: str) -> bool:
     return bool(source_text.strip()) and "n/a" not in s
 
 
-def parse_recipes(client: WikiClient, max_level: int = 52) -> list[dict[str, Any]]:
+def parse_recipes(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     """
     Build recipes from the Goods List.
 

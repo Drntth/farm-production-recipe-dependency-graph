@@ -29,8 +29,9 @@ class WikiClient:
             }
         )
         self.timeout = timeout
-        self.delay = delay 
+        self.delay = delay
         self._last_request = 0.0
+        self.fetched_pages: set[str] = set()
 
     def _throttle(self) -> None:
         elapsed = time.time() - self._last_request
@@ -53,7 +54,34 @@ class WikiClient:
         data = response.json()
         if "error" in data:
             raise RuntimeError(f"Wiki API error for '{page_name}': {data['error']}")
+        self.fetched_pages.add(page_name)
         return data["parse"]["text"]["*"]
+
+    def get_revision_timestamps(self, page_names: set[str]) -> dict[str, str | None]:
+        """Return the last-revision timestamp (ISO 8601) of each page, None if missing."""
+        result: dict[str, str | None] = {}
+        names = sorted(page_names)
+        for i in range(0, len(names), 50):  # MediaWiki limit per query
+            self._throttle()
+            params = {
+                "action": "query",
+                "titles": "|".join(names[i : i + 50]),
+                "prop": "revisions",
+                "rvprop": "timestamp",
+                "format": "json",
+            }
+            response = self.session.get(
+                self.API_URL, params=params, timeout=self.timeout
+            )
+            response.raise_for_status()
+            query = response.json().get("query", {})
+            # The API answers with normalised titles ("Goods List"); map them back.
+            aliases = {n["to"]: n["from"] for n in query.get("normalized", [])}
+            for page in query.get("pages", {}).values():
+                title = aliases.get(page["title"], page["title"])
+                revisions = page.get("revisions")
+                result[title] = revisions[0]["timestamp"] if revisions else None
+        return result
 
     def get_page(self, page_name: str) -> BeautifulSoup:
         """Return a BeautifulSoup of the rendered page content."""

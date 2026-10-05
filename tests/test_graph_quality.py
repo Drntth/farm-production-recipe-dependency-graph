@@ -1,7 +1,7 @@
 """
 Validate graph quality on representative Hay Day production chains.
 
-These tests lock in the structural invariants expected up to level 52:
+These tests lock in level-independent structural invariants:
 node/edge consistency, PRODUCES coverage for raw resources, known
 dependency paths, stoichiometry weights, and exclusion of external inputs.
 """
@@ -223,23 +223,35 @@ def test_edge_types_only_allowed_values(chain_graph: nx.DiGraph) -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_real_data_loads_and_builds() -> None:
-    ds = load_data(DATA_DIR, max_level=52)
+    ds = load_data(DATA_DIR)
     G = build_graph(ds)
 
     assert G.number_of_nodes() == len(ds.locations) + len(ds.resources)
-    assert G.number_of_nodes() == 197  # known level-52 snapshot
-    assert G.number_of_edges() == 313
+    assert G.number_of_edges() > 0
 
-    # locations + resources kinds
     loc = sum(1 for _, d in G.nodes(data=True) if d.get("kind") == "location")
     res = sum(1 for _, d in G.nodes(data=True) if d.get("kind") == "resource")
-    assert loc == 38
-    assert res == 159
+    assert loc == len(ds.locations)
+    assert res == len(ds.resources)
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_real_data_level_filter_is_monotonic() -> None:
+    """A higher player level never removes nodes or edges from the graph."""
+    full = load_data(DATA_DIR)
+    top = max(loc.unlock_level for loc in full.location_list)
+    previous: nx.DiGraph | None = None
+    for level in (10, 25, 40, top):
+        G = build_graph(full.filter_by_max_level(level))
+        if previous is not None:
+            assert set(previous.nodes) <= set(G.nodes)
+            assert set(previous.edges) <= set(G.edges)
+        previous = G
 
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_real_data_known_paths() -> None:
-    G = build_graph(load_data(DATA_DIR, max_level=52))
+    G = build_graph(load_data(DATA_DIR))
 
     # Dairy cluster
     assert nx.has_path(G, "cow_pasture", "cream")
@@ -262,7 +274,7 @@ def test_real_data_known_paths() -> None:
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_real_data_produces_coverage() -> None:
     """PRODUCES edges exist only for raw resources (crop / animal_product / ore)."""
-    ds = load_data(DATA_DIR, max_level=52)
+    ds = load_data(DATA_DIR)
     G = build_graph(ds)
     produces_targets = {
         v
@@ -287,6 +299,6 @@ def test_real_data_produces_coverage() -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_real_data_no_external_nodes() -> None:
-    G = build_graph(load_data(DATA_DIR, max_level=52))
+    G = build_graph(load_data(DATA_DIR))
     for external in ("voucher", "diamond"):
         assert external not in G

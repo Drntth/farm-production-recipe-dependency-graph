@@ -2486,5 +2486,153 @@
       "resource_id": "toffee",
       "amount": 1
     }
+  },
+  {
+    "id": "fish_soup",
+    "name": "Fish soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 53,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 1
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 2
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fish_soup",
+      "amount": 1
+    }
+  },
+  {
+    "id": "bean_dip",
+    "name": "Bean dip",
+    "location_id": "sauce_maker",
+    "unlock_level": 54,
+    "inputs": [
+      {
+        "resource_id": "black_bean",
+        "amount": 3
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bean_dip",
+      "amount": 1
+    }
+  },
+  {
+    "id": "chocolate",
+    "name": "Chocolate",
+    "location_id": "candy_machine",
+    "unlock_level": 54,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate",
+      "amount": 1
+    }
+  },
+  {
+    "id": "fancy_cake",
+    "name": "Fancy cake",
+    "location_id": "cake_oven",
+    "unlock_level": 54,
+    "inputs": [
+      {
+        "resource_id": "cream_cake",
+        "amount": 1
+      },
+      {
+        "resource_id": "lily",
+        "amount": 3
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "gold_ore",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fancy_cake",
+      "amount": 1
+    }
+  },
+  {
+    "id": "soy_sauce",
+    "name": "Soy sauce",
+    "location_id": "sauce_maker",
+    "unlock_level": 54,
+    "inputs": [
+      {
+        "resource_id": "soybean",
+        "amount": 9
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "soy_sauce",
+      "amount": 1
+    }
+  },
+  {
+    "id": "sushi_roll",
+    "name": "Sushi roll",
+    "location_id": "sushi_bar",
+    "unlock_level": 56,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "rice",
+        "amount": 15
+      },
+      {
+        "resource_id": "soy_sauce",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "sushi_roll",
+      "amount": 1
+    }
   }
 ]
