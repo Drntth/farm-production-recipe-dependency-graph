@@ -1,10 +1,27 @@
 {
-  "scraped_at": "2026-10-05T12:09:15+00:00",
+  "scraped_at": "2026-10-05T13:47:36+00:00",
   "max_level": 56,
   "known_game_version": "1.72",
   "wiki_revisions": {
     "Animal_Shelters": "2026-06-08T19:52:38Z",
+    "Banana_Tree": "2026-05-23T21:28:39Z",
+    "Category:Fishing_Lake_Buildings": "2016-01-21T19:17:37Z",
+    "Category:Trees_and_Bushes": "2018-07-07T12:38:40Z",
+    "Coconut_Tree": "2026-05-30T00:45:37Z",
+    "Experience_Levels/Levels_1-25": "2026-06-05T20:59:22Z",
+    "Experience_Levels/Levels_26-50": "2026-09-03T17:40:26Z",
+    "Experience_Levels/Levels_51-75": "2026-09-11T08:44:18Z",
     "Goods_List": "2026-07-29T14:20:27Z",
+    "Guava_Tree": "2026-05-30T00:25:10Z",
+    "Lemon_Tree": "2026-04-04T00:04:29Z",
+    "Mango_Tree": "2026-05-21T23:18:38Z",
+    "Nectar_Bush": "2021-01-17T18:12:30Z",
+    "Olive_Tree": "2026-04-02T23:46:50Z",
+    "Orange_Tree": "2026-05-29T00:33:02Z",
+    "Peach_Tree": "2026-04-05T21:28:04Z",
+    "Peanut_Bush": "2022-07-06T19:10:05Z",
+    "Plum_Tree": "2026-05-23T21:23:53Z",
+    "Pomegranate_Tree": "2026-05-21T23:24:29Z",
     "Production_Buildings_List": "2026-07-04T16:43:42Z"
   }
 }

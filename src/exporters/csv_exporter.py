@@ -27,8 +27,15 @@ _NODE_COLUMNS = [
     "type",
     "unlock_level",
     "source_location_id",
+    "area",
+    "movable",
+    "rotatable",
+    "footprint_width",
+    "footprint_height",
+    "animal_capacity",
     "max_slots",
     "max_in_barn",
+    "growth_time_seconds",
     "description",
 ]
 

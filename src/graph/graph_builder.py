@@ -17,8 +17,10 @@ Node attributes (always present)
 - unlock_level  : int
 - type          : LocationType / ResourceType value (str)
 
-Additional attributes for locations: max_slots (optional)
-Additional attributes for resources: source_location_id (optional)
+Additional attributes for locations: area, movable, rotatable (always); max_slots,
+footprint_width, footprint_height, animal_capacity (optional)
+Additional attributes for resources: source_location_id, max_in_barn,
+growth_time_seconds (optional)
 
 Edge model
 ----------
@@ -135,9 +137,17 @@ def _add_location_nodes(G: nx.DiGraph, dataset: DataSet) -> None:
             "name": loc.name,
             "type": loc.type.value,
             "unlock_level": loc.unlock_level,
+            "area": loc.area.value,
+            "movable": loc.movable,
+            "rotatable": loc.rotatable,
         }
         if loc.max_slots is not None:
             attrs["max_slots"] = loc.max_slots
+        if loc.footprint_width is not None:
+            attrs["footprint_width"] = loc.footprint_width
+            attrs["footprint_height"] = loc.footprint_height
+        if loc.animal_capacity is not None:
+            attrs["animal_capacity"] = loc.animal_capacity
         if loc.description is not None:
             attrs["description"] = loc.description
         G.add_node(loc.id, **attrs)
@@ -162,6 +172,8 @@ def _add_resource_nodes(G: nx.DiGraph, dataset: DataSet) -> None:
             attrs["description"] = res.description
         if res.max_in_barn is not None:
             attrs["max_in_barn"] = res.max_in_barn
+        if res.growth_time_seconds is not None:
+            attrs["growth_time_seconds"] = res.growth_time_seconds
         G.add_node(res.id, **attrs)
 
 

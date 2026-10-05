@@ -302,3 +302,21 @@ def test_real_data_no_external_nodes() -> None:
     G = build_graph(load_data(DATA_DIR))
     for external in ("voucher", "diamond"):
         assert external not in G
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_real_data_timing_and_limits() -> None:
+    """Scraped data carries timing for every raw good / recipe and level limits."""
+    ds = load_data(DATA_DIR)
+    raw_types = {ResourceType.CROP, ResourceType.ANIMAL_PRODUCT, ResourceType.ORE}
+
+    for res in ds.resource_list:
+        if res.type in raw_types:
+            assert res.growth_time_seconds is not None, res.id
+    for rec in ds.recipe_list:
+        assert rec.production_time_seconds is not None, rec.id
+
+    assert ds.level_limits is not None
+    assert ds.level_limits.fields_at(1) > 0
+    for inst in ds.level_limits.location_instances:
+        assert inst.unlock_level >= ds.locations[inst.location_id].unlock_level

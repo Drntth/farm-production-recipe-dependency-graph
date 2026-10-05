@@ -9,6 +9,10 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
+**Status:** v0.5 (data foundation) is complete; v0.6 (standalone Layout Planner) is next. See the [Roadmap](#roadmap).
+
+**Game knowledge** (rules, limits, measured sizes, game versions, data sources) is collected in [docs/](docs/README.md). Check there before researching the game again.
+
 ---
 
 ## Architecture
@@ -81,6 +85,16 @@ A production block is a movable logical unit, for example:
 - Feed Mill
 - the appropriate number of fields
 
+### Placement inputs (already in the data)
+
+- **Footprints** in tiles (`footprint_width` × `footprint_height`) for every movable location at the current level. Machine sizes come from the wiki, the rest were measured in the game.
+- **Fixed buildings** (`movable: false`): the mine and the fishing lake buildings stay where they are.
+- **Rotation** (`rotatable`): non-square items that can be turned, e.g. the 1×2 raspberry and blackberry bushes and the 3×2 ice cream maker.
+- **Copies per level** (`level_limits.json`): how many feed mills, coops, … are available.
+- **Support relations** (planned for v0.6): non-production neighbours, e.g. nectar bushes next to the beehive tree.
+
+The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
+
 ### Evolution
 
 | Horizon     | Output                                                                                                                                                                   |
@@ -93,16 +107,18 @@ A production block is a movable logical unit, for example:
 
 ## 2. Production Planner
 
-### Purpose
+### Production Planner purpose
 
 Produce a sustainable production plan and a practical action/login schedule for the player's level, using only static data. Farm only.
 
 ### Inputs (static only)
 
-- Player config: level, mastery system (see [Player configuration](#player-configuration))
-- Barn and silo capacity
-- Maximum available fields, animal shelters, animals and production buildings at that level (`level_limits.json`)
-- Optional current progress: owned counts, machine mastery (stars or Workbench level), unlocked slots
+- Player profile: level, mastery system, barn and silo capacity, and per location the slots, mastery, owned copies, animals and beehives (see [Player configuration](#player-configuration))
+- Growth and production times (`growth_time_seconds`, `production_time_seconds`, `production_time_3star_seconds`)
+- Fields and building / shelter copies available at that level (`level_limits.json`), animals per shelter (`animal_capacity`)
+- Game rules such as slot limits and mastery effects ([docs/game-facts/](docs/README.md))
+
+Values missing from the profile are filled with level defaults. Fields, trees and bushes left empty get a recommended count.
 
 Live truck, boat, town or event orders are intentionally ignored.
 
@@ -118,14 +134,14 @@ Live truck, boat, town or event orders are intentionally ignored.
 
 Mastery modifies production times, so it is modelled as a pluggable modifier chosen by `mastery_system` in the player config:
 
-- `stars` (default): the classic 3-star mastery (production time bonus at full mastery).
+- `stars` (default): the classic 3-star mastery. The data holds both the base time and the full-mastery time of every recipe (`production_time_3star_seconds`).
 - `workbench`: Building Mastery / Workbench, introduced in game version 1.72 (August 2026) with a gradual rollout.
 
 ---
 
 ## 3. Combiner / Layout Finetuner
 
-### Purpose
+### Combiner purpose
 
 Merge the results of the Layout Planner and the Production Planner into one coordinated, usable farm plan.
 
@@ -151,15 +167,43 @@ Player-specific, static settings live in `config/`:
 - `config/player.example.json`: committed example.
 - `config/player.json`: your own copy. It is git-ignored and takes precedence when present.
 
+The config is the **player profile**: everything the player buys, upgrades or earns rather than unlocks by level. `null` means unknown; the planners then use a default derived from the level and the shared data.
+
 ```json
 {
   "level": 56,
-  "mastery_system": "stars"
+  "mastery_system": "stars",
+  "barn_capacity": 675,
+  "silo_capacity": 750,
+  "fields_owned": 84,
+  "fishing_spots_unlocked": 8,
+  "locations": {
+    "chicken_coop": { "owned": 3, "animals": 18 },
+    "feed_mill": { "owned": 2, "slots": 12, "mastery_stars": 1 },
+    "dairy": { "slots": 8, "mastery_stars": 3 },
+    "apple_tree": { "owned": 9 },
+    "beehive_tree": { "beehives": 2 },
+    "lobster_pool": { "slots": 3 }
+  }
 }
 ```
 
+The example file lists every configurable location unlocked at its level. Per-location fields, all optional:
+
+| Field             | Applies to                                     | Meaning                                                     | If missing / `null`                                                               |
+| ----------------- | ---------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `owned`           | multi-copy buildings, shelters, trees, bushes  | copies placed                                               | all copies unlocked at the level; trees / bushes: the planner recommends a number |
+| `slots`           | production buildings, lobster pool, duck salon | slots unlocked, **summed over all copies**                  | base slots per copy                                                               |
+| `mastery_stars`   | production buildings                           | 0-3 per building **type** (copies share production hours)   | 0                                                                                 |
+| `workbench_level` | production buildings                           | with `mastery_system: "workbench"`                          | 0                                                                                 |
+| `animals`         | animal shelters                                | animals in **all** shelters of the type (3 full coops = 18) | full shelters                                                                     |
+| `beehives`        | beehive tree                                   | 1-4 beehives (3 bees each)                                  | 1                                                                                 |
+
+`fields_owned` and the tree / bush counts are optional on purpose: they are tedious to count, and the planners will recommend a sensible number when they are missing.
+
 Every CLI reads the level from this file. `--level` overrides it for a single run.  
-Owned counts, mastery progress and unlocked slots will be added here in later versions (v0.7).
+`python -m src.main` checks the profile against the data and logs a warning for unknown ids, locations above the player level, more copies than the level allows, or more animals than `copies × animal_capacity`.  
+The analysis behind the schema, including the input options (manual, defaults, presets, wizard, account sync), is in [docs/player-profile.md](docs/player-profile.md). The planners start using the profile in v0.7.
 
 ---
 
@@ -177,11 +221,23 @@ Everything that occupies space (production buildings, animal shelters, fields, t
   "id": "dairy",
   "name": "Dairy",
   "type": "production",
-  "unlock_level": 6
+  "unlock_level": 6,
+  "area": "farm",
+  "footprint_width": 4,
+  "footprint_height": 4
 }
 ```
 
-Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.
+Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.  
+Allowed `area` values: `farm` (default), `town`, `fishing_lake`. The scraper sets `fishing_lake` from the wiki category *Fishing Lake Buildings*.  
+`movable` is `true` by default. It is `false` for fixed buildings the player cannot move (mine, fishing lake buildings).  
+`rotatable` is `false` by default. It is `true` when the footprint can be turned (width and height swapped). It only matters for non-square footprints such as the 1×2 bushes or the 3×2 ice cream maker.  
+Every fruit tree and bush kind is its own location (`apple_tree`, `raspberry_bush`, …), because each is placed separately and has its own footprint and fruit. Trees and bushes that produce no goods (the nectar bush) come from the wiki category *Trees and Bushes*.  
+Optional fields:
+
+- `footprint_width` / `footprint_height`: size in tiles, both or neither. The wiki lists them for production buildings only; the rest come from `data/overrides/`.
+- `animal_capacity`: maximum animals per shelter (e.g. 6 for a chicken coop). The player's actual animals, beehives and lobster / duck slots are in the profile.
+- `max_slots`: production slots (not filled yet; the rules are in [docs/game-facts/production-buildings.md](docs/game-facts/production-buildings.md)).
 
 ### resources.json
 
@@ -193,12 +249,14 @@ Crops, animal products, intermediate/processed goods and ores.
   "name": "Milk",
   "type": "animal_product",
   "unlock_level": 6,
-  "source_location_id": "cow_pasture"
+  "source_location_id": "cow_pasture",
+  "growth_time_seconds": 3600
 }
 ```
 
 `source_location_id` is mandatory for `crop`, `animal_product` and `ore`.  
-Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_material`, `ore`.
+Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_material`, `ore`.  
+`growth_time_seconds` is set for raw goods: crop growth, animal production, `0` for instant goods (ores, honeycomb). Processed goods carry their time on the recipe.
 
 ### recipes.json
 
@@ -220,15 +278,18 @@ Animal products and raw crops are resources, not recipes.
   "output": {
     "resource_id": "cream",
     "amount": 1
-  }
+  },
+  "production_time_seconds": 7200,
+  "production_time_3star_seconds": 6120
 }
 ```
 
+`production_time_3star_seconds` is the time with full 3-star mastery.  
 Recipes may contain zero or more inputs. External/premium inputs (vouchers, diamonds, etc.) are allowed but never become graph nodes.
 
 ### meta.json
 
-Written by the scraper. It records where and when the data came from, and is used by the [Game update checklist](#game-update-checklist).
+Written by the scraper. It records where and when the data came from, and is used by the [game update process](docs/game-updates.md).
 
 ```json
 {
@@ -239,24 +300,42 @@ Written by the scraper. It records where and when the data came from, and is use
 }
 ```
 
-### Planned data (v0.5)
+### level_limits.json
 
-- `level_limits.json`: maximum number of fields, animal shelters, animals and production buildings per player level, plus the barn and silo upgrade tables. It is kept in a separate file to preserve 3NF.
-- `size` on locations: footprint in tiles (e.g. `2x2`, `3x3`), taken from the wiki.
-- `area` on locations: `farm`, `town` or `fishing_lake`.
-- `growth_time_seconds` on resources (crops, animal products, ores).
-- `data/overrides/`: manually maintained additions for content the game already has but the wiki does not list yet. The normalizer merges them, and they are recorded in `meta.json`.
+Level-gated limits, as two 3NF tables:
+
+- `field_grants`: new fields per level (from the wiki's *Experience Levels* pages). The total at a level is the sum of all grants up to that level.
+- `location_instances`: one row per placeable copy of a production building or shelter, with its unlock level (e.g. the second Feed Mill at level 12).
+
+```json
+{
+  "field_grants": [{ "level": 1, "count": 6 }, { "level": 3, "count": 3 }],
+  "location_instances": [
+    { "location_id": "feed_mill", "instance": 1, "unlock_level": 2 },
+    { "location_id": "feed_mill", "instance": 2, "unlock_level": 12 }
+  ]
+}
+```
+
+`LevelLimits.fields_at(level)` and `LevelLimits.instances_at(location_id, level)` answer "how many at my level". Fields, trees and bushes beyond the grants can be bought, so they have no instance rows.
+
+### overrides/
+
+`data/overrides/{locations,resources,recipes}.json` are hand-maintained lists that the loader merges on top of the scraped data at every load:
+
+- an entry whose `id` already exists patches only the listed fields;
+- an entry with a new `id` is added as a complete entity;
+- `null` means "not filled in yet" and is ignored.
+
+Use them for data the wiki does not have, for example shelter and field footprints, or for content the wiki has not listed yet. They survive re-scraping. `load_data(..., apply_data_overrides=False)` loads the raw scraped data only.
+
+`data/overrides/locations.json` holds the measured footprints, `movable` and `rotatable` values; it is complete for level 56. [data/overrides/README.md](data/overrides/README.md) explains how to measure footprints in the game and which edge is width and which is height.
 
 ### Timing and capacity fields
 
-Already in the models (optional, not yet filled by the scraper):
-
-- `production_time_seconds` on recipes
-- `max_slots` on locations
-- `max_in_barn` on resources
-
 All durations are stored in seconds.  
-Player-specific progress (owned counts, mastery, unlocked slots) lives in the player config, not in the shared data.
+`max_slots` (locations) and `max_in_barn` (resources) exist in the models but are not filled yet.  
+Player-specific progress (owned copies, mastery, slots, animals, barn / silo capacity) lives in the player profile, not in the shared data. Game rules that apply to everyone (slot limits, mastery effects, costs) are documented in [docs/game-facts/](docs/README.md).
 
 ### External resources
 
@@ -272,16 +351,23 @@ The system builds a directed weighted dependency graph (NetworkX `DiGraph`).
 
 Every Location and every Resource becomes a node.
 
-| Attribute            | Present on       | Description                       |
-| -------------------- | ---------------- | --------------------------------- |
-| `kind`               | all              | `"location"` or `"resource"`      |
-| `id`                 | all              | Original entity id                |
-| `name`               | all              | Human-readable name               |
-| `type`               | all              | LocationType / ResourceType value |
-| `unlock_level`       | all              | Player level required             |
-| `source_location_id` | resources (raw)  | Producing location                |
-| `max_slots`          | locations (opt.) | Production slots                  |
-| `max_in_barn`        | resources (opt.) | Storage limit for the resource    |
+| Attribute             | Present on       | Description                       |
+| --------------------- | ---------------- | --------------------------------- |
+| `kind`                | all              | `"location"` or `"resource"`      |
+| `id`                  | all              | Original entity id                |
+| `name`                | all              | Human-readable name               |
+| `type`                | all              | LocationType / ResourceType value |
+| `unlock_level`        | all              | Player level required             |
+| `source_location_id`  | resources (raw)  | Producing location                |
+| `area`                | locations        | `farm` / `town` / `fishing_lake`  |
+| `movable`             | locations        | `false` for fixed buildings       |
+| `rotatable`           | locations        | footprint can be turned           |
+| `footprint_width`     | locations (opt.) | Width in tiles                    |
+| `footprint_height`    | locations (opt.) | Height in tiles                   |
+| `animal_capacity`     | locations (opt.) | Animals per shelter               |
+| `max_slots`           | locations (opt.) | Production slots                  |
+| `max_in_barn`         | resources (opt.) | Storage limit for the resource    |
+| `growth_time_seconds` | resources (opt.) | Growth / animal production time   |
 
 ### Edges - three semantic kinds
 
@@ -333,42 +419,19 @@ Higher weight means stronger coupling → the two locations should be placed clo
 
 ## Game update checklist
 
-Hay Day changes regularly. After each game update, check which mechanics changed and update the matching part of the project.
+Hay Day changes regularly. After each game update, follow [docs/game-updates.md](docs/game-updates.md). It has the step-by-step process, the table mapping each game mechanic to the affected code and data, the known game versions, and the known wiki gaps.
 
-### Process
+In short: read the update notes → compare with `data/meta.json` → update the affected parts → `python -m src.scraper --game-version <version>` → `python -m pytest`.
 
-1. Read the update notes: [Fandom Update page](https://hayday.fandom.com/wiki/Update) and the official in-game / Supercell announcements.
-2. Compare them with `data/meta.json`: game version and wiki revision dates.
-3. Work through the table below for every changed mechanic.
-4. Re-scrape: `python -m src.scraper --game-version <version>`. Run `python -m pytest`.
-5. If the wiki does not list new content yet, add it to `data/overrides/` (v0.5+) and note it.
-
-### Mechanic → affected part
-
-| Game change                                   | What to update                                                              |
-| --------------------------------------------- | --------------------------------------------------------------------------- |
-| New building, good, crop or animal            | scraper parsers, normalizer, re-scrape, quality tests                       |
-| Changed unlock levels or new level cap        | re-scrape, player config                                                    |
-| Mastery system (3 stars ↔ Workbench)          | planner mastery modifier, `mastery_system` in the player config             |
-| Production / growth times, machine slots      | timing fields, `max_slots`, Production Planner                              |
-| Barn / silo capacity, upgrade tables          | `level_limits.json`, capacity model                                         |
-| Building sizes, expansion, map size           | location `size`, area dimensions, Layout Planner                            |
-| Town, sanctuary, fishing lake                 | area modes (`--area`), area-specific data                                   |
-| Decorations, paths                            | Design layer                                                                |
-| Wiki lags behind the game                     | `data/overrides/`, `known_game_version` in `meta.json`                      |
-
-### Known state (checked 2026-10-05, game version 1.72)
-
-- 1.72 (2026-08): Building Mastery / Workbench replaces the 3-star mastery, rolled out gradually. Not on the wiki yet.
-- 1.71 (2026-06): new machines Balloon Maker and Kebab Machine. Not on the wiki's production building list yet.
+Data in the repository: game version 1.72, level 56, scraped 2026-10-05. The 1.72 Building Mastery / Workbench is not on the wiki yet, so the data holds 3-star times only.
 
 ---
 
 ## Roadmap
 
-**Current status:** v0.4 is complete. Next milestone: v0.5 (Data foundation).  
-Current data set (level 56): 40 locations, 167 resources, 126 recipes. It contains no timing, capacity or footprint values yet.  
-Next step: review the wiki pages for sizes, timing and per-level limits, then extend the models and the scraper.
+**Current status:** v0.5 is complete (79 tests passing). Next milestone: v0.6 (Standalone Layout Planner).  
+Current data set (level 56): 46 locations (8 tree / bush kinds incl. the nectar bush, 6 fixed, 5 on the fishing lake), 167 resources, 126 recipes, 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base and a 3-star time, and every movable location has a footprint.  
+Next step: start v0.6 with named production blocks built from the detected communities, each with a footprint (sum of its buildings plus fields).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -387,20 +450,30 @@ Next step: review the wiki pages for sizes, timing and per-level limits, then ex
 - [x] Separated architecture: Layout and Production as independent tools, Combiner optional
 - [x] Game update checklist
 
-### v0.5 - Data foundation (next)
+### v0.5 - Data foundation (done)
 
-- [ ] Review all relevant wiki pages (production buildings, animals, crops, barn, silo, town, fishing lake)
-- [ ] Footprint `size` and `area` fields on locations
-- [ ] `production_time_seconds` and `growth_time_seconds` filled by the scraper
-- [ ] `level_limits.json`: buildings, fields and animals per level, barn and silo upgrade tables
-- [ ] `data/overrides/` for content missing from the wiki (e.g. Balloon Maker, Kebab Machine)
-- [ ] Scraper tests with saved HTML fixtures
+- [x] Review the relevant wiki pages (production buildings, animal shelters, goods, experience levels, barn, silo, town, fishing lake)
+- [x] `footprint_width` / `footprint_height` and `area` on locations; `animal_capacity` on shelters
+- [x] `growth_time_seconds`, `production_time_seconds` and `production_time_3star_seconds` filled by the scraper
+- [x] `level_limits.json`: field grants per level and building / shelter copies with unlock levels
+- [x] Barn / silo capacity moved to the player config (upgraded with supplies, not level-gated)
+- [x] `data/overrides/` merged by the loader (`null` = not filled in yet); footprints measured in the game
+- [x] Fruit trees and bushes as separate locations per kind, plus goods-less ones (nectar bush) from the wiki category; `movable` flag for fixed buildings
+- [x] Player profile analysis ([docs/player-profile.md](docs/player-profile.md)) and schema (`PlayerConfig.locations`), validated against the data
+- [x] `rotatable` flag for non-square footprints
+- [x] Scraper tests with saved HTML fixtures
+- [x] Game knowledge collected in [docs/](docs/README.md): game facts by category, game updates, data sources, player profile
 
-### v0.6 - Standalone Layout Planner (farm)
+### v0.6 - Standalone Layout Planner (farm) (next)
 
+- [ ] Support relations outside the production graph: nectar bushes near the beehive tree (the wiki says distance slows the bees)
+- [ ] Fixed buildings (`movable: false`) kept in place; only movable items are arranged
+- [ ] Non-square items placed in both orientations when `rotatable` is true, otherwise only as stored
+- [ ] Usable farm area: free space and the fixed non-production buildings (farmhouse, barn, silo, …; see [docs/game-facts/farm.md](docs/game-facts/farm.md))
 - [ ] Named production blocks (Dairy block, Bakery block, Feed + Animals block, …) with footprints
 - [ ] Expansion-friendly placement heuristics (reserve space for later unlocks)
-- [ ] Simple graphical layout (SVG grid with coloured block frames and labels), without production data
+- [ ] Simple graphical layout (SVG with coloured block frames and labels), without production data
+- [ ] Always draw the isometric tile grid, with every item's footprint, because the game's Layout Edit Mode shows none
 - [ ] Textual layout description: block list, recommended neighbourhoods and relative order
 
 ### v0.7 - Production Planner
@@ -408,7 +481,9 @@ Next step: review the wiki pages for sizes, timing and per-level limits, then ex
 - [ ] Capacity model (barn, silo, fields, animals, machine slots)
 - [ ] Steady-state quantity calculation tuned to barn/silo limits
 - [ ] Mastery modifier: `stars` (default), `workbench` pluggable
-- [ ] Player progress in the player config (owned buildings/animals, mastery, slots)
+- [ ] Use the player profile (option B of [docs/player-profile.md](docs/player-profile.md)): resolve every `null` to its level default, then apply the player's values
+- [ ] Scrape base slots per building (wiki infobox `slots`) for the profile defaults; maximum is 9 per copy, 6 for the lobster pool and duck salon (wiki)
+- [ ] Recommend field, tree and bush counts when the profile leaves them empty
 - [ ] Ordered action list and suggested login frequency
 - [ ] `output/schedule.json` export
 
@@ -430,6 +505,7 @@ Next step: review the wiki pages for sizes, timing and per-level limits, then ex
 ### v1.0 - Local usable platform
 
 - [ ] Unified CLI (`--area`, `--design`, `--level`)
+- [ ] Game fact checker: a script that reads every row of `docs/game-facts/*.md` (`Source` = `wiki:<Page>`), fetches the page through the wiki API and reports rows whose value is no longer found or whose page changed after `Checked`. It can be pulled forward if game updates make manual checks too slow.
 - [ ] Visual outputs (block frames, block collages, optional whole-map collage)
 - [ ] Ready-to-use player-config examples for common levels
 - [ ] Documentation
@@ -499,6 +575,18 @@ python -m src.scraper --game-version 1.72
 
 ```text
 farm-production-recipe-dependency-graph/
+├── docs/                              # project knowledge, see docs/README.md
+│   ├── README.md                      # index, where knowledge lives, fact table format
+│   ├── game-facts/                    # game rules by category (wiki + in-game)
+│   │   ├── animals.md
+│   │   ├── farm.md
+│   │   ├── fishing-lake.md
+│   │   ├── production-buildings.md
+│   │   ├── storage.md
+│   │   └── town.md
+│   ├── data-sources.md                # what is scraped, from where; what is manual
+│   ├── game-updates.md                # update process, known versions, wiki gaps
+│   └── player-profile.md              # player-specific settings and profile schema
 ├── config/
 │   ├── player.example.json            # example player config (committed)
 │   └── player.json                    # your own config (git-ignored)
@@ -507,15 +595,19 @@ farm-production-recipe-dependency-graph/
 │   ├── resources.json                 # crops, animal products, processed goods, ores
 │   ├── recipes.json                   # production transformations inside locations
 │   ├── meta.json                      # scrape date, level, wiki revisions, game version
-│   ├── level_limits.json              # (planned, v0.5) max counts per player level
-│   ├── overrides/                     # (planned, v0.5) content missing from the wiki
+│   ├── level_limits.json              # field grants + building / shelter copies per level
+│   ├── overrides/                     # hand-maintained patches merged by the loader
+│   │   ├── README.md                  # what to fill in and how to measure it
+│   │   ├── locations.json
+│   │   ├── resources.json
+│   │   └── recipes.json
 │   └── examples/
 │       ├── locations.example.json
 │       ├── resources.example.json
 │       └── recipes.example.json
 ├── output/                            # generated exports land here
 ├── src/
-│   ├── config.py                      # player config loader
+│   ├── config.py                      # player profile: model, loader, validation
 │   ├── exporters/
 │   │   ├── csv_exporter.py
 │   │   ├── graphml_exporter.py
@@ -529,6 +621,7 @@ farm-production-recipe-dependency-graph/
 │   ├── loaders/
 │   │   └── json_loader.py
 │   ├── models/
+│   │   ├── level_limits.py
 │   │   ├── location.py
 │   │   ├── recipe.py
 │   │   └── resource.py
@@ -536,21 +629,27 @@ farm-production-recipe-dependency-graph/
 │   ├── planner/                       # (planned, v0.7) Production Planner
 │   ├── scraper/
 │   │   ├── parsers/
+│   │   │   ├── level_limits.py        # field grants from Experience Levels pages
 │   │   │   ├── locations.py
 │   │   │   ├── recipes.py
 │   │   │   └── resources.py
 │   │   ├── cli.py
+│   │   ├── durations.py               # "1 d 3 h" / "★★★" → seconds
 │   │   ├── normalizer.py
 │   │   ├── wiki_client.py
 │   │   └── writer.py
 │   └── main.py
 ├── tests/
+│   ├── fixtures/wiki/                 # trimmed wiki HTML for scraper tests
 │   ├── test_analysis.py
 │   ├── test_config.py
 │   ├── test_exporters.py
 │   ├── test_graph_builder.py
 │   ├── test_graph_quality.py
-│   └── test_json_loader.py
+│   ├── test_json_loader.py
+│   ├── test_level_limits.py
+│   ├── test_models.py
+│   └── test_scraper.py
 ├── AGENTS.md                          # instructions for coding agents
 ├── CLAUDE.md -> AGENTS.md             # symlink
 ├── LICENSE

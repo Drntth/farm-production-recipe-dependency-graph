@@ -41,6 +41,11 @@ class Resource(BaseModel):
 
     description: str | None = None
     max_in_barn: int | None = Field(None, ge=1)
+    growth_time_seconds: int | None = Field(
+        None,
+        ge=0,
+        description="Time from planting / feeding to harvest for raw resources; 0 = instant",
+    )
 
     @field_validator("id")
     @classmethod

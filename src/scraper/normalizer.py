@@ -16,6 +16,43 @@ def to_snake_case(name: str) -> str:
     return cleaned
 
 
+# Optional schema fields copied as-is from raw entries when present.
+_LOCATION_OPTIONAL = ("area", "footprint_width", "footprint_height", "animal_capacity")
+_RESOURCE_OPTIONAL = ("growth_time_seconds",)
+_RECIPE_OPTIONAL = ("production_time_seconds", "production_time_3star_seconds")
+
+
+def _copy_optional(raw: dict[str, Any], keys: tuple[str, ...]) -> dict[str, Any]:
+    return {k: raw[k] for k in keys if raw.get(k) is not None}
+
+
+def build_level_limits(
+    raw_locations: list[dict[str, Any]],
+    field_grants: list[dict[str, Any]],
+    known_location_ids: set[str],
+) -> dict[str, Any]:
+    """
+    Build the level_limits.json payload.
+
+    ``location_instances`` comes from the private ``_instance_levels`` list
+    of each raw location (one row per copy); unknown locations are dropped.
+    """
+    instances: list[dict[str, Any]] = []
+    done: set[str] = set()
+    for raw in raw_locations:
+        loc_id = raw.get("id")
+        levels = raw.get("_instance_levels") or []
+        if not loc_id or loc_id in done or loc_id not in known_location_ids:
+            continue
+        done.add(loc_id)
+        for n, level in enumerate(sorted(levels), start=1):
+            instances.append(
+                {"location_id": loc_id, "instance": n, "unlock_level": int(level)}
+            )
+    instances.sort(key=lambda x: (x["unlock_level"], x["location_id"], x["instance"]))
+    return {"field_grants": field_grants, "location_instances": instances}
+
+
 def normalize(
     raw_locations: list[dict[str, Any]],
     raw_resources: list[dict[str, Any]],
@@ -39,6 +76,7 @@ def normalize(
             "name": raw.get("name", loc_id.replace("_", " ").title()),
             "type": raw.get("type", "other"),
             "unlock_level": int(raw.get("unlock_level", 1)),
+            **_copy_optional(raw, _LOCATION_OPTIONAL),
         }
         existing = loc_by_id.get(loc_id)
         if existing is None or entry["unlock_level"] < existing["unlock_level"]:
@@ -60,6 +98,7 @@ def normalize(
             "type": raw.get("type", "processed_material"),
             "unlock_level": int(raw.get("unlock_level", 1)),
             "source_location_id": source,
+            **_copy_optional(raw, _RESOURCE_OPTIONAL),
         }
         existing = res_by_id.get(res_id)
         if existing is None or entry["unlock_level"] < existing["unlock_level"]:
@@ -103,6 +142,7 @@ def normalize(
                 "resource_id": out_id,
                 "amount": out_amount,
             },
+            **_copy_optional(raw, _RECIPE_OPTIONAL),
         }
         existing = recipe_by_id.get(recipe_id)
         if existing is None or entry["unlock_level"] < existing["unlock_level"]:
@@ -194,6 +234,10 @@ def normalize(
                 or sid in animal_source_aliases.values()
             ):
                 loc_type = "animal"
+            elif res.get("type") == "crop" and sid.endswith("_tree"):
+                loc_type = "tree"
+            elif res.get("type") == "crop" and sid.endswith("_bush"):
+                loc_type = "bush"
             elif res.get("type") == "crop":
                 loc_type = "field"
             elif res.get("type") == "ore":
@@ -205,6 +249,7 @@ def normalize(
             "name": sid.replace("_", " ").title(),
             "type": loc_type,
             "unlock_level": int(res.get("unlock_level", 1)),
+            "area": "fishing_lake" if sid == "fishing_lake" else "farm",
         }
         known_locs.add(sid)
 

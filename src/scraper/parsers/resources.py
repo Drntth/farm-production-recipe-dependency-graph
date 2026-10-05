@@ -7,8 +7,13 @@ from typing import Any
 
 from bs4 import NavigableString, Tag
 
+from src.scraper.durations import parse_timed_cell
 from src.scraper.normalizer import to_snake_case
 from src.scraper.wiki_client import WikiClient
+
+# Goods_List columns: Name | Level | Max. price | Time | XP | Needs | Source | …
+GOODS_TIME_COL = 3
+RAW_RESOURCE_TYPES = {"crop", "animal_product", "ore"}
 
 
 def _extract_first_int(text: str) -> int | None:
@@ -108,17 +113,12 @@ def _classify_type_and_source(
         if is_animal_name:
             return "animal_product", "animal"
 
-    if "field" in source_lower or "crop" in source_lower:
-        if "tree" in source_lower:
-            return "crop", "tree"
-        if "bush" in source_lower:
-            return "crop", "bush"
-        return "crop", "field"
+    # Every fruit tree / bush kind is its own location ("Apple tree" → apple_tree).
+    if "tree" in source_lower or "bush" in source_lower:
+        return "crop", to_snake_case(source_text.split("(")[0].strip())
 
-    if "tree" in source_lower:
-        return "crop", "tree"
-    if "bush" in source_lower:
-        return "crop", "bush"
+    if "field" in source_lower or "crop" in source_lower:
+        return "crop", "field"
 
     loc_id = to_snake_case(source_text.split("(")[0].strip()) if source_text else ""
     loc_id = re.sub(r"_x\d+$", "", loc_id)
@@ -170,16 +170,21 @@ def parse_resources(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
             continue
         seen.add(res_id)
 
-        results.append(
-            {
-                "id": res_id,
-                "name": name,
-                "type": res_type,
-                "unlock_level": level,
-                "source_location_id": source_loc,
-                "_needs": needs,
-                "_source_text": source_text,
-            }
-        )
+        entry: dict[str, Any] = {
+            "id": res_id,
+            "name": name,
+            "type": res_type,
+            "unlock_level": level,
+            "source_location_id": source_loc,
+            "_needs": needs,
+            "_source_text": source_text,
+        }
+        # For raw goods the Time column is the growth / animal production time;
+        # for processed goods it belongs to the recipe (see parse_recipes).
+        if res_type in RAW_RESOURCE_TYPES:
+            growth, _ = parse_timed_cell(_cell_text(cells[GOODS_TIME_COL]))
+            if growth is not None:
+                entry["growth_time_seconds"] = growth
+        results.append(entry)
 
     return results

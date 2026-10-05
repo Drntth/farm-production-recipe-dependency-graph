@@ -17,7 +17,7 @@ import logging
 import sys
 from pathlib import Path
 
-from src.config import load_player_config
+from src.config import load_player_config, validate_player_config
 from src.exporters import export_csv, export_graphml, export_json
 from src.graph import analysis_summary, build_graph, graph_summary
 from src.loaders.json_loader import load_data
@@ -111,16 +111,38 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        level = args.level
-        if level is None:
-            level = load_player_config(args.player_config).level
+        player = load_player_config(args.player_config)
+    except FileNotFoundError:
+        if args.level is None:
+            logger.error("No player config found and no --level given")
+            return 1
+        player = None
+    except ValueError as exc:
+        logger.error("Invalid player config: %s", exc)
+        return 1
+
+    try:
+        level = args.level if args.level is not None else player.level
         logger.info("Player level: %d", level)
-        dataset = load_data(args.data_dir, max_level=level)
+        full_dataset = load_data(args.data_dir)
+        dataset = full_dataset.filter_by_max_level(level)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Failed to load data: %s", exc)
         return 1
 
+    if player is not None:
+        for problem in validate_player_config(player, full_dataset):
+            logger.warning("Player config: %s", problem)
+
     logger.info("Loaded %s", dataset.summary())
+    if dataset.level_limits is not None:
+        limits = dataset.level_limits
+        logger.info(
+            "Level limits at level %d: %d fields, %d location instances",
+            level,
+            limits.fields_at(level),
+            len(limits.location_instances),
+        )
 
     graph = build_graph(dataset)
     logger.info("Built %s", graph_summary(graph))

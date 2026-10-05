@@ -29,6 +29,20 @@ def write_json_files(
         print(f"Wrote {path} ({len(data)} items)")
 
 
+def write_level_limits_file(output_dir: Path, level_limits: dict[str, Any]) -> Path:
+    """Write level_limits.json (field grants + location instances)."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / "level_limits.json"
+    path.write_text(
+        json.dumps(level_limits, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(
+        f"Wrote {path} ({len(level_limits['field_grants'])} field grants, "
+        f"{len(level_limits['location_instances'])} location instances)"
+    )
+    return path
+
+
 def write_meta_file(
     output_dir: Path,
     *,

@@ -5,10 +5,11 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from src.scraper.durations import parse_timed_cell
 from src.scraper.normalizer import to_snake_case
 from src.scraper.wiki_client import WikiClient
 
-from .resources import _cell_text, _extract_first_int, _parse_needs
+from .resources import GOODS_TIME_COL, _cell_text, _extract_first_int, _parse_needs
 
 
 def _is_recipe_source(source_text: str) -> bool:
@@ -96,18 +97,22 @@ def parse_recipes(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
 
         inputs = [{"resource_id": to_snake_case(n), "amount": a} for n, a in needs if n]
 
-        results.append(
-            {
-                "id": recipe_id,
-                "name": name,
-                "location_id": location_id,
-                "unlock_level": level,
-                "inputs": inputs,
-                "output": {
-                    "resource_id": recipe_id,
-                    "amount": 1,
-                },
-            }
-        )
+        entry: dict[str, Any] = {
+            "id": recipe_id,
+            "name": name,
+            "location_id": location_id,
+            "unlock_level": level,
+            "inputs": inputs,
+            "output": {
+                "resource_id": recipe_id,
+                "amount": 1,
+            },
+        }
+        base, mastered = parse_timed_cell(_cell_text(cells[GOODS_TIME_COL]))
+        if base is not None:
+            entry["production_time_seconds"] = base
+        if mastered is not None:
+            entry["production_time_3star_seconds"] = mastered
+        results.append(entry)
 
     return results

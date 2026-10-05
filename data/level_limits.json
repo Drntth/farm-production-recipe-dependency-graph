@@ -1,0 +1,378 @@
+{
+  "field_grants": [
+    {
+      "level": 1,
+      "count": 6
+    },
+    {
+      "level": 3,
+      "count": 3
+    },
+    {
+      "level": 5,
+      "count": 3
+    },
+    {
+      "level": 7,
+      "count": 3
+    },
+    {
+      "level": 9,
+      "count": 3
+    },
+    {
+      "level": 11,
+      "count": 3
+    },
+    {
+      "level": 13,
+      "count": 3
+    },
+    {
+      "level": 15,
+      "count": 3
+    },
+    {
+      "level": 17,
+      "count": 3
+    },
+    {
+      "level": 19,
+      "count": 3
+    },
+    {
+      "level": 21,
+      "count": 3
+    },
+    {
+      "level": 23,
+      "count": 3
+    },
+    {
+      "level": 25,
+      "count": 3
+    },
+    {
+      "level": 27,
+      "count": 3
+    },
+    {
+      "level": 29,
+      "count": 3
+    },
+    {
+      "level": 31,
+      "count": 3
+    },
+    {
+      "level": 33,
+      "count": 3
+    },
+    {
+      "level": 35,
+      "count": 3
+    },
+    {
+      "level": 37,
+      "count": 3
+    },
+    {
+      "level": 39,
+      "count": 3
+    },
+    {
+      "level": 41,
+      "count": 3
+    },
+    {
+      "level": 43,
+      "count": 3
+    },
+    {
+      "level": 45,
+      "count": 3
+    },
+    {
+      "level": 47,
+      "count": 3
+    },
+    {
+      "level": 49,
+      "count": 3
+    },
+    {
+      "level": 51,
+      "count": 2
+    },
+    {
+      "level": 53,
+      "count": 2
+    },
+    {
+      "level": 55,
+      "count": 2
+    }
+  ],
+  "location_instances": [
+    {
+      "location_id": "chicken_coop",
+      "instance": 1,
+      "unlock_level": 1
+    },
+    {
+      "location_id": "feed_mill",
+      "instance": 1,
+      "unlock_level": 2
+    },
+    {
+      "location_id": "bakery",
+      "instance": 1,
+      "unlock_level": 4
+    },
+    {
+      "location_id": "cow_pasture",
+      "instance": 1,
+      "unlock_level": 6
+    },
+    {
+      "location_id": "dairy",
+      "instance": 1,
+      "unlock_level": 6
+    },
+    {
+      "location_id": "sugar_mill",
+      "instance": 1,
+      "unlock_level": 7
+    },
+    {
+      "location_id": "popcorn_pot",
+      "instance": 1,
+      "unlock_level": 8
+    },
+    {
+      "location_id": "bbq_grill",
+      "instance": 1,
+      "unlock_level": 9
+    },
+    {
+      "location_id": "pig_pen",
+      "instance": 1,
+      "unlock_level": 10
+    },
+    {
+      "location_id": "chicken_coop",
+      "instance": 2,
+      "unlock_level": 12
+    },
+    {
+      "location_id": "feed_mill",
+      "instance": 2,
+      "unlock_level": 12
+    },
+    {
+      "location_id": "pie_oven",
+      "instance": 1,
+      "unlock_level": 14
+    },
+    {
+      "location_id": "cow_pasture",
+      "instance": 2,
+      "unlock_level": 15
+    },
+    {
+      "location_id": "sheep_pasture",
+      "instance": 1,
+      "unlock_level": 16
+    },
+    {
+      "location_id": "loom",
+      "instance": 1,
+      "unlock_level": 17
+    },
+    {
+      "location_id": "pig_pen",
+      "instance": 2,
+      "unlock_level": 18
+    },
+    {
+      "location_id": "sewing_machine",
+      "instance": 1,
+      "unlock_level": 19
+    },
+    {
+      "location_id": "cake_oven",
+      "instance": 1,
+      "unlock_level": 21
+    },
+    {
+      "location_id": "chicken_coop",
+      "instance": 3,
+      "unlock_level": 23
+    },
+    {
+      "location_id": "mine",
+      "instance": 1,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "smelter",
+      "instance": 1,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "smelter",
+      "instance": 2,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "smelter",
+      "instance": 3,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "smelter",
+      "instance": 4,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "smelter",
+      "instance": 5,
+      "unlock_level": 24
+    },
+    {
+      "location_id": "lamb_pasture",
+      "instance": 1,
+      "unlock_level": 25
+    },
+    {
+      "location_id": "juice_press",
+      "instance": 1,
+      "unlock_level": 26
+    },
+    {
+      "location_id": "sheep_pasture",
+      "instance": 2,
+      "unlock_level": 26
+    },
+    {
+      "location_id": "cow_pasture",
+      "instance": 3,
+      "unlock_level": 27
+    },
+    {
+      "location_id": "lure_workbench",
+      "instance": 1,
+      "unlock_level": 27
+    },
+    {
+      "location_id": "ice_cream_maker",
+      "instance": 1,
+      "unlock_level": 29
+    },
+    {
+      "location_id": "lamb_pasture",
+      "instance": 2,
+      "unlock_level": 30
+    },
+    {
+      "location_id": "net_maker",
+      "instance": 1,
+      "unlock_level": 30
+    },
+    {
+      "location_id": "doner_kebab_stand",
+      "instance": 1,
+      "unlock_level": 32
+    },
+    {
+      "location_id": "goat_yard",
+      "instance": 1,
+      "unlock_level": 32
+    },
+    {
+      "location_id": "pig_pen",
+      "instance": 3,
+      "unlock_level": 32
+    },
+    {
+      "location_id": "jam_maker",
+      "instance": 1,
+      "unlock_level": 35
+    },
+    {
+      "location_id": "goat_yard",
+      "instance": 2,
+      "unlock_level": 37
+    },
+    {
+      "location_id": "jeweler",
+      "instance": 1,
+      "unlock_level": 38
+    },
+    {
+      "location_id": "beehive_tree",
+      "instance": 1,
+      "unlock_level": 39
+    },
+    {
+      "location_id": "honey_extractor",
+      "instance": 1,
+      "unlock_level": 39
+    },
+    {
+      "location_id": "coffee_kiosk",
+      "instance": 1,
+      "unlock_level": 42
+    },
+    {
+      "location_id": "sheep_pasture",
+      "instance": 3,
+      "unlock_level": 42
+    },
+    {
+      "location_id": "lobster_pool",
+      "instance": 1,
+      "unlock_level": 44
+    },
+    {
+      "location_id": "soup_kitchen",
+      "instance": 1,
+      "unlock_level": 46
+    },
+    {
+      "location_id": "candle_maker",
+      "instance": 1,
+      "unlock_level": 48
+    },
+    {
+      "location_id": "flower_shop",
+      "instance": 1,
+      "unlock_level": 49
+    },
+    {
+      "location_id": "duck_salon",
+      "instance": 1,
+      "unlock_level": 50
+    },
+    {
+      "location_id": "goat_yard",
+      "instance": 3,
+      "unlock_level": 50
+    },
+    {
+      "location_id": "candy_machine",
+      "instance": 1,
+      "unlock_level": 51
+    },
+    {
+      "location_id": "sauce_maker",
+      "instance": 1,
+      "unlock_level": 54
+    },
+    {
+      "location_id": "sushi_bar",
+      "instance": 1,
+      "unlock_level": 56
+    }
+  ]
+}

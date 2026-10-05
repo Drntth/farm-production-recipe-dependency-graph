@@ -3,240 +3,376 @@
     "id": "chicken_coop",
     "name": "Chicken Coop",
     "type": "animal",
-    "unlock_level": 1
+    "unlock_level": 1,
+    "area": "farm",
+    "animal_capacity": 6
   },
   {
     "id": "field",
     "name": "Field",
     "type": "field",
-    "unlock_level": 1
+    "unlock_level": 1,
+    "area": "farm"
   },
   {
     "id": "feed_mill",
     "name": "Feed mill",
     "type": "production",
-    "unlock_level": 2
+    "unlock_level": 2,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
   },
   {
     "id": "bakery",
     "name": "Bakery",
     "type": "production",
-    "unlock_level": 4
+    "unlock_level": 4,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
   },
   {
     "id": "cow_pasture",
     "name": "Cow Pasture",
     "type": "animal",
-    "unlock_level": 6
+    "unlock_level": 6,
+    "area": "farm",
+    "animal_capacity": 5
   },
   {
     "id": "dairy",
     "name": "Dairy",
     "type": "production",
-    "unlock_level": 6
+    "unlock_level": 6,
+    "area": "farm",
+    "footprint_width": 4,
+    "footprint_height": 4
   },
   {
     "id": "sugar_mill",
     "name": "Sugar mill",
     "type": "production",
-    "unlock_level": 7
+    "unlock_level": 7,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "popcorn_pot",
     "name": "Popcorn pot",
     "type": "production",
-    "unlock_level": 8
+    "unlock_level": 8,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
   },
   {
     "id": "bbq_grill",
     "name": "BBQ grill",
     "type": "production",
-    "unlock_level": 9
+    "unlock_level": 9,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "pig_pen",
     "name": "Pig Pen",
     "type": "animal",
-    "unlock_level": 10
+    "unlock_level": 10,
+    "area": "farm",
+    "animal_capacity": 5
   },
   {
     "id": "pie_oven",
     "name": "Pie oven",
     "type": "production",
-    "unlock_level": 14
+    "unlock_level": 14,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
   },
   {
-    "id": "tree",
-    "name": "Tree",
+    "id": "apple_tree",
+    "name": "Apple tree",
     "type": "tree",
-    "unlock_level": 15
+    "unlock_level": 15,
+    "area": "farm"
   },
   {
     "id": "sheep_pasture",
     "name": "Sheep Pasture",
     "type": "animal",
-    "unlock_level": 16
+    "unlock_level": 16,
+    "area": "farm",
+    "animal_capacity": 5
   },
   {
     "id": "loom",
     "name": "Loom",
     "type": "production",
-    "unlock_level": 17
+    "unlock_level": 17,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
-    "id": "bush",
-    "name": "Bush",
+    "id": "raspberry_bush",
+    "name": "Raspberry bush",
     "type": "bush",
-    "unlock_level": 19
+    "unlock_level": 19,
+    "area": "farm"
   },
   {
     "id": "sewing_machine",
     "name": "Sewing machine",
     "type": "production",
-    "unlock_level": 19
+    "unlock_level": 19,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "cake_oven",
     "name": "Cake oven",
     "type": "production",
-    "unlock_level": 21
+    "unlock_level": 21,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
+  },
+  {
+    "id": "cherry_tree",
+    "name": "Cherry tree",
+    "type": "tree",
+    "unlock_level": 22,
+    "area": "farm"
   },
   {
     "id": "mine",
     "name": "Mine",
     "type": "other",
-    "unlock_level": 24
+    "unlock_level": 24,
+    "area": "farm"
   },
   {
     "id": "smelter",
     "name": "Smelter",
     "type": "production",
-    "unlock_level": 24
+    "unlock_level": 24,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "lamb_pasture",
     "name": "Lamb Pasture",
     "type": "animal",
-    "unlock_level": 25
+    "unlock_level": 25,
+    "area": "farm",
+    "animal_capacity": 5
+  },
+  {
+    "id": "blackberry_bush",
+    "name": "Blackberry bush",
+    "type": "bush",
+    "unlock_level": 26,
+    "area": "farm"
   },
   {
     "id": "juice_press",
     "name": "Juice press",
     "type": "production",
-    "unlock_level": 26
+    "unlock_level": 26,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "fishing_lake",
     "name": "Fishing Lake",
     "type": "other",
-    "unlock_level": 27
+    "unlock_level": 27,
+    "area": "fishing_lake"
   },
   {
     "id": "lure_workbench",
     "name": "Lure workbench",
     "type": "production",
-    "unlock_level": 27
+    "unlock_level": 27,
+    "area": "fishing_lake"
   },
   {
     "id": "ice_cream_maker",
     "name": "Ice cream maker",
     "type": "production",
-    "unlock_level": 29
+    "unlock_level": 29,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 2
+  },
+  {
+    "id": "blueberry_bush",
+    "name": "Blueberry bush",
+    "type": "bush",
+    "unlock_level": 30,
+    "area": "farm"
   },
   {
     "id": "net_maker",
     "name": "Net maker",
     "type": "production",
-    "unlock_level": 30
+    "unlock_level": 30,
+    "area": "fishing_lake"
   },
   {
     "id": "doner_kebab_stand",
     "name": "Doner kebab stand",
     "type": "production",
-    "unlock_level": 32
+    "unlock_level": 32,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "goat_yard",
     "name": "Goat Yard",
     "type": "animal",
-    "unlock_level": 32
+    "unlock_level": 32,
+    "area": "farm",
+    "animal_capacity": 4
   },
   {
     "id": "jam_maker",
     "name": "Jam maker",
     "type": "production",
-    "unlock_level": 35
+    "unlock_level": 35,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
+  },
+  {
+    "id": "cacao_tree",
+    "name": "Cacao tree",
+    "type": "tree",
+    "unlock_level": 36,
+    "area": "farm"
   },
   {
     "id": "jeweler",
     "name": "Jeweler",
     "type": "production",
-    "unlock_level": 38
+    "unlock_level": 38,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "beehive_tree",
     "name": "Beehive Tree",
     "type": "animal",
-    "unlock_level": 39
+    "unlock_level": 39,
+    "area": "farm"
   },
   {
     "id": "honey_extractor",
     "name": "Honey extractor",
     "type": "production",
-    "unlock_level": 39
+    "unlock_level": 39,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
+  },
+  {
+    "id": "nectar_bush",
+    "name": "Nectar Bush",
+    "type": "bush",
+    "unlock_level": 39,
+    "area": "farm"
+  },
+  {
+    "id": "coffee_bush",
+    "name": "Coffee bush",
+    "type": "bush",
+    "unlock_level": 42,
+    "area": "farm"
   },
   {
     "id": "coffee_kiosk",
     "name": "Coffee kiosk",
     "type": "production",
-    "unlock_level": 42
+    "unlock_level": 42,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "lobster_pool",
     "name": "Lobster pool",
     "type": "animal",
-    "unlock_level": 44
+    "unlock_level": 44,
+    "area": "fishing_lake"
   },
   {
     "id": "soup_kitchen",
     "name": "Soup kitchen",
     "type": "production",
-    "unlock_level": 46
+    "unlock_level": 46,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "candle_maker",
     "name": "Candle maker",
     "type": "production",
-    "unlock_level": 48
+    "unlock_level": 48,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "flower_shop",
     "name": "Flower shop",
     "type": "production",
-    "unlock_level": 49
+    "unlock_level": 49,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "duck_salon",
     "name": "Duck salon",
     "type": "animal",
-    "unlock_level": 50
+    "unlock_level": 50,
+    "area": "fishing_lake"
   },
   {
     "id": "candy_machine",
     "name": "Candy machine",
     "type": "production",
-    "unlock_level": 51
+    "unlock_level": 51,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   },
   {
     "id": "sauce_maker",
     "name": "Sauce maker",
     "type": "production",
-    "unlock_level": 54
+    "unlock_level": 54,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3
   },
   {
     "id": "sushi_bar",
     "name": "Sushi bar",
     "type": "production",
-    "unlock_level": 56
+    "unlock_level": 56,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2
   }
 ]

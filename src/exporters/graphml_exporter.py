@@ -31,6 +31,11 @@ ET.register_namespace("y", _NS_Y)
 ET.register_namespace("xsi", _NS_XSI)
 
 
+def _bool_text(value: bool | None) -> str | None:
+    """GraphML booleans are lower-case 'true' / 'false'."""
+    return None if value is None else str(bool(value)).lower()
+
+
 def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
     """
     Write *G* to a yEd-compatible GraphML file at *path*.
@@ -69,6 +74,13 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
         ("type", "string"),
         ("unlock_level", "long"),
         ("source_location_id", "string"),
+        ("area", "string"),
+        ("movable", "boolean"),
+        ("rotatable", "boolean"),
+        ("footprint_width", "long"),
+        ("footprint_height", "long"),
+        ("animal_capacity", "long"),
+        ("growth_time_seconds", "long"),
         ("label", "string"),
     ]
     for i, (name, atype) in enumerate(node_attr_keys):
@@ -163,6 +175,13 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
             "type": attrs.get("type"),
             "unlock_level": attrs.get("unlock_level"),
             "source_location_id": attrs.get("source_location_id"),
+            "area": attrs.get("area"),
+            "movable": _bool_text(attrs.get("movable")),
+            "rotatable": _bool_text(attrs.get("rotatable")),
+            "footprint_width": attrs.get("footprint_width"),
+            "footprint_height": attrs.get("footprint_height"),
+            "animal_capacity": attrs.get("animal_capacity"),
+            "growth_time_seconds": attrs.get("growth_time_seconds"),
             "label": label,
         }
         for name, value in export_attrs.items():

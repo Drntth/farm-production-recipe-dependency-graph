@@ -61,6 +61,9 @@ class Recipe(BaseModel):
     output: RecipeOutput = Field(..., description="Produced output")
 
     production_time_seconds: int | None = Field(None, ge=0)
+    production_time_3star_seconds: int | None = Field(
+        None, ge=0, description="Production time with full 3-star mastery"
+    )
     description: str | None = None
 
     @field_validator("id", "location_id")

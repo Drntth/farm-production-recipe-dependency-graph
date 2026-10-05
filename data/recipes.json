@@ -17,7 +17,9 @@
     "output": {
       "resource_id": "chicken_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 300,
+    "production_time_3star_seconds": 240
   },
   {
     "id": "bread",
@@ -33,7 +35,9 @@
     "output": {
       "resource_id": "bread",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 300,
+    "production_time_3star_seconds": 240
   },
   {
     "id": "cow_feed",
@@ -53,7 +57,9 @@
     "output": {
       "resource_id": "cow_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 600,
+    "production_time_3star_seconds": 480
   },
   {
     "id": "cream",
@@ -69,7 +75,9 @@
     "output": {
       "resource_id": "cream",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "brown_sugar",
@@ -85,7 +93,9 @@
     "output": {
       "resource_id": "brown_sugar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "corn_bread",
@@ -105,7 +115,9 @@
     "output": {
       "resource_id": "corn_bread",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "popcorn",
@@ -121,7 +133,9 @@
     "output": {
       "resource_id": "popcorn",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "butter",
@@ -137,7 +151,9 @@
     "output": {
       "resource_id": "butter",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "pancake",
@@ -157,7 +173,9 @@
     "output": {
       "resource_id": "pancake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "cookie",
@@ -181,7 +199,9 @@
     "output": {
       "resource_id": "cookie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "pig_feed",
@@ -201,7 +221,9 @@
     "output": {
       "resource_id": "pig_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "bacon_and_eggs",
@@ -221,7 +243,9 @@
     "output": {
       "resource_id": "bacon_and_eggs",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "cheese",
@@ -237,7 +261,9 @@
     "output": {
       "resource_id": "cheese",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "white_sugar",
@@ -253,7 +279,9 @@
     "output": {
       "resource_id": "white_sugar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
   },
   {
     "id": "carrot_pie",
@@ -277,7 +305,9 @@
     "output": {
       "resource_id": "carrot_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "pumpkin_pie",
@@ -301,7 +331,9 @@
     "output": {
       "resource_id": "pumpkin_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "buttered_popcorn",
@@ -321,7 +353,9 @@
     "output": {
       "resource_id": "buttered_popcorn",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "sheep_feed",
@@ -341,7 +375,9 @@
     "output": {
       "resource_id": "sheep_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "sweater",
@@ -357,7 +393,9 @@
     "output": {
       "resource_id": "sweater",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "bacon_pie",
@@ -381,7 +419,9 @@
     "output": {
       "resource_id": "bacon_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "cotton_fabric",
@@ -397,7 +437,9 @@
     "output": {
       "resource_id": "cotton_fabric",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "hamburger",
@@ -417,7 +459,9 @@
     "output": {
       "resource_id": "hamburger",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "syrup",
@@ -433,7 +477,9 @@
     "output": {
       "resource_id": "syrup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "blue_woolly_hat",
@@ -453,7 +499,9 @@
     "output": {
       "resource_id": "blue_woolly_hat",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "cotton_shirt",
@@ -469,7 +517,9 @@
     "output": {
       "resource_id": "cotton_shirt",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "raspberry_muffin",
@@ -493,7 +543,9 @@
     "output": {
       "resource_id": "raspberry_muffin",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "blue_sweater",
@@ -513,7 +565,9 @@
     "output": {
       "resource_id": "blue_sweater",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "carrot_cake",
@@ -537,7 +591,9 @@
     "output": {
       "resource_id": "carrot_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "wooly_chaps",
@@ -557,7 +613,9 @@
     "output": {
       "resource_id": "wooly_chaps",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "cream_cake",
@@ -581,7 +639,9 @@
     "output": {
       "resource_id": "cream_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "red_berry_cake",
@@ -609,7 +669,9 @@
     "output": {
       "resource_id": "red_berry_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "cheesecake",
@@ -629,7 +691,9 @@
     "output": {
       "resource_id": "cheesecake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
   },
   {
     "id": "silver_bar",
@@ -645,7 +709,9 @@
     "output": {
       "resource_id": "silver_bar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 28800,
+    "production_time_3star_seconds": 24480
   },
   {
     "id": "chili_popcorn",
@@ -665,7 +731,9 @@
     "output": {
       "resource_id": "chili_popcorn",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "gold_bar",
@@ -681,7 +749,9 @@
     "output": {
       "resource_id": "gold_bar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 43200,
+    "production_time_3star_seconds": 36720
   },
   {
     "id": "grilled_lamb_skewer",
@@ -697,7 +767,9 @@
     "output": {
       "resource_id": "grilled_lamb_skewer",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "lamb_feed",
@@ -717,7 +789,9 @@
     "output": {
       "resource_id": "lamb_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 600,
+    "production_time_3star_seconds": 480
   },
   {
     "id": "platinum_bar",
@@ -733,7 +807,9 @@
     "output": {
       "resource_id": "platinum_bar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 57600,
+    "production_time_3star_seconds": 48960
   },
   {
     "id": "violet_dress",
@@ -757,7 +833,9 @@
     "output": {
       "resource_id": "violet_dress",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 8100,
+    "production_time_3star_seconds": 6840
   },
   {
     "id": "blackberry_muffin",
@@ -781,7 +859,9 @@
     "output": {
       "resource_id": "blackberry_muffin",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "carrot_juice",
@@ -797,7 +877,9 @@
     "output": {
       "resource_id": "carrot_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "blue_lure",
@@ -813,7 +895,9 @@
     "output": {
       "resource_id": "blue_lure",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "fish_burger",
@@ -837,7 +921,9 @@
     "output": {
       "resource_id": "fish_burger",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "gold_lure",
@@ -853,7 +939,9 @@
     "output": {
       "resource_id": "gold_lure",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "green_lure",
@@ -869,7 +957,9 @@
     "output": {
       "resource_id": "green_lure",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
   },
   {
     "id": "purple_lure",
@@ -885,7 +975,9 @@
     "output": {
       "resource_id": "purple_lure",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "red_lure",
@@ -896,7 +988,9 @@
     "output": {
       "resource_id": "red_lure",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "apple_juice",
@@ -912,7 +1006,9 @@
     "output": {
       "resource_id": "apple_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "apple_pie",
@@ -940,7 +1036,9 @@
     "output": {
       "resource_id": "apple_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "fish_pie",
@@ -964,7 +1062,9 @@
     "output": {
       "resource_id": "fish_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "vanilla_ice_cream",
@@ -988,7 +1088,9 @@
     "output": {
       "resource_id": "vanilla_ice_cream",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "cherry_juice",
@@ -1004,7 +1106,9 @@
     "output": {
       "resource_id": "cherry_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "fishing_net",
@@ -1015,7 +1119,9 @@
     "output": {
       "resource_id": "fishing_net",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
   },
   {
     "id": "mystery_net",
@@ -1031,7 +1137,9 @@
     "output": {
       "resource_id": "mystery_net",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "roasted_tomatoes",
@@ -1047,7 +1155,9 @@
     "output": {
       "resource_id": "roasted_tomatoes",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "berry_juice",
@@ -1067,7 +1177,9 @@
     "output": {
       "resource_id": "berry_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "blueberry_cheesecake",
@@ -1087,7 +1199,9 @@
     "output": {
       "resource_id": "blueberry_cheesecake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
   },
   {
     "id": "tomato_juice",
@@ -1103,7 +1217,9 @@
     "output": {
       "resource_id": "tomato_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "goat_feed",
@@ -1127,7 +1243,9 @@
     "output": {
       "resource_id": "goat_feed",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
   },
   {
     "id": "lamb_doner_wrap",
@@ -1151,7 +1269,9 @@
     "output": {
       "resource_id": "lamb_doner_wrap",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "spicy_bean_doner",
@@ -1179,7 +1299,9 @@
     "output": {
       "resource_id": "spicy_bean_doner",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "blueberry_muffin",
@@ -1203,7 +1325,9 @@
     "output": {
       "resource_id": "blueberry_muffin",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "cherry_popsicle",
@@ -1223,7 +1347,9 @@
     "output": {
       "resource_id": "cherry_popsicle",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "goat_cheese",
@@ -1239,7 +1365,9 @@
     "output": {
       "resource_id": "goat_cheese",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "pizza",
@@ -1263,7 +1391,9 @@
     "output": {
       "resource_id": "pizza",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
   },
   {
     "id": "refined_coal",
@@ -1279,7 +1409,9 @@
     "output": {
       "resource_id": "refined_coal",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 21600,
+    "production_time_3star_seconds": 18360
   },
   {
     "id": "feta_pie",
@@ -1303,7 +1435,9 @@
     "output": {
       "resource_id": "feta_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "iron_bar",
@@ -1319,7 +1453,9 @@
     "output": {
       "resource_id": "iron_bar",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 25200,
+    "production_time_3star_seconds": 21420
   },
   {
     "id": "meat_bucket",
@@ -1339,7 +1475,9 @@
     "output": {
       "resource_id": "meat_bucket",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "strawberry_ice_cream",
@@ -1367,7 +1505,9 @@
     "output": {
       "resource_id": "strawberry_ice_cream",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
   },
   {
     "id": "wheat_bundle",
@@ -1383,7 +1523,9 @@
     "output": {
       "resource_id": "wheat_bundle",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "apple_jam",
@@ -1399,7 +1541,9 @@
     "output": {
       "resource_id": "apple_jam",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 21600,
+    "production_time_3star_seconds": 18360
   },
   {
     "id": "baked_potato",
@@ -1427,7 +1571,9 @@
     "output": {
       "resource_id": "baked_potato",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
   },
   {
     "id": "strawberry_cake",
@@ -1455,7 +1601,9 @@
     "output": {
       "resource_id": "strawberry_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "casserole",
@@ -1483,7 +1631,9 @@
     "output": {
       "resource_id": "casserole",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "chocolate_cake",
@@ -1507,7 +1657,9 @@
     "output": {
       "resource_id": "chocolate_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "raspberry_jam",
@@ -1523,7 +1675,9 @@
     "output": {
       "resource_id": "raspberry_jam",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 25200,
+    "production_time_3star_seconds": 21420
   },
   {
     "id": "blackberry_jam",
@@ -1539,7 +1693,9 @@
     "output": {
       "resource_id": "blackberry_jam",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 28800,
+    "production_time_3star_seconds": 24480
   },
   {
     "id": "spicy_pizza",
@@ -1567,7 +1723,9 @@
     "output": {
       "resource_id": "spicy_pizza",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
   },
   {
     "id": "bracelet",
@@ -1587,7 +1745,9 @@
     "output": {
       "resource_id": "bracelet",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "cherry_jam",
@@ -1603,7 +1763,9 @@
     "output": {
       "resource_id": "cherry_jam",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 25200,
+    "production_time_3star_seconds": 21420
   },
   {
     "id": "potato_feta_cake",
@@ -1627,7 +1789,9 @@
     "output": {
       "resource_id": "potato_feta_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "chocolate_ice_cream",
@@ -1655,7 +1819,9 @@
     "output": {
       "resource_id": "chocolate_ice_cream",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "honey",
@@ -1671,7 +1837,9 @@
     "output": {
       "resource_id": "honey",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
   },
   {
     "id": "necklace",
@@ -1695,7 +1863,9 @@
     "output": {
       "resource_id": "necklace",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "potato_bread",
@@ -1723,7 +1893,9 @@
     "output": {
       "resource_id": "potato_bread",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "shepherd_s_pie",
@@ -1751,7 +1923,9 @@
     "output": {
       "resource_id": "shepherd_s_pie",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 6000,
+    "production_time_3star_seconds": 5100
   },
   {
     "id": "diamond_ring",
@@ -1775,7 +1949,9 @@
     "output": {
       "resource_id": "diamond_ring",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
   },
   {
     "id": "honey_popcorn",
@@ -1795,7 +1971,9 @@
     "output": {
       "resource_id": "honey_popcorn",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "fish_and_chips",
@@ -1815,7 +1993,9 @@
     "output": {
       "resource_id": "fish_and_chips",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "iron_bracelet",
@@ -1839,7 +2019,9 @@
     "output": {
       "resource_id": "iron_bracelet",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "espresso",
@@ -1859,7 +2041,9 @@
     "output": {
       "resource_id": "espresso",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 300,
+    "production_time_3star_seconds": 240
   },
   {
     "id": "honey_apple_cake",
@@ -1887,7 +2071,9 @@
     "output": {
       "resource_id": "honey_apple_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 12000,
+    "production_time_3star_seconds": 10200
   },
   {
     "id": "caff_latte",
@@ -1911,7 +2097,9 @@
     "output": {
       "resource_id": "caff_latte",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 600,
+    "production_time_3star_seconds": 480
   },
   {
     "id": "chocolate_popcorn",
@@ -1931,7 +2119,9 @@
     "output": {
       "resource_id": "chocolate_popcorn",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "lobster_trap",
@@ -1942,7 +2132,9 @@
     "output": {
       "resource_id": "lobster_trap",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "caff_mocha",
@@ -1966,7 +2158,9 @@
     "output": {
       "resource_id": "caff_mocha",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
   },
   {
     "id": "frutti_di_mare_pizza",
@@ -1994,7 +2188,9 @@
     "output": {
       "resource_id": "frutti_di_mare_pizza",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
   },
   {
     "id": "soothing_pad",
@@ -2018,7 +2214,9 @@
     "output": {
       "resource_id": "soothing_pad",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "lamb_soup",
@@ -2042,7 +2240,9 @@
     "output": {
       "resource_id": "lamb_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "lobster_soup",
@@ -2070,7 +2270,9 @@
     "output": {
       "resource_id": "lobster_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "raspberry_mocha",
@@ -2098,7 +2300,9 @@
     "output": {
       "resource_id": "raspberry_mocha",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
   },
   {
     "id": "hot_chocolate",
@@ -2126,7 +2330,9 @@
     "output": {
       "resource_id": "hot_chocolate",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
   },
   {
     "id": "tomato_soup",
@@ -2154,7 +2360,9 @@
     "output": {
       "resource_id": "tomato_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "beeswax",
@@ -2170,7 +2378,9 @@
     "output": {
       "resource_id": "beeswax",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "lobster_skewer",
@@ -2194,7 +2404,9 @@
     "output": {
       "resource_id": "lobster_skewer",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
   },
   {
     "id": "red_scarf",
@@ -2214,7 +2426,9 @@
     "output": {
       "resource_id": "red_scarf",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
   },
   {
     "id": "strawberry_candle",
@@ -2234,7 +2448,9 @@
     "output": {
       "resource_id": "strawberry_candle",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "asparagus_quiche",
@@ -2262,7 +2478,9 @@
     "output": {
       "resource_id": "asparagus_quiche",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "pumpkin_soup",
@@ -2290,7 +2508,9 @@
     "output": {
       "resource_id": "pumpkin_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "rustic_bouquet",
@@ -2314,7 +2534,9 @@
     "output": {
       "resource_id": "rustic_bouquet",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "duck_trap",
@@ -2325,7 +2547,9 @@
     "output": {
       "resource_id": "duck_trap",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "sesame_ice_cream",
@@ -2349,7 +2573,9 @@
     "output": {
       "resource_id": "sesame_ice_cream",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "strawberry_jam",
@@ -2365,7 +2591,9 @@
     "output": {
       "resource_id": "strawberry_jam",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 27000,
+    "production_time_3star_seconds": 22920
   },
   {
     "id": "asparagus_soup",
@@ -2385,7 +2613,9 @@
     "output": {
       "resource_id": "asparagus_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   },
   {
     "id": "caramel_apple",
@@ -2405,7 +2635,9 @@
     "output": {
       "resource_id": "caramel_apple",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
   },
   {
     "id": "pillow",
@@ -2425,7 +2657,9 @@
     "output": {
       "resource_id": "pillow",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "pineapple_juice",
@@ -2441,7 +2675,9 @@
     "output": {
       "resource_id": "pineapple_juice",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
   },
   {
     "id": "raspberry_candle",
@@ -2461,7 +2697,9 @@
     "output": {
       "resource_id": "raspberry_candle",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 6300,
+    "production_time_3star_seconds": 5340
   },
   {
     "id": "toffee",
@@ -2485,7 +2723,9 @@
     "output": {
       "resource_id": "toffee",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
   },
   {
     "id": "fish_soup",
@@ -2513,7 +2753,9 @@
     "output": {
       "resource_id": "fish_soup",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "bean_dip",
@@ -2537,7 +2779,9 @@
     "output": {
       "resource_id": "bean_dip",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
   },
   {
     "id": "chocolate",
@@ -2561,7 +2805,9 @@
     "output": {
       "resource_id": "chocolate",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 72000,
+    "production_time_3star_seconds": 61200
   },
   {
     "id": "fancy_cake",
@@ -2589,7 +2835,9 @@
     "output": {
       "resource_id": "fancy_cake",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
   },
   {
     "id": "soy_sauce",
@@ -2609,7 +2857,9 @@
     "output": {
       "resource_id": "soy_sauce",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
   },
   {
     "id": "sushi_roll",
@@ -2633,6 +2883,8 @@
     "output": {
       "resource_id": "sushi_roll",
       "amount": 1
-    }
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
   }
 ]

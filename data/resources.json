@@ -4,14 +4,16 @@
     "name": "Egg",
     "type": "animal_product",
     "unlock_level": 1,
-    "source_location_id": "chicken_coop"
+    "source_location_id": "chicken_coop",
+    "growth_time_seconds": 1200
   },
   {
     "id": "wheat",
     "name": "Wheat",
     "type": "crop",
     "unlock_level": 1,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 120
   },
   {
     "id": "chicken_feed",
@@ -25,7 +27,8 @@
     "name": "Corn",
     "type": "crop",
     "unlock_level": 2,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 300
   },
   {
     "id": "bread",
@@ -39,7 +42,8 @@
     "name": "Soybean",
     "type": "crop",
     "unlock_level": 5,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 1200
   },
   {
     "id": "cow_feed",
@@ -60,7 +64,8 @@
     "name": "Milk",
     "type": "animal_product",
     "unlock_level": 6,
-    "source_location_id": "cow_pasture"
+    "source_location_id": "cow_pasture",
+    "growth_time_seconds": 3600
   },
   {
     "id": "brown_sugar",
@@ -81,7 +86,8 @@
     "name": "Sugarcane",
     "type": "crop",
     "unlock_level": 7,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 1800
   },
   {
     "id": "popcorn",
@@ -102,7 +108,8 @@
     "name": "Carrot",
     "type": "crop",
     "unlock_level": 9,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 600
   },
   {
     "id": "pancake",
@@ -116,7 +123,8 @@
     "name": "Bacon",
     "type": "animal_product",
     "unlock_level": 10,
-    "source_location_id": "pig_pen"
+    "source_location_id": "pig_pen",
+    "growth_time_seconds": 14400
   },
   {
     "id": "cookie",
@@ -151,7 +159,8 @@
     "name": "Indigo",
     "type": "crop",
     "unlock_level": 13,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 7200
   },
   {
     "id": "white_sugar",
@@ -172,14 +181,16 @@
     "name": "Apple",
     "type": "crop",
     "unlock_level": 15,
-    "source_location_id": "tree"
+    "source_location_id": "apple_tree",
+    "growth_time_seconds": 57600
   },
   {
     "id": "pumpkin",
     "name": "Pumpkin",
     "type": "crop",
     "unlock_level": 15,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 10800
   },
   {
     "id": "pumpkin_pie",
@@ -207,7 +218,8 @@
     "name": "Wool",
     "type": "animal_product",
     "unlock_level": 16,
-    "source_location_id": "sheep_pasture"
+    "source_location_id": "sheep_pasture",
+    "growth_time_seconds": 21600
   },
   {
     "id": "sweater",
@@ -228,7 +240,8 @@
     "name": "Cotton",
     "type": "crop",
     "unlock_level": 18,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 9000
   },
   {
     "id": "cotton_fabric",
@@ -270,7 +283,8 @@
     "name": "Raspberry",
     "type": "crop",
     "unlock_level": 19,
-    "source_location_id": "bush"
+    "source_location_id": "raspberry_bush",
+    "growth_time_seconds": 64800
   },
   {
     "id": "raspberry_muffin",
@@ -305,7 +319,8 @@
     "name": "Cherry",
     "type": "crop",
     "unlock_level": 22,
-    "source_location_id": "tree"
+    "source_location_id": "cherry_tree",
+    "growth_time_seconds": 97200
   },
   {
     "id": "cream_cake",
@@ -333,14 +348,16 @@
     "name": "Gold ore",
     "type": "ore",
     "unlock_level": 24,
-    "source_location_id": "mine"
+    "source_location_id": "mine",
+    "growth_time_seconds": 0
   },
   {
     "id": "platinum_ore",
     "name": "Platinum ore",
     "type": "ore",
     "unlock_level": 24,
-    "source_location_id": "mine"
+    "source_location_id": "mine",
+    "growth_time_seconds": 0
   },
   {
     "id": "silver_bar",
@@ -354,21 +371,24 @@
     "name": "Silver ore",
     "type": "ore",
     "unlock_level": 24,
-    "source_location_id": "mine"
+    "source_location_id": "mine",
+    "growth_time_seconds": 0
   },
   {
     "id": "black_bean",
     "name": "Black bean",
     "type": "crop",
     "unlock_level": 25,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 600
   },
   {
     "id": "chili_pepper",
     "name": "Chili pepper",
     "type": "crop",
     "unlock_level": 25,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 14400
   },
   {
     "id": "chili_popcorn",
@@ -396,7 +416,8 @@
     "name": "Lamb chop",
     "type": "animal_product",
     "unlock_level": 25,
-    "source_location_id": "lamb_pasture"
+    "source_location_id": "lamb_pasture",
+    "growth_time_seconds": 1800
   },
   {
     "id": "lamb_feed",
@@ -424,7 +445,8 @@
     "name": "Blackberry",
     "type": "crop",
     "unlock_level": 26,
-    "source_location_id": "bush"
+    "source_location_id": "blackberry_bush",
+    "growth_time_seconds": 115200
   },
   {
     "id": "blackberry_muffin",
@@ -459,7 +481,8 @@
     "name": "Fish fillet",
     "type": "animal_product",
     "unlock_level": 27,
-    "source_location_id": "fishing_lake"
+    "source_location_id": "fishing_lake",
+    "growth_time_seconds": 0
   },
   {
     "id": "gold_lure",
@@ -522,7 +545,8 @@
     "name": "Blueberries",
     "type": "crop",
     "unlock_level": 30,
-    "source_location_id": "bush"
+    "source_location_id": "blueberry_bush",
+    "growth_time_seconds": 122400
   },
   {
     "id": "cherry_juice",
@@ -557,7 +581,8 @@
     "name": "Tomato",
     "type": "crop",
     "unlock_level": 30,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 21600
   },
   {
     "id": "berry_juice",
@@ -592,7 +617,8 @@
     "name": "Goat milk",
     "type": "animal_product",
     "unlock_level": 32,
-    "source_location_id": "goat_yard"
+    "source_location_id": "goat_yard",
+    "growth_time_seconds": 28800
   },
   {
     "id": "lamb_doner_wrap",
@@ -627,7 +653,8 @@
     "name": "Coal",
     "type": "ore",
     "unlock_level": 33,
-    "source_location_id": "mine"
+    "source_location_id": "mine",
+    "growth_time_seconds": 0
   },
   {
     "id": "goat_cheese",
@@ -669,7 +696,8 @@
     "name": "Iron ore",
     "type": "ore",
     "unlock_level": 34,
-    "source_location_id": "mine"
+    "source_location_id": "mine",
+    "growth_time_seconds": 0
   },
   {
     "id": "meat_bucket",
@@ -683,7 +711,8 @@
     "name": "Strawberry",
     "type": "crop",
     "unlock_level": 34,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 28800
   },
   {
     "id": "strawberry_ice_cream",
@@ -718,7 +747,8 @@
     "name": "Potato",
     "type": "crop",
     "unlock_level": 35,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 13200
   },
   {
     "id": "strawberry_cake",
@@ -732,7 +762,8 @@
     "name": "Cacao",
     "type": "crop",
     "unlock_level": 36,
-    "source_location_id": "tree"
+    "source_location_id": "cacao_tree",
+    "growth_time_seconds": 122400
   },
   {
     "id": "casserole",
@@ -809,7 +840,8 @@
     "name": "Honeycomb",
     "type": "animal_product",
     "unlock_level": 39,
-    "source_location_id": "beehive_tree"
+    "source_location_id": "beehive_tree",
+    "growth_time_seconds": 0
   },
   {
     "id": "necklace",
@@ -865,7 +897,8 @@
     "name": "Coffee bean",
     "type": "crop",
     "unlock_level": 42,
-    "source_location_id": "bush"
+    "source_location_id": "coffee_bush",
+    "growth_time_seconds": 90000
   },
   {
     "id": "espresso",
@@ -900,7 +933,8 @@
     "name": "Lobster tail",
     "type": "animal_product",
     "unlock_level": 44,
-    "source_location_id": "lobster_pool"
+    "source_location_id": "lobster_pool",
+    "growth_time_seconds": 21600
   },
   {
     "id": "lobster_trap",
@@ -921,7 +955,8 @@
     "name": "Chamomile",
     "type": "crop",
     "unlock_level": 45,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 1200
   },
   {
     "id": "frutti_di_mare_pizza",
@@ -1005,7 +1040,8 @@
     "name": "Asparagus",
     "type": "crop",
     "unlock_level": 49,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 21600
   },
   {
     "id": "asparagus_quiche",
@@ -1033,7 +1069,8 @@
     "name": "Duck feather",
     "type": "animal_product",
     "unlock_level": 50,
-    "source_location_id": "duck_salon"
+    "source_location_id": "duck_salon",
+    "growth_time_seconds": 10800
   },
   {
     "id": "duck_trap",
@@ -1047,7 +1084,8 @@
     "name": "Sesame",
     "type": "crop",
     "unlock_level": 50,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 3600
   },
   {
     "id": "sesame_ice_cream",
@@ -1089,7 +1127,8 @@
     "name": "Pineapple",
     "type": "crop",
     "unlock_level": 52,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 1800
   },
   {
     "id": "pineapple_juice",
@@ -1124,7 +1163,8 @@
     "name": "Lily",
     "type": "crop",
     "unlock_level": 53,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 5400
   },
   {
     "id": "bean_dip",
@@ -1159,7 +1199,8 @@
     "name": "Rice",
     "type": "crop",
     "unlock_level": 56,
-    "source_location_id": "field"
+    "source_location_id": "field",
+    "growth_time_seconds": 2700
   },
   {
     "id": "sushi_roll",

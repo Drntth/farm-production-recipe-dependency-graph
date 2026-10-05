@@ -57,24 +57,46 @@ class WikiClient:
         self.fetched_pages.add(page_name)
         return data["parse"]["text"]["*"]
 
+    def _query(self, params: dict) -> dict:
+        self._throttle()
+        response = self.session.get(
+            self.API_URL,
+            params={"action": "query", "format": "json", **params},
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        return response.json().get("query", {})
+
+    def get_category_members(self, category: str) -> list[str]:
+        """Page titles in ``Category:<category>`` (subcategories excluded)."""
+        self.fetched_pages.add(f"Category:{category}")
+        query = self._query(
+            {
+                "list": "categorymembers",
+                "cmtitle": f"Category:{category}",
+                "cmtype": "page",
+                "cmlimit": "500",
+            }
+        )
+        return [m["title"] for m in query.get("categorymembers", [])]
+
+    def list_pages(self, prefix: str) -> list[str]:
+        """Titles of all pages starting with *prefix* (e.g. 'Experience_Levels/')."""
+        query = self._query({"list": "allpages", "apprefix": prefix, "aplimit": "500"})
+        return [p["title"] for p in query.get("allpages", [])]
+
     def get_revision_timestamps(self, page_names: set[str]) -> dict[str, str | None]:
         """Return the last-revision timestamp (ISO 8601) of each page, None if missing."""
         result: dict[str, str | None] = {}
         names = sorted(page_names)
         for i in range(0, len(names), 50):  # MediaWiki limit per query
-            self._throttle()
-            params = {
-                "action": "query",
-                "titles": "|".join(names[i : i + 50]),
-                "prop": "revisions",
-                "rvprop": "timestamp",
-                "format": "json",
-            }
-            response = self.session.get(
-                self.API_URL, params=params, timeout=self.timeout
+            query = self._query(
+                {
+                    "titles": "|".join(names[i : i + 50]),
+                    "prop": "revisions",
+                    "rvprop": "timestamp",
+                }
             )
-            response.raise_for_status()
-            query = response.json().get("query", {})
             # The API answers with normalised titles ("Goods List"); map them back.
             aliases = {n["to"]: n["from"] for n in query.get("normalized", [])}
             for page in query.get("pages", {}).values():
@@ -82,6 +104,24 @@ class WikiClient:
                 revisions = page.get("revisions")
                 result[title] = revisions[0]["timestamp"] if revisions else None
         return result
+
+    def get_wikitext(self, page_name: str) -> str:
+        """Raw wikitext of a page (infobox fields like ``|level = 39``)."""
+        self._throttle()
+        params = {
+            "action": "parse",
+            "page": page_name,
+            "prop": "wikitext",
+            "format": "json",
+            "redirects": "1",
+        }
+        response = self.session.get(self.API_URL, params=params, timeout=self.timeout)
+        response.raise_for_status()
+        data = response.json()
+        if "error" in data:
+            raise RuntimeError(f"Wiki API error for '{page_name}': {data['error']}")
+        self.fetched_pages.add(page_name)
+        return data["parse"]["wikitext"]["*"]
 
     def get_page(self, page_name: str) -> BeautifulSoup:
         """Return a BeautifulSoup of the rendered page content."""

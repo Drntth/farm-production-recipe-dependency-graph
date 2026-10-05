@@ -14,12 +14,13 @@ from pathlib import Path
 
 from src.config import load_player_config
 
-from .normalizer import normalize
+from .normalizer import build_level_limits, normalize
+from .parsers.level_limits import parse_field_grants
 from .parsers.locations import parse_locations
 from .parsers.recipes import parse_recipes
 from .parsers.resources import parse_resources
 from .wiki_client import WikiClient
-from .writer import write_json_files, write_meta_file
+from .writer import write_json_files, write_level_limits_file, write_meta_file
 
 
 def main() -> None:
@@ -79,10 +80,18 @@ def main() -> None:
     raw_recipes = parse_recipes(client, max_level=level)
     print(f"     {len(raw_recipes)} raw recipes")
 
+    print("  → field grants")
+    field_grants = parse_field_grants(client, max_level=level)
+    print(f"     {len(field_grants)} levels with new fields")
+
     print("  → normalize")
     locations, resources, recipes = normalize(raw_locations, raw_resources, raw_recipes)
+    level_limits = build_level_limits(
+        raw_locations, field_grants, {loc["id"] for loc in locations}
+    )
 
     write_json_files(args.output_dir, locations, resources, recipes)
+    write_level_limits_file(args.output_dir, level_limits)
     write_meta_file(
         args.output_dir,
         max_level=level,
