@@ -164,10 +164,19 @@ Kept in a separate file to preserve 3NF.
 
 ### Timing and capacity fields
 
-- `growth_time_minutes` on resources (crops)
-- `production_time_minutes` on recipes
-- `max_slots` / slot-related data on locations
-- Player-specific progress (owned counts, star levels, unlocked slots) lives in a separate player-config file, not in the shared data.
+Already in the models (optional, not yet filled by the scraper):
+
+- `production_time_seconds` on recipes
+- `max_slots` on locations
+- `max_in_barn` on resources
+
+Planned for v0.5:
+
+- `growth_time_seconds` on resources (crops, animal products, ores)
+- further slot-related data on locations
+
+All durations are stored in seconds.  
+Player-specific progress (owned counts, star levels, unlocked slots) lives in a separate player-config file, not in the shared data.
 
 ### External resources
 
@@ -192,6 +201,7 @@ Every Location and every Resource becomes a node.
 | `unlock_level`       | all              | Player level required             |
 | `source_location_id` | resources (raw)  | Producing location                |
 | `max_slots`          | locations (opt.) | Production slots                  |
+| `max_in_barn`        | resources (opt.) | Storage limit for the resource    |
 
 ### Edges - three semantic kinds
 
@@ -243,15 +253,19 @@ Higher weight means stronger coupling → the two locations should be placed clo
 
 ## Roadmap
 
+**Current status:** v0.3 is complete (34 tests passing). Next milestone: v0.5.  
+Current data set: 38 locations, 159 resources, 120 recipes. It contains no timing or capacity values yet.  
+Next step: review the wiki data for timing and capacity fields, then extend the schema and scraper.
+
 ### v0.3 - Layout Planner usable (done)
 
 - [x] Weighted multi-level proximity
 - [x] Production-block detection
 - [x] Centrality and path analysis
 - [x] JSON / CSV / GraphML exporters
-- [x] Wiki scraper (level 52)
+- [x] Wiki scraper up to player level 52 (locations, resources, recipes)
 
-### v0.5 - Production Planner foundation
+### v0.5 - Production Planner foundation (next)
 
 - [ ] Review all relevant wiki data
 - [ ] Extend the JSON model with timing and capacity fields while keeping 3NF
@@ -316,7 +330,12 @@ Higher weight means stronger coupling → the two locations should be placed clo
 
 ```bash
 # install
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+
+# run tests
+python -m pytest
 
 # build graph + analysis
 python -m src.main --max-level 52
@@ -404,6 +423,8 @@ farm-production-recipe-dependency-graph/
 │   ├── test_graph_builder.py
 │   ├── test_graph_quality.py
 │   └── test_json_loader.py
+├── AGENTS.md                          # instructions for coding agents
+├── CLAUDE.md -> AGENTS.md             # symlink
 ├── LICENSE
 ├── README.md
 └── requirements.txt
