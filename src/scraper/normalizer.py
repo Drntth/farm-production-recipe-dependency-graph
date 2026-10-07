@@ -22,6 +22,15 @@ _RESOURCE_OPTIONAL = ("growth_time_seconds",)
 _RECIPE_OPTIONAL = ("production_time_seconds", "production_time_3star_seconds")
 
 
+# Goods List "Needs" entries that name a caught animal instead of a good.
+# Each animal is caught with exactly one trap (wiki: Lobster_Tail, Duck_Feather),
+# so the trap made at the net maker is the real input.
+NEED_ALIASES = {
+    "lobster": "lobster_trap",
+    "duck": "duck_trap",
+}
+
+
 def _copy_optional(raw: dict[str, Any], keys: tuple[str, ...]) -> dict[str, Any]:
     return {k: raw[k] for k in keys if raw.get(k) is not None}
 
@@ -119,6 +128,7 @@ def normalize(
             rid = inp.get("resource_id") or to_snake_case(inp.get("name", ""))
             if not rid:
                 continue
+            rid = NEED_ALIASES.get(rid, rid)
             inputs.append(
                 {
                     "resource_id": rid,

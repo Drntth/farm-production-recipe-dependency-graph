@@ -38,6 +38,8 @@ Three edge kinds (see relationship.EdgeType):
 3. OUTPUTS   location  → resource
    Created for every recipe output.
    Captures “this building produces this (processed) good”.
+   Skipped when the location already PRODUCES the output (animal feeding
+   recipes: chicken_feed ─CONSUMES→ chicken_coop ─PRODUCES→ egg).
 
 Together they form continuous dependency paths, e.g.:
 
@@ -226,17 +228,21 @@ def _add_recipe_edges(G: nx.DiGraph, dataset: DataSet) -> None:
             continue
 
         # --- OUTPUTS edge (location → output resource) ---
-        _add_or_merge_edge(
-            G,
-            loc_id,
-            out_id,
-            edge_attrs(
-                EdgeType.OUTPUTS,
-                outputs_weight(),
-                amount=out_amount,
-                recipe_id=rec.id,
-            ),
-        )
+        # Feeding recipes (feed → egg at the coop) output a raw good that
+        # already has a PRODUCES edge; keep that one instead of merging.
+        produces = G.get_edge_data(loc_id, out_id, {}).get(ATTR_EDGE_TYPE)
+        if produces != EdgeType.PRODUCES.value:
+            _add_or_merge_edge(
+                G,
+                loc_id,
+                out_id,
+                edge_attrs(
+                    EdgeType.OUTPUTS,
+                    outputs_weight(),
+                    amount=out_amount,
+                    recipe_id=rec.id,
+                ),
+            )
 
         # --- CONSUMES edges (input resource → location) ---
         for inp in rec.inputs:

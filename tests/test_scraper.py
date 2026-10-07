@@ -219,6 +219,41 @@ def test_recipe_production_times(client: FakeWikiClient) -> None:
     assert "wheat" not in rec
 
 
+def test_animal_feeding_recipes(client: FakeWikiClient) -> None:
+    rec = _by_id(parse_recipes(client, max_level=56))
+
+    assert rec["egg"]["location_id"] == "chicken_coop"
+    assert rec["egg"]["inputs"] == [{"resource_id": "chicken_feed", "amount": 1}]
+    assert rec["egg"]["production_time_seconds"] == 1200
+    assert rec["milk"]["location_id"] == "cow_pasture"
+    assert rec["milk"]["inputs"] == [{"resource_id": "cow_feed", "amount": 1}]
+    # honeycomb has no needs (nectar is not a good), so it stays a pure resource
+    assert "honeycomb" not in rec
+
+
+def test_caught_animal_needs_become_traps() -> None:
+    raw_recipe = {
+        "id": "lobster_tail",
+        "name": "Lobster tail",
+        "location_id": "lobster_pool",
+        "unlock_level": 44,
+        "inputs": [{"resource_id": "lobster", "amount": 1}],
+        "output": {"resource_id": "lobster_tail", "amount": 1},
+    }
+    raw_resources = [
+        {"id": "lobster_trap", "name": "Lobster trap", "type": "processed_material",
+         "unlock_level": 44, "source_location_id": "net_maker"},
+        {"id": "lobster_tail", "name": "Lobster tail", "type": "animal_product",
+         "unlock_level": 44, "source_location_id": "lobster_pool"},
+    ]
+    raw_locations = [
+        {"id": "net_maker", "name": "Net maker", "type": "production", "unlock_level": 30},
+        {"id": "lobster_pool", "name": "Lobster pool", "type": "animal", "unlock_level": 44},
+    ]
+    _, _, recipes = normalize(raw_locations, raw_resources, [raw_recipe])
+    assert recipes[0]["inputs"] == [{"resource_id": "lobster_trap", "amount": 1}]
+
+
 # ---------------------------------------------------------------------------
 # Level limits
 # ---------------------------------------------------------------------------

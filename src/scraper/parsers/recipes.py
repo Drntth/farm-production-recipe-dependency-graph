@@ -1,4 +1,4 @@
-"""Parse recipes (only production-location transformations)."""
+"""Parse recipes: production-building transformations and animal feeding."""
 
 from __future__ import annotations
 
@@ -9,7 +9,13 @@ from src.scraper.durations import parse_timed_cell
 from src.scraper.normalizer import to_snake_case
 from src.scraper.wiki_client import WikiClient
 
-from .resources import GOODS_TIME_COL, _cell_text, _extract_first_int, _parse_needs
+from .resources import (
+    GOODS_TIME_COL,
+    _cell_text,
+    _classify_type_and_source,
+    _extract_first_int,
+    _parse_needs,
+)
 
 
 def _is_recipe_source(source_text: str) -> bool:
@@ -40,12 +46,26 @@ def _is_recipe_source(source_text: str) -> bool:
     return bool(source_text.strip()) and "n/a" not in s
 
 
+def _feeding_location(
+    name: str, source_text: str, needs: list[tuple[str, int]]
+) -> str | None:
+    """Shelter id for an animal product that needs a feed, else None."""
+    if not needs:
+        return None
+    res_type, location_id = _classify_type_and_source(name, source_text, needs)
+    if res_type != "animal_product" or location_id == "animal":
+        return None
+    return location_id
+
+
 def parse_recipes(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     """
     Build recipes from the Goods List.
 
-    Only rows whose Source is a production building become recipes.
-    Animal products and raw crops are excluded (they are pure resources).
+    Rows whose Source is a production building become recipes. Animal
+    products with a feed in the Needs column become feeding recipes at their
+    shelter (e.g. chicken_coop: 1 chicken_feed -> 1 egg). Crops, ores and
+    goods without needs (honeycomb) stay pure resources.
     """
     soup = client.get_goods_list()
     table = soup.find("table", class_=re.compile(r"wikitable|article-table|sortable"))
@@ -78,17 +98,18 @@ def parse_recipes(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
         needs = _parse_needs(cells[5])
         source_text = _cell_text(cells[6])
 
-        if not _is_recipe_source(source_text):
-            continue
-
-        source_link = cells[6].find("a")
-        location_name = (
-            source_link.get_text(strip=True)
-            if source_link
-            else source_text.split("(")[0].strip()
-        )
-        location_id = to_snake_case(location_name)
-        location_id = re.sub(r"_x\d+$", "", location_id)
+        location_id = _feeding_location(name, source_text, needs)
+        if location_id is None:
+            if not _is_recipe_source(source_text):
+                continue
+            source_link = cells[6].find("a")
+            location_name = (
+                source_link.get_text(strip=True)
+                if source_link
+                else source_text.split("(")[0].strip()
+            )
+            location_id = to_snake_case(location_name)
+            location_id = re.sub(r"_x\d+$", "", location_id)
 
         recipe_id = to_snake_case(name)
         if recipe_id in seen:

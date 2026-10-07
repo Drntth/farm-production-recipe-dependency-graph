@@ -33,13 +33,18 @@
 | Fishing boat repair        | unlocks the fishing lake (see fishing-lake.md)                                                                                                                                                                                                                             | wiki:Fishing_Lake | 2026-10-05 |
 | Train station repair       | unlocks the town (see town.md)                                                                                                                                                                                                                                             | wiki:Town         | 2026-10-05 |
 
-These buildings are not in `data/` yet. Their footprints and whether they can be moved are open questions for the layout planner.
+These buildings are not in `data/`. Their footprints and positions differ per farm, so the player measures them into `config/farm_map.json` (the example lists their ids with empty positions); the layout planner treats them as fixed obstacles. Whether the game lets some of them move is still open.
 
 ## Placing and measuring
 
 | Fact                                         | Value                                                | Source  | Checked    |
 | -------------------------------------------- | ---------------------------------------------------- | ------- | ---------- |
 | Layout Edit Mode shows no tile grid          | -                                                    | in-game | 2026-10-05 |
+| Layout Edit Mode unlock                      | level 37 (farm), level 34 (town)                     | wiki:Edit_Mode | 2026-10-05 |
+| Layout slots                                 | 2 per area at start; extra slots 20 / 40 / 80 diamonds | wiki:Edit_Mode | 2026-10-05 |
+| A new layout starts empty                    | every movable item is stored; only fixed buildings remain | wiki:Edit_Mode | 2026-10-05 |
+| A layout can be set active only if complete  | all production buildings, fields, shelters, trees and bushes placed | wiki:Edit_Mode | 2026-10-05 |
+| Paintbrush tool                              | places fields, trees, bushes and decorations in rows | wiki:Edit_Mode | 2026-10-05 |
 | The shop shows an item's size before placing | e.g. "3x3" for the chicken coop                      | in-game | 2026-10-05 |
 | Measuring trick                              | 1x1 fields as a ruler; calibrated with the 4x4 dairy | in-game | 2026-10-05 |
 | Width / height convention of this project    | width = ↘ edge, height = ↙ edge from the top corner  | project | 2026-10-05 |
@@ -53,3 +58,8 @@ These buildings are not in `data/` yet. Their footprints and whether they can be
 | Special farm section                          | needs expansion permits (Wheel of Fortune, derby, valley shop, level thresholds) | wiki:Expansion | 2026-10-05 |
 | Town expansion available from                 | reputation level 3                                                               | wiki:Expansion | 2026-10-05 |
 | Number of cleared expansions                  | hard to count afterwards; not in the profile                                     | in-game        | 2026-10-05 |
+| Expansion locations                           | main section beside the farmhouse; second section across the main road (with special plots) | wiki:Expansion/Farm | 2026-10-05 |
+| Main section plots                            | 52 (plus 13 upper plots since summer 2021); each needs N deeds = N mallets = N stakes, 5-40 per plot | wiki:Expansion/Farm | 2026-10-05 |
+| Unlock order                                  | from the top; a cleared plot makes its neighbours unlockable                     | wiki:Expansion/Farm | 2026-10-05 |
+| Plot maps on the wiki                         | isometric images with plot numbers, no tile grid, no tile sizes                  | wiki:Expansion/Farm | 2026-10-05 |
+| Farm overview image on the wiki               | 2015 screenshot of the central area only, not to scale                           | wiki:Farm      | 2026-10-05 |

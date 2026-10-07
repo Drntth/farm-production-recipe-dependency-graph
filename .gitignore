@@ -227,3 +227,11 @@ output/*
 
 # Local player config (personal level / progress)
 config/player.json
+
+# Local farm map (measured positions of fixed buildings)
+config/farm_map.json
+config/*.png
+
+# Local agent instructions (not versioned)
+CLAUDE.local.md
+.claude/settings.local.json

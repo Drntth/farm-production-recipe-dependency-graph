@@ -110,6 +110,14 @@ def chain_dataset() -> DataSet:
             output=RecipeOutput(resource_id="cow_feed", amount=1),
         ),
         Recipe(
+            id="milk",
+            name="Milk",
+            location_id="cow_pasture",
+            unlock_level=6,
+            inputs=[RecipeInput(resource_id="cow_feed", amount=1)],
+            output=RecipeOutput(resource_id="milk", amount=1),
+        ),
+        Recipe(
             id="cream",
             name="Cream",
             location_id="dairy",
@@ -161,6 +169,15 @@ def test_known_dependency_paths(chain_graph: nx.DiGraph) -> None:
     # full dairy-side chain pieces
     assert nx.has_path(chain_graph, "milk", "cream")
     assert nx.has_path(chain_graph, "dairy", "cream")
+
+
+def test_feeding_recipe_keeps_produces_edge(chain_graph: nx.DiGraph) -> None:
+    # cow_feed ─CONSUMES→ cow_pasture; the milk edge stays a single PRODUCES edge
+    assert chain_graph["cow_feed"]["cow_pasture"][ATTR_EDGE_TYPE] == "consumes"
+    edge = chain_graph["cow_pasture"]["milk"]
+    assert edge[ATTR_EDGE_TYPE] == EdgeType.PRODUCES.value
+    assert edge[ATTR_WEIGHT] == pytest.approx(1.0)
+    assert nx.has_path(chain_graph, "feed_mill", "cream")
 
 
 def test_stoichiometry_weights(chain_graph: nx.DiGraph) -> None:

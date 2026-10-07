@@ -1,5 +1,22 @@
 [
   {
+    "id": "egg",
+    "name": "Egg",
+    "location_id": "chicken_coop",
+    "unlock_level": 1,
+    "inputs": [
+      {
+        "resource_id": "chicken_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "egg",
+      "amount": 1
+    },
+    "production_time_seconds": 1200
+  },
+  {
     "id": "chicken_feed",
     "name": "Chicken feed",
     "location_id": "feed_mill",
@@ -78,6 +95,23 @@
     },
     "production_time_seconds": 1200,
     "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "milk",
+    "name": "Milk",
+    "location_id": "cow_pasture",
+    "unlock_level": 6,
+    "inputs": [
+      {
+        "resource_id": "cow_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "milk",
+      "amount": 1
+    },
+    "production_time_seconds": 3600
   },
   {
     "id": "brown_sugar",
@@ -176,6 +210,23 @@
     },
     "production_time_seconds": 1800,
     "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "bacon",
+    "name": "Bacon",
+    "location_id": "pig_pen",
+    "unlock_level": 10,
+    "inputs": [
+      {
+        "resource_id": "pig_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bacon",
+      "amount": 1
+    },
+    "production_time_seconds": 14400
   },
   {
     "id": "cookie",
@@ -378,6 +429,23 @@
     },
     "production_time_seconds": 1800,
     "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "wool",
+    "name": "Wool",
+    "location_id": "sheep_pasture",
+    "unlock_level": 16,
+    "inputs": [
+      {
+        "resource_id": "sheep_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "wool",
+      "amount": 1
+    },
+    "production_time_seconds": 21600
   },
   {
     "id": "sweater",
@@ -772,6 +840,23 @@
     "production_time_3star_seconds": 1020
   },
   {
+    "id": "lamb_chop",
+    "name": "Lamb chop",
+    "location_id": "lamb_pasture",
+    "unlock_level": 25,
+    "inputs": [
+      {
+        "resource_id": "lamb_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lamb_chop",
+      "amount": 1
+    },
+    "production_time_seconds": 1800
+  },
+  {
     "id": "lamb_feed",
     "name": "Lamb feed",
     "location_id": "feed_mill",
@@ -924,6 +1009,31 @@
     },
     "production_time_seconds": 7200,
     "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "fish_fillet",
+    "name": "Fish fillet",
+    "location_id": "fishing_lake",
+    "unlock_level": 27,
+    "inputs": [
+      {
+        "resource_id": "lure",
+        "amount": 1
+      },
+      {
+        "resource_id": "fishing_net",
+        "amount": 1
+      },
+      {
+        "resource_id": "fishing_spot",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fish_fillet",
+      "amount": 1
+    },
+    "production_time_seconds": 0
   },
   {
     "id": "gold_lure",
@@ -1246,6 +1356,23 @@
     },
     "production_time_seconds": 2400,
     "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "goat_milk",
+    "name": "Goat milk",
+    "location_id": "goat_yard",
+    "unlock_level": 32,
+    "inputs": [
+      {
+        "resource_id": "goat_feed",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "goat_milk",
+      "amount": 1
+    },
+    "production_time_seconds": 28800
   },
   {
     "id": "lamb_doner_wrap",
@@ -2124,6 +2251,23 @@
     "production_time_3star_seconds": 7620
   },
   {
+    "id": "lobster_tail",
+    "name": "Lobster tail",
+    "location_id": "lobster_pool",
+    "unlock_level": 44,
+    "inputs": [
+      {
+        "resource_id": "lobster_trap",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lobster_tail",
+      "amount": 1
+    },
+    "production_time_seconds": 21600
+  },
+  {
     "id": "lobster_trap",
     "name": "Lobster trap",
     "location_id": "net_maker",
@@ -2537,6 +2681,23 @@
     },
     "production_time_seconds": 2700,
     "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "duck_feather",
+    "name": "Duck feather",
+    "location_id": "duck_salon",
+    "unlock_level": 50,
+    "inputs": [
+      {
+        "resource_id": "duck_trap",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "duck_feather",
+      "amount": 1
+    },
+    "production_time_seconds": 10800
   },
   {
     "id": "duck_trap",

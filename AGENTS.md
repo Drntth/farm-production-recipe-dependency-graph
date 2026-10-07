@@ -2,12 +2,14 @@
 
 Instructions for coding agents working in this repository. `CLAUDE.md` is a symlink to this file.
 
+Commit prefix: [HAYDAY-PROJECT]
+
 ## Project
 
 The project analyses Hay Day production chains. It turns locations, resources and recipes into a weighted directed graph (NetworkX). From that graph it detects production blocks for layout planning, and later plans production quantities. The concept, architecture and roadmap are in `README.md`.
 
-- Milestone done: **v0.5** (data foundation: timing, footprints, `area`, `movable`, `rotatable`, `level_limits.json`, `data/overrides/`, per-kind trees and bushes, player profile schema, `docs/`).
-- Next milestone: **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations such as nectar bush → beehive tree).
+- Milestone done: **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations, `config/farm_map.json`, animal feeding recipes).
+- Next milestone: **v0.7** (Production Planner: capacity model, quantities, mastery modifier, profile defaults, schedule).
 
 ## Read first
 
@@ -29,7 +31,7 @@ When you learn a new game fact (from the wiki, the web or the user), add a row t
 ## Architecture rules
 
 - A shared core (`src/config.py`, `src/models`, `src/loaders`, `src/graph`) feeds three tools.
-- The **Layout Planner** (planned `src/layout/`) and the **Production Planner** (planned `src/planner/`) are independent. Neither may import the other. Layout must work without production data.
+- The **Layout Planner** (`src/layout/`) and the **Production Planner** (planned `src/planner/`) are independent. Neither may import the other. Layout must work without production data.
 - The **Combiner** (planned) is the only place that joins the two.
 - Layout areas: `farm` (graph-driven), plus `town` and `fishing_lake`. Town and fishing lake have no quantity calculations.
 
@@ -42,16 +44,21 @@ pip install -r requirements.txt
 python -m pytest                          # all tests must pass (no network needed)
 python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
 python -m src.main --level 30             # override the player level
+python -m src.layout                      # farm layout: output/layout.svg, layout.md, layout.json
+# tools/farm_map_editor.html: open in a browser to measure config/farm_map.json from a screenshot
 python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.json, meta.json from the Fandom wiki
 ```
 
 ## Code map
 
 - `config/player.example.json` - the player profile (committed; currently holds the maintainer's values). `config/player.json` is local, git-ignored and takes precedence.
+- `config/farm_map.example.json` - fixed farm buildings with empty positions. `config/farm_map.json` (local, git-ignored) holds the player's measured map size, fixed positions, the calibrated screenshot (`background`, `config/*.png` is git-ignored) and the farm plots (`expansions`).
+- `tools/farm_map_editor.html` - self-contained browser tool that writes `farm_map.json` and exports PNGs. Its pure JS functions sit between `CORE-START` / `CORE-END` and are tested with node in `tests/test_farm_map_editor.py`; keep the JSON it writes in sync with `src/layout/farm_map.py`.
 - `src/config.py` - `PlayerConfig` (level, mastery system, barn / silo, fields, fishing spots, per-location `LocationProgress`), `load_player_config()`, `validate_player_config()`.
 - `src/models/` - pydantic models: `Location` (with `Area`, footprint, `movable`, `rotatable`, `animal_capacity`), `Resource` (`growth_time_seconds`), `Recipe` (`production_time_seconds`, `production_time_3star_seconds`), `LevelLimits` (`field_grants`, `location_instances`).
 - `src/loaders/json_loader.py` - loads `data/*.json`, merges `data/overrides/*.json` (`null` = skip), validates into a `DataSet` with optional `level_limits`, optional level filter.
 - `src/graph/` - graph builder, edge types (`relationship.py`), weights (`weighting.py`), analysis (`analysis.py`: proximity, Louvain blocks, centrality, paths).
+- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing), `planner.py` (`plan_layout`), `farm_map.py`, `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
 - `src/exporters/` - JSON / CSV / GraphML export. New node attributes must be added to the CSV column list and the GraphML key list.
 - `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations, resources, recipes, level_limits), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`), `writer.py`, `cli.py`.
 - `src/main.py` - CLI entry point.
@@ -90,6 +97,7 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 | Per-entity data the wiki lacks            | `data/overrides/*.json` (existing ids patched field by field, new ids added)                    |
 | Game rules (min / max, costs, mechanics)  | `docs/game-facts/*.md`; move into data or code only when code needs them                        |
 | Anything a player buys, upgrades or earns | the player profile (`config/player*.json`)                                                      |
+| The player's farm area and fixed building positions | `config/farm_map*.json`                                                               |
 
 ### Player profile
 

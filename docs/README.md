@@ -24,6 +24,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | Per-entity data the wiki lacks (footprints, …)  | `data/overrides/*.json`                 | hand, measured in game |
 | Game rules (min / max values, mechanics, costs) | `docs/game-facts/*.md`                  | hand, from wiki / game |
 | One player's farm state                         | `config/player.json`                    | the player             |
+| One player's farm map (size, fixed buildings)   | `config/farm_map.json`                  | the player, measured   |
 
 Rules are kept in Markdown, not in the data files, until code needs them. When a planner starts using a rule (e.g. the maximum of 9 slots), move the value into data or code and keep the fact row here as its source.
 

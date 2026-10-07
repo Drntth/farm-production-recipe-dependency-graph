@@ -36,13 +36,15 @@ class DataSet:
         resources: list[Resource],
         recipes: list[Recipe],
         level_limits: LevelLimits | None = None,
+        *,
+        log_external: bool = True,
     ) -> None:
         self.locations: dict[str, Location] = {loc.id: loc for loc in locations}
         self.resources: dict[str, Resource] = {res.id: res for res in resources}
         self.recipes: dict[str, Recipe] = {rec.id: rec for rec in recipes}
         self.level_limits: LevelLimits | None = level_limits
 
-        self._validate_references()
+        self._validate_references(log_external=log_external)
 
     # ------------------------------------------------------------------
     # Public helpers
@@ -70,7 +72,8 @@ class DataSet:
             if self.level_limits is not None
             else None
         )
-        return DataSet(locations, resources, recipes, limits)
+        # the full set already reported its external inputs
+        return DataSet(locations, resources, recipes, limits, log_external=False)
 
     def summary(self) -> str:
         return (
@@ -83,7 +86,16 @@ class DataSet:
     # Integrity checks
     # ------------------------------------------------------------------
 
-    def _validate_references(self) -> None:
+    def external_inputs(self) -> dict[str, list[str]]:
+        """Recipe inputs that are not resources (vouchers, diamonds, …) → recipe ids."""
+        result: dict[str, list[str]] = {}
+        for rec in self.recipes.values():
+            for inp in rec.inputs:
+                if inp.resource_id not in self.resources:
+                    result.setdefault(inp.resource_id, []).append(rec.id)
+        return {k: sorted(v) for k, v in sorted(result.items())}
+
+    def _validate_references(self, *, log_external: bool = True) -> None:
         """Raise ValueError if any foreign-key style reference is broken."""
         errors: list[str] = []
 
@@ -100,13 +112,6 @@ class DataSet:
                     f"Recipe '{rec.id}' references unknown location_id '{rec.location_id}'"
                 )
 
-            for inp in rec.inputs:
-                if inp.resource_id not in self.resources:
-                    logger.warning(
-                        "Recipe '%s' uses external resource '%s'",
-                        rec.id,
-                        inp.resource_id,
-                    )
             if rec.output.resource_id not in self.resources:
                 errors.append(
                     f"Recipe '{rec.id}' output references unknown resource_id "
@@ -120,6 +125,13 @@ class DataSet:
                         f"Level limit instance {inst.instance} references unknown "
                         f"location_id '{inst.location_id}'"
                     )
+
+        external = self.external_inputs()
+        if log_external and external:
+            logger.info(
+                "External recipe inputs (not graph nodes): %s",
+                ", ".join(f"{k} ({len(v)})" for k, v in external.items()),
+            )
 
         if errors:
             raise ValueError(

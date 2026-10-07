@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest*)",
+      "Bash(python -m src.main*)",
+      "Bash(python -m src.layout*)"
+    ],
+    "ask": [
+      "Bash(python -m src.scraper*)",
+      "Edit(data/**)",
+      "Edit(AGENTS.md)"
+    ]
+  }
+}

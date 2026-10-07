@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v0.5 (data foundation) is complete; v0.6 (standalone Layout Planner) is next. See the [Roadmap](#roadmap).
+**Status:** v0.6 (standalone Layout Planner for the farm) is complete; v0.7 (Production Planner) is next. See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -76,7 +76,18 @@ The farm layout is driven by the dependency graph. The town and fishing lake lay
    - CONSUMES (resource → location, weight = input/output ratio)
    - OUTPUTS (location → resource)
 3. Derives a location-proximity graph (multi-level weight propagation with decay).
-4. Detects **production blocks** via community detection on the proximity graph.
+4. Detects **production blocks** via community detection on the proximity graph (`python -m src.main`, `analysis.json`).
+5. Builds **named blocks** for placement (`python -m src.layout`, `src/layout/blocks.py`):
+   - every production building is an anchor;
+   - every tree, bush and animal shelter joins the anchor with the strongest direct coupling;
+   - support relations pull non-production neighbours along (nectar bushes join the beehive tree);
+   - a lone building merges into the block it is most coupled to (at most 3 buildings per block); a big crop user (at least 10 % of the farm's crop demand, e.g. the feed mill) is never lone, because its fields are its suppliers;
+   - the block is named after its main building ("Dairy block").
+6. Counts the copies per location: player profile, else everything the level allows, else one placeholder tree / bush (the Combiner will size them).
+7. Gives **every block its own fields** (`src/layout/fields.py`), so crops such as corn for the feed mill or sugarcane for the sugar mill can stay planted: the fields are shared out in proportion to the block's crop demand (sum of the crop CONSUMES weights into its buildings), at least one per crop-using block. `--field-pool 0.1` keeps 10 % in a separate "Shared fields block". The counts are estimates until the Production Planner sizes them.
+8. Packs each block (buildings one by one, fields / trees / bushes as patches), grows its frame by a reserve (default 20 %) and keeps unlocked but not yet owned copies as reserved space.
+9. Packs the block frames on the farm map around the fixed buildings, one free tile apart, pulling coupled blocks together.
+10. Writes `output/layout.svg` (isometric tile grid with every footprint), `output/layout.md` (block list, upstream → downstream order, recommended neighbourhoods) and `output/layout.json`.
 
 A production block is a movable logical unit, for example:
 
@@ -91,7 +102,38 @@ A production block is a movable logical unit, for example:
 - **Fixed buildings** (`movable: false`): the mine and the fishing lake buildings stay where they are.
 - **Rotation** (`rotatable`): non-square items that can be turned, e.g. the 1×2 raspberry and blackberry bushes and the 3×2 ice cream maker.
 - **Copies per level** (`level_limits.json`): how many feed mills, coops, … are available.
-- **Support relations** (planned for v0.6): non-production neighbours, e.g. nectar bushes next to the beehive tree.
+- **Support relations** (`src/layout/support.py`): non-production neighbours, e.g. nectar bushes next to the beehive tree.
+
+### Farm map (player data)
+
+Every farm has its own expansions and its own spot for the farmhouse, barn, silo, mine, …, so the usable area is player data: `config/farm_map.json` (git-ignored; the committed `config/farm_map.example.json` lists the fixed farm buildings with empty positions).
+
+```json
+{
+  "width": 60,
+  "height": 55,
+  "fixed": [
+    { "id": "farmhouse", "x": 20, "y": 18, "width": 6, "height": 6 },
+    { "id": "mine", "x": 52, "y": 2, "width": 4, "height": 4 },
+    { "id": "silo", "x": null, "y": null, "width": null, "height": null }
+  ]
+}
+```
+
+The values above are only an illustration. Coordinates are tiles from the farm's top corner, with `x` along the ↘ edge and `y` along the ↙ edge. `null` means not measured yet: without `width` / `height` the layout is unbounded, and a fixed item without a position is listed in the notes but not drawn. A fixed item whose id is a location (`mine`) also pulls the coupled block (smelter) toward it.
+
+The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored.
+
+#### Measuring with the map editor
+
+`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded):
+
+1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
+2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored).
+3. **Calibrate**: load the PNG, click A (top corner of the corner field), B (right corner of the last ↘ field), C (left corner of the last ↙ field), enter the two row lengths and apply. The grid must follow the field edges everywhere.
+4. **Fixed**: pick an id (farmhouse, barn, silo, mine, …) and drag over its tiles.
+5. **Expansions**: add a plot (section + wiki number, unlocked or not) and drag one or more rectangles over its tiles; Alt + click removes a rectangle.
+6. **Export**: `farm_map.json` (save it as `config/farm_map.json`), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
 
 The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
 
@@ -100,7 +142,7 @@ The game's Layout Edit Mode shows no tile grid, so the graphical output always d
 | Horizon     | Output                                                                                                                                                                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Short term  | Weighted graph + detected production blocks (done)                                                                                                                       |
-| Medium term | Named blocks with footprints and a simple graphical layout, without production data                                                                                      |
+| Medium term | Named blocks with footprints and a simple graphical layout, without production data (done, v0.6)                                                                         |
 | Long term   | Complete expansion-friendly layout per area, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations. |
 
 ---
@@ -260,8 +302,8 @@ Allowed `type` values: `crop`, `animal_product`, `processed_material`, `raw_mate
 
 ### recipes.json
 
-Transformations that happen inside production locations.  
-Animal products and raw crops are resources, not recipes.
+Transformations that happen inside production locations, plus **feeding recipes** at animal shelters (`chicken_coop`: 1 `chicken_feed` → 1 `egg`), taken from the Goods List "Needs" column.  
+Raw crops, ores and goods without needs (honeycomb) are resources only. The wiki names the caught animal for the lobster pool and duck salon; the normalizer maps it to the trap that catches it (`lobster` → `lobster_trap`, `duck` → `duck_trap`), so the net maker feeds the fishing-lake shelters.
 
 ```json
 {
@@ -387,7 +429,8 @@ location  ──PRODUCES──►  resource  ──CONSUMES──►  location  
 
 3. **OUTPUTS** (`location → resource`)  
    Created for every recipe output.  
-   Captures “this building produces this (processed) good”.
+   Captures “this building produces this (processed) good”.  
+   Skipped for feeding recipes, whose output already has a PRODUCES edge (`cow_feed ─CONSUMES→ cow_pasture ─PRODUCES→ milk`).
 
 ### Weighting rules
 
@@ -429,9 +472,10 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-05. The 1.7
 
 ## Roadmap
 
-**Current status:** v0.5 is complete (79 tests passing). Next milestone: v0.6 (Standalone Layout Planner).  
-Current data set (level 56): 46 locations (8 tree / bush kinds incl. the nectar bush, 6 fixed, 5 on the fishing lake), 167 resources, 126 recipes, 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base and a 3-star time, and every movable location has a footprint.  
-Next step: start v0.6 with named production blocks built from the detected communities, each with a footprint (sum of its buildings plus fields).
+**Current status:** v0.6 is complete (113 tests passing). Next milestone: v0.7 (Production Planner).  
+Current data set (level 56): 46 locations (8 tree / bush kinds incl. the nectar bush, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
+The Layout Planner (`python -m src.layout`) arranges 14 named blocks for level 56. Measuring the fixed buildings into `config/farm_map.json` makes the layout fit the real farm.  
+Next step: start v0.7 with the capacity model and the profile defaults.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -464,17 +508,22 @@ Next step: start v0.6 with named production blocks built from the detected commu
 - [x] Scraper tests with saved HTML fixtures
 - [x] Game knowledge collected in [docs/](docs/README.md): game facts by category, game updates, data sources, player profile
 
-### v0.6 - Standalone Layout Planner (farm) (next)
+### v0.6 - Standalone Layout Planner (farm) (done)
 
-- [ ] Support relations outside the production graph: nectar bushes near the beehive tree (the wiki says distance slows the bees)
-- [ ] Fixed buildings (`movable: false`) kept in place; only movable items are arranged
-- [ ] Non-square items placed in both orientations when `rotatable` is true, otherwise only as stored
-- [ ] Usable farm area: free space and the fixed non-production buildings (farmhouse, barn, silo, …; see [docs/game-facts/farm.md](docs/game-facts/farm.md))
-- [ ] Named production blocks (Dairy block, Bakery block, Feed + Animals block, …) with footprints
-- [ ] Expansion-friendly placement heuristics (reserve space for later unlocks)
-- [ ] Simple graphical layout (SVG with coloured block frames and labels), without production data
-- [ ] Always draw the isometric tile grid, with every item's footprint, because the game's Layout Edit Mode shows none
-- [ ] Textual layout description: block list, recommended neighbourhoods and relative order
+- [x] Support relations outside the production graph: nectar bushes near the beehive tree (the wiki says distance slows the bees)
+- [x] Fixed buildings (`movable: false`) kept in place; only movable items are arranged
+- [x] Non-square items placed in both orientations when `rotatable` is true, otherwise only as stored
+- [x] Usable farm area: free space and the fixed non-production buildings (farmhouse, barn, silo, …; see [docs/game-facts/farm.md](docs/game-facts/farm.md)), measured by the player in `config/farm_map.json`
+- [x] Named production blocks (Dairy block, Bakery block, Feed mill block, …) with footprints
+- [x] Expansion-friendly placement heuristics (reserve space for later unlocks): reserved copies plus a configurable free margin per block
+- [x] Simple graphical layout (SVG with coloured block frames and labels), without production data
+- [x] Always draw the isometric tile grid, with every item's footprint, because the game's Layout Edit Mode shows none
+- [x] Textual layout description: block list, recommended neighbourhoods and relative order
+- [x] Animal feeding recipes scraped from the Goods List (feed mill → shelters in the graph); lobster / duck needs mapped to the lobster / duck trap
+- [x] Dedicated fields per block, shared out by crop demand (optional shared pool)
+- [x] Farm map editor (`tools/farm_map_editor.html`): screenshot calibration, fixed buildings, farm plots; exports JSON, full map PNG and per-plot pieces
+- [x] Screenshot under the SVG grid; blocks only on unlocked plots
+- [x] External recipe inputs logged once, as one summary line
 
 ### v0.7 - Production Planner
 
@@ -548,6 +597,11 @@ python -m src.main --data-dir data --output-dir output
 
 # skip analysis if only the graph is needed
 python -m src.main --no-analysis
+
+# farm layout: named blocks, isometric SVG, text description
+# optional: measure config/farm_map.json with tools/farm_map_editor.html (see "Farm map")
+python -m src.layout
+python -m src.layout --level 30 --reserve 0.3 --gap 1 --field-pool 0.1
 ```
 
 Output lands in `output/`:
@@ -558,10 +612,13 @@ output/
 ├── graph_nodes.csv
 ├── graph_edges.csv
 ├── graph.graphml
-└── analysis.json
+├── analysis.json
+├── layout.json                        # python -m src.layout
+├── layout.md
+└── layout.svg
 ```
 
-Later versions will add `schedule.json`, layout descriptions and visual files to the same directory.
+Later versions will add `schedule.json` to the same directory.
 
 Update data from the wiki (level from the player config):
 
@@ -589,7 +646,10 @@ farm-production-recipe-dependency-graph/
 │   └── player-profile.md              # player-specific settings and profile schema
 ├── config/
 │   ├── player.example.json            # example player config (committed)
-│   └── player.json                    # your own config (git-ignored)
+│   ├── player.json                    # your own config (git-ignored)
+│   ├── farm_map.example.json          # fixed farm buildings, positions empty (committed)
+│   ├── farm_map.json                  # your measured farm map (git-ignored)
+│   └── farm_background.png            # your stitched farm screenshot (git-ignored)
 ├── data/
 │   ├── locations.json                 # locations (buildings, fields, animals…)
 │   ├── resources.json                 # crops, animal products, processed goods, ores
@@ -625,7 +685,17 @@ farm-production-recipe-dependency-graph/
 │   │   ├── location.py
 │   │   ├── recipe.py
 │   │   └── resource.py
-│   ├── layout/                        # (planned, v0.6) Layout Planner
+│   ├── layout/                        # Layout Planner (farm)
+│   │   ├── blocks.py                  # named blocks (anchor method), flow order
+│   │   ├── cli.py                     # python -m src.layout
+│   │   ├── describe.py                # layout.md / layout.json
+│   │   ├── farm_map.py                # config/farm_map*.json model and loader
+│   │   ├── fields.py                  # dedicated fields per block (crop demand)
+│   │   ├── inventory.py               # copies per location (profile → level)
+│   │   ├── packing.py                 # greedy rectangle packing on the tile grid
+│   │   ├── planner.py                 # plan_layout(): blocks → frames → farm
+│   │   ├── render_svg.py              # isometric SVG with tile grid
+│   │   └── support.py                 # support relations (nectar bush → beehive tree)
 │   ├── planner/                       # (planned, v0.7) Production Planner
 │   ├── scraper/
 │   │   ├── parsers/
@@ -639,14 +709,18 @@ farm-production-recipe-dependency-graph/
 │   │   ├── wiki_client.py
 │   │   └── writer.py
 │   └── main.py
+├── tools/
+│   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
 │   ├── fixtures/wiki/                 # trimmed wiki HTML for scraper tests
 │   ├── test_analysis.py
 │   ├── test_config.py
 │   ├── test_exporters.py
+│   ├── test_farm_map_editor.py        # editor JS core via node (skipped without node)
 │   ├── test_graph_builder.py
 │   ├── test_graph_quality.py
 │   ├── test_json_loader.py
+│   ├── test_layout.py
 │   ├── test_level_limits.py
 │   ├── test_models.py
 │   └── test_scraper.py

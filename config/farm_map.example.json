@@ -1,0 +1,25 @@
+{
+  "width": null,
+  "height": null,
+  "fixed": [
+    {"id": "farmhouse", "x": null, "y": null, "width": null, "height": null},
+    {"id": "mailbox", "x": null, "y": null, "width": null, "height": null},
+    {"id": "newspaper_mailbox", "x": null, "y": null, "width": null, "height": null},
+    {"id": "roadside_shop", "x": null, "y": null, "width": null, "height": null},
+    {"id": "truck", "x": null, "y": null, "width": null, "height": null},
+    {"id": "riverboat", "x": null, "y": null, "width": null, "height": null},
+    {"id": "wheel_of_fortune_truck", "x": null, "y": null, "width": null, "height": null},
+    {"id": "silo", "x": null, "y": null, "width": null, "height": null},
+    {"id": "barn", "x": null, "y": null, "width": null, "height": null},
+    {"id": "mine", "x": null, "y": null, "width": null, "height": null},
+    {"id": "maggies_workbench", "x": null, "y": null, "width": null, "height": null},
+    {"id": "helpers_house", "x": null, "y": null, "width": null, "height": null},
+    {"id": "event_board", "x": null, "y": null, "width": null, "height": null},
+    {"id": "neighborhood_house", "x": null, "y": null, "width": null, "height": null},
+    {"id": "derby_stand", "x": null, "y": null, "width": null, "height": null},
+    {"id": "leaderboard", "x": null, "y": null, "width": null, "height": null},
+    {"id": "fishing_boat", "x": null, "y": null, "width": null, "height": null},
+    {"id": "train_station", "x": null, "y": null, "width": null, "height": null},
+    {"id": "valley_board", "x": null, "y": null, "width": null, "height": null}
+  ]
+}

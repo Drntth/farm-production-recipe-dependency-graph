@@ -23,7 +23,7 @@ Many values that the planners need are not tied to the player level. The player 
 | Town hall / train station / service building levels | town                           | upgrades                               | (v0.8)                              | lowest level                                | Town layout (v0.8) |
 | Mastery system                                      | whole farm                     | game rollout (stars → Workbench)       | `mastery_system`                    | `stars`                                     | Production         |
 
-Dropped: **farm land expansions**. Players cannot reliably count cleared expansions afterwards. The usable farm area will be handled by the layout planner instead (v0.6: measure or draw the free area).
+Dropped: **farm land expansions**. Players cannot reliably count cleared expansions afterwards. The usable farm area is handled by the layout planner instead: the player measures the map size and the fixed buildings into `config/farm_map.json`.
 
 Out of scope: helpers (Tom, Rose, Ernest), boosters and events. They are temporary or optional and do not change the static plan.
 
@@ -111,4 +111,4 @@ Future database mapping (3NF): `player(level, mastery_system, barn_capacity, sil
 ## Shared data still needed for good defaults
 
 - Base slots per building (wiki infobox `slots`; scraper extension in v0.7).
-- Farm map size and free area (layout space limits, v0.6).
+- Farm map size and free area: player-measured in `config/farm_map.json` with `tools/farm_map_editor.html` (v0.6); no shared default exists. Unlocked farm plots are marked there too, by wiki plot number.

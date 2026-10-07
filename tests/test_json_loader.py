@@ -135,3 +135,18 @@ def test_level_limits_unknown_location_rejected(data_dir: Path) -> None:
 
 def test_level_limits_optional(data_dir: Path) -> None:
     assert load_data(data_dir).level_limits is None
+
+
+def test_external_inputs_logged_once(data_dir: Path, caplog: pytest.LogCaptureFixture) -> None:
+    recipes = json.loads((data_dir / "recipes.json").read_text())
+    recipes[0]["inputs"].append({"resource_id": "voucher", "amount": 2})
+    _write(data_dir / "recipes.json", recipes)
+
+    with caplog.at_level("INFO", logger="src.loaders.json_loader"):
+        ds = load_data(data_dir)
+        ds.filter_by_max_level(10)
+
+    assert ds.external_inputs() == {"voucher": ["cream"]}
+    lines = [r for r in caplog.records if "External recipe inputs" in r.getMessage()]
+    assert len(lines) == 1 and "voucher (1)" in lines[0].getMessage()
+    assert not [r for r in caplog.records if r.levelname == "WARNING"]

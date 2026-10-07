@@ -20,6 +20,8 @@ The scraper uses the MediaWiki API (`https://hayday.fandom.com/api.php`), not th
 
 `Name | Level | Max. price | Time | XP | Needs | Source | Per boat crate`. The Time column holds `base ★★★ mastered` (e.g. `30 min ★★★ 25 min`) for processed goods and the growth / animal time for raw goods. "Instant" is stored as 0.
 
+Animal products with a feed in the Needs column (`Egg`: `Chicken feed (1)`) also become **feeding recipes** at their shelter, with the animal time as `production_time_seconds` and no 3-star time. The lobster pool and duck salon rows name the caught animal (`Lobster`, `Duck`); one animal is caught with exactly one trap (wiki: Lobster_Tail, Duck_Feather), so `normalizer.NEED_ALIASES` maps them to `lobster_trap` / `duck_trap`. The fishing lake row names `lure` (any lure) and `fishing_spot`, which are not goods; the loader lists such external inputs in one INFO line and they never become graph nodes.
+
 ## Read but not scraped
 
 Pages that were read by hand for the facts in `docs/game-facts/`: Production_Buildings, Feed_Mill, Smelter, Lobster_Pool, Duck_Salon, Chicken_Coop, Beehive_Tree, Nectar_Bush, Barn, Silo, Farm, Crops, Expansion, Fishing_Lake, Town, Update, Birthday_Balloon_Maker, Category:Town_Buildings, Category:Service_Buildings.
@@ -37,6 +39,8 @@ Candidates for future scraping: the infobox `slots` of every production building
 ## Player-specific
 
 `config/player.json` (or the committed example): level, mastery system, barn / silo, fields, fishing spots, and per-location slots, mastery, copies, animals, beehives. See [player-profile.md](player-profile.md).
+
+`config/farm_map.json` (or the committed example): the usable farm size, the positions of the fixed buildings (farmhouse, barn, silo, mine, …), the calibrated farm screenshot and the farm plots with their unlocked state, measured by the player with `tools/farm_map_editor.html`. See the README section "Farm map".
 
 ## Not available
 

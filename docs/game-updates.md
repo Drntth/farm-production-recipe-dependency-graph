@@ -46,6 +46,7 @@ Data in the repository was scraped for game version 1.72 at level 56 (see `data/
 | Rotation of trees and bushes is ambiguous ("Both can be rotated")               | `rotatable` in `data/overrides/`, from game | 2026-10-05 |
 | Lobster pool / duck salon slot cost: text says coins, table shows diamond icons | noted in `game-facts/animals.md`            | 2026-10-05 |
 | "No limit" on fields vs. per-level field grants                                 | noted in `game-facts/farm.md`               | 2026-10-05 |
+| Goods List "Needs" names the caught animal (lobster, duck), not the trap        | `NEED_ALIASES` in `scraper/normalizer.py`   | 2026-10-05 |
 
 ## Corrections of earlier assumptions
 

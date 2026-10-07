@@ -47,7 +47,7 @@ The values are stored in `data/overrides/locations.json`.
 | Distance between bush and beehive tree                              | farther = slower bees while online; no effect offline                          | wiki:Nectar_Bush  | 2026-10-05 |
 | Nectar bush footprint                                               | 1x1                                                                            | in-game           | 2026-10-05 |
 
-Layout consequence: nectar bushes belong next to the beehive tree (v0.6 support relation).
+Layout consequence: nectar bushes belong next to the beehive tree (support relation in `src/layout/support.py`).
 
 ## Lobster pool and duck salon (fishing lake)
 
@@ -61,4 +61,7 @@ Layout consequence: nectar bushes belong next to the beehive tree (v0.6 support 
 | Cannot be moved, rotated or mastered | -                                                                   | wiki:Lobster_Pool, wiki:Duck_Salon | 2026-10-05 |
 | Catching a lobster                   | 6 h; at most 6 tails per 12 h with steady traps                     | wiki:Lobster_Pool                  | 2026-10-05 |
 | Catching a duck                      | 2 h; at most 6 feathers per 5 h with steady traps                   | wiki:Duck_Salon                    | 2026-10-05 |
+| One trap catches one animal          | lobster trap → 1 lobster (6 h); duck trap → 1 duck (2 h)            | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
+| Time in the building per animal      | lobster pool 6 h per tail; duck salon 3 h per feather               | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
+| Traps cost nothing                   | made at the net maker without materials                             | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
 | Maintainer's slots                   | lobster pool 3, duck salon 1                                        | in-game                            | 2026-10-05 |
