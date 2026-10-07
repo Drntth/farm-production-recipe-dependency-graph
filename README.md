@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v0.6 (standalone Layout Planner for the farm) is complete; v0.7 (Production Planner) is next. See the [Roadmap](#roadmap).
+**Status:** v0.6 (standalone Layout Planner for the farm) is implemented; its last step, measuring the real farm map with the editor, is open. v0.7 (Production Planner) follows. See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -142,7 +142,7 @@ The game's Layout Edit Mode shows no tile grid, so the graphical output always d
 | Horizon     | Output                                                                                                                                                                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Short term  | Weighted graph + detected production blocks (done)                                                                                                                       |
-| Medium term | Named blocks with footprints and a simple graphical layout, without production data (done, v0.6)                                                                         |
+| Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, farm map pending)                                                                         |
 | Long term   | Complete expansion-friendly layout per area, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations. |
 
 ---
@@ -472,10 +472,10 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-05. The 1.7
 
 ## Roadmap
 
-**Current status:** v0.6 is complete (113 tests passing). Next milestone: v0.7 (Production Planner).  
+**Current status:** v0.6 is implemented (115 tests passing); the stitched farm map is not measured yet. Next milestone after that: v0.7 (Production Planner).  
 Current data set (level 56): 46 locations (8 tree / bush kinds incl. the nectar bush, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 14 named blocks for level 56. Measuring the fixed buildings into `config/farm_map.json` makes the layout fit the real farm.  
-Next step: start v0.7 with the capacity model and the profile defaults.
+Next step: finish v0.6 by measuring the stitched farm screenshot into `config/farm_map.json` with the editor; then start v0.7 with the capacity model and the profile defaults.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -508,7 +508,7 @@ Next step: start v0.7 with the capacity model and the profile defaults.
 - [x] Scraper tests with saved HTML fixtures
 - [x] Game knowledge collected in [docs/](docs/README.md): game facts by category, game updates, data sources, player profile
 
-### v0.6 - Standalone Layout Planner (farm) (done)
+### v0.6 - Standalone Layout Planner (farm) (in progress)
 
 - [x] Support relations outside the production graph: nectar bushes near the beehive tree (the wiki says distance slows the bees)
 - [x] Fixed buildings (`movable: false`) kept in place; only movable items are arranged
@@ -524,6 +524,7 @@ Next step: start v0.7 with the capacity model and the profile defaults.
 - [x] Farm map editor (`tools/farm_map_editor.html`): screenshot calibration, fixed buildings, farm plots; exports JSON, full map PNG and per-plot pieces
 - [x] Screenshot under the SVG grid; blocks only on unlocked plots
 - [x] External recipe inputs logged once, as one summary line
+- [ ] Stitched farm screenshot finalised in the editor: calibration, fixed buildings and farm plots saved to `config/farm_map.json`; layout checked against the real farm (required before v0.7)
 
 ### v0.7 - Production Planner
 

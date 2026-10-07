@@ -8,7 +8,8 @@ Commit prefix: [HAYDAY-PROJECT]
 
 The project analyses Hay Day production chains. It turns locations, resources and recipes into a weighted directed graph (NetworkX). From that graph it detects production blocks for layout planning, and later plans production quantities. The concept, architecture and roadmap are in `README.md`.
 
-- Milestone done: **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations, `config/farm_map.json`, animal feeding recipes).
+- Milestone done: **v0.5** (data foundation).
+- Current milestone: **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations, `config/farm_map.json`, animal feeding recipes). Code done; open: the stitched farm map measured with `tools/farm_map_editor.html`. Do not start v0.7 before it is done.
 - Next milestone: **v0.7** (Production Planner: capacity model, quantities, mastery modifier, profile defaults, schedule).
 
 ## Read first
