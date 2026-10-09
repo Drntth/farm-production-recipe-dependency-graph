@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v0.6 (standalone Layout Planner for the farm) is implemented; its last step, measuring the real farm map with the editor, is open. v0.7 (Production Planner) follows. See the [Roadmap](#roadmap).
+**Status:** v0.6 (standalone Layout Planner for the farm) is done, measured on the real farm. v0.7 (Production Planner) is next. See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -85,7 +85,7 @@ The farm layout is driven by the dependency graph. The town and fishing lake lay
    - the block is named after its main building ("Dairy block").
 6. Counts the copies per location: player profile, else everything the level allows, else one placeholder tree / bush (the Combiner will size them).
 7. Gives **every block its own fields** (`src/layout/fields.py`), so crops such as corn for the feed mill or sugarcane for the sugar mill can stay planted: the fields are shared out in proportion to the block's crop demand (sum of the crop CONSUMES weights into its buildings), at least one per crop-using block. `--field-pool 0.1` keeps 10 % in a separate "Shared fields block". The counts are estimates until the Production Planner sizes them.
-8. Packs each block (buildings one by one, fields / trees / bushes as patches), grows its frame by a reserve (default 20 %) and keeps unlocked but not yet owned copies as reserved space.
+8. Packs each block (buildings one by one, fields / trees / bushes as patches), grows its frame by a reserve (default 20 %; when a block would not fit on the map, the blocks are also tried largest first, then the reserve is lowered in 1 % steps down to 0) and keeps unlocked but not yet owned copies as reserved space.
 9. Packs the block frames on the farm map around the fixed buildings, one free tile apart, pulling coupled blocks together.
 10. Writes `output/layout.svg` (isometric tile grid with every footprint), `output/layout.md` (block list, upstream → downstream order, recommended neighbourhoods) and `output/layout.json`.
 
@@ -122,18 +122,24 @@ Every farm has its own expansions and its own spot for the farmhouse, barn, silo
 
 The values above are only an illustration. Coordinates are tiles from the farm's top corner, with `x` along the ↘ edge and `y` along the ↙ edge. `null` means not measured yet: without `width` / `height` the layout is unbounded, and a fixed item without a position is listed in the notes but not drawn. A fixed item whose id is a location (`mine`) also pulls the coupled block (smelter) toward it.
 
-The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored.
+The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored. Plots of section `base` (the starting land) always count as unlocked. The barn and silo are movable: without a position in `fixed` the planner places them as the Storage block. `zones` are hand-marked tile rectangles: blocks stay inside the `buildable` zones (if any) and never touch `blocked` ones (water, road, forest, …).
 
 #### Measuring with the map editor
 
 `tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded):
 
 1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
-2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored).
+2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored). Keep the GIMP file (`.xcf`) and the raw screenshots in `config/screenshots/`, and the wiki plot maps used on the Reference tab in `config/reference/`; both folders are git-ignored (player data, wiki licence, file size). Manual stitching in GIMP:
+   - Take all screenshots in **one session**, with overlap between neighbours. After closing the game the same zoom cannot be reproduced, and details of locked plots (e.g. stone wall textures) change, so later shots do not match.
+   - **File → Open as Layers** loads all screenshots at once; enlarge the canvas with **Image → Canvas Size** (resize layers: none), then move each layer into place by hand.
+   - Small black gaps where no screenshot covers the farm are acceptable, as long as the ruler fields and the fixed buildings are visible.
+   - Tile accuracy is enough: an error of a few pixels does not matter for the calibration.
 3. **Calibrate**: load the PNG, click A (top corner of the corner field), B (right corner of the last ↘ field), C (left corner of the last ↙ field), enter the two row lengths and apply. The grid must follow the field edges everywhere.
 4. **Fixed**: pick an id (farmhouse, barn, silo, mine, …) and drag over its tiles.
-5. **Expansions**: add a plot (section + wiki number, unlocked or not) and drag one or more rectangles over its tiles; Alt + click removes a rectangle.
-6. **Export**: `farm_map.json` (save it as `config/farm_map.json`), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
+5. **Reference** (optional): overlay the wiki plot map (Expansion/Farm) to trace plot borders that unlocked plots no longer show. Click 3 point pairs far apart, each first on the overlay and then on the same spot of the farm (r1, m1, r2, m2, r3, m3); the overlay is scaled and moved onto the farm. It is not saved in the JSON.
+6. **Expansions**: add a plot (section + wiki number, unlocked or not) and drag one or more rectangles over its tiles; touching rectangles of one plot merge into one shape, Alt + drag erases tiles.
+7. **Zones**: mark the farm sections as **buildable** (green) and water, roads, forest, … as **blocked** (red), each as tile rectangles.
+8. **Export**: `farm_map.json` (save it as `config/farm_map.json`; by default the map is cropped to the farm with a 5-tile margin, so the outline follows the real farm), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
 
 The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
 
@@ -142,7 +148,7 @@ The game's Layout Edit Mode shows no tile grid, so the graphical output always d
 | Horizon     | Output                                                                                                                                                                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Short term  | Weighted graph + detected production blocks (done)                                                                                                                       |
-| Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, farm map pending)                                                                         |
+| Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, farm map pending)                                                             |
 | Long term   | Complete expansion-friendly layout per area, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations. |
 
 ---
@@ -271,10 +277,10 @@ Everything that occupies space (production buildings, animal shelters, fields, t
 ```
 
 Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.  
-Allowed `area` values: `farm` (default), `town`, `fishing_lake`. The scraper sets `fishing_lake` from the wiki category *Fishing Lake Buildings*.  
+Allowed `area` values: `farm` (default), `town`, `fishing_lake`. The scraper sets `fishing_lake` from the wiki category _Fishing Lake Buildings_.  
 `movable` is `true` by default. It is `false` for fixed buildings the player cannot move (mine, fishing lake buildings).  
 `rotatable` is `false` by default. It is `true` when the footprint can be turned (width and height swapped). It only matters for non-square footprints such as the 1×2 bushes or the 3×2 ice cream maker.  
-Every fruit tree and bush kind is its own location (`apple_tree`, `raspberry_bush`, …), because each is placed separately and has its own footprint and fruit. Trees and bushes that produce no goods (the nectar bush) come from the wiki category *Trees and Bushes*.  
+Every fruit tree and bush kind is its own location (`apple_tree`, `raspberry_bush`, …), because each is placed separately and has its own footprint and fruit. Trees and bushes that produce no goods (the nectar bush) come from the wiki category _Trees and Bushes_.  
 Optional fields:
 
 - `footprint_width` / `footprint_height`: size in tiles, both or neither. The wiki lists them for production buildings only; the rest come from `data/overrides/`.
@@ -346,12 +352,15 @@ Written by the scraper. It records where and when the data came from, and is use
 
 Level-gated limits, as two 3NF tables:
 
-- `field_grants`: new fields per level (from the wiki's *Experience Levels* pages). The total at a level is the sum of all grants up to that level.
+- `field_grants`: new fields per level (from the wiki's _Experience Levels_ pages). The total at a level is the sum of all grants up to that level.
 - `location_instances`: one row per placeable copy of a production building or shelter, with its unlock level (e.g. the second Feed Mill at level 12).
 
 ```json
 {
-  "field_grants": [{ "level": 1, "count": 6 }, { "level": 3, "count": 3 }],
+  "field_grants": [
+    { "level": 1, "count": 6 },
+    { "level": 3, "count": 3 }
+  ],
   "location_instances": [
     { "location_id": "feed_mill", "instance": 1, "unlock_level": 2 },
     { "location_id": "feed_mill", "instance": 2, "unlock_level": 12 }
@@ -472,10 +481,10 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-05. The 1.7
 
 ## Roadmap
 
-**Current status:** v0.6 is implemented (115 tests passing); the stitched farm map is not measured yet. Next milestone after that: v0.7 (Production Planner).  
-Current data set (level 56): 46 locations (8 tree / bush kinds incl. the nectar bush, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
-The Layout Planner (`python -m src.layout`) arranges 14 named blocks for level 56. Measuring the fixed buildings into `config/farm_map.json` makes the layout fit the real farm.  
-Next step: finish v0.6 by measuring the stitched farm screenshot into `config/farm_map.json` with the editor; then start v0.7 with the capacity model and the profile defaults.
+**Current status:** v0.6 is done (131 tests passing), with the real farm measured into `config/farm_map.json`. Next milestone: v0.7 (Production Planner).  
+Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
+The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
+Next step: start v0.7 with the capacity model and the profile defaults.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -508,7 +517,7 @@ Next step: finish v0.6 by measuring the stitched farm screenshot into `config/fa
 - [x] Scraper tests with saved HTML fixtures
 - [x] Game knowledge collected in [docs/](docs/README.md): game facts by category, game updates, data sources, player profile
 
-### v0.6 - Standalone Layout Planner (farm) (in progress)
+### v0.6 - Standalone Layout Planner (farm) (done)
 
 - [x] Support relations outside the production graph: nectar bushes near the beehive tree (the wiki says distance slows the bees)
 - [x] Fixed buildings (`movable: false`) kept in place; only movable items are arranged
@@ -524,7 +533,10 @@ Next step: finish v0.6 by measuring the stitched farm screenshot into `config/fa
 - [x] Farm map editor (`tools/farm_map_editor.html`): screenshot calibration, fixed buildings, farm plots; exports JSON, full map PNG and per-plot pieces
 - [x] Screenshot under the SVG grid; blocks only on unlocked plots
 - [x] External recipe inputs logged once, as one summary line
-- [ ] Stitched farm screenshot finalised in the editor: calibration, fixed buildings and farm plots saved to `config/farm_map.json`; layout checked against the real farm (required before v0.7)
+- [x] Stitched farm screenshot finalised in the editor: calibration, fixed buildings and farm plots saved to `config/farm_map.json`; layout checked against the real farm
+- [x] Editor: reference overlay (wiki plot map, 3-point alignment), zones (buildable / blocked), merged plot outlines, crop to the farm on save
+- [x] Barn and silo as movable storage locations (Storage block); the block reserve shrinks until every block fits
+- [x] Placement strategies (`--strategy coupling | size | auto | all`); `all` writes one output set per strategy in one run
 
 ### v0.7 - Production Planner
 
@@ -577,6 +589,7 @@ Next step: finish v0.6 by measuring the stitched farm screenshot into `config/fa
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+pip install -r requirements-dev.txt   # optional: ruff
 
 # personal player config (optional; otherwise the example is used)
 cp config/player.example.json config/player.json
@@ -603,6 +616,7 @@ python -m src.main --no-analysis
 # optional: measure config/farm_map.json with tools/farm_map_editor.html (see "Farm map")
 python -m src.layout
 python -m src.layout --level 30 --reserve 0.3 --gap 1 --field-pool 0.1
+python -m src.layout --strategy all   # also layout_coupling.* and layout_size.*
 ```
 
 Output lands in `output/`:

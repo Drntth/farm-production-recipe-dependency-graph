@@ -20,12 +20,15 @@ from src.layout.farm_map import (
     Expansion,
     FarmMap,
     FixedItem,
+    Zone,
+    cells_to_tiles,
     load_farm_map,
+    outline_segments,
 )
 from src.layout.fields import SHARED_BLOCK_ID, allocate_fields, apportion
 from src.layout.inventory import CountSource, farm_stock
 from src.layout.packing import Box, Rect, bounding_rect, pack, patch
-from src.layout.planner import plan_layout
+from src.layout.planner import _grow, plan_layout
 from src.layout.render_svg import render_svg
 from src.layout.support import active_relations
 from src.loaders.json_loader import DataSet, load_data
@@ -107,6 +110,9 @@ def farm() -> DataSet:
         _loc("nectar_bush", B, 1, 1),
         _loc("honey_extractor", P, 2, 2),
         _loc("lure_workbench", P, area="fishing_lake", movable=False),
+        # synthetic sizes, not game values
+        _loc("barn", LocationType.STORAGE, 4, 4),
+        _loc("silo", LocationType.STORAGE, 3, 3),
     ]
     resources = [
         _res("wheat", ResourceType.CROP, "field"),
@@ -416,7 +422,7 @@ def test_plan_layout_bounded_with_fixed(farm: DataSet) -> None:
         fixed=[
             FixedItem(id="mine", x=36, y=0, width=4, height=4),
             FixedItem(id="farmhouse", x=17, y=17, width=6, height=6),
-            FixedItem(id="silo"),
+            FixedItem(id="event_board"),
         ],
     )
     layout = plan_layout(farm, level=5, farm_map=farm_map, reserve_ratio=0.5)
@@ -425,7 +431,7 @@ def test_plan_layout_bounded_with_fixed(farm: DataSet) -> None:
     for b in layout.blocks:
         f = b.frame
         assert f.x >= 0 and f.y >= 0 and f.x + f.w <= 40 and f.y + f.h <= 40
-    assert layout.fixed_unplaced == ["silo"]
+    assert layout.fixed_unplaced == ["event_board"]
     smelter = next(b for b in layout.blocks if "smelter" in b.block.locations)
     assert any(n.b == "mine" and n.a == smelter.block.id for n in layout.neighbourhoods)
 
@@ -448,6 +454,33 @@ def test_unlocked_plot_without_cells_is_ignored() -> None:
     assert FarmMap(width=10, height=10, expansions=[empty]).usable_tiles() is None
     drawn = Expansion(id="base", section="base", unlocked=True, cells=[(0, 0, 2, 1)])
     assert FarmMap(width=10, height=10, expansions=[empty, drawn]).usable_tiles() == {(0, 0), (1, 0)}
+
+
+
+def test_outline_merges_touching_rectangles() -> None:
+    # two touching rectangles of one plot form a 3x1 bar: 4 border segments, no inner edge
+    tiles = cells_to_tiles([(0, 0, 2, 1), (2, 0, 1, 1)])
+    assert sorted(outline_segments(tiles)) == sorted(
+        [((0, 0), (3, 0)), ((0, 1), (3, 1)), ((0, 0), (0, 1)), ((3, 0), (3, 1))]
+    )
+    # an L shape has 6 border segments
+    assert len(outline_segments(cells_to_tiles([(0, 0, 2, 1), (0, 1, 1, 1)]))) == 6
+
+def test_zones_limit_usable_tiles() -> None:
+    plot = Expansion(id="base", section="base", unlocked=True, cells=[(0, 0, 4, 4)])
+    buildable = Zone(id="main_section", kind="buildable", cells=[(0, 0, 3, 3)])
+    pond = Zone(id="pond", kind="blocked", cells=[(0, 0, 1, 1)])
+    # plots, then buildable zones, then blocked zones
+    fm = FarmMap(width=10, height=10, expansions=[plot], zones=[buildable, pond])
+    assert fm.usable_tiles() == {(x, y) for x in range(3) for y in range(3)} - {(0, 0)}
+    # without plots: the buildable zones are the start
+    assert len(FarmMap(width=10, height=10, zones=[buildable, pond]).usable_tiles()) == 8
+    # only blocked zones: the whole bounded map minus the blocked tiles
+    assert len(FarmMap(width=2, height=2, zones=[pond]).usable_tiles()) == 3
+    with pytest.raises(ValidationError):
+        FarmMap(width=2, height=2, zones=[Zone(id="road", kind="blocked", cells=[(1, 1, 2, 1)])])
+    with pytest.raises(ValidationError):
+        Zone(id="road", kind="water", cells=[])
 
 
 def test_unplaced_block_has_no_items(farm: DataSet) -> None:
@@ -489,6 +522,82 @@ def test_plan_layout_shared_field_pool(farm: DataSet) -> None:
     assert shared.fields.count == 4 and shared.block.name == "Shared fields block"
     assert sum(i.location_id == "field" for b in layout.blocks for i in b.items) == 9
 
+
+
+def test_plan_layout_avoids_blocked_zones(farm: DataSet, tmp_path: Path) -> None:
+    road = Zone(id="road", kind="blocked", cells=[(0, 10, 60, 2)])
+    layout = plan_layout(farm, level=5, farm_map=FarmMap(width=60, height=60, zones=[road]))
+    for pb in layout.blocks:
+        for it in pb.items:
+            r = it.rect
+            assert all((r.x + i, r.y + j) not in road.tiles() for i in range(r.w) for j in range(r.h))
+    svg = render_svg(layout, tmp_path / "layout.svg")
+    assert "road (blocked)" in svg
+
+
+def test_barn_and_silo_form_a_storage_block(farm: DataSet) -> None:
+    layout = plan_layout(farm, level=5)
+    storage = next(b for b in layout.blocks if b.block.id == "storage_block")
+    assert storage.block.name == "Storage block"
+    assert sorted(i.location_id for i in storage.items) == ["barn", "silo"]
+    assert "barn" not in layout.fixed_unplaced
+
+
+def test_barn_placed_on_the_map_stays_fixed(farm: DataSet) -> None:
+    barn = FixedItem(id="barn", x=0, y=0, width=4, height=4)
+    silo = FixedItem(id="silo")  # listed without a position: the planner places it
+    layout = plan_layout(farm, level=5, farm_map=FarmMap(width=60, height=60, fixed=[barn, silo]))
+    storage = next(b for b in layout.blocks if b.block.id == "storage_block")
+    assert [i.location_id for i in storage.items] == ["silo"]
+    assert layout.fixed_unplaced == ["mine"]
+
+
+
+def test_pinned_copy_of_a_multi_copy_building_keeps_the_others(farm: DataSet) -> None:
+    player = PlayerConfig(level=5, locations={"dairy": LocationProgress(owned=2)})
+    dairy = FixedItem(id="dairy", x=0, y=0, width=4, height=4)
+    fm = FarmMap(width=60, height=60, fixed=[dairy])
+    layout = plan_layout(farm, level=5, player=player, farm_map=fm)
+    planned = [i for b in layout.blocks for i in b.items if i.location_id == "dairy"]
+    assert len(planned) == 1  # the second copy is still placed in its block
+
+
+def test_plan_layout_rejects_negative_reserve(farm: DataSet) -> None:
+    with pytest.raises(ValueError, match="negative"):
+        plan_layout(farm, level=5, reserve_ratio=-0.1)
+
+def test_base_plot_counts_as_unlocked() -> None:
+    base = Expansion(id="base", section="base", cells=[(0, 0, 2, 1)])
+    locked = Expansion(id="main_1", section="main", number=1, cells=[(5, 5, 1, 1)])
+    assert FarmMap(width=10, height=10, expansions=[base, locked]).usable_tiles() == {(0, 0), (1, 0)}
+
+
+def test_reserve_shrinks_until_blocks_fit(farm: DataSet) -> None:
+    # find a map size where the full reserve does not fit but a smaller one does
+    for size in range(60, 4, -1):
+        layout = plan_layout(farm, level=5, farm_map=FarmMap(width=size, height=size), reserve_ratio=1.0)
+        if 0 < layout.reserve_ratio < 1.0 and not layout.unplaced_blocks:
+            break
+    else:
+        pytest.fail("no map size forced a smaller reserve")
+    assert layout.reserve_requested == 1.0
+    assert "lowered from 100%" in layout_to_markdown(layout)
+
+
+def test_grow_adds_the_reserve_to_the_cheaper_side() -> None:
+    # a 5 % reserve must not turn a 2-wide block into a 3-wide one
+    assert _grow(2, 6, 0.05) == (2, 7)
+    assert _grow(4, 4, 0.0) == (4, 4)
+    w, h = _grow(10, 8, 0.2)
+    assert w >= 10 and h >= 8 and w * h >= 96
+
+
+def test_pack_size_order_places_the_largest_box_first() -> None:
+    boxes = [Box("small", 1, 1), Box("big", 3, 3)]
+    weights = {("big", "small"): 0.0}
+    area = {(x, y) for x in range(10) for y in range(10)}
+    placed, _ = pack(boxes, weights, bounds=(10, 10), area=area, order="size")
+    assert list(placed) == ["big", "small"]
 
 def test_plan_layout_reports_blocks_that_do_not_fit(farm: DataSet) -> None:
     layout = plan_layout(farm, level=5, farm_map=FarmMap(width=6, height=6))
@@ -544,6 +653,21 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
         assert (tmp_path / name).exists()
     assert json.loads((tmp_path / "layout.json").read_text())["level"] == 20
 
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
+    args = ["--level", "20", "--strategy", "all", "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    for stem, used in (("layout_coupling", "coupling"), ("layout_size", "size")):
+        assert json.loads((tmp_path / f"{stem}.json").read_text())["strategy"] == used
+        assert (tmp_path / f"{stem}.svg").exists()
+    assert (tmp_path / "layout.svg").exists()
+
+
+def test_plan_layout_rejects_unknown_strategy(farm: DataSet) -> None:
+    with pytest.raises(ValueError, match="strategy"):
+        plan_layout(farm, level=5, strategy="random")
 
 @pytest.mark.parametrize("level", ["0", "-3"])
 def test_cli_rejects_invalid_level(tmp_path: Path, level: str) -> None:

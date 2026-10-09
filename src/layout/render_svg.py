@@ -9,6 +9,7 @@ none, and every item footprint is outlined on it.
 With a calibrated ``background`` in the farm map, the screenshot of the farm
 is drawn under the grid through an affine transform (image pixel → tile →
 screen), and the farm plots (expansions) are outlined: locked plots shaded.
+Zones: buildable outlined in green, blocked filled in red.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import os
 from html import escape
 from pathlib import Path
 
+from .farm_map import outline_segments
 from .packing import Rect, bounding_rect
 from .planner import Layout
 
@@ -49,6 +51,9 @@ PALETTE = (
 FIXED_COLOUR = "#6B7280"
 UNLOCKED_COLOUR = "#15803D"
 LOCKED_COLOUR = "#B91C1C"
+FARM_OUTLINE_COLOUR = "#111827"
+BUILDABLE_COLOUR = "#16A34A"
+BLOCKED_COLOUR = "#DC2626"
 
 
 def render_svg(layout: Layout, path: Path | str | None = None) -> str:
@@ -87,13 +92,27 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         '<rect width="100%" height="100%" fill="#FFFFFF"/>',
     ]
 
-    # background screenshot, mapped onto the tile grid
+    def outline(tiles: set, colour: str, width: float, dash: str = "") -> str:
+        d = " ".join(
+            "M{:.1f},{:.1f} L{:.1f},{:.1f}".format(*pt(*a), *pt(*b))
+            for a, b in outline_segments(tiles)
+        )
+        dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+        return (
+            f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"'
+            f'{dash_attr} stroke-linecap="round"/>'
+        )
+
+    # background screenshot, mapped onto the tile grid and cut to the map
     if bg is not None:
         href = _href(fm.background_path(), path)
         m = _image_matrix(bg, pt)
         out.append(
+            f'<clipPath id="map-clip"><polygon points="{poly(Rect(gx0, gy0, gw, gh))}"/></clipPath>'
+        )
+        out.append(
             f'<image href="{escape(href)}" xlink:href="{escape(href)}" '
-            f'width="{bg.image_width}" height="{bg.image_height}" '
+            f'width="{bg.image_width}" height="{bg.image_height}" clip-path="url(#map-clip)" '
             f'transform="matrix({" ".join(f"{v:.6f}" for v in m)})" preserveAspectRatio="none"/>'
         )
 
@@ -108,19 +127,40 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         out.append(f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}"/>')
     out.append("</g>")
 
+    # zones: buildable sections, blocked tiles (water, road, …); one outline per zone
+    for z in fm.zones:
+        blocked = z.kind == "blocked"
+        colour = BLOCKED_COLOUR if blocked else BUILDABLE_COLOUR
+        if blocked:
+            for x, y, w, h in z.cells:
+                out.append(
+                    f'<polygon points="{poly(Rect(x, y, w, h))}" fill="{colour}" '
+                    f'fill-opacity="0.35"><title>{escape(z.id)} ({z.kind})</title></polygon>'
+                )
+        if z.cells:
+            out.append(outline(z.tiles(), colour, 1 if blocked else 2.5))
+            box = bounding_rect([Rect(*c) for c in z.cells])
+            out.append(_label(pt(*_mid(box)), z.id, 10, colour, bold=True))
+
     # farm plots (expansions)
     for e in fm.expansions:
-        colour = UNLOCKED_COLOUR if e.unlocked else LOCKED_COLOUR
-        fill = 'fill="none"' if e.unlocked else f'fill="{LOCKED_COLOUR}" fill-opacity="0.18"'
-        state = "unlocked" if e.unlocked else "locked"
+        colour = UNLOCKED_COLOUR if e.is_unlocked else LOCKED_COLOUR
+        fill = 'fill="none"' if e.is_unlocked else f'fill="{LOCKED_COLOUR}" fill-opacity="0.18"'
+        state = "unlocked" if e.is_unlocked else "locked"
         for x, y, w, h in e.cells:
             out.append(
-                f'<polygon points="{poly(Rect(x, y, w, h))}" {fill} stroke="{colour}" '
-                f'stroke-width="1.2" stroke-dasharray="5,3"><title>{escape(e.id)} ({state})</title></polygon>'
+                f'<polygon points="{poly(Rect(x, y, w, h))}" {fill}>'
+                f"<title>{escape(e.id)} ({state})</title></polygon>"
             )
         if e.cells:
+            out.append(outline(e.tiles(), colour, 1.2, "5,3"))
             box = bounding_rect([Rect(*c) for c in e.cells])
             out.append(_label(pt(*_mid(box)), e.id, 10, colour, bold=True))
+
+    # outline of the whole farm (all plots and buildable zones)
+    farm_tiles = fm.farm_tiles()
+    if farm_tiles:
+        out.append(outline(farm_tiles, FARM_OUTLINE_COLOUR, 3))
 
     # fixed buildings
     for f in layout.farm_map.placed_fixed:

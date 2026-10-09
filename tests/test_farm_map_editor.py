@@ -43,6 +43,7 @@ const state = {
           { id: 'silo', name: '', rect: null }],
   expansions: [{ id: 'main_1', section: 'main', number: 1, unlocked: true, cells: [[2, 2, 4, 3], [6, 2, 1, 1]] },
                { id: 'base', section: 'base', number: null, unlocked: true, cells: [[10, 10, 5, 5]] }],
+  zones: [{ id: 'pond', kind: 'blocked', cells: [[2, 2, 1, 1]] }],
 };
 const map = Core.toFarmMap(state, 'farm_background.png');
 const again = Core.toFarmMap(Object.assign(Core.fromFarmMap(map), { imgW: 800, imgH: 600 }), 'farm_background.png');
@@ -58,6 +59,22 @@ console.log(JSON.stringify({
   bg, tA, back, map, same: JSON.stringify(map) === JSON.stringify(again), moved, crop,
   rect: Core.rectFromTiles([5.7, 2.1], [3.2, 4.9]), snake: Core.toSnake("Maggie's Workbench"),
   zip: Buffer.from(zip).toString('base64'),
+  merged: Core.mergeCells([[0, 0, 2, 1]], [[2, 0, 1, 1], [0, 0, 1, 1]]),
+  erased: Core.mergeCells([[0, 0, 3, 1]], [], [[1, 0, 1, 1]]),
+  outline: Core.outlineSegments([[0, 0, 2, 1], [2, 0, 1, 1]]).length,
+  cropped: (() => {
+    const c = Core.cropMap(state, 1);
+    const s2 = Object.assign({}, state, c);
+    return { bg: c.bg, map: Core.toFarmMap(s2, 'farm_background.png'),
+             farmhouse: Core.tileToPx(c.bg, ...c.fixed[0].rect.slice(0, 2)),
+             farmhouseBefore: Core.tileToPx(bg, ...state.fixed[0].rect.slice(0, 2)) };
+  })(),
+  affine: (() => {
+    // overlay drawn at half size, shifted by (100, 50)
+    const src = [[0, 0], [200, 0], [0, 100]], dst = src.map(p => [p[0] / 2 + 100, p[1] / 2 + 50]);
+    const m = Core.affine3(src, dst);
+    return { m, p: Core.applyAffine(m, [40, 60]), back: Core.applyAffine(Core.invertAffine(m), [120, 80]) };
+  })(),
 }));
 """
 
@@ -95,7 +112,8 @@ def test_exported_json_loads_in_python(result: dict) -> None:
     assert fm.background.image_width == 800
     assert [f.id for f in fm.placed_fixed] == ["farmhouse"]
     assert fm.fixed[0].name == "Farmhouse"
-    assert len(fm.usable_tiles()) == 4 * 3 + 1 + 25
+    assert [(z.id, z.kind) for z in fm.zones] == [("pond", "blocked")]
+    assert len(fm.usable_tiles()) == 4 * 3 + 1 + 25 - 1
     assert result["same"], "toFarmMap(fromFarmMap(x)) must round-trip"
 
 
@@ -115,3 +133,29 @@ def test_zip_writer_produces_valid_archive(result: dict) -> None:
         assert zf.testzip() is None
         assert zf.read("a.txt") == b"hello"
         assert json.loads(zf.read("dir/b.json")) == {"x": 1}
+
+
+def test_affine_from_three_points(result: dict) -> None:
+    aff = result["affine"]
+    assert aff["m"] == pytest.approx([0.5, 0, 0, 0.5, 100, 50])
+    assert aff["p"] == pytest.approx([120, 80])
+    assert aff["back"] == pytest.approx([40, 60])
+
+
+def test_merge_and_erase_cells(result: dict) -> None:
+    # touching and overlapping rectangles become one 3x1 bar
+    assert result["merged"] == [[0, 0, 3, 1]]
+    # erasing the middle tile leaves two single tiles
+    assert result["erased"] == [[0, 0, 1, 1], [2, 0, 1, 1]]
+    # the bar has 4 border segments: inner edges are not drawn
+    assert result["outline"] == 4
+
+
+def test_crop_keeps_the_farm_in_place(result: dict) -> None:
+    c = result["cropped"]
+    fm = FarmMap.model_validate(c["map"])
+    # the content (plots at 2..15, a 3x3 house) plus a 1-tile margin
+    assert fm.width < result["bg"]["width"] and fm.height < result["bg"]["height"]
+    assert fm.zones[0].cells == [(1, 1, 1, 1)]
+    # same physical spot: the pixel of the farmhouse corner is unchanged
+    assert c["farmhouse"] == pytest.approx(c["farmhouseBefore"])

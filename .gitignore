@@ -231,6 +231,10 @@ config/player.json
 # Local farm map (measured positions of fixed buildings)
 config/farm_map.json
 config/*.png
+config/*.zip
+# Map sources: wiki reference images (Fandom licence) and the GIMP stitching file
+config/reference/
+config/screenshots/
 
 # Local agent instructions (not versioned)
 CLAUDE.local.md

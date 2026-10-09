@@ -21,5 +21,7 @@
   {"id": "nectar_bush", "footprint_width": 1, "footprint_height": 1},
   {"id": "coffee_bush", "footprint_width": 1, "footprint_height": 1},
   {"id": "lobster_pool", "movable": false},
-  {"id": "duck_salon", "movable": false}
+  {"id": "duck_salon", "movable": false},
+  {"id": "barn", "name": "Barn", "type": "storage", "unlock_level": 1, "area": "farm", "footprint_width": 3, "footprint_height": 3},
+  {"id": "silo", "name": "Silo", "type": "storage", "unlock_level": 1, "area": "farm", "footprint_width": 2, "footprint_height": 2}
 ]

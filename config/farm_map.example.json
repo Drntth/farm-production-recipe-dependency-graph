@@ -20,6 +20,11 @@
     {"id": "leaderboard", "x": null, "y": null, "width": null, "height": null},
     {"id": "fishing_boat", "x": null, "y": null, "width": null, "height": null},
     {"id": "train_station", "x": null, "y": null, "width": null, "height": null},
-    {"id": "valley_board", "x": null, "y": null, "width": null, "height": null}
+    {"id": "valley_board", "x": null, "y": null, "width": null, "height": null},
+    {"id": "neighborhood_requests", "x": null, "y": null, "width": null, "height": null},
+    {"id": "farm_pass", "x": null, "y": null, "width": null, "height": null},
+    {"id": "decoration_collection", "x": null, "y": null, "width": null, "height": null},
+    {"id": "decorate_event", "x": null, "y": null, "width": null, "height": null},
+    {"id": "toms_box", "x": null, "y": null, "width": null, "height": null}
   ]
 }

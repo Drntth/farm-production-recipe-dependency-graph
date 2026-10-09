@@ -11,5 +11,6 @@
 | The fishing lake tackle box uses silo supplies | -                                                                   | wiki:Fishing_Lake                      | 2026-10-05 |
 | What goes where                                | silo: crops; barn: products, supplies (e.g. balloon maker products) | wiki:Farm, wiki:Birthday_Balloon_Maker | 2026-10-05 |
 | Maintainer's capacity                          | barn 675, silo 750                                                  | in-game                                | 2026-10-05 |
+| Footprint                                      | barn 3x3, silo 2x2 (measured at barn 675 / silo 750; unknown whether the barn appearance stages change it) | in-game | 2026-10-09 |
 
 The player's capacity is stored in the profile (`barn_capacity`, `silo_capacity`).

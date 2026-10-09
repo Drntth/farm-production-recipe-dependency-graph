@@ -21,7 +21,13 @@ from src.loaders.json_loader import load_data
 
 from .describe import layout_to_dict, layout_to_markdown
 from .farm_map import load_farm_map
-from .planner import DEFAULT_FIELD_POOL, DEFAULT_GAP, DEFAULT_RESERVE_RATIO, plan_layout
+from .planner import (
+    DEFAULT_FIELD_POOL,
+    DEFAULT_GAP,
+    DEFAULT_RESERVE_RATIO,
+    STRATEGIES,
+    plan_layout,
+)
 from .render_svg import render_svg
 
 logger = logging.getLogger("src.layout")
@@ -69,6 +75,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_FIELD_POOL,
         help="Share of the fields kept in a separate shared block (default: 0)",
     )
+    parser.add_argument(
+        "--strategy",
+        choices=(*STRATEGIES, "all"),
+        default="auto",
+        help="Block order: coupling (related blocks close), size (largest first), auto "
+        "(coupling, then size if a block does not fit) or all (auto as layout.*, plus "
+        "layout_coupling.* and layout_size.*). Default: auto",
+    )
     return parser.parse_args(argv)
 
 
@@ -112,29 +126,44 @@ def main(argv: list[str] | None = None) -> int:
         for problem in validate_player_config(player, full):
             logger.warning("Player config: %s", problem)
 
-    layout = plan_layout(
-        full.filter_by_max_level(level),
-        level=level,
-        player=player,
-        farm_map=farm_map,
-        reserve_ratio=args.reserve,
-        gap=args.gap,
-        field_pool=args.field_pool,
-    )
+    # (output file stem, strategy); "all" adds one file set per fixed strategy
+    runs = [("layout", "auto" if args.strategy == "all" else args.strategy)]
+    if args.strategy == "all":
+        runs += [(f"layout_{s}", s) for s in STRATEGIES if s != "auto"]
 
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
-    (out / "layout.json").write_text(
-        json.dumps(layout_to_dict(layout), ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    (out / "layout.md").write_text(layout_to_markdown(layout), encoding="utf-8")
-    render_svg(layout, out / "layout.svg")
+    data = full.filter_by_max_level(level)
+    for stem, strategy in runs:
+        layout = plan_layout(
+            data,
+            level=level,
+            player=player,
+            farm_map=farm_map,
+            reserve_ratio=args.reserve,
+            gap=args.gap,
+            field_pool=args.field_pool,
+            strategy=strategy,
+        )
+        (out / f"{stem}.json").write_text(
+            json.dumps(layout_to_dict(layout), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        (out / f"{stem}.md").write_text(layout_to_markdown(layout), encoding="utf-8")
+        render_svg(layout, out / f"{stem}.svg")
+        logger.info(
+            "%s: strategy %s (used: %s), reserve %.0f%%, %d blocks not placed",
+            stem,
+            strategy,
+            layout.strategy,
+            layout.reserve_ratio * 100,
+            len(layout.unplaced_blocks),
+        )
 
     ext = layout.extent()
     logger.info("Level %d: %d blocks on %d x %d tiles", level, len(layout.blocks), ext.w, ext.h)
     for pb in layout.blocks:
         logger.info("  %s: %s", pb.block.name, ", ".join(pb.block.locations))
-    logger.info("Wrote layout.json, layout.md, layout.svg → %s", out)
+    logger.info("Wrote %s (.json, .md, .svg) → %s", ", ".join(stem for stem, _ in runs), out)
     return 0
 
 

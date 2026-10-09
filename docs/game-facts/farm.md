@@ -32,8 +32,10 @@
 | First decoration           | level 8 (wiki: "tbc")                                                                                                                                                                                                                                                      | wiki:Farm         | 2026-10-05 |
 | Fishing boat repair        | unlocks the fishing lake (see fishing-lake.md)                                                                                                                                                                                                                             | wiki:Fishing_Lake | 2026-10-05 |
 | Train station repair       | unlocks the town (see town.md)                                                                                                                                                                                                                                             | wiki:Town         | 2026-10-05 |
+| More fixed items on the farm | neighborhood requests, farm pass, decoration collection, decorate event, Tom's box | in-game | 2026-10-09 |
+| Barn and silo | can be moved in Layout Edit Mode (not fixed) | in-game | 2026-10-09 |
 
-These buildings are not in `data/`. Their footprints and positions differ per farm, so the player measures them into `config/farm_map.json` (the example lists their ids with empty positions); the layout planner treats them as fixed obstacles. Whether the game lets some of them move is still open.
+These buildings are not in `data/`. Their footprints and positions differ per farm, so the player measures them into `config/farm_map.json` (the example lists their ids with empty positions); the layout planner treats them as fixed obstacles. The barn and silo can be moved: they are storage locations in `data/overrides/locations.json`, and the planner places them as the Storage block. Marking them in `config/farm_map.json` is optional and keeps them where they are. Mark every tile an item blocks (e.g. the truck together with its order board).
 
 ## Placing and measuring
 
@@ -60,6 +62,9 @@ These buildings are not in `data/`. Their footprints and positions differ per fa
 | Number of cleared expansions                  | hard to count afterwards; not in the profile                                     | in-game        | 2026-10-05 |
 | Expansion locations                           | main section beside the farmhouse; second section across the main road (with special plots) | wiki:Expansion/Farm | 2026-10-05 |
 | Main section plots                            | 52 (plus 13 upper plots since summer 2021); each needs N deeds = N mallets = N stakes, 5-40 per plot | wiki:Expansion/Farm | 2026-10-05 |
+| Second section plots | two wiki maps, each numbered #1-#9: "Farm Expansions 2" (April 2015, 239 of each tool in total) and "Farm Expansions 3" (December 2018, 355 in total); the editor uses sections `second` and `second_2018` | wiki:Expansion/Farm | 2026-10-09 |
+| Special and later plots | wiki maps: "Farm Expansions Special" (March 2017, section `special`); special plots of December 2018 unlocked with expansion permits and LEMs (169 and 609 in total, section `special_2018`; its map labels plots with pairs such as "10/33", probably permits / LEMs per plot (unverified), not plot numbers, so the editor numbers them top to bottom, left to right); "Hay Day Lower plots" #1-#24 (October 2019) and #25-#41 (summer 2021, section `lower`); "Farm expansion Spring 2023" next to the left side of the second section (section `spring_2023`) | wiki:Expansion/Farm | 2026-10-09 |
+| Plots missing from the wiki | 3 rows of unlockable plots along the top and the bottom edge of the farm, with no wiki map; the editor puts them in section `other`, numbered top to bottom, left to right | in-game | 2026-10-09 |
 | Unlock order                                  | from the top; a cleared plot makes its neighbours unlockable                     | wiki:Expansion/Farm | 2026-10-05 |
 | Plot maps on the wiki                         | isometric images with plot numbers, no tile grid, no tile sizes                  | wiki:Expansion/Farm | 2026-10-05 |
 | Farm overview image on the wiki               | 2015 screenshot of the central area only, not to scale                           | wiki:Farm      | 2026-10-05 |

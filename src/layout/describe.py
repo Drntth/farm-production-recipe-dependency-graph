@@ -21,6 +21,8 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
             "extent": _rect(layout.extent()),
         },
         "reserve_ratio": layout.reserve_ratio,
+        "reserve_requested": layout.reserve_requested,
+        "strategy": layout.strategy,
         "flow_order": layout.flow_order,
         "blocks": [
             {
@@ -83,6 +85,12 @@ def layout_to_markdown(layout: Layout) -> str:
     stock = {s.location.id: s for s in layout.stock}
     fm = layout.farm_map
     ext = layout.extent()
+    requested = layout.reserve_requested
+    lowered = (
+        f" (lowered from {requested:.0%} so that the blocks fit)"
+        if requested is not None and layout.reserve_ratio < requested
+        else ""
+    )
     lines = [
         f"# Farm layout - level {layout.level}",
         "",
@@ -92,7 +100,8 @@ def layout_to_markdown(layout: Layout) -> str:
             else f"Farm map: unbounded (no `config/farm_map.json` size); layout spans "
             f"{ext.w} x {ext.h} tiles."
         ),
-        f"Each block keeps {layout.reserve_ratio:.0%} extra area for later unlocks. "
+        f"Block order: {layout.strategy}. "
+        f"Each block keeps {layout.reserve_ratio:.0%} extra area for later unlocks{lowered}. "
         "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge.",
         "",
         "## Blocks",

@@ -38,6 +38,8 @@
   ul.list li button { padding: 1px 6px; }
   .pill { display: inline-block; padding: 0 6px; border-radius: 8px; font-size: 11px; color: #fff; }
   .pill.ok { background: var(--ok); } .pill.bad { background: var(--bad); }
+  #pad { position: absolute; right: 8px; bottom: 8px; display: grid; grid-template-columns: repeat(3, 34px); gap: 3px; }
+  #pad button { height: 34px; padding: 0; font-size: 15px; background: rgba(255,255,255,.9); }
   #status { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,.9); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--line); }
   #empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); pointer-events: none; }
   kbd { border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; font-size: 11px; }
@@ -50,13 +52,16 @@
   <div class="hint">Load the stitched screenshot of the empty farm (PNG). Everything stays in this browser; nothing is uploaded.</div>
   <div class="row"><label>Image</label><input type="file" id="fileImage" accept="image/png,image/*"></div>
   <div class="row"><label>JSON</label><input type="file" id="fileJson" accept="application/json,.json"></div>
-  <div class="hint">Zoom: mouse wheel. Pan: right or middle drag, or <kbd>Space</kbd> + drag.</div>
+  <div class="hint">Zoom: mouse wheel, touchpad pinch or <kbd>+</kbd> / <kbd>-</kbd>. Pan: left drag (Calibrate tab), right or middle drag, <kbd>Space</kbd> + drag or the arrow keys. <kbd>0</kbd>: fit.</div>
+  <div class="row"><button id="zoomIn">+</button><button id="zoomOut">-</button><button id="zoomFit">Fit</button></div>
 
   <div class="tabs">
     <button data-tab="calibrate" class="active">1. Calibrate</button>
     <button data-tab="fixed">2. Fixed</button>
-    <button data-tab="expansions">3. Expansions</button>
-    <button data-tab="export">4. Export</button>
+    <button data-tab="reference">3. Reference</button>
+    <button data-tab="expansions">4. Expansions</button>
+    <button data-tab="zones">5. Zones</button>
+    <button data-tab="export">6. Export</button>
   </div>
 
   <section class="pane active" id="pane-calibrate">
@@ -77,31 +82,55 @@
   </section>
 
   <section class="pane" id="pane-fixed">
-    <div class="hint">Fixed buildings (farmhouse, barn, silo, mine, …). Pick an id, then drag over its tiles. Dragging again moves it.</div>
+    <div class="hint">Fixed buildings (farmhouse, mine, truck, …). Pick an id, then drag over every tile it blocks (e.g. the truck with its order board). Dragging again moves it. Barn and silo are optional: without a position the layout planner places them.</div>
     <div class="row"><label>Id</label><input type="text" id="fixedId" list="fixedIds" placeholder="farmhouse"></div>
     <datalist id="fixedIds"></datalist>
     <div class="row"><label>Name</label><input type="text" id="fixedName" placeholder="(optional)"></div>
     <ul class="list" id="fixedList"></ul>
   </section>
 
+  <section class="pane" id="pane-reference">
+    <div class="hint">Overlay another image (e.g. the wiki plot map) to trace plot borders that are gone from the screenshot. Load it, then click 3 points spread far apart, each first on the overlay (<b>r</b>) and then on the same spot of the farm (<b>m</b>): r1, m1, r2, m2, r3, m3. Lower the opacity to see the farm under it. A left drag pans. The overlay is not saved in the JSON.</div>
+    <div class="row"><input type="file" id="refImage" accept="image/*"></div>
+    <div class="row"><label>Opacity</label><input type="range" id="refOpacity" min="0" max="1" step="0.05" value="0.5"></div>
+    <div class="row">
+      <label>Next click sets</label>
+      <select id="refNext"><option>r1</option><option>m1</option><option>r2</option><option>m2</option><option>r3</option><option>m3</option></select>
+    </div>
+    <div class="row"><button id="refReset">Reset alignment</button></div>
+    <div class="hint" id="refInfo">No overlay.</div>
+  </section>
+
   <section class="pane" id="pane-expansions">
-    <div class="hint">Farm plots (wiki: Expansion/Farm). Add a plot, then drag one or more rectangles to cover its tiles. <kbd>Alt</kbd> + click removes a rectangle of the selected plot. Draw the starting land as section <i>base</i>.</div>
+    <div class="hint">Farm plots (wiki: Expansion/Farm). Add a plot, then drag rectangles to cover its tiles; touching rectangles merge into one shape. <kbd>Alt</kbd> + drag erases tiles of the selected plot. Draw the starting land as section <i>base</i>.</div>
     <div class="row">
       <select id="expSection">
-        <option>base</option><option selected>main</option><option>second</option><option>special</option>
+        <option>base</option><option selected>main</option><option>second</option><option>second_2018</option><option>special</option><option>special_2018</option>
         <option>upper</option><option>lower</option><option>spring_2023</option><option>other</option>
       </select>
       <input type="number" id="expNumber" min="0" placeholder="no.">
       <label><input type="checkbox" id="expUnlocked"> unlocked</label>
     </div>
-    <div class="row"><button id="expAdd">Add plot</button><button id="expUndo">Undo last rectangle</button></div>
+    <div class="row"><button id="expAdd">Add plot</button><button id="expUndo">Undo</button></div>
     <ul class="list" id="expList"></ul>
+  </section>
+
+  <section class="pane" id="pane-zones">
+    <div class="hint">Mark tiles by hand. <b>Buildable</b> (green): the farm sections; the layout stays inside them. <b>Blocked</b> (red): water, road, forest, … never used. Add a zone, then drag rectangles; touching rectangles merge. <kbd>Alt</kbd> + drag erases tiles of the selected zone.</div>
+    <div class="row">
+      <select id="zoneKind"><option value="buildable">buildable</option><option value="blocked">blocked</option></select>
+      <input type="text" id="zoneId" placeholder="name, e.g. pond">
+    </div>
+    <div class="row"><button id="zoneAdd">Add zone</button><button id="zoneUndo">Undo</button></div>
+    <ul class="list" id="zoneList"></ul>
   </section>
 
   <section class="pane" id="pane-export">
     <div class="row"><label>Image path in JSON</label><input type="text" id="bgPath" value="farm_background.png"></div>
     <div class="hint">Relative to <code>config/farm_map.json</code>; save the screenshot as <code>config/farm_background.png</code>.</div>
     <div class="row"><label>Piece margin (tiles)</label><input type="number" id="margin" min="0" value="1"></div>
+    <div class="row"><label><input type="checkbox" id="cropOnSave" checked> crop to the farm on save, margin</label><input type="number" id="cropMargin" min="0" value="5" style="width:4em"> tiles</div>
+    <div class="hint">Cropping keeps every plot, buildable zone and fixed building plus the margin; blocked zones are cut at the new edge. The editor switches to the cropped map too.</div>
     <div class="row"><button id="saveJson">Save farm_map.json</button></div>
     <div class="row"><button id="savePng">Save full map PNG</button></div>
     <div class="row"><button id="saveZip">Save plot pieces (ZIP)</button></div>
@@ -113,6 +142,8 @@
     <label><input type="checkbox" id="lyGrid" checked> grid</label>
     <label><input type="checkbox" id="lyFixed" checked> fixed</label>
     <label><input type="checkbox" id="lyExp" checked> expansions</label>
+    <label><input type="checkbox" id="lyZones" checked> zones</label>
+    <label><input type="checkbox" id="lyRef" checked> overlay</label>
     <label><input type="checkbox" id="lyLabels" checked> labels</label>
   </div>
 </aside>
@@ -120,6 +151,11 @@
   <canvas id="view"></canvas>
   <div id="empty">Load an image to start.</div>
   <div id="status">-</div>
+  <div id="pad">
+    <span></span><button data-pan="ArrowUp" title="Up">▲</button><span></span>
+    <button data-pan="ArrowLeft" title="Left">◀</button><button id="padFit" title="Fit">⤢</button><button data-pan="ArrowRight" title="Right">▶</button>
+    <span></span><button data-pan="ArrowDown" title="Down">▼</button><span></span>
+  </div>
 </main>
 </div>
 
@@ -224,6 +260,7 @@ const Core = (() => {
     out.expansions = state.expansions.map(e => ({
       id: e.id, section: e.section, number: e.number, unlocked: e.unlocked, cells: e.cells,
     }));
+    out.zones = (state.zones || []).map(z => ({ id: z.id, kind: z.kind, cells: z.cells }));
     return out;
   }
 
@@ -245,6 +282,7 @@ const Core = (() => {
         id: e.id, section: e.section, number: e.number == null ? null : e.number,
         unlocked: !!e.unlocked, cells: (e.cells || []).map(c => c.slice()),
       })),
+      zones: (json.zones || []).map(z => ({ id: z.id, kind: z.kind, cells: (z.cells || []).map(c => c.slice()) })),
     };
   }
 
@@ -299,8 +337,115 @@ const Core = (() => {
     return out;
   }
 
+  // Affine matrix [a, b, c, d, e, f] (canvas order) mapping 3 src points onto 3 dst points.
+  function affine3(src, dst) {
+    const u1 = [src[1][0] - src[0][0], src[1][1] - src[0][1]], u2 = [src[2][0] - src[0][0], src[2][1] - src[0][1]];
+    const v1 = [dst[1][0] - dst[0][0], dst[1][1] - dst[0][1]], v2 = [dst[2][0] - dst[0][0], dst[2][1] - dst[0][1]];
+    const det = u1[0] * u2[1] - u2[0] * u1[1];
+    if (Math.abs(det) < 1e-9) throw new Error('The 3 points are on one line');
+    const a = (v1[0] * u2[1] - v2[0] * u1[1]) / det, c = (v2[0] * u1[0] - v1[0] * u2[0]) / det;
+    const b = (v1[1] * u2[1] - v2[1] * u1[1]) / det, d = (v2[1] * u1[0] - v1[1] * u2[0]) / det;
+    return [a, b, c, d, dst[0][0] - a * src[0][0] - c * src[0][1], dst[0][1] - b * src[0][0] - d * src[0][1]];
+  }
+
+  function applyAffine(m, p) {
+    return [m[0] * p[0] + m[2] * p[1] + m[4], m[1] * p[0] + m[3] * p[1] + m[5]];
+  }
+
+  function invertAffine(m) {
+    const [a, b, c, d, e, f] = m, det = a * d - b * c;
+    return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
+  }
+
+  const tileKey = (x, y) => x + ',' + y;
+
+  function cellsToTiles(cells) {
+    const set = new Set();
+    for (const [x, y, w, h] of cells) for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) set.add(tileKey(x + i, y + j));
+    return set;
+  }
+
+  // Tile set -> few rectangles: greedy, row runs first, then grown downwards.
+  function tilesToCells(set) {
+    const tiles = [...set].map(k => k.split(',').map(Number)).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    const used = new Set(), cells = [];
+    const free = (x, y) => set.has(tileKey(x, y)) && !used.has(tileKey(x, y));
+    for (const [x, y] of tiles) {
+      if (!free(x, y)) continue;
+      let w = 1;
+      while (free(x + w, y)) w++;
+      let h = 1;
+      while ([...Array(w).keys()].every(i => free(x + i, y + h))) h++;
+      for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) used.add(tileKey(x + i, y + j));
+      cells.push([x, y, w, h]);
+    }
+    return cells;
+  }
+
+  // Union of the cells and the added rects, minus the erased rects, as few rectangles.
+  function mergeCells(cells, add = [], erase = []) {
+    const set = cellsToTiles(cells.concat(add));
+    for (const k of cellsToTiles(erase)) set.delete(k);
+    return tilesToCells(set);
+  }
+
+  // Border of the union of cells as tile-corner segments [[x0, y0], [x1, y1]]; inner edges left out.
+  function outlineSegments(cells) {
+    const set = cellsToTiles(cells), runs = new Map(), segs = [];
+    const add = (key, v) => { if (!runs.has(key)) runs.set(key, []); runs.get(key).push(v); };
+    for (const k of set) {
+      const [x, y] = k.split(',').map(Number);
+      if (!set.has(tileKey(x, y - 1))) add(`h,${y},-1`, x);
+      if (!set.has(tileKey(x, y + 1))) add(`h,${y + 1},1`, x);
+      if (!set.has(tileKey(x - 1, y))) add(`v,${x},-1`, y);
+      if (!set.has(tileKey(x + 1, y))) add(`v,${x + 1},1`, y);
+    }
+    for (const [key, starts] of runs) {
+      const [axis, line] = key.split(','), l = +line;
+      starts.sort((a, b) => a - b);
+      let a = starts[0], prev = a;
+      for (const s of starts.slice(1).concat([null])) {
+        if (s !== null && s === prev + 1) { prev = s; continue; }
+        segs.push(axis === 'h' ? [[a, l], [prev + 1, l]] : [[l, a], [l, prev + 1]]);
+        if (s !== null) { a = prev = s; }
+      }
+    }
+    return segs;
+  }
+
+  function clipRect(r, w, h) {
+    const x0 = Math.max(0, r[0]), y0 = Math.max(0, r[1]);
+    const x1 = Math.min(w, r[0] + r[2]), y1 = Math.min(h, r[1] + r[3]);
+    return x1 > x0 && y1 > y0 ? [x0, y0, x1 - x0, y1 - y0] : null;
+  }
+
+  // Crop the map to the farm (plots, buildable zones, fixed buildings) plus `margin` tiles.
+  // Returns {bg, fixed, expansions, zones} with shifted coordinates, or null if there is nothing to keep.
+  function cropMap(state, margin) {
+    const bg = state.bg;
+    const rects = [
+      ...state.expansions.flatMap(e => e.cells),
+      ...state.zones.filter(z => z.kind === 'buildable').flatMap(z => z.cells),
+      ...state.fixed.filter(f => f.rect).map(f => f.rect),
+    ];
+    if (!bg || !rects.length) return null;
+    const box = bbox(rects);
+    const x0 = Math.max(0, box[0] - margin), y0 = Math.max(0, box[1] - margin);
+    const x1 = Math.min(bg.width, box[0] + box[2] + margin), y1 = Math.min(bg.height, box[1] + box[3] + margin);
+    const w = x1 - x0, h = y1 - y0;
+    const move = r => clipRect([r[0] - x0, r[1] - y0, r[2], r[3]], w, h);
+    return {
+      bg: Object.assign({}, bg, { origin: tileToPx(bg, x0, y0), width: w, height: h }),
+      fixed: state.fixed.map(f => Object.assign({}, f, { rect: f.rect ? move(f.rect) : null })),
+      expansions: state.expansions.map(e => Object.assign({}, e, { cells: e.cells.map(move).filter(Boolean) })),
+      zones: state.zones.map(z => Object.assign({}, z, { cells: z.cells.map(move).filter(Boolean) }))
+        .filter(z => z.cells.length),
+    };
+  }
+
   return { SNAKE, toSnake, tileToPx, pxToTile, calibrate, moveRect, rectFromTiles, rectCorners,
-           cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip };
+           cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip, affine3, applyAffine, invertAffine,
+           mergeCells, outlineSegments, cropMap };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 // CORE-END
@@ -310,19 +455,54 @@ if (typeof module !== 'undefined') module.exports = Core;
 (() => {
   const FIXED_IDS = ['farmhouse', 'mailbox', 'newspaper_mailbox', 'roadside_shop', 'truck', 'riverboat',
     'wheel_of_fortune_truck', 'silo', 'barn', 'mine', 'maggies_workbench', 'helpers_house', 'event_board',
-    'neighborhood_house', 'derby_stand', 'leaderboard', 'fishing_boat', 'train_station', 'valley_board'];
+    'neighborhood_house', 'derby_stand', 'leaderboard', 'fishing_boat', 'train_station', 'valley_board',
+    'neighborhood_requests', 'farm_pass', 'decoration_collection', 'decorate_event', 'toms_box'];
   const COLORS = { grid: 'rgba(255,255,255,0.75)', fixed: '#374151', fixedFill: 'rgba(107,114,128,0.35)',
     ok: '#15803d', okFill: 'rgba(21,128,61,0.12)', bad: '#b91c1c', badFill: 'rgba(185,28,28,0.22)',
-    sel: '#2563eb', ruler: '#f59e0b' };
+    sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)' };
   const STORE_KEY = 'farm_map_editor_state_v1';
 
   const $ = id => document.getElementById(id);
   const canvas = $('view'), ctx = canvas.getContext('2d');
   const state = { img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
-    fixed: FIXED_IDS.map(id => ({ id, name: '', rect: null })), expansions: [],
-    selFixed: null, selExp: null, tab: 'calibrate' };
+    fixed: FIXED_IDS.map(id => ({ id, name: '', rect: null })), expansions: [], zones: [],
+    selFixed: null, selExp: null, selZone: null, tab: 'calibrate' };
   const view = { s: 1, tx: 0, ty: 0 };
   let drag = null, spaceDown = false, mouseImg = null;
+  // reference overlay: image (not stored), matrix overlay px -> farm px, alignment points
+  const REF_KEY = 'farm_map_editor_ref_v1';
+  const REF_ORDER = ['r1', 'm1', 'r2', 'm2', 'r3', 'm3'];
+  const ref = { img: null, m: null, pts: {} };
+  function saveRef() {
+    try { localStorage.setItem(REF_KEY, JSON.stringify({ m: ref.m, pts: ref.pts, opacity: $('refOpacity').value })); }
+    catch (e) { /* storage unavailable */ }
+  }
+  function restoreRef() {
+    try {
+      const data = JSON.parse(localStorage.getItem(REF_KEY) || 'null');
+      if (!data) return;
+      ref.m = data.m; ref.pts = data.pts || {};
+      if (data.opacity != null) $('refOpacity').value = data.opacity;
+    } catch (e) { /* ignore broken storage */ }
+  }
+  function refInfo() {
+    if (!ref.img) return ref.m ? 'Alignment kept; load the overlay image again.' : 'No overlay.';
+    const done = REF_ORDER.filter(k => ref.pts[k]).length;
+    return done === 6 ? 'Aligned with 3 point pairs. Click a point again to refine it.' : `${done} / 6 points set.`;
+  }
+  function setRefPoint(p) {
+    if (!ref.img) { alert('Load the overlay image first.'); return; }
+    const k = $('refNext').value;
+    // overlay points are stored in overlay pixels, farm points in farm pixels
+    ref.pts[k] = k[0] === 'r' ? Core.applyAffine(Core.invertAffine(ref.m), p) : p;
+    $('refNext').value = REF_ORDER[(REF_ORDER.indexOf(k) + 1) % 6];
+    if (REF_ORDER.every(x => ref.pts[x])) {
+      try { ref.m = Core.affine3(['r1', 'r2', 'r3'].map(x => ref.pts[x]), ['m1', 'm2', 'm3'].map(x => ref.pts[x])); }
+      catch (err) { alert(err.message); }
+    }
+    saveRef();
+    $('refInfo').textContent = refInfo();
+  }
 
   // ---------------------------------------------------------------- storage
   function save() {
@@ -348,6 +528,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     const known = new Set(s.fixed.map(f => f.id));
     state.fixed = s.fixed.concat(FIXED_IDS.filter(id => !known.has(id)).map(id => ({ id, name: '', rect: null })));
     state.expansions = s.expansions;
+    state.zones = s.zones;
     if (s.imagePath) $('bgPath').value = s.imagePath;
     refreshAll();
   }
@@ -365,6 +546,21 @@ if (typeof module !== 'undefined') module.exports = Core;
     view.s = s;
     view.tx = (canvas.width - state.imgW * s) / 2;
     view.ty = (canvas.height - state.imgH * s) / 2;
+  }
+  // Zoom by factor k around the canvas point (sx, sy), in device pixels.
+  function zoomAt(k, sx, sy) {
+    const fitS = Math.min(canvas.width / state.imgW, canvas.height / state.imgH);
+    const s = Math.min(Math.max(view.s * k, fitS * 0.5), 16);
+    k = s / view.s;
+    view.tx = sx - (sx - view.tx) * k; view.ty = sy - (sy - view.ty) * k; view.s = s;
+    requestDraw();
+  }
+  // At most one redraw per frame: the full farm screenshot is large.
+  let drawQueued = false;
+  function requestDraw() {
+    if (drawQueued) return;
+    drawQueued = true;
+    requestAnimationFrame(() => { drawQueued = false; draw(); });
   }
   function screenToImg(e) {
     const r = canvas.getBoundingClientRect();
@@ -392,19 +588,33 @@ if (typeof module !== 'undefined') module.exports = Core;
       g.stroke();
       g.restore();
     }
+    if (bg && opts.zones) {
+      for (const z of state.zones) {
+        const blocked = z.kind === 'blocked', selected = opts.selection && z === state.selZone;
+        if (blocked) for (const c of z.cells) { poly(g, Core.rectCorners(bg, c)); g.fillStyle = COLORS.blockedFill; g.fill(); }
+        outline(g, bg, z.cells, selected ? COLORS.sel : (blocked ? COLORS.blocked : COLORS.buildable), (blocked ? 2 : 4) * px);
+        if (opts.labels && z.cells.length) label(g, bg, Core.bbox(z.cells), z.id, font, blocked ? COLORS.blocked : COLORS.buildable);
+      }
+    }
     if (bg && opts.expansions) {
       for (const e of state.expansions) {
         const selected = opts.selection && e === state.selExp;
+        const open = isUnlocked(e);
         for (const c of e.cells) {
           poly(g, Core.rectCorners(bg, c));
-          g.fillStyle = e.unlocked ? COLORS.okFill : COLORS.badFill; g.fill();
-          g.setLineDash([6 * px, 4 * px]);
-          g.strokeStyle = selected ? COLORS.sel : (e.unlocked ? COLORS.ok : COLORS.bad);
-          g.lineWidth = (selected ? 3 : 2) * px; g.stroke();
-          g.setLineDash([]);
+          g.fillStyle = open ? COLORS.okFill : COLORS.badFill; g.fill();
         }
-        if (opts.labels && e.cells.length) label(g, bg, Core.bbox(e.cells), e.id, font, e.unlocked ? COLORS.ok : COLORS.bad);
+        g.setLineDash([6 * px, 4 * px]);
+        outline(g, bg, e.cells, selected ? COLORS.sel : (open ? COLORS.ok : COLORS.bad), (selected ? 3 : 2) * px);
+        g.setLineDash([]);
+        if (opts.labels && e.cells.length) label(g, bg, Core.bbox(e.cells), e.id, font, open ? COLORS.ok : COLORS.bad);
       }
+    }
+    if (bg && (opts.expansions || opts.zones)) {
+      // outline of the whole farm: every plot and buildable zone
+      const farm = state.expansions.flatMap(e => e.cells)
+        .concat(state.zones.filter(z => z.kind === 'buildable').flatMap(z => z.cells));
+      outline(g, bg, farm, COLORS.farm, 4 * px);
     }
     if (bg && opts.fixed) {
       for (const f of state.fixed) {
@@ -416,6 +626,17 @@ if (typeof module !== 'undefined') module.exports = Core;
         if (opts.labels) label(g, bg, f.rect, f.name || f.id, font, COLORS.fixed);
       }
     }
+  }
+  // the starting land (section base) always counts as unlocked, like in src/layout/farm_map.py
+  const isUnlocked = e => e.unlocked || e.section === 'base';
+  function outline(g, bg, cells, color, width) {
+    if (!cells.length) return;
+    g.beginPath();
+    for (const [a, b] of Core.outlineSegments(cells)) {
+      const p = Core.tileToPx(bg, a[0], a[1]), q = Core.tileToPx(bg, b[0], b[1]);
+      g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]);
+    }
+    g.strokeStyle = color; g.lineWidth = width; g.lineCap = 'round'; g.stroke();
   }
   function poly(g, pts) {
     g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
@@ -430,7 +651,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     g.fillStyle = color; g.fillText(text, c[0], c[1]);
   }
   function layerOpts(selection) {
-    return { grid: $('lyGrid').checked, fixed: $('lyFixed').checked, expansions: $('lyExp').checked,
+    return { grid: $('lyGrid').checked, fixed: $('lyFixed').checked, expansions: $('lyExp').checked, zones: $('lyZones').checked,
              labels: $('lyLabels').checked, selection };
   }
 
@@ -443,7 +664,24 @@ if (typeof module !== 'undefined') module.exports = Core;
     ctx.imageSmoothingEnabled = view.s < 2;
     ctx.drawImage(state.img, 0, 0);
     const px = 1 / view.s;
+    if (ref.img && ref.m && $('lyRef').checked) {
+      ctx.save();
+      ctx.transform(...ref.m);
+      ctx.globalAlpha = +$('refOpacity').value;
+      ctx.drawImage(ref.img, 0, 0);
+      ctx.restore();
+    }
     drawLayers(ctx, px, layerOpts(true));
+    if (state.tab === 'reference' && ref.m) {
+      for (const k of REF_ORDER) {
+        if (!ref.pts[k]) continue;
+        const p = k[0] === 'r' ? Core.applyAffine(ref.m, ref.pts[k]) : ref.pts[k];
+        ctx.beginPath(); ctx.arc(p[0], p[1], 5 * px, 0, Math.PI * 2);
+        ctx.fillStyle = k[0] === 'r' ? '#7c3aed' : COLORS.ruler; ctx.fill();
+        ctx.font = `bold ${14 * px}px system-ui`; ctx.fillStyle = '#111';
+        ctx.fillText(k, p[0] + 8 * px, p[1] - 8 * px);
+      }
+    }
 
     // ruler points
     for (const k of ['A', 'B', 'C']) {
@@ -457,8 +695,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     // drag preview
     if (drag && drag.kind === 'rect' && state.bg) {
       poly(ctx, Core.rectCorners(state.bg, Core.rectFromTiles(drag.t0, drag.t1)));
-      ctx.fillStyle = 'rgba(37,99,235,0.25)'; ctx.fill();
-      ctx.strokeStyle = COLORS.sel; ctx.lineWidth = 2 * px; ctx.stroke();
+      ctx.fillStyle = drag.erase ? 'rgba(220,38,38,0.3)' : 'rgba(37,99,235,0.25)'; ctx.fill();
+      ctx.strokeStyle = drag.erase ? COLORS.blocked : COLORS.sel; ctx.lineWidth = 2 * px; ctx.stroke();
     }
     updateStatus();
   }
@@ -480,65 +718,123 @@ if (typeof module !== 'undefined') module.exports = Core;
   canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
+    if (!state.img) return;
     const r = canvas.getBoundingClientRect();
     const sx = (e.clientX - r.left) * devicePixelRatio, sy = (e.clientY - r.top) * devicePixelRatio;
-    const k = Math.exp(-e.deltaY * 0.0015);
-    view.tx = sx - (sx - view.tx) * k; view.ty = sy - (sy - view.ty) * k; view.s *= k;
-    draw();
+    // touchpad pinch arrives as ctrl + wheel with small deltas
+    zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), sx, sy);
   }, { passive: false });
 
   canvas.addEventListener('mousedown', e => {
     if (!state.img) return;
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     const p = screenToImg(e);
-    if (e.button === 1 || e.button === 2 || spaceDown) {
-      drag = { kind: 'pan', x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
+    // Calibrate: a left drag pans, a click without movement sets the point (on mouseup).
+    const calClick = e.button === 0 && !spaceDown && (state.tab === 'calibrate' || state.tab === 'reference');
+    if (e.button === 1 || e.button === 2 || spaceDown || calClick) {
+      drag = { kind: 'pan', x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty, moved: false,
+               point: calClick ? p : null };
       return;
     }
     if (e.button !== 0) return;
-    if (state.tab === 'calibrate') {
-      const k = $('calNext').value;
-      state.cal[k] = p;
-      $('calNext').value = { A: 'B', B: 'C', C: 'A' }[k];
-      save(); draw();
-      return;
-    }
+    if (state.tab === 'calibrate' || state.tab === 'reference') return;
     if (!state.bg) { alert('Calibrate the grid first.'); return; }
     const t = Core.pxToTile(state.bg, p[0], p[1]);
-    if (state.tab === 'expansions' && e.altKey && state.selExp) {
-      const x = Math.floor(t[0]), y = Math.floor(t[1]);
-      const i = state.selExp.cells.findIndex(c => x >= c[0] && x < c[0] + c[2] && y >= c[1] && y < c[1] + c[3]);
-      if (i >= 0) { state.selExp.cells.splice(i, 1); refreshAll(); }
-      return;
-    }
-    if (state.tab === 'fixed' || state.tab === 'expansions') drag = { kind: 'rect', t0: t, t1: t };
+    const erase = e.altKey && (state.tab === 'expansions' || state.tab === 'zones');
+    if (['fixed', 'expansions', 'zones'].includes(state.tab)) drag = { kind: 'rect', t0: t, t1: t, erase };
   });
 
   window.addEventListener('mousemove', e => {
     if (state.img && e.target === canvas) mouseImg = screenToImg(e);
     if (!drag) { if (e.target === canvas) updateStatus(); return; }
     if (drag.kind === 'pan') {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) drag.moved = true;
       view.tx = drag.tx + (e.clientX - drag.x) * devicePixelRatio;
       view.ty = drag.ty + (e.clientY - drag.y) * devicePixelRatio;
     } else if (drag.kind === 'rect') {
       const p = screenToImg(e);
       drag.t1 = Core.pxToTile(state.bg, p[0], p[1]);
     }
-    draw();
+    requestDraw();
   });
 
   window.addEventListener('mouseup', () => {
-    if (drag && drag.kind === 'rect') finishRect(Core.rectFromTiles(drag.t0, drag.t1));
+    if (drag && drag.kind === 'rect') finishRect(Core.rectFromTiles(drag.t0, drag.t1), drag.erase);
+    if (drag && drag.kind === 'pan' && drag.point && !drag.moved && state.tab === 'reference') setRefPoint(drag.point);
+    else if (drag && drag.kind === 'pan' && drag.point && !drag.moved) {
+      const k = $('calNext').value;
+      state.cal[k] = drag.point;
+      $('calNext').value = { A: 'B', B: 'C', C: 'A' }[k];
+      save();
+    }
     drag = null; draw();
   });
 
-  window.addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body) { spaceDown = true; e.preventDefault(); } });
+  // Keyboard navigation works unless the focus is in a text field or a list.
+  const typing = el => el && (el.tagName === 'INPUT' && !['file', 'checkbox'].includes(el.type) || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA');
+  const PAN_KEYS = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
+  window.addEventListener('keydown', e => {
+    if (typing(e.target)) return;
+    if (e.code === 'Space') {
+      // a focused button would be pressed by Space
+      if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+      spaceDown = true; e.preventDefault(); return;
+    }
+    if (!state.img) return;
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    if (PAN_KEYS[e.key]) pan(e.key, e.shiftKey);
+    else if (e.key === '+' || e.key === '=') zoomAt(1.25, cx, cy);
+    else if (e.key === '-') zoomAt(0.8, cx, cy);
+    else if (e.key === '0') { fit(); requestDraw(); }
+    else return;
+    e.preventDefault();
+  });
+  function pan(key, big) {
+    if (!state.img) return;
+    const step = (big ? 0.5 : 0.15) * Math.min(canvas.width, canvas.height);
+    view.tx += PAN_KEYS[key][0] * step; view.ty += PAN_KEYS[key][1] * step;
+    requestDraw();
+  }
+  // On-screen pad: click pans one step (Shift: bigger), holding the button keeps panning.
+  let padTimer = null;
+  const stopPad = () => { clearInterval(padTimer); padTimer = null; };
+  document.querySelectorAll('#pad [data-pan]').forEach(b => {
+    b.addEventListener('mousedown', e => {
+      e.preventDefault();
+      stopPad(); pan(b.dataset.pan, e.shiftKey);
+      padTimer = setInterval(() => pan(b.dataset.pan, e.shiftKey), 120);
+    });
+  });
+  window.addEventListener('mouseup', stopPad);
+  $('padFit').addEventListener('mousedown', e => { e.preventDefault(); fit(); requestDraw(); });
+  // Enter in a text field releases the focus, so the arrow keys pan the map again.
+  window.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text') e.target.blur(); });
   window.addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
+  $('zoomIn').onclick = () => state.img && zoomAt(1.5, canvas.width / 2, canvas.height / 2);
+  $('zoomOut').onclick = () => state.img && zoomAt(1 / 1.5, canvas.width / 2, canvas.height / 2);
+  $('zoomFit').onclick = () => { fit(); requestDraw(); };
 
   function inMap(r) {
     return r[0] >= 0 && r[1] >= 0 && r[0] + r[2] <= state.bg.width && r[1] + r[3] <= state.bg.height;
   }
 
-  function finishRect(r) {
+  // undo history of cell edits (owner, previous cells); not saved
+  const history = [];
+  function editCells(owner, r, erase) {
+    history.push({ owner, cells: owner.cells.map(c => c.slice()) });
+    if (history.length > 200) history.shift();
+    owner.cells = erase ? Core.mergeCells(owner.cells, [], [r]) : Core.mergeCells(owner.cells, [r]);
+  }
+  function undo(owner) {
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].owner !== owner) continue;
+      owner.cells = history.splice(i, 1)[0].cells;
+      refreshAll();
+      return;
+    }
+  }
+
+  function finishRect(r, erase = false) {
     if (!inMap(r)) { alert('The rectangle is outside the calibrated grid.'); return; }
     if (state.tab === 'fixed') {
       const id = Core.toSnake($('fixedId').value);
@@ -550,7 +846,10 @@ if (typeof module !== 'undefined') module.exports = Core;
       state.selFixed = f;
     } else if (state.tab === 'expansions') {
       if (!state.selExp) { alert('Add or select a plot first.'); return; }
-      state.selExp.cells.push(r);
+      editCells(state.selExp, r, erase);
+    } else if (state.tab === 'zones') {
+      if (!state.selZone) { alert('Add or select a zone first.'); return; }
+      editCells(state.selZone, r, erase);
     }
     refreshAll();
   }
@@ -567,6 +866,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       const old = state.bg;
       for (const f of state.fixed) if (f.rect) f.rect = Core.moveRect(old, bg, f.rect);
       for (const e of state.expansions) e.cells = e.cells.map(c => Core.moveRect(old, bg, c));
+      for (const z of state.zones) z.cells = z.cells.map(c => Core.moveRect(old, bg, c));
     }
     state.bg = bg;
     refreshAll();
@@ -601,7 +901,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     for (const e of state.expansions) {
       const li = document.createElement('li');
       if (e === state.selExp) li.className = 'sel';
-      const pill = e.unlocked ? '<span class="pill ok">unlocked</span>' : '<span class="pill bad">locked</span>';
+      const pill = isUnlocked(e) ? '<span class="pill ok">unlocked</span>' : '<span class="pill bad">locked</span>';
       li.innerHTML = `<span>${esc(e.id)} · ${e.cells.length} rect ${pill}</span>`;
       li.append(btn('select', () => { state.selExp = e; refreshAll(); }));
       li.append(btn(e.unlocked ? 'lock' : 'unlock', () => { e.unlocked = !e.unlocked; refreshAll(); }));
@@ -612,6 +912,21 @@ if (typeof module !== 'undefined') module.exports = Core;
         refreshAll();
       }));
       $('expList').append(li);
+    }
+    $('zoneList').innerHTML = '';
+    for (const z of state.zones) {
+      const li = document.createElement('li');
+      if (z === state.selZone) li.className = 'sel';
+      const pill = z.kind === 'blocked' ? '<span class="pill bad">blocked</span>' : '<span class="pill ok">buildable</span>';
+      li.innerHTML = `<span>${esc(z.id)} · ${z.cells.length} rect ${pill}</span>`;
+      li.append(btn('select', () => { state.selZone = z; refreshAll(); }));
+      li.append(btn('×', () => {
+        if (!confirm(`Delete zone ${z.id}?`)) return;
+        state.zones.splice(state.zones.indexOf(z), 1);
+        if (state.selZone === z) state.selZone = null;
+        refreshAll();
+      }));
+      $('zoneList').append(li);
     }
     save(); draw();
   }
@@ -632,7 +947,18 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (num != null) $('expNumber').value = num + 1;
     refreshAll();
   };
-  $('expUndo').onclick = () => { if (state.selExp && state.selExp.cells.length) { state.selExp.cells.pop(); refreshAll(); } };
+  $('zoneAdd').onclick = () => {
+    const kind = $('zoneKind').value;
+    const id = Core.toSnake($('zoneId').value) || `${kind}_${state.zones.filter(z => z.kind === kind).length + 1}`;
+    if (state.zones.some(z => z.id === id)) { alert(`Zone ${id} already exists.`); return; }
+    const z = { id, kind, cells: [] };
+    state.zones.push(z);
+    state.selZone = z;
+    $('zoneId').value = '';
+    refreshAll();
+  };
+  $('zoneUndo').onclick = () => { if (state.selZone) undo(state.selZone); };
+  $('expUndo').onclick = () => { if (state.selExp) undo(state.selExp); };
 
   // ---------------------------------------------------------------- tabs, layers, files
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
@@ -641,7 +967,28 @@ if (typeof module !== 'undefined') module.exports = Core;
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + state.tab));
     canvas.style.cursor = state.tab === 'export' ? 'default' : 'crosshair';
   });
-  ['lyGrid', 'lyFixed', 'lyExp', 'lyLabels'].forEach(id => $(id).onchange = draw);
+  ['lyGrid', 'lyFixed', 'lyExp', 'lyZones', 'lyRef', 'lyLabels'].forEach(id => $(id).onchange = draw);
+  $('refOpacity').oninput = () => { saveRef(); requestDraw(); };
+  $('refImage').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      ref.img = img;
+      // first load: stretch the overlay over the farm image as a starting point
+      if (!ref.m && state.img) { const k = state.imgW / img.naturalWidth; ref.m = [k, 0, 0, k, 0, 0]; }
+      if (!ref.m) ref.m = [1, 0, 0, 1, 0, 0];
+      saveRef();
+      $('refInfo').textContent = refInfo();
+      draw();
+    };
+    img.src = URL.createObjectURL(file);
+  };
+  $('refReset').onclick = () => {
+    ref.pts = {}; ref.m = ref.img && state.img ? [state.imgW / ref.img.naturalWidth, 0, 0, state.imgW / ref.img.naturalWidth, 0, 0] : null;
+    $('refNext').value = 'r1';
+    saveRef(); $('refInfo').textContent = refInfo(); draw();
+  };
 
   $('fileImage').onchange = e => {
     const file = e.target.files[0];
@@ -683,7 +1030,23 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
   const toBlob = c => new Promise((ok, fail) => c.toBlob(b => b ? ok(b) : fail(new Error('PNG export failed (image too large for this browser?)')), 'image/png'));
 
+  // Before saving: merge the cells of every plot / zone, crop the map to the farm (optional).
+  function tidyForSave() {
+    for (const e of state.expansions) e.cells = Core.mergeCells(e.cells);
+    for (const z of state.zones) z.cells = Core.mergeCells(z.cells);
+    if ($('cropOnSave').checked) {
+      const c = Core.cropMap(state, Math.max(0, +$('cropMargin').value || 0));
+      if (c) {
+        state.bg = c.bg; state.fixed = c.fixed; state.expansions = c.expansions; state.zones = c.zones;
+        state.selFixed = state.selExp = state.selZone = null;
+        history.length = 0;
+      }
+    }
+    refreshAll();
+  }
+
   $('saveJson').onclick = () => {
+    tidyForSave();
     const json = JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n';
     download(new Blob([json], { type: 'application/json' }), 'farm_map.json');
   };
@@ -694,6 +1057,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   };
   $('saveZip').onclick = async () => {
     if (!state.img || !state.bg) { alert('Load and calibrate the image first.'); return; }
+    tidyForSave();
     const plots = state.expansions.filter(e => e.cells.length);
     if (!plots.length) { alert('Draw at least one plot first.'); return; }
     const margin = Math.max(0, +$('margin').value || 0);
@@ -713,6 +1077,8 @@ if (typeof module !== 'undefined') module.exports = Core;
 
   window.addEventListener('resize', resize);
   restore();
+  restoreRef();
+  $('refInfo').textContent = refInfo();
   refreshAll();
   resize();
 })();

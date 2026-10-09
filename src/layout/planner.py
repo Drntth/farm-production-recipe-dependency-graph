@@ -11,7 +11,12 @@ Steps:
 4. Grow each block frame by ``reserve_ratio`` free area for later unlocks.
 5. Pack the block frames on the farm map around the fixed buildings, with a
    ``gap`` of free tiles between blocks; when plots are marked unlocked in the
-   farm map, only on unlocked plots.
+   farm map, only on unlocked plots. The ``strategy`` sets the order of the
+   blocks: ``coupling`` (strongest neighbours first, related blocks end up
+   close), ``size`` (largest first, fills an irregular area better) or
+   ``auto`` (coupling, then size if a block does not fit). If a block still
+   does not fit, steps 4-5 are repeated with a smaller reserve
+   (``RESERVE_STEP``) down to 0.
 
 No production data is used: block sizes come from the profile and the level.
 """
@@ -21,7 +26,7 @@ from __future__ import annotations
 import logging
 import math
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import networkx as nx
 
@@ -40,6 +45,8 @@ from .support import SupportRelation, active_relations
 logger = logging.getLogger(__name__)
 
 DEFAULT_RESERVE_RATIO = 0.2
+RESERVE_STEP = 0.01
+STRATEGIES = ("auto", "coupling", "size")
 DEFAULT_GAP = 1
 DEFAULT_FIELD_POOL = 0.0
 COPY_WEIGHT = 1.0  # keeps copies of the same building together
@@ -93,8 +100,10 @@ class Layout:
     support: list[SupportRelation]
     fixed_unplaced: list[str]  # fixed farm locations / map items without a position
     missing_footprint: list[str]
-    reserve_ratio: float
+    reserve_ratio: float  # used; lower than requested when the blocks did not fit otherwise
     crop_names: dict[str, str] = field(default_factory=dict)
+    reserve_requested: float | None = None
+    strategy: str = "coupling"  # the block order actually used
 
     @property
     def unplaced_blocks(self) -> list[str]:
@@ -119,11 +128,36 @@ def plan_layout(
     gap: int = DEFAULT_GAP,
     field_pool: float = DEFAULT_FIELD_POOL,
     graph: nx.DiGraph | None = None,
+    strategy: str = "auto",
 ) -> Layout:
     """Plan the farm layout for the level-filtered *dataset*."""
+    if strategy not in STRATEGIES:
+        raise ValueError(f"Unknown strategy {strategy!r}; use one of {', '.join(STRATEGIES)}")
+    if reserve_ratio < 0 or gap < 0:
+        raise ValueError("reserve_ratio and gap must not be negative")
+    orders = ("coupling", "size") if strategy == "auto" else (strategy,)
     farm_map = farm_map or FarmMap()
     G = graph if graph is not None else build_graph(dataset)
-    blocks = detect_named_blocks(G)
+    stock = {s.location.id: s for s in farm_stock(dataset, player, level)}
+
+    # a movable location placed on the map by hand (e.g. the barn) stays there as
+    # fixed: that copy leaves the stock, the other copies are still planned
+    pinned_out: set[str] = set()
+    for f in farm_map.placed_fixed:
+        s = stock.get(f.id)
+        if s is None:
+            continue
+        if s.count + s.reserved <= 1:
+            pinned_out.add(f.id)
+        elif s.count > 0:
+            stock[f.id] = replace(s, count=s.count - 1)
+        else:
+            stock[f.id] = replace(s, reserved=s.reserved - 1)
+    blocks = [
+        Block(b.id, b.name, b.anchor, [x for x in b.locations if x not in pinned_out])
+        for b in detect_named_blocks(G)
+    ]
+    blocks = [b for b in blocks if b.locations]
 
     farm_ids = {
         n
@@ -131,7 +165,6 @@ def plan_layout(
         if d.get("kind") == "location" and d.get("area") == Area.FARM.value
     }
     P = direct_coupling(G, farm_ids)
-    stock = {s.location.id: s for s in farm_stock(dataset, player, level)}
 
     # fields: a dedicated share per block, optionally a shared pool block
     field_stock = next((s for s in stock.values() if s.location.type == LocationType.FIELD), None)
@@ -164,23 +197,27 @@ def plan_layout(
     for loc_id in missing:
         logger.warning("No footprint for %s; add it to data/overrides/locations.json", loc_id)
 
-    # 3-4. blocks with their items, relative to the block origin
-    block_boxes: list[Box] = []
+    # 3. blocks with their items, relative to the block origin
     block_items: dict[str, list[PlacedItem]] = {}
     for b in blocks:
         items = _pack_block(b, stock, P, shares.get(b.id), field_stock, crop_names)
-        if not items:
-            continue
-        inner = bounding_rect([i.rect for i in items])
-        grow = math.sqrt(1 + reserve_ratio)
-        frame = Rect(0, 0, math.ceil(inner.w * grow), math.ceil(inner.h * grow))
-        rotatable = all(
-            i.rect.w == i.rect.h or stock[i.location_id].location.rotatable for i in items
-        )
-        block_items[b.id] = items
-        block_boxes.append(
-            Box(b.id, frame.w, frame.h, rotatable, [frame] + [i.rect for i in items])
-        )
+        if items:
+            block_items[b.id] = items
+
+    def frames(ratio: float) -> list[Box]:
+        """4. Block frames grown by *ratio* free area."""
+        boxes = []
+        for b in blocks:
+            items = block_items.get(b.id)
+            if not items:
+                continue
+            inner = bounding_rect([i.rect for i in items])
+            frame = Rect(0, 0, *_grow(inner.w, inner.h, ratio))
+            rotatable = all(
+                i.rect.w == i.rect.h or stock[i.location_id].location.rotatable for i in items
+            )
+            boxes.append(Box(b.id, frame.w, frame.h, rotatable, [frame] + [i.rect for i in items]))
+        return boxes
 
     # 5. blocks on the farm map
     fixed_rects = {f.id: Rect(f.x, f.y, f.width, f.height) for f in farm_map.placed_fixed}
@@ -194,14 +231,32 @@ def plan_layout(
                 key = tuple(sorted((fixed_id, owner[nb])))
                 weights[key] = weights.get(key, 0.0) + P[fixed_id][nb]["weight"]
     bounds = (farm_map.width, farm_map.height) if farm_map.bounded else None
-    placements, _ = pack(
-        block_boxes,
-        weights,
-        gap=gap,
-        obstacles=fixed_rects,
-        bounds=bounds,
-        area=farm_map.usable_tiles(),
-    )
+    area = farm_map.usable_tiles()
+    requested = reserve_ratio
+    while True:
+        block_boxes = frames(reserve_ratio)
+        for order in orders:
+            placements, _ = pack(
+                block_boxes,
+                weights,
+                gap=gap,
+                obstacles=fixed_rects,
+                bounds=bounds,
+                area=area,
+                order=order,
+            )
+            if len(placements) == len(block_boxes):
+                break
+        if len(placements) == len(block_boxes) or reserve_ratio <= 0:
+            break
+        # shrink the reserve until every block fits
+        reserve_ratio = max(0.0, round(reserve_ratio - RESERVE_STEP, 4))
+    if reserve_ratio < requested:
+        logger.info(
+            "Reserve lowered from %.0f%% to %.0f%% so that the blocks fit",
+            requested * 100,
+            reserve_ratio * 100,
+        )
 
     placed_blocks: list[PlacedBlock] = []
     for box in block_boxes:
@@ -225,7 +280,7 @@ def plan_layout(
         _shift_to_origin(placed_blocks)
 
     fixed_unplaced = sorted(
-        {f.id for f in farm_map.fixed if not f.is_placed}
+        {f.id for f in farm_map.fixed if not f.is_placed and f.id not in stock}
         | {
             loc.id
             for loc in dataset.location_list
@@ -244,7 +299,27 @@ def plan_layout(
         missing_footprint=missing,
         reserve_ratio=reserve_ratio,
         crop_names=crop_names,
+        reserve_requested=requested,
+        strategy=order,
     )
+
+
+def _grow(w: int, h: int, ratio: float) -> tuple[int, int]:
+    """
+    Smallest frame (w' >= w, h' >= h) with at least ``ratio`` extra area.
+
+    Growing both sides by sqrt(1 + ratio) and rounding up would turn a 5 %
+    reserve into +50 % on a 2-tile wide block; here the extra tiles may go to
+    one side only. Ties prefer the more square frame.
+    """
+    target = w * h * (1 + ratio) - 1e-9
+    best: tuple[int, int, int, int] | None = None
+    for fw in range(w, math.ceil(w * (1 + ratio)) + 1):
+        fh = max(h, math.ceil(target / fw))
+        cand = (fw * fh, abs(fw - fh), fw, fh)
+        if best is None or cand < best:
+            best = cand
+    return best[2], best[3]
 
 
 def _pack_block(

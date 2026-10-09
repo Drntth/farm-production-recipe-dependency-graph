@@ -33,6 +33,8 @@ from .support import active_relations
 
 DEFAULT_MAX_ANCHORS = 3
 DEFAULT_MIN_CROP_SHARE = 0.1
+STORAGE_BLOCK_ID = "storage_block"
+STORAGE_BLOCK_ANCHOR = "barn"
 
 
 @dataclass
@@ -94,12 +96,17 @@ def detect_named_blocks(
     def w(a: str, b: str) -> float:
         return P[a][b]["weight"] if P.has_edge(a, b) else 0.0
 
-    # 1-2. anchors and their suppliers
+    # 1-2. anchors and their suppliers; storage (barn, silo) is one block of its own
     members: dict[str, set[str]] = {a: {a} for a in sorted(locs) if is_anchor[a]}
+    storage = sorted(n for n, d in locs.items() if d.get("type") == "storage")
+    storage_anchor = STORAGE_BLOCK_ANCHOR if STORAGE_BLOCK_ANCHOR in storage else None
+    storage_anchor = storage_anchor or (storage[0] if storage else None)
+    if storage_anchor:
+        members[storage_anchor] = set(storage)
     support_targets = {r.source: r.target for r in active_relations(set(locs))}
     orphans: list[str] = []
     for n in sorted(locs):
-        if is_anchor[n] or n in support_targets:
+        if is_anchor[n] or n in support_targets or n in storage:
             continue
         best = max(
             (a for a in members if w(n, a) > 0),
@@ -160,9 +167,12 @@ def detect_named_blocks(
             ),
         )
         name = locs[main].get("name", main)
+        block_id = f"{main}_block"
+        if storage_anchor in m:
+            main, name, block_id = storage_anchor, "Storage", STORAGE_BLOCK_ID
         blocks.append(
             Block(
-                id=f"{main}_block",
+                id=block_id,
                 name=f"{name} block",
                 anchor=main,
                 locations=[main] + sorted(m - {main}),

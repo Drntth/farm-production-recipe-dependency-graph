@@ -5,10 +5,12 @@ The same placer arranges the items inside a block and the blocks on the farm:
 
 1. The box with the strongest total coupling goes first.
 2. Next comes the unplaced box most strongly coupled to what is already
-   placed (fixed obstacles count as placed).
+   placed (fixed obstacles count as placed). With ``order="size"`` the
+   largest box goes next instead, which fills an irregular area better.
 3. Candidate positions touch a side of a placed box or obstacle (with a
    ``gap``). Each candidate costs the coupling-weighted distance to the placed
-   boxes plus a compactness term (half perimeter of the bounding box).
+   boxes plus a compactness term (half perimeter of the bounding box) and,
+   with an ``area``, a small pull toward the middle of the area.
 4. A rotatable box also tries its transposed orientation (width ↔ height).
 5. With an ``area`` (a set of usable tiles, e.g. the unlocked farm plots) a
    box must lie fully on usable tiles.
@@ -24,6 +26,7 @@ import math
 from dataclasses import dataclass, field
 
 COMPACTNESS = 0.5
+CENTRING = 0.25  # pull toward the middle of the usable area, so free space stays balanced
 
 
 @dataclass(frozen=True)
@@ -92,6 +95,7 @@ def pack(
     obstacles: dict[str, Rect] | None = None,
     bounds: tuple[int, int] | None = None,
     area: set[tuple[int, int]] | None = None,
+    order: str = "coupling",
 ) -> tuple[dict[str, Placement], list[str]]:
     """
     Place *boxes*; return ``(placements, unplaced_keys)``.
@@ -108,10 +112,16 @@ def pack(
     placed: dict[str, Placement] = {}
     unplaced: list[str] = []
     todo = {b.key: b for b in boxes}
+    centre = _centroid(area)
 
     while todo:
         anchors = {k: p.rect for k, p in placed.items()} | obstacles
-        if placed:
+        if order == "size":
+            key = max(
+                todo,
+                key=lambda k: (todo[k].w * todo[k].h, sum(wt(k, a) for a in anchors), neg_key(k)),
+            )
+        elif placed:
             key = max(
                 todo,
                 key=lambda k: (
@@ -131,7 +141,7 @@ def pack(
                 ),
             )
         box = todo.pop(key)
-        best = _best_position(box, anchors, placed, wt, gap, bounds, area)
+        best = _best_position(box, anchors, placed, wt, gap, bounds, area, centre)
         if best is None:
             unplaced.append(key)
         else:
@@ -162,7 +172,18 @@ def _on_area(r: Rect, area: set[tuple[int, int]] | None) -> bool:
     return all((r.x + i, r.y + j) in area for i in range(r.w) for j in range(r.h))
 
 
-def _best_position(box, anchors, placed, wt, gap, bounds, area=None) -> Placement | None:
+def _centroid(area: set[tuple[int, int]] | None) -> tuple[float, float] | None:
+    if not area:
+        return None
+    return (
+        sum(t[0] for t in area) / len(area) + 0.5,
+        sum(t[1] for t in area) / len(area) + 0.5,
+    )
+
+
+def _best_position(
+    box, anchors, placed, wt, gap, bounds, area=None, centre=None
+) -> Placement | None:
     orientations = [(box.w, box.h, False)]
     if box.rotatable and box.w != box.h:
         orientations.append((box.h, box.w, True))
@@ -178,7 +199,7 @@ def _best_position(box, anchors, placed, wt, gap, bounds, area=None) -> Placemen
                 continue
             if any(r.overlaps(o, gap) for o in blocking) or not _on_area(r, area):
                 continue
-            cost = _cost(box.key, r, anchors, placed_rects, wt)
+            cost = _cost(box.key, r, anchors, placed_rects, wt, centre)
             if best is None or cost < best[0] - 1e-9:
                 best = (cost, Placement(box.key, r, rotated))
         scan = _scan_range(bounds, area)
@@ -189,7 +210,7 @@ def _best_position(box, anchors, placed, wt, gap, bounds, area=None) -> Placemen
                     r = Rect(x, y, w, h)
                     if any(r.overlaps(o, gap) for o in blocking) or not _on_area(r, area):
                         continue
-                    cost = _cost(box.key, r, anchors, placed_rects, wt)
+                    cost = _cost(box.key, r, anchors, placed_rects, wt, centre)
                     if best is None or cost < best[0] - 1e-9:
                         best = (cost, Placement(box.key, r, rotated))
     return best[1] if best else None
@@ -224,7 +245,7 @@ def _candidates(w, h, anchors, gap, bounds):
             yield (x, a.y - h - gap)
 
 
-def _cost(key, r, anchors, placed_rects, wt) -> float:
+def _cost(key, r, anchors, placed_rects, wt, centre=None) -> float:
     cx, cy = r.center
     total_w = 0.0
     pull = 0.0
@@ -237,7 +258,10 @@ def _cost(key, r, anchors, placed_rects, wt) -> float:
         total_w += w
     pull = pull / total_w if total_w else 0.0
     bb = bounding_rect(placed_rects + [r])
-    return pull + COMPACTNESS * (bb.w + bb.h)
+    cost = pull + COMPACTNESS * (bb.w + bb.h)
+    if centre is not None:
+        cost += CENTRING * (abs(cx - centre[0]) + abs(cy - centre[1]))
+    return cost
 
 
 def neg_key(s: str) -> tuple[int, ...]:
