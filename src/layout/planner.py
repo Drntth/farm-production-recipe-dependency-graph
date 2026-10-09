@@ -35,7 +35,13 @@ from src.graph import build_graph
 from src.loaders.json_loader import DataSet
 from src.models import Area, LocationType
 
-from .blocks import Block, block_coupling, block_flow_order, detect_named_blocks, direct_coupling
+from .blocks import (
+    Block,
+    block_coupling,
+    block_flow_order,
+    detect_named_blocks,
+    direct_coupling,
+)
 from .farm_map import FarmMap
 from .fields import SHARED_BLOCK_ID, FieldShare, allocate_fields
 from .inventory import Stock, farm_stock
@@ -100,7 +106,9 @@ class Layout:
     support: list[SupportRelation]
     fixed_unplaced: list[str]  # fixed farm locations / map items without a position
     missing_footprint: list[str]
-    reserve_ratio: float  # used; lower than requested when the blocks did not fit otherwise
+    reserve_ratio: (
+        float  # used; lower than requested when the blocks did not fit otherwise
+    )
     crop_names: dict[str, str] = field(default_factory=dict)
     reserve_requested: float | None = None
     strategy: str = "coupling"  # the block order actually used
@@ -132,7 +140,9 @@ def plan_layout(
 ) -> Layout:
     """Plan the farm layout for the level-filtered *dataset*."""
     if strategy not in STRATEGIES:
-        raise ValueError(f"Unknown strategy {strategy!r}; use one of {', '.join(STRATEGIES)}")
+        raise ValueError(
+            f"Unknown strategy {strategy!r}; use one of {', '.join(STRATEGIES)}"
+        )
     if reserve_ratio < 0 or gap < 0:
         raise ValueError("reserve_ratio and gap must not be negative")
     orders = ("coupling", "size") if strategy == "auto" else (strategy,)
@@ -167,7 +177,9 @@ def plan_layout(
     P = direct_coupling(G, farm_ids)
 
     # fields: a dedicated share per block, optionally a shared pool block
-    field_stock = next((s for s in stock.values() if s.location.type == LocationType.FIELD), None)
+    field_stock = next(
+        (s for s in stock.values() if s.location.type == LocationType.FIELD), None
+    )
     shares: dict[str, FieldShare] = {}
     if field_stock is not None:
         for share in allocate_fields(
@@ -195,7 +207,9 @@ def plan_layout(
         )
     )
     for loc_id in missing:
-        logger.warning("No footprint for %s; add it to data/overrides/locations.json", loc_id)
+        logger.warning(
+            "No footprint for %s; add it to data/overrides/locations.json", loc_id
+        )
 
     # 3. blocks with their items, relative to the block origin
     block_items: dict[str, list[PlacedItem]] = {}
@@ -214,13 +228,20 @@ def plan_layout(
             inner = bounding_rect([i.rect for i in items])
             frame = Rect(0, 0, *_grow(inner.w, inner.h, ratio))
             rotatable = all(
-                i.rect.w == i.rect.h or stock[i.location_id].location.rotatable for i in items
+                i.rect.w == i.rect.h or stock[i.location_id].location.rotatable
+                for i in items
             )
-            boxes.append(Box(b.id, frame.w, frame.h, rotatable, [frame] + [i.rect for i in items]))
+            boxes.append(
+                Box(
+                    b.id, frame.w, frame.h, rotatable, [frame] + [i.rect for i in items]
+                )
+            )
         return boxes
 
     # 5. blocks on the farm map
-    fixed_rects = {f.id: Rect(f.x, f.y, f.width, f.height) for f in farm_map.placed_fixed}
+    fixed_rects = {
+        f.id: Rect(f.x, f.y, f.width, f.height) for f in farm_map.placed_fixed
+    }
     weights: dict[tuple[str, str], float] = dict(block_coupling(P, blocks))
     owner = {loc: b.id for b in blocks for loc in b.locations}
     for fixed_id in fixed_rects:
@@ -270,7 +291,13 @@ def plan_layout(
         frame, *units = oriented_units(box, p)
         items = [
             PlacedItem(
-                i.location_id, i.name, b.id, u, i.rotated != p.rotated, i.reserved, i.in_patch
+                i.location_id,
+                i.name,
+                b.id,
+                u,
+                i.rotated != p.rotated,
+                i.reserved,
+                i.in_patch,
             )
             for i, u in zip(block_items[b.id], units)
         ]
@@ -293,7 +320,9 @@ def plan_layout(
         blocks=placed_blocks,
         stock=list(stock.values()),
         flow_order=[i for i in block_flow_order(G, blocks) if i in block_items],
-        neighbourhoods=_neighbourhoods(P, blocks, weights, set(fixed_rects) | set(fixed_unplaced)),
+        neighbourhoods=_neighbourhoods(
+            P, blocks, weights, set(fixed_rects) | set(fixed_unplaced)
+        ),
         support=active_relations(farm_ids),
         fixed_unplaced=fixed_unplaced,
         missing_footprint=missing,
@@ -338,7 +367,13 @@ def _pack_block(
     if share is not None and field_stock.location.footprint_width is not None:
         f = field_stock.location
         boxes.append(
-            patch(f.id, f.footprint_width, f.footprint_height, share.count + share.reserved, False)
+            patch(
+                f.id,
+                f.footprint_width,
+                f.footprint_height,
+                share.count + share.reserved,
+                False,
+            )
         )
         meta[f.id] = (f.id, False)
         reserved_units[f.id] = share.reserved
@@ -384,7 +419,15 @@ def _pack_block(
         for idx, u in enumerate(units):
             is_reserved = reserved or idx >= len(units) - n_reserved
             items.append(
-                PlacedItem(loc_id, name, block.id, u, p.rotated, is_reserved, key in reserved_units)
+                PlacedItem(
+                    loc_id,
+                    name,
+                    block.id,
+                    u,
+                    p.rotated,
+                    is_reserved,
+                    key in reserved_units,
+                )
             )
     if items:
         origin = bounding_rect([i.rect for i in items])

@@ -150,7 +150,10 @@ def _load_json_file(path: Path) -> list:
     with path.open(encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, list):
-        raise ValueError(f"Expected a JSON array in {path}, got {type(data).__name__}")
+        # ValueError on purpose: callers report every bad data file through it
+        raise ValueError(  # noqa: TRY004
+            f"Expected a JSON array in {path}, got {type(data).__name__}"
+        )
     return data
 
 

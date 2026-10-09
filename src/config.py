@@ -46,7 +46,9 @@ class LocationProgress(BaseModel):
     """
 
     owned: int | None = Field(
-        None, ge=0, description="Copies placed (default: all copies unlocked at the level)"
+        None,
+        ge=0,
+        description="Copies placed (default: all copies unlocked at the level)",
     )
     slots: int | None = Field(
         None, ge=1, description="Production slots unlocked, summed over all copies"
@@ -125,14 +127,19 @@ def validate_player_config(cfg: PlayerConfig, dataset: DataSet) -> list[str]:
             i.location_id == loc_id for i in limits.location_instances
         )
         available = limits.instances_at(loc_id, cfg.level) if has_rows else None
-        if progress.owned is not None and available is not None:
-            if progress.owned > available:
-                problems.append(
-                    f"locations.{loc_id}: owned={progress.owned} exceeds the "
-                    f"{available} copies available at level {cfg.level}"
-                )
+        if (
+            progress.owned is not None
+            and available is not None
+            and progress.owned > available
+        ):
+            problems.append(
+                f"locations.{loc_id}: owned={progress.owned} exceeds the "
+                f"{available} copies available at level {cfg.level}"
+            )
         if progress.slots is not None and loc.type in _NO_SLOT_TYPES:
-            problems.append(f"locations.{loc_id}: slots do not apply to {loc.type.value}")
+            problems.append(
+                f"locations.{loc_id}: slots do not apply to {loc.type.value}"
+            )
         if progress.animals is not None:
             copies = progress.owned if progress.owned is not None else available
             if loc.animal_capacity is None:
@@ -145,7 +152,10 @@ def validate_player_config(cfg: PlayerConfig, dataset: DataSet) -> list[str]:
                     f"locations.{loc_id}: animals={progress.animals} exceeds "
                     f"{copies} x {loc.animal_capacity} places"
                 )
-        if progress.mastery_stars is not None and cfg.mastery_system != MasterySystem.STARS:
+        if (
+            progress.mastery_stars is not None
+            and cfg.mastery_system != MasterySystem.STARS
+        ):
             problems.append(
                 f"locations.{loc_id}: mastery_stars set but mastery_system is "
                 f"{cfg.mastery_system.value}"

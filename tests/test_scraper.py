@@ -8,6 +8,7 @@ rows for multi-copy buildings, '★★★' mastery times, shelter unlock rows.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 from bs4 import BeautifulSoup
@@ -39,7 +40,7 @@ class FakeWikiClient:
     def get_production_locations_list(self) -> BeautifulSoup:
         return self.get_page("Production_Buildings_List")
 
-    CATEGORIES = {
+    CATEGORIES: ClassVar[dict[str, list[str]]] = {
         "Fishing_Lake_Buildings": ["Lobster Pool", "Lure Workbench", "Tackle Box"],
         "Trees_and_Bushes": [
             "Apple Tree",
@@ -50,7 +51,7 @@ class FakeWikiClient:
             "Trees and Bushes",
         ],
     }
-    WIKITEXT = {
+    WIKITEXT: ClassVar[dict[str, str]] = {
         "Nectar_Bush": "{{Infobox\n |level = 39|price = 120|title = Trees & bushes}}",
         "Peanut_Bush": "{{Infobox\n |level = 62|price = 300}}",
     }
@@ -125,8 +126,14 @@ def test_production_building_instances(client: FakeWikiClient) -> None:
 def test_production_building_footprints(client: FakeWikiClient) -> None:
     locs = _by_id(parse_locations(client, max_level=56))
 
-    assert (locs["feed_mill"]["footprint_width"], locs["feed_mill"]["footprint_height"]) == (3, 3)
-    assert (locs["dairy"]["footprint_width"], locs["dairy"]["footprint_height"]) == (4, 4)
+    assert (
+        locs["feed_mill"]["footprint_width"],
+        locs["feed_mill"]["footprint_height"],
+    ) == (3, 3)
+    assert (locs["dairy"]["footprint_width"], locs["dairy"]["footprint_height"]) == (
+        4,
+        4,
+    )
     assert (
         locs["ice_cream_maker"]["footprint_width"],
         locs["ice_cream_maker"]["footprint_height"],
@@ -241,14 +248,34 @@ def test_caught_animal_needs_become_traps() -> None:
         "output": {"resource_id": "lobster_tail", "amount": 1},
     }
     raw_resources = [
-        {"id": "lobster_trap", "name": "Lobster trap", "type": "processed_material",
-         "unlock_level": 44, "source_location_id": "net_maker"},
-        {"id": "lobster_tail", "name": "Lobster tail", "type": "animal_product",
-         "unlock_level": 44, "source_location_id": "lobster_pool"},
+        {
+            "id": "lobster_trap",
+            "name": "Lobster trap",
+            "type": "processed_material",
+            "unlock_level": 44,
+            "source_location_id": "net_maker",
+        },
+        {
+            "id": "lobster_tail",
+            "name": "Lobster tail",
+            "type": "animal_product",
+            "unlock_level": 44,
+            "source_location_id": "lobster_pool",
+        },
     ]
     raw_locations = [
-        {"id": "net_maker", "name": "Net maker", "type": "production", "unlock_level": 30},
-        {"id": "lobster_pool", "name": "Lobster pool", "type": "animal", "unlock_level": 44},
+        {
+            "id": "net_maker",
+            "name": "Net maker",
+            "type": "production",
+            "unlock_level": 30,
+        },
+        {
+            "id": "lobster_pool",
+            "name": "Lobster pool",
+            "type": "animal",
+            "unlock_level": 44,
+        },
     ]
     _, _, recipes = normalize(raw_locations, raw_resources, [raw_recipe])
     assert recipes[0]["inputs"] == [{"resource_id": "lobster_trap", "amount": 1}]

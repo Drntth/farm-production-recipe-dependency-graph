@@ -32,5 +32,7 @@ SUPPORT_RELATIONS: tuple[SupportRelation, ...] = (
 def active_relations(location_ids: set[str]) -> list[SupportRelation]:
     """Relations whose two ends are both present (e.g. unlocked at the level)."""
     return [
-        r for r in SUPPORT_RELATIONS if r.source in location_ids and r.target in location_ids
+        r
+        for r in SUPPORT_RELATIONS
+        if r.source in location_ids and r.target in location_ids
     ]

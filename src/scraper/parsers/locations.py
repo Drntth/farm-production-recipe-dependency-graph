@@ -120,7 +120,11 @@ def _parse_production_buildings(
             instance_levels = [level]
             for row in continuation:
                 first = row.find(["td", "th"])
-                extra = _extract_first_int(first.get_text(" ", strip=True)) if first else None
+                extra = (
+                    _extract_first_int(first.get_text(" ", strip=True))
+                    if first
+                    else None
+                )
                 if extra is not None:
                     instance_levels.append(extra)
 
@@ -398,7 +402,9 @@ def _parse_trees_and_bushes_category(
         loc_id = to_snake_case(title)
         if loc_id in seen_ids or not loc_id.endswith(("_tree", "_bush")):
             continue
-        level_match = _INFOBOX_LEVEL_RE.search(client.get_wikitext(title.replace(" ", "_")))
+        level_match = _INFOBOX_LEVEL_RE.search(
+            client.get_wikitext(title.replace(" ", "_"))
+        )
         if level_match is None or int(level_match.group(1)) > max_level:
             continue
         seen_ids.add(loc_id)
@@ -436,7 +442,8 @@ def parse_locations(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     results.extend(_parse_trees_and_bushes_category(client, max_level, seen_ids))
 
     lake_ids = {
-        to_snake_case(title) for title in client.get_category_members(FISHING_LAKE_CATEGORY)
+        to_snake_case(title)
+        for title in client.get_category_members(FISHING_LAKE_CATEGORY)
     }
     lake_ids.add(Area.FISHING_LAKE.value)  # the lake itself (fishing spots)
     for entry in results:

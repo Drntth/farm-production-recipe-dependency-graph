@@ -15,7 +15,11 @@ def test_location_defaults_to_farm() -> None:
 def test_footprint_requires_both_sides() -> None:
     with pytest.raises(ValidationError):
         Location(
-            id="dairy", name="Dairy", type="production", unlock_level=6, footprint_width=4
+            id="dairy",
+            name="Dairy",
+            type="production",
+            unlock_level=6,
+            footprint_width=4,
         )
 
 

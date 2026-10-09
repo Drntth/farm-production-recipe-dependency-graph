@@ -67,7 +67,9 @@ def outline_segments(tiles: set[Tile]) -> list[Segment]:
                 prev = s
                 continue
             a, b = run_start, prev + 1
-            segments.append(((a, line), (b, line)) if axis == "h" else ((line, a), (line, b)))
+            segments.append(
+                ((a, line), (b, line)) if axis == "h" else ((line, a), (line, b))
+            )
             if s is not None:
                 run_start = prev = s
     return segments
@@ -121,8 +123,12 @@ class Background(BaseModel):
     image_width: int = Field(..., ge=1)
     image_height: int = Field(..., ge=1)
     origin_px: tuple[float, float] = Field(..., description="Top corner of tile (0, 0)")
-    x_axis_px: tuple[float, float] = Field(..., description="Pixel step of one tile along x (↘)")
-    y_axis_px: tuple[float, float] = Field(..., description="Pixel step of one tile along y (↙)")
+    x_axis_px: tuple[float, float] = Field(
+        ..., description="Pixel step of one tile along x (↘)"
+    )
+    y_axis_px: tuple[float, float] = Field(
+        ..., description="Pixel step of one tile along y (↙)"
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -138,7 +144,9 @@ class Expansion(BaseModel):
     """A farm plot (wiki: Expansion/Farm), drawn as a union of tile rectangles."""
 
     id: str = Field(..., description="e.g. 'main_12'")
-    section: str = Field(..., description="base, main, second, special, upper, lower, …")
+    section: str = Field(
+        ..., description="base, main, second, special, upper, lower, …"
+    )
     number: int | None = Field(None, ge=0, description="Plot number on the wiki map")
     unlocked: bool = False
     cells: list[tuple[int, int, int, int]] = Field(
@@ -151,7 +159,9 @@ class Expansion(BaseModel):
     @classmethod
     def must_be_snake_case(cls, v: str) -> str:
         if not v or not v.replace("_", "").isalnum() or v != v.lower():
-            raise ValueError(f"Expansion id / section must be lower-case snake_case, got: {v!r}")
+            raise ValueError(
+                f"Expansion id / section must be lower-case snake_case, got: {v!r}"
+            )
         return v
 
     @field_validator("cells")
@@ -234,7 +244,9 @@ class FarmMap(BaseModel):
             for e in self.expansions:
                 for x, y, w, h in e.cells:
                     if x + w > self.width or y + h > self.height:
-                        raise ValueError(f"Expansion '{e.id}' lies outside the farm map")
+                        raise ValueError(
+                            f"Expansion '{e.id}' lies outside the farm map"
+                        )
             for z in self.zones:
                 for x, y, w, h in z.cells:
                     if x + w > self.width or y + h > self.height:

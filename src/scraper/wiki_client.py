@@ -6,7 +6,6 @@ Uses the parse API to avoid Cloudflare challenges on direct page requests.
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -134,9 +133,9 @@ class WikiClient:
     def get_production_locations_list(self) -> BeautifulSoup:
         return self.get_page("Production_Buildings_List")
 
-    def get_page_optional(self, page_name: str) -> Optional[BeautifulSoup]:
+    def get_page_optional(self, page_name: str) -> BeautifulSoup | None:
         """Fetch a page; return None on 404 / missing page."""
         try:
             return self.get_page(page_name)
-        except Exception:
+        except (requests.RequestException, RuntimeError, ValueError):
             return None

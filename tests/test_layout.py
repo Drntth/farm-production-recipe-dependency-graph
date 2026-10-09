@@ -71,7 +71,9 @@ def _loc(id_, type_, w=None, h=None, **kw) -> Location:
 
 
 def _res(id_, type_, source=None) -> Resource:
-    return Resource(id=id_, name=id_, type=type_, unlock_level=1, source_location_id=source)
+    return Resource(
+        id=id_, name=id_, type=type_, unlock_level=1, source_location_id=source
+    )
 
 
 def _rec(id_, loc, inputs, out=None) -> Recipe:
@@ -177,10 +179,14 @@ def test_farm_map_validation() -> None:
     with pytest.raises(ValidationError):
         FarmMap(width=10)  # width without height
     with pytest.raises(ValidationError):
-        FarmMap(width=5, height=5, fixed=[FixedItem(id="barn", x=3, y=3, width=3, height=3)])
+        FarmMap(
+            width=5, height=5, fixed=[FixedItem(id="barn", x=3, y=3, width=3, height=3)]
+        )
     with pytest.raises(ValidationError):
         FarmMap(fixed=[FixedItem(id="barn"), FixedItem(id="barn")])
-    m = FarmMap(fixed=[FixedItem(id="barn"), FixedItem(id="mine", x=0, y=0, width=4, height=4)])
+    m = FarmMap(
+        fixed=[FixedItem(id="barn"), FixedItem(id="mine", x=0, y=0, width=4, height=4)]
+    )
     assert not m.bounded
     assert [f.id for f in m.placed_fixed] == ["mine"]
 
@@ -199,8 +205,20 @@ def test_background_and_expansions(tmp_path: Path) -> None:
         },
         "fixed": [],
         "expansions": [
-            {"id": "base", "section": "base", "number": None, "unlocked": True, "cells": [[0, 0, 3, 2]]},
-            {"id": "main_1", "section": "main", "number": 1, "unlocked": False, "cells": [[5, 5, 2, 2]]},
+            {
+                "id": "base",
+                "section": "base",
+                "number": None,
+                "unlocked": True,
+                "cells": [[0, 0, 3, 2]],
+            },
+            {
+                "id": "main_1",
+                "section": "main",
+                "number": 1,
+                "unlocked": False,
+                "cells": [[5, 5, 2, 2]],
+            },
         ],
     }
     p = tmp_path / "farm_map.json"
@@ -210,10 +228,20 @@ def test_background_and_expansions(tmp_path: Path) -> None:
     assert fm.usable_tiles() == {(x, y) for x in range(3) for y in range(2)}
 
     with pytest.raises(ValidationError):  # parallel axes
-        Background(image="a.png", image_width=1, image_height=1, origin_px=(0, 0),
-                   x_axis_px=(2, 1), y_axis_px=(4, 2))
+        Background(
+            image="a.png",
+            image_width=1,
+            image_height=1,
+            origin_px=(0, 0),
+            x_axis_px=(2, 1),
+            y_axis_px=(4, 2),
+        )
     with pytest.raises(ValidationError):  # outside the map
-        FarmMap(width=4, height=4, expansions=[Expansion(id="a", section="main", cells=[(3, 3, 2, 2)])])
+        FarmMap(
+            width=4,
+            height=4,
+            expansions=[Expansion(id="a", section="main", cells=[(3, 3, 2, 2)])],
+        )
     with pytest.raises(ValidationError):  # background needs a bounded map
         FarmMap(background=payload["background"])
     assert FarmMap().usable_tiles() is None
@@ -280,7 +308,9 @@ def test_named_blocks(farm: DataSet) -> None:
     assert owner["cow_pasture"] == owner["dairy"]
     assert owner["chicken_coop"] == owner["bakery"]
     # a big crop user keeps its own block instead of merging as a lone building
-    assert next(b for b in blocks if b.id == owner["feed_mill"]).locations == ["feed_mill"]
+    assert next(b for b in blocks if b.id == owner["feed_mill"]).locations == [
+        "feed_mill"
+    ]
     # support relation: nectar bush sits with the beehive tree
     assert owner["nectar_bush"] == owner["beehive_tree"] == owner["honey_extractor"]
     # lone buildings merge into the coupled block; the earlier / stronger one names it
@@ -393,17 +423,23 @@ def _check_layout(layout) -> None:
 
 
 def test_plan_layout_unbounded(farm: DataSet) -> None:
-    player = PlayerConfig(level=5, locations={"chicken_coop": LocationProgress(owned=2)})
+    player = PlayerConfig(
+        level=5, locations={"chicken_coop": LocationProgress(owned=2)}
+    )
     layout = plan_layout(farm, level=5, player=player)
     _check_layout(layout)
 
     ext = layout.extent()
     assert (ext.x, ext.y) == (0, 0)
     assert "mine" in layout.fixed_unplaced
-    coop_items = [i for b in layout.blocks for i in b.items if i.location_id == "chicken_coop"]
+    coop_items = [
+        i for b in layout.blocks for i in b.items if i.location_id == "chicken_coop"
+    ]
     assert sum(i.reserved for i in coop_items) == 1 and len(coop_items) == 3
     # fields: 9 at level 5, split into dedicated patches, none left in one big block
-    field_items = [i for b in layout.blocks for i in b.items if i.location_id == "field"]
+    field_items = [
+        i for b in layout.blocks for i in b.items if i.location_id == "field"
+    ]
     assert len(field_items) == 9
     assert len({i.block_id for i in field_items}) == 2
     assert all(b.fields is None or b.fields.crops == ["wheat"] for b in layout.blocks)
@@ -412,7 +448,10 @@ def test_plan_layout_unbounded(farm: DataSet) -> None:
         for i in b.items:
             loc = farm.locations[i.location_id]
             if not loc.rotatable:
-                assert (i.rect.w, i.rect.h) == (loc.footprint_width, loc.footprint_height)
+                assert (i.rect.w, i.rect.h) == (
+                    loc.footprint_width,
+                    loc.footprint_height,
+                )
 
 
 def test_plan_layout_bounded_with_fixed(farm: DataSet) -> None:
@@ -437,8 +476,12 @@ def test_plan_layout_bounded_with_fixed(farm: DataSet) -> None:
 
 
 def test_plan_layout_only_on_unlocked_plots(farm: DataSet) -> None:
-    unlocked = Expansion(id="base", section="base", unlocked=True, cells=[(0, 0, 30, 30)])
-    locked = Expansion(id="main_1", section="main", number=1, cells=[(30, 0, 30, 60), (0, 30, 30, 30)])
+    unlocked = Expansion(
+        id="base", section="base", unlocked=True, cells=[(0, 0, 30, 30)]
+    )
+    locked = Expansion(
+        id="main_1", section="main", number=1, cells=[(30, 0, 30, 60), (0, 30, 30, 30)]
+    )
     farm_map = FarmMap(width=60, height=60, expansions=[unlocked, locked])
     layout = plan_layout(farm, level=5, farm_map=farm_map)
     _check_layout(layout)
@@ -453,8 +496,10 @@ def test_unlocked_plot_without_cells_is_ignored() -> None:
     empty = Expansion(id="main_2", section="main", number=2, unlocked=True)
     assert FarmMap(width=10, height=10, expansions=[empty]).usable_tiles() is None
     drawn = Expansion(id="base", section="base", unlocked=True, cells=[(0, 0, 2, 1)])
-    assert FarmMap(width=10, height=10, expansions=[empty, drawn]).usable_tiles() == {(0, 0), (1, 0)}
-
+    assert FarmMap(width=10, height=10, expansions=[empty, drawn]).usable_tiles() == {
+        (0, 0),
+        (1, 0),
+    }
 
 
 def test_outline_merges_touching_rectangles() -> None:
@@ -466,6 +511,7 @@ def test_outline_merges_touching_rectangles() -> None:
     # an L shape has 6 border segments
     assert len(outline_segments(cells_to_tiles([(0, 0, 2, 1), (0, 1, 1, 1)]))) == 6
 
+
 def test_zones_limit_usable_tiles() -> None:
     plot = Expansion(id="base", section="base", unlocked=True, cells=[(0, 0, 4, 4)])
     buildable = Zone(id="main_section", kind="buildable", cells=[(0, 0, 3, 3)])
@@ -474,11 +520,17 @@ def test_zones_limit_usable_tiles() -> None:
     fm = FarmMap(width=10, height=10, expansions=[plot], zones=[buildable, pond])
     assert fm.usable_tiles() == {(x, y) for x in range(3) for y in range(3)} - {(0, 0)}
     # without plots: the buildable zones are the start
-    assert len(FarmMap(width=10, height=10, zones=[buildable, pond]).usable_tiles()) == 8
+    assert (
+        len(FarmMap(width=10, height=10, zones=[buildable, pond]).usable_tiles()) == 8
+    )
     # only blocked zones: the whole bounded map minus the blocked tiles
     assert len(FarmMap(width=2, height=2, zones=[pond]).usable_tiles()) == 3
     with pytest.raises(ValidationError):
-        FarmMap(width=2, height=2, zones=[Zone(id="road", kind="blocked", cells=[(1, 1, 2, 1)])])
+        FarmMap(
+            width=2,
+            height=2,
+            zones=[Zone(id="road", kind="blocked", cells=[(1, 1, 2, 1)])],
+        )
     with pytest.raises(ValidationError):
         Zone(id="road", kind="water", cells=[])
 
@@ -496,8 +548,14 @@ def test_unplaced_block_has_no_items(farm: DataSet) -> None:
 def test_svg_background_matrix_maps_tiles(farm: DataSet, tmp_path: Path) -> None:
     from src.layout.render_svg import _image_matrix
 
-    bg = Background(image="bg.png", image_width=1300, image_height=900,
-                    origin_px=(600, 100), x_axis_px=(24, 12), y_axis_px=(-24, 12))
+    bg = Background(
+        image="bg.png",
+        image_width=1300,
+        image_height=900,
+        origin_px=(600, 100),
+        x_axis_px=(24, 12),
+        y_axis_px=(-24, 12),
+    )
     farm_map = FarmMap(width=40, height=30, background=bg)
     farm_map._base_dir = tmp_path
     layout = plan_layout(farm, level=5, farm_map=farm_map)
@@ -512,7 +570,9 @@ def test_svg_background_matrix_maps_tiles(farm: DataSet, tmp_path: Path) -> None
     a, b, c, d, e, f = _image_matrix(bg, pt)
     for x, y in ((0, 0), (7, 3), (40, 30)):
         px = (600 + 24 * x - 24 * y, 100 + 12 * x + 12 * y)
-        assert (a * px[0] + c * px[1] + e, b * px[0] + d * px[1] + f) == pytest.approx(pt(x, y))
+        assert (a * px[0] + c * px[1] + e, b * px[0] + d * px[1] + f) == pytest.approx(
+            pt(x, y)
+        )
 
 
 def test_plan_layout_shared_field_pool(farm: DataSet) -> None:
@@ -523,14 +583,19 @@ def test_plan_layout_shared_field_pool(farm: DataSet) -> None:
     assert sum(i.location_id == "field" for b in layout.blocks for i in b.items) == 9
 
 
-
 def test_plan_layout_avoids_blocked_zones(farm: DataSet, tmp_path: Path) -> None:
     road = Zone(id="road", kind="blocked", cells=[(0, 10, 60, 2)])
-    layout = plan_layout(farm, level=5, farm_map=FarmMap(width=60, height=60, zones=[road]))
+    layout = plan_layout(
+        farm, level=5, farm_map=FarmMap(width=60, height=60, zones=[road])
+    )
     for pb in layout.blocks:
         for it in pb.items:
             r = it.rect
-            assert all((r.x + i, r.y + j) not in road.tiles() for i in range(r.w) for j in range(r.h))
+            assert all(
+                (r.x + i, r.y + j) not in road.tiles()
+                for i in range(r.w)
+                for j in range(r.h)
+            )
     svg = render_svg(layout, tmp_path / "layout.svg")
     assert "road (blocked)" in svg
 
@@ -546,11 +611,12 @@ def test_barn_and_silo_form_a_storage_block(farm: DataSet) -> None:
 def test_barn_placed_on_the_map_stays_fixed(farm: DataSet) -> None:
     barn = FixedItem(id="barn", x=0, y=0, width=4, height=4)
     silo = FixedItem(id="silo")  # listed without a position: the planner places it
-    layout = plan_layout(farm, level=5, farm_map=FarmMap(width=60, height=60, fixed=[barn, silo]))
+    layout = plan_layout(
+        farm, level=5, farm_map=FarmMap(width=60, height=60, fixed=[barn, silo])
+    )
     storage = next(b for b in layout.blocks if b.block.id == "storage_block")
     assert [i.location_id for i in storage.items] == ["silo"]
     assert layout.fixed_unplaced == ["mine"]
-
 
 
 def test_pinned_copy_of_a_multi_copy_building_keeps_the_others(farm: DataSet) -> None:
@@ -566,16 +632,22 @@ def test_plan_layout_rejects_negative_reserve(farm: DataSet) -> None:
     with pytest.raises(ValueError, match="negative"):
         plan_layout(farm, level=5, reserve_ratio=-0.1)
 
+
 def test_base_plot_counts_as_unlocked() -> None:
     base = Expansion(id="base", section="base", cells=[(0, 0, 2, 1)])
     locked = Expansion(id="main_1", section="main", number=1, cells=[(5, 5, 1, 1)])
-    assert FarmMap(width=10, height=10, expansions=[base, locked]).usable_tiles() == {(0, 0), (1, 0)}
+    assert FarmMap(width=10, height=10, expansions=[base, locked]).usable_tiles() == {
+        (0, 0),
+        (1, 0),
+    }
 
 
 def test_reserve_shrinks_until_blocks_fit(farm: DataSet) -> None:
     # find a map size where the full reserve does not fit but a smaller one does
     for size in range(60, 4, -1):
-        layout = plan_layout(farm, level=5, farm_map=FarmMap(width=size, height=size), reserve_ratio=1.0)
+        layout = plan_layout(
+            farm, level=5, farm_map=FarmMap(width=size, height=size), reserve_ratio=1.0
+        )
         if 0 < layout.reserve_ratio < 1.0 and not layout.unplaced_blocks:
             break
     else:
@@ -598,6 +670,7 @@ def test_pack_size_order_places_the_largest_box_first() -> None:
     area = {(x, y) for x in range(10) for y in range(10)}
     placed, _ = pack(boxes, weights, bounds=(10, 10), area=area, order="size")
     assert list(placed) == ["big", "small"]
+
 
 def test_plan_layout_reports_blocks_that_do_not_fit(farm: DataSet) -> None:
     layout = plan_layout(farm, level=5, farm_map=FarmMap(width=6, height=6))
@@ -654,7 +727,6 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
     assert json.loads((tmp_path / "layout.json").read_text())["level"] == 20
 
 
-
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
     args = ["--level", "20", "--strategy", "all", "--output-dir", str(tmp_path)]
@@ -668,6 +740,7 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
 def test_plan_layout_rejects_unknown_strategy(farm: DataSet) -> None:
     with pytest.raises(ValueError, match="strategy"):
         plan_layout(farm, level=5, strategy="random")
+
 
 @pytest.mark.parametrize("level", ["0", "-3"])
 def test_cli_rejects_invalid_level(tmp_path: Path, level: str) -> None:

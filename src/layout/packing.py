@@ -26,7 +26,9 @@ import math
 from dataclasses import dataclass, field
 
 COMPACTNESS = 0.5
-CENTRING = 0.25  # pull toward the middle of the usable area, so free space stays balanced
+CENTRING = (
+    0.25  # pull toward the middle of the usable area, so free space stays balanced
+)
 
 
 @dataclass(frozen=True)
@@ -67,7 +69,13 @@ class Box:
             self.units = [Rect(0, 0, self.w, self.h)]
 
     def transposed(self) -> Box:
-        return Box(self.key, self.h, self.w, self.rotatable, [u.transposed() for u in self.units])
+        return Box(
+            self.key,
+            self.h,
+            self.w,
+            self.rotatable,
+            [u.transposed() for u in self.units],
+        )
 
 
 @dataclass(frozen=True)
@@ -82,7 +90,8 @@ def patch(key: str, unit_w: int, unit_h: int, count: int, rotatable: bool) -> Bo
     cols = max(1, math.ceil(math.sqrt(count * unit_h / unit_w)))
     rows = math.ceil(count / cols)
     units = [
-        Rect((i % cols) * unit_w, (i // cols) * unit_h, unit_w, unit_h) for i in range(count)
+        Rect((i % cols) * unit_w, (i // cols) * unit_h, unit_w, unit_h)
+        for i in range(count)
     ]
     return Box(key, cols * unit_w, rows * unit_h, rotatable, units)
 
@@ -119,7 +128,11 @@ def pack(
         if order == "size":
             key = max(
                 todo,
-                key=lambda k: (todo[k].w * todo[k].h, sum(wt(k, a) for a in anchors), neg_key(k)),
+                key=lambda k: (
+                    todo[k].w * todo[k].h,
+                    sum(wt(k, a) for a in anchors),
+                    neg_key(k),
+                ),
             )
         elif placed:
             key = max(
@@ -152,7 +165,9 @@ def pack(
 def oriented_units(box: Box, placement: Placement) -> list[Rect]:
     """Absolute unit rects of *box* at *placement*."""
     units = [u.transposed() for u in box.units] if placement.rotated else box.units
-    return [Rect(placement.rect.x + u.x, placement.rect.y + u.y, u.w, u.h) for u in units]
+    return [
+        Rect(placement.rect.x + u.x, placement.rect.y + u.y, u.w, u.h) for u in units
+    ]
 
 
 def bounding_rect(rects: list[Rect]) -> Rect:
@@ -166,7 +181,12 @@ def bounding_rect(rects: list[Rect]) -> Rect:
 def _on_area(r: Rect, area: set[tuple[int, int]] | None) -> bool:
     if area is None:
         return True
-    corners = ((r.x, r.y), (r.x + r.w - 1, r.y), (r.x, r.y + r.h - 1), (r.x + r.w - 1, r.y + r.h - 1))
+    corners = (
+        (r.x, r.y),
+        (r.x + r.w - 1, r.y),
+        (r.x, r.y + r.h - 1),
+        (r.x + r.w - 1, r.y + r.h - 1),
+    )
     if any(c not in area for c in corners):
         return False
     return all((r.x + i, r.y + j) in area for i in range(r.w) for j in range(r.h))
@@ -195,7 +215,9 @@ def _best_position(
     for w, h, rotated in orientations:
         for x, y in _candidates(w, h, anchors, gap, bounds):
             r = Rect(x, y, w, h)
-            if bounds is not None and (x < 0 or y < 0 or x + w > bounds[0] or y + h > bounds[1]):
+            if bounds is not None and (
+                x < 0 or y < 0 or x + w > bounds[0] or y + h > bounds[1]
+            ):
                 continue
             if any(r.overlaps(o, gap) for o in blocking) or not _on_area(r, area):
                 continue
@@ -208,7 +230,9 @@ def _best_position(
             for x in range(x0, x1 - w + 1):
                 for y in range(y0, y1 - h + 1):
                     r = Rect(x, y, w, h)
-                    if any(r.overlaps(o, gap) for o in blocking) or not _on_area(r, area):
+                    if any(r.overlaps(o, gap) for o in blocking) or not _on_area(
+                        r, area
+                    ):
                         continue
                     cost = _cost(box.key, r, anchors, placed_rects, wt, centre)
                     if best is None or cost < best[0] - 1e-9:

@@ -25,7 +25,12 @@ def data_dir(tmp_path: Path) -> Path:
     _write(
         tmp_path / "locations.json",
         [
-            {"id": "cow_pasture", "name": "Cow Pasture", "type": "animal", "unlock_level": 6},
+            {
+                "id": "cow_pasture",
+                "name": "Cow Pasture",
+                "type": "animal",
+                "unlock_level": 6,
+            },
             {"id": "dairy", "name": "Dairy", "type": "production", "unlock_level": 6},
         ],
     )
@@ -39,7 +44,12 @@ def data_dir(tmp_path: Path) -> Path:
                 "unlock_level": 6,
                 "source_location_id": "cow_pasture",
             },
-            {"id": "cream", "name": "Cream", "type": "processed_material", "unlock_level": 6},
+            {
+                "id": "cream",
+                "name": "Cream",
+                "type": "processed_material",
+                "unlock_level": 6,
+            },
         ],
     )
     _write(
@@ -87,8 +97,18 @@ def test_override_null_values_are_skipped(data_dir: Path) -> None:
     _write(
         data_dir / "overrides" / "locations.json",
         [
-            {"id": "cow_pasture", "name": None, "footprint_width": None, "footprint_height": None},
-            {"id": "dairy", "footprint_width": 4, "footprint_height": 4, "animal_capacity": None},
+            {
+                "id": "cow_pasture",
+                "name": None,
+                "footprint_width": None,
+                "footprint_height": None,
+            },
+            {
+                "id": "dairy",
+                "footprint_width": 4,
+                "footprint_height": 4,
+                "animal_capacity": None,
+            },
         ],
     )
     ds = load_data(data_dir)
@@ -127,7 +147,11 @@ def test_level_limits_loaded_and_filtered(data_dir: Path) -> None:
 def test_level_limits_unknown_location_rejected(data_dir: Path) -> None:
     _write(
         data_dir / "level_limits.json",
-        {"location_instances": [{"location_id": "bakery", "instance": 1, "unlock_level": 4}]},
+        {
+            "location_instances": [
+                {"location_id": "bakery", "instance": 1, "unlock_level": 4}
+            ]
+        },
     )
     with pytest.raises(ValueError, match="unknown location_id 'bakery'"):
         load_data(data_dir)
@@ -137,7 +161,9 @@ def test_level_limits_optional(data_dir: Path) -> None:
     assert load_data(data_dir).level_limits is None
 
 
-def test_external_inputs_logged_once(data_dir: Path, caplog: pytest.LogCaptureFixture) -> None:
+def test_external_inputs_logged_once(
+    data_dir: Path, caplog: pytest.LogCaptureFixture
+) -> None:
     recipes = json.loads((data_dir / "recipes.json").read_text())
     recipes[0]["inputs"].append({"resource_id": "voucher", "amount": 2})
     _write(data_dir / "recipes.json", recipes)

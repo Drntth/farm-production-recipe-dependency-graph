@@ -43,7 +43,7 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt       # ruff
 
 python -m pytest                          # all tests must pass (no network needed)
-ruff check src tests                      # lint (ruff from requirements-dev.txt; existing findings are not fixed yet)
+ruff check src tests                      # lint and format check: ruff format --check src tests (ruff from requirements-dev.txt)
 python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
 python -m src.main --level 30             # override the player level
 python -m src.layout                      # farm layout: output/layout.svg, layout.md, layout.json

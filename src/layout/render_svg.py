@@ -73,7 +73,12 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         return (ox + (rx - ry) * TILE_W / 2, oy + (rx + ry) * TILE_H / 2)
 
     def poly(r: Rect) -> str:
-        corners = [pt(r.x, r.y), pt(r.x + r.w, r.y), pt(r.x + r.w, r.y + r.h), pt(r.x, r.y + r.h)]
+        corners = [
+            pt(r.x, r.y),
+            pt(r.x + r.w, r.y),
+            pt(r.x + r.w, r.y + r.h),
+            pt(r.x, r.y + r.h),
+        ]
         return " ".join(f"{a:.1f},{b:.1f}" for a, b in corners)
 
     width = MARGIN * 2 + (gw + gh) * TILE_W / 2
@@ -85,9 +90,12 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
     fm = layout.farm_map
     bg = fm.background
     out: list[str] = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
-        f'width="{width:.0f}" height="{height:.0f}" '
-        f'viewBox="0 0 {width:.0f} {height:.0f}" font-family="sans-serif">',
+        (
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{width:.0f}" height="{height:.0f}" '
+            f'viewBox="0 0 {width:.0f} {height:.0f}" font-family="sans-serif">'
+        ),
         f"<title>Farm layout - level {layout.level}</title>",
         '<rect width="100%" height="100%" fill="#FFFFFF"/>',
     ]
@@ -145,7 +153,11 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
     # farm plots (expansions)
     for e in fm.expansions:
         colour = UNLOCKED_COLOUR if e.is_unlocked else LOCKED_COLOUR
-        fill = 'fill="none"' if e.is_unlocked else f'fill="{LOCKED_COLOUR}" fill-opacity="0.18"'
+        fill = (
+            'fill="none"'
+            if e.is_unlocked
+            else f'fill="{LOCKED_COLOUR}" fill-opacity="0.18"'
+        )
         state = "unlocked" if e.is_unlocked else "locked"
         for x, y, w, h in e.cells:
             out.append(
@@ -172,7 +184,9 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         out.append(_label(pt(*_mid(r)), f.label, 10, "#111827"))
 
     # blocks and items
-    colours = {b.block.id: PALETTE[i % len(PALETTE)] for i, b in enumerate(layout.blocks)}
+    colours = {
+        b.block.id: PALETTE[i % len(PALETTE)] for i, b in enumerate(layout.blocks)
+    }
     placed = [pb for pb in layout.blocks if pb.frame is not None]
     for pb in placed:
         c = colours[pb.block.id]
@@ -187,7 +201,9 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
                 if it.reserved
                 else f'fill="{_tint(c, 0.6)}"'
             )
-            tip = f"{it.name} ({it.rect.w}x{it.rect.h})" + (" - reserved" if it.reserved else "")
+            tip = f"{it.name} ({it.rect.w}x{it.rect.h})" + (
+                " - reserved" if it.reserved else ""
+            )
             out.append(
                 f'<polygon points="{poly(it.rect)}" {style} stroke="{c}" stroke-width="1">'
                 f"<title>{escape(tip)}</title></polygon>"
@@ -205,24 +221,44 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
             out.append(_label(pt(*_mid(box)), f"{name} ×{len(rects)}", 9, "#111827"))
     for pb in placed:
         c = colours[pb.block.id]
-        out.append(_label(pt(pb.frame.x, pb.frame.y), pb.block.name, 12, c, dy=-6, bold=True))
+        out.append(
+            _label(pt(pb.frame.x, pb.frame.y), pb.block.name, 12, c, dy=-6, bold=True)
+        )
 
     # legend
     y = MARGIN + grid_h + 30
     out.append(
-        _text(MARGIN, y, f"Level {layout.level} · 1 diamond = 1 tile · x ↘ (width), y ↙ (height)"
-              " · dashed = reserved copy", 11, "#374151")
+        _text(
+            MARGIN,
+            y,
+            f"Level {layout.level} · 1 diamond = 1 tile · x ↘ (width), y ↙ (height)"
+            " · dashed = reserved copy",
+            11,
+            "#374151",
+        )
     )
     for pb in layout.blocks:
         y += LEGEND_ROW
         c = colours[pb.block.id]
-        where = "not placed" if pb.frame is None else f"{pb.frame.w}x{pb.frame.h} at ({pb.frame.x}, {pb.frame.y})"
-        out.append(f'<rect x="{MARGIN}" y="{y - 10}" width="12" height="12" fill="{c}"/>')
+        where = (
+            "not placed"
+            if pb.frame is None
+            else f"{pb.frame.w}x{pb.frame.h} at ({pb.frame.x}, {pb.frame.y})"
+        )
+        out.append(
+            f'<rect x="{MARGIN}" y="{y - 10}" width="12" height="12" fill="{c}"/>'
+        )
         out.append(_text(MARGIN + 18, y, f"{pb.block.name}: {where}", 11, "#111827"))
     if fixed_lines:
         y += LEGEND_ROW
         out.append(
-            _text(MARGIN, y, "Fixed, position unknown (add to config/farm_map.json):", 11, FIXED_COLOUR)
+            _text(
+                MARGIN,
+                y,
+                "Fixed, position unknown (add to config/farm_map.json):",
+                11,
+                FIXED_COLOUR,
+            )
         )
         for line in fixed_lines:
             y += LEGEND_ROW
@@ -245,7 +281,8 @@ def _image_matrix(bg, pt) -> tuple[float, ...]:
     sx, sy = pt(1, 0), pt(0, 1)
     S = ((sx[0] - o[0], sy[0] - o[0]), (sx[1] - o[1], sy[1] - o[1]))  # screen per tile
     A = tuple(
-        tuple(sum(S[i][k] * inv[k][j] for k in range(2)) for j in range(2)) for i in range(2)
+        tuple(sum(S[i][k] * inv[k][j] for k in range(2)) for j in range(2))
+        for i in range(2)
     )
     ox_, oy_ = bg.origin_px
     e = o[0] - (A[0][0] * ox_ + A[0][1] * oy_)

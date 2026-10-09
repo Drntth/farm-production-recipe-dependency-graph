@@ -41,7 +41,9 @@ class Stock:
 _PLACEHOLDER_TYPES = {LocationType.TREE, LocationType.BUSH}
 
 
-def farm_stock(dataset: DataSet, player: PlayerConfig | None, level: int) -> list[Stock]:
+def farm_stock(
+    dataset: DataSet, player: PlayerConfig | None, level: int
+) -> list[Stock]:
     """Count every movable farm location of the (level-filtered) *dataset*."""
     limits = dataset.level_limits
     stocks: list[Stock] = []

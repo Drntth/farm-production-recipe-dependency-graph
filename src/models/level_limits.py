@@ -57,7 +57,9 @@ class LevelLimits(BaseModel):
             raise ValueError("field_grants contains duplicate levels")
         keys = [(i.location_id, i.instance) for i in self.location_instances]
         if len(keys) != len(set(keys)):
-            raise ValueError("location_instances contains duplicate (location_id, instance)")
+            raise ValueError(
+                "location_instances contains duplicate (location_id, instance)"
+            )
         return self
 
     def fields_at(self, level: int) -> int:

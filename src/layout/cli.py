@@ -87,7 +87,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
+    )
     args = parse_args(argv)
     if args.reserve < 0 or args.gap < 0 or not 0 <= args.field_pool <= 1:
         logger.error("--reserve and --gap must not be negative; --field-pool is 0..1")
@@ -114,7 +116,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     bg_path = farm_map.background_path()
     if bg_path is not None and not bg_path.exists():
-        logger.warning("Farm map background not found: %s (the SVG shows a broken image)", bg_path)
+        logger.warning(
+            "Farm map background not found: %s (the SVG shows a broken image)", bg_path
+        )
 
     level = args.level if args.level is not None else player.level
     try:
@@ -146,7 +150,8 @@ def main(argv: list[str] | None = None) -> int:
             strategy=strategy,
         )
         (out / f"{stem}.json").write_text(
-            json.dumps(layout_to_dict(layout), ensure_ascii=False, indent=2), encoding="utf-8"
+            json.dumps(layout_to_dict(layout), ensure_ascii=False, indent=2),
+            encoding="utf-8",
         )
         (out / f"{stem}.md").write_text(layout_to_markdown(layout), encoding="utf-8")
         render_svg(layout, out / f"{stem}.svg")
@@ -160,10 +165,14 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     ext = layout.extent()
-    logger.info("Level %d: %d blocks on %d x %d tiles", level, len(layout.blocks), ext.w, ext.h)
+    logger.info(
+        "Level %d: %d blocks on %d x %d tiles", level, len(layout.blocks), ext.w, ext.h
+    )
     for pb in layout.blocks:
         logger.info("  %s: %s", pb.block.name, ", ".join(pb.block.locations))
-    logger.info("Wrote %s (.json, .md, .svg) → %s", ", ".join(stem for stem, _ in runs), out)
+    logger.info(
+        "Wrote %s (.json, .md, .svg) → %s", ", ".join(stem for stem, _ in runs), out
+    )
     return 0
 
 

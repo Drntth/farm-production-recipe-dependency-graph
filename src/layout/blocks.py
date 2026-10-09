@@ -50,7 +50,9 @@ def farm_locations(G: nx.DiGraph) -> dict[str, dict]:
     return {
         n: d
         for n, d in G.nodes(data=True)
-        if d.get("kind") == "location" and d.get("area") == "farm" and d.get("movable", True)
+        if d.get("kind") == "location"
+        and d.get("area") == "farm"
+        and d.get("movable", True)
     }
 
 
@@ -59,7 +61,11 @@ def direct_coupling(G: nx.DiGraph, location_ids: set[str]) -> nx.Graph:
     P = location_proximity_graph(G, max_hops=1).subgraph(location_ids).copy()
     P.add_nodes_from(location_ids)
     for rel in active_relations(location_ids):
-        w = P[rel.source][rel.target]["weight"] if P.has_edge(rel.source, rel.target) else 0.0
+        w = (
+            P[rel.source][rel.target]["weight"]
+            if P.has_edge(rel.source, rel.target)
+            else 0.0
+        )
         P.add_edge(rel.source, rel.target, weight=w + rel.weight, support=True)
     return P
 
@@ -67,7 +73,9 @@ def direct_coupling(G: nx.DiGraph, location_ids: set[str]) -> nx.Graph:
 def crop_demand_by_location(G: nx.DiGraph) -> dict[str, dict[str, float]]:
     """location id → {crop id: summed CONSUMES weight} for crops grown on fields."""
     field_locs = {
-        n for n, d in G.nodes(data=True) if d.get("kind") == "location" and d.get("type") == "field"
+        n
+        for n, d in G.nodes(data=True)
+        if d.get("kind") == "location" and d.get("type") == "field"
     }
     demand: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     for crop, d in G.nodes(data=True):
@@ -126,7 +134,10 @@ def detect_named_blocks(
     # 3. merge lone buildings (big crop users are never lone)
     crops = {loc: sum(c.values()) for loc, c in crop_demand_by_location(G).items()}
     crop_total = sum(v for loc, v in crops.items() if loc in locs) or 1.0
-    big_crop_user = {n for n in locs if crops.get(n, 0.0) / crop_total >= min_crop_share}
+    big_crop_user = {
+        n for n in locs if crops.get(n, 0.0) / crop_total >= min_crop_share
+    }
+
     def coupling(a: set[str], b: set[str]) -> float:
         return sum(w(x, y) for x in a for y in b)
 
@@ -150,7 +161,9 @@ def detect_named_blocks(
                 if c > 0:
                     candidates.append((c, k, other))
         if candidates:
-            c, k, other = max(candidates, key=lambda t: (t[0], neg_key(t[1]), neg_key(t[2])))
+            c, k, other = max(
+                candidates, key=lambda t: (t[0], neg_key(t[1]), neg_key(t[2]))
+            )
             members[other] |= members.pop(k)
             changed = True
 

@@ -55,7 +55,9 @@ def allocate_fields(
 ) -> list[FieldShare]:
     """Split *count* fields (+ *reserved* free ones) among the crop-using blocks."""
     demand = crop_demand(G, blocks)
-    totals = {b: sum(c.values()) for b, c in sorted(demand.items()) if sum(c.values()) > 0}
+    totals = {
+        b: sum(c.values()) for b, c in sorted(demand.items()) if sum(c.values()) > 0
+    }
 
     pool = round(count * pool_ratio) if totals else count
     owned = apportion(count - pool, totals, minimum=1)
@@ -75,7 +77,9 @@ def allocate_fields(
     return [s for s in shares if s.count + s.reserved > 0]
 
 
-def apportion(total: int, weights: dict[str, float], *, minimum: int = 0) -> dict[str, int]:
+def apportion(
+    total: int, weights: dict[str, float], *, minimum: int = 0
+) -> dict[str, int]:
     """
     Split *total* in proportion to *weights* (largest remainder method).
 
@@ -94,6 +98,8 @@ def apportion(total: int, weights: dict[str, float], *, minimum: int = 0) -> dic
     for k in keys:
         result[k] += math.floor(exact[k])
     left = rest - sum(math.floor(v) for v in exact.values())
-    for k in sorted(keys, key=lambda k: (-(exact[k] - math.floor(exact[k])), keys.index(k)))[:left]:
+    for k in sorted(
+        keys, key=lambda k: (-(exact[k] - math.floor(exact[k])), keys.index(k))
+    )[:left]:
         result[k] += 1
     return result

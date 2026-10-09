@@ -100,9 +100,12 @@ def layout_to_markdown(layout: Layout) -> str:
             else f"Farm map: unbounded (no `config/farm_map.json` size); layout spans "
             f"{ext.w} x {ext.h} tiles."
         ),
-        f"Block order: {layout.strategy}. "
-        f"Each block keeps {layout.reserve_ratio:.0%} extra area for later unlocks{lowered}. "
-        "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge.",
+        (
+            f"Block order: {layout.strategy}. "
+            f"Each block keeps {layout.reserve_ratio:.0%} extra area for later "
+            f"unlocks{lowered}. "
+            "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge."
+        ),
         "",
         "## Blocks",
         "",
@@ -112,7 +115,11 @@ def layout_to_markdown(layout: Layout) -> str:
     for pb in layout.blocks:
         lines.append(
             f"| {pb.block.name} | {_items(pb, stock, layout.crop_names)} | "
-            + (f"{pb.frame.w} x {pb.frame.h} | ({pb.frame.x}, {pb.frame.y})" if pb.frame else "- | not placed")
+            + (
+                f"{pb.frame.w} x {pb.frame.h} | ({pb.frame.x}, {pb.frame.y})"
+                if pb.frame
+                else "- | not placed"
+            )
             + f" | {pb.used_tiles} / {pb.reserved_tiles} |"
         )
 
@@ -128,13 +135,19 @@ def layout_to_markdown(layout: Layout) -> str:
         lines.append(f"- {r.source} next to {r.target}: {r.reason}")
 
     notes = [
-        "Field counts per block are estimates from recipe weights (crop demand of the "
-        "block's buildings); the Production Planner will size them from real quantities."
+        (
+            "Field counts per block are estimates from recipe weights (crop demand of "
+            "the block's buildings); the Production Planner will size them from real "
+            "quantities."
+        )
     ]
-    placeholders = sorted(s.location.name for s in layout.stock if s.source == CountSource.PLACEHOLDER)
+    placeholders = sorted(
+        s.location.name for s in layout.stock if s.source == CountSource.PLACEHOLDER
+    )
     if placeholders:
         notes.append(
-            "One placeholder copy (count not in the profile): " + ", ".join(placeholders)
+            "One placeholder copy (count not in the profile): "
+            + ", ".join(placeholders)
         )
     if layout.fixed_unplaced:
         notes.append(
@@ -142,7 +155,10 @@ def layout_to_markdown(layout: Layout) -> str:
             + ", ".join(layout.fixed_unplaced)
         )
     if layout.unplaced_blocks:
-        notes.append("Did not fit on the map: " + ", ".join(names[b] for b in layout.unplaced_blocks))
+        notes.append(
+            "Did not fit on the map: "
+            + ", ".join(names[b] for b in layout.unplaced_blocks)
+        )
     if layout.missing_footprint:
         notes.append("No footprint (skipped): " + ", ".join(layout.missing_footprint))
     if notes:
@@ -161,7 +177,11 @@ def _items(pb: PlacedBlock, stock, crop_names: dict[str, str]) -> str:
             part += f" (+{pb.fields.reserved} reserved)"
         parts.append(part)
     for loc_id in pb.block.locations:
-        if pb.fields is not None and stock.get(loc_id) and stock[loc_id].location.type.value == "field":
+        if (
+            pb.fields is not None
+            and stock.get(loc_id)
+            and stock[loc_id].location.type.value == "field"
+        ):
             continue
         if loc_id not in counts and loc_id not in reserved:
             continue

@@ -57,19 +57,28 @@ def _dataset() -> DataSet:
         [
             Location(id="field", name="Field", type="field", unlock_level=1),
             Location(
-                id="chicken_coop", name="Chicken Coop", type="animal",
-                unlock_level=1, animal_capacity=6,
+                id="chicken_coop",
+                name="Chicken Coop",
+                type="animal",
+                unlock_level=1,
+                animal_capacity=6,
             ),
             Location(id="dairy", name="Dairy", type="production", unlock_level=6),
-            Location(id="sushi_bar", name="Sushi Bar", type="production", unlock_level=56),
+            Location(
+                id="sushi_bar", name="Sushi Bar", type="production", unlock_level=56
+            ),
         ],
         [],
         [],
         LevelLimits(
             field_grants=[FieldGrant(level=1, count=6)],
             location_instances=[
-                LocationInstance(location_id="chicken_coop", instance=1, unlock_level=1),
-                LocationInstance(location_id="chicken_coop", instance=2, unlock_level=12),
+                LocationInstance(
+                    location_id="chicken_coop", instance=1, unlock_level=1
+                ),
+                LocationInstance(
+                    location_id="chicken_coop", instance=2, unlock_level=12
+                ),
             ],
         ),
     )
