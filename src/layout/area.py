@@ -16,6 +16,7 @@ measured area map alone (``config/<area>_map.json``).
 from __future__ import annotations
 
 from src.models import Area
+from src.settings import DEFAULT_PATH_STYLE
 
 from .blocks import Block
 from .design import DEFAULT_DECOR_BAND, plan_design
@@ -38,6 +39,8 @@ def plan_area_layout(
     gap: int = 1,
     design: bool = False,
     decor_band: int = DEFAULT_DECOR_BAND,
+    path_style: str = DEFAULT_PATH_STYLE,
+    design_zones: bool = True,
 ) -> Layout:
     """Arrange the movable items of a town / fishing lake map."""
     if area_map.area == Area.FARM:
@@ -58,7 +61,7 @@ def plan_area_layout(
         gap=gap,
         obstacles=fixed,
         bounds=(area_map.width, area_map.height) if area_map.bounded else None,
-        area=area_map.usable_tiles(),
+        area=area_map.usable_tiles(design_zones),
         order="size",
     )
 
@@ -89,6 +92,7 @@ def plan_area_layout(
         ),
         reserve_ratio=0.0,
         strategy="size",
+        design_zones=design_zones and bool(area_map.design_tiles()),
     )
     if design:
         allowed = area_map.usable_tiles()
@@ -101,6 +105,13 @@ def plan_area_layout(
             }
         placed = {b.block.id: b.frame for b in blocks if b.frame is not None}
         layout.design = plan_design(
-            allowed, placed, fixed, decor_band, hubs=hubs, keys=set(fixed)
+            allowed,
+            placed,
+            fixed,
+            decor_band,
+            hubs=hubs,
+            keys=set(fixed),
+            path_style=path_style,
+            walk_only=area_map.design_tiles() if design_zones else (),
         )
     return layout

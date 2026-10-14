@@ -735,9 +735,17 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
     assert json.loads((tmp_path / "layout.json").read_text())["level"] == 20
 
 
+def _design_config(tmp_path: Path, **sections) -> str:
+    """A design.json in *tmp_path* with the given sections."""
+    path = tmp_path / "design.json"
+    path.write_text(json.dumps(sections), encoding="utf-8")
+    return str(path)
+
+
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
-    args = ["--level", "20", "--strategy", "all", "--output-dir", str(tmp_path)]
+    config = _design_config(tmp_path, farm={"strategy": "all"})
+    args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     for stem, used in (("layout_coupling", "coupling"), ("layout_size", "size")):
         assert json.loads((tmp_path / f"{stem}.json").read_text())["strategy"] == used
@@ -747,11 +755,15 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_flow(tmp_path: Path) -> None:
-    args = ["--level", "20", "--strategy", "flow", "--output-dir", str(tmp_path)]
+    config = _design_config(tmp_path, farm={"strategy": "flow", "reserve": 0.1})
+    args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     data = json.loads((tmp_path / "layout.json").read_text())
     assert data["strategy"] in ("flow", "size")
     assert data["sized_by_production"] is False
+    # the settings actually used are written next to the layout
+    assert data["settings"]["strategy"] == "flow"
+    assert data["settings"]["reserve"] == 0.1
 
 
 def test_plan_layout_rejects_unknown_strategy(farm: DataSet) -> None:
@@ -874,10 +886,14 @@ def test_plan_layout_with_design(farm: DataSet) -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_design(tmp_path: Path) -> None:
-    args = ["--level", "20", "--design", "--output-dir", str(tmp_path)]
+    config = _design_config(tmp_path, default={"design_layer": True})
+    args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     assert json.loads((tmp_path / "layout.json").read_text())["design"] is not None
-    assert cli.main([*args, "--decor-band", "-1"]) == 1
+    bad = _design_config(tmp_path, default={"decor_band": -1})
+    assert cli.main(["--level", "20", "--design-config", bad]) == 1
+    missing = str(tmp_path / "missing.json")
+    assert cli.main(["--level", "20", "--design-config", missing]) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -958,10 +974,14 @@ def test_example_area_maps_load() -> None:
 def test_cli_area_town(tmp_path: Path) -> None:
     town = tmp_path / "town_map.json"
     town.write_text(_town_map().model_dump_json(), encoding="utf-8")
+    config = _design_config(tmp_path, town={"design_layer": True})
     args = ["--level", "40", "--area", "town", "--map", str(town)]
-    assert cli.main([*args, "--design", "--output-dir", str(tmp_path)]) == 0
+    assert (
+        cli.main([*args, "--design-config", config, "--output-dir", str(tmp_path)]) == 0
+    )
     data = json.loads((tmp_path / "layout_town.json").read_text())
     assert data["area"] == "town" and data["design"] is not None
+    assert "reserve" not in data["settings"]  # farm-only keys are not shown
     assert not (tmp_path / "layout.json").exists()
     # a town map passed as the fishing lake map is rejected
     lake = ["--level", "40", "--area", "fishing_lake", "--map", str(town)]
@@ -993,15 +1013,28 @@ def test_farm_movable_flag_only_for_placeable_items(
     assert storage and storage[0].frame is not None  # the barn is still planned
 
 
-def test_cli_area_warns_about_farm_only_options(
-    tmp_path: Path, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_cli_town_ignores_farm_only_keys_of_default(tmp_path: Path) -> None:
     town = tmp_path / "town_map.json"
     town.write_text(_town_map().model_dump_json(), encoding="utf-8")
+    config = _design_config(
+        tmp_path,
+        default={"design_layer": True, "path_targets": "buildings"},
+        farm={"item_gap": 1},
+    )
     args = ["--level", "40", "--area", "town", "--map", str(town)]
-    with caplog.at_level("WARNING"):
-        assert cli.main([*args, "--reserve", "0.5", "--output-dir", str(tmp_path)]) == 0
-    assert "Farm-only options ignored for town: --reserve" in caplog.text
+    assert (
+        cli.main([*args, "--design-config", config, "--output-dir", str(tmp_path)]) == 0
+    )
+    settings = json.loads((tmp_path / "layout_town.json").read_text())["settings"]
+    assert "path_targets" not in settings and settings["design_layer"] is True
+
+
+def test_cli_rejects_farm_only_settings_for_town(tmp_path: Path) -> None:
+    town = tmp_path / "town_map.json"
+    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
+    config = _design_config(tmp_path, town={"reserve": 0.5})
+    args = ["--level", "40", "--area", "town", "--map", str(town)]
+    assert cli.main([*args, "--design-config", config]) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -1084,3 +1117,171 @@ def test_plan_layout_with_sizing(farm: DataSet) -> None:
     # a count of 0 drops the location from the layout
     none = plan_layout(farm, level=5, sizing=Sizing(counts={"apple_tree": 0}))
     assert "apple_tree" not in {s.location.id for s in none.stock}
+
+
+# ---------------------------------------------------------------------------
+# v1.0 design options: figures, path style and targets, item gap, design zones
+# ---------------------------------------------------------------------------
+
+
+def test_design_figures() -> None:
+    # an L-shaped connection: one corner, no detour
+    design = plan_design(
+        _grid(6, 6), {"a_block": Rect(0, 0, 1, 1)}, {"farmhouse": Rect(4, 4, 1, 1)}
+    )
+    assert design.corners >= 1
+    assert design.detour_ratio == pytest.approx(1.0)
+    assert design.walked == design.direct
+    assert plan_design(_grid(3, 3), {}, {}).detour_ratio == 1.0
+    with pytest.raises(ValueError, match="path_style"):
+        plan_design(_grid(3, 3), {}, {}, path_style="curvy")
+
+
+def test_straight_paths_have_fewer_corners() -> None:
+    # scattered blocks: breadth-first paths zigzag, a turn cost straightens them
+    corners = {"b1": (14, 2), "b2": (8, 13), "b3": (5, 1), "b4": (1, 3)}
+    blocks = {f"{k}_block": Rect(x, y, 2, 2) for k, (x, y) in corners.items()}
+    fixed = {"farmhouse": Rect(13, 10, 2, 2)}
+    args = (_grid(18, 18), blocks, fixed)
+    shortest = plan_design(*args, decor_band=0)
+    straight = plan_design(*args, decor_band=0, path_style="straight")
+    assert set(straight.connected) == set(shortest.connected)
+    assert not straight.unreachable
+    assert straight.corners < shortest.corners
+    assert _connected(straight.paths)
+
+
+def test_design_terminal_of_several_rects_and_walk_only_tiles() -> None:
+    patch_rects = [Rect(5, 1, 1, 1), Rect(6, 1, 1, 1)]
+    walk_only = {(x, 3) for x in range(10)}  # a design zone across the map
+    design = plan_design(
+        _grid(10, 6),
+        {"fields": patch_rects},
+        {"farmhouse": Rect(1, 4, 1, 1)},
+        decor_band=1,
+        obstacles=[Rect(8, 4, 1, 1)],
+        walk_only=walk_only,
+    )
+    assert design.connected == ["farmhouse", "fields"]
+    assert not design.decorations & walk_only  # paths may cross, no band there
+    assert (8, 4) not in design.paths | design.decorations  # reserved space
+
+
+def test_item_gap_spaces_the_buildings_of_a_block(farm: DataSet) -> None:
+    layout = plan_layout(farm, level=5, item_gap=1)
+    assert layout.item_gap == 1
+    for pb in layout.blocks:
+        buildings = [i.rect for i in pb.items if not i.in_patch]
+        for a, b in combinations(buildings, 2):
+            assert not a.overlaps(b, gap=1), (pb.block.id, a, b)
+        # a patch stays one piece: its units touch each other
+        patches = [i.rect for i in pb.items if i.in_patch]
+        if len(patches) > 1:
+            assert bounding_rect(patches).w * bounding_rect(patches).h <= 2 * len(
+                patches
+            )
+    with pytest.raises(ValueError):
+        plan_layout(farm, level=5, item_gap=-1)
+
+
+def test_paths_to_every_building(farm: DataSet) -> None:
+    farm_map = FarmMap(
+        width=50,
+        height=50,
+        fixed=[FixedItem(id="farmhouse", x=22, y=22, width=4, height=4)],
+    )
+    layout = plan_layout(
+        farm,
+        level=5,
+        farm_map=farm_map,
+        design=True,
+        item_gap=1,
+        path_targets="buildings",
+    )
+    d = layout.design
+    assert d is not None and not d.unreachable
+    for pb in layout.blocks:
+        for item in pb.items:
+            if not item.reserved and not item.in_patch:
+                assert _touches(d.paths, item.rect), item
+    assert "buildings and patches" in layout_to_markdown(layout)
+    assert layout_to_dict(layout)["design"]["figures"]["path_targets"] == "buildings"
+    # paths may enter the block frames, the band stays out of the reserve there
+    for pb in layout.blocks:
+        if pb.frame is not None:
+            f = pb.frame
+            assert not any(
+                f.x <= x < f.x + f.w and f.y <= y < f.y + f.h for x, y in d.decorations
+            ), pb.block.id
+    with pytest.raises(ValueError, match="item_gap"):
+        plan_layout(farm, level=5, design=True, path_targets="buildings")
+    with pytest.raises(ValueError, match="path_targets"):
+        plan_layout(farm, level=5, path_targets="trees")
+
+
+def test_design_zones_keep_blocks_out(farm: DataSet) -> None:
+    garden = Zone(id="garden", kind="design", cells=[(0, 0, 40, 20)])
+    farm_map = FarmMap(
+        width=40,
+        height=40,
+        fixed=[FixedItem(id="farmhouse", x=17, y=22, width=4, height=4)],
+        zones=[garden],
+    )
+    layout = plan_layout(farm, level=5, farm_map=farm_map, design=True)
+    _check_layout(layout)
+    assert layout.design_zones
+    zone = garden.tiles()
+    for pb in layout.blocks:
+        if pb.frame is not None:
+            assert not (
+                {
+                    (pb.frame.x + i, pb.frame.y + j)
+                    for i in range(pb.frame.w)
+                    for j in range(pb.frame.h)
+                }
+                & zone
+            ), pb.block.id
+    assert not layout.design.decorations & zone
+    data = layout_to_dict(layout)["design"]["figures"]
+    assert data["design_zone_tiles"] == len(zone)
+    assert "Design zones" in layout_to_markdown(layout)
+    assert "#8B5CF6" in render_svg(layout)
+    # switched off: the zone is ordinary land
+    off = plan_layout(farm, level=5, farm_map=farm_map, design_zones=False)
+    assert not off.design_zones
+
+
+def test_item_gap_shrinks_before_blocks_are_left_out(
+    farm: DataSet, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Placing every block comes first: the gap is lowered, then the reserve."""
+    roomy = plan_layout(
+        farm, level=5, farm_map=FarmMap(width=30, height=30), item_gap=2
+    )
+    assert roomy.item_gap == 2 and roomy.item_gap_requested == 2
+
+    tight = FarmMap(width=25, height=25)
+    with caplog.at_level("WARNING"):
+        layout = plan_layout(farm, level=5, farm_map=tight, item_gap=2)
+    assert not layout.unplaced_blocks
+    assert layout.item_gap == 1 and layout.item_gap_requested == 2
+    assert layout.reserve_ratio == 0.2  # the reserve is kept while the gap shrinks
+    assert "Item gap lowered from 2 to 1" in caplog.text
+    assert "lowered from 2 so that every block fits" in layout_to_markdown(layout)
+    assert layout_to_dict(layout)["item_gap"] == 1
+
+    # no gap left: paths fall back from every building to the blocks
+    tighter = FarmMap(width=21, height=21)
+    with caplog.at_level("WARNING"):
+        no_gap = plan_layout(
+            farm,
+            level=5,
+            farm_map=tighter,
+            item_gap=1,
+            design=True,
+            path_targets="buildings",
+        )
+    assert no_gap.item_gap == 0 and not no_gap.unplaced_blocks
+    assert "paths go to the blocks" in caplog.text
+    assert not any("/" in k for k in no_gap.design.connected)
+    assert no_gap.design.path_targets == "blocks"

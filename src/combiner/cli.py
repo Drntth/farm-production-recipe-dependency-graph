@@ -4,9 +4,11 @@ Combiner CLI (farm): production plan + layout sized by it, one report.
 Usage
 -----
     python -m src.combiner                     # level from the player config
-    python -m src.combiner --level 30 --lookahead 3
-    python -m src.combiner --design            # plus paths and decoration band
-    python -m src.combiner --login-interval 4 --strategy auto
+    python -m src.combiner --level 30
+    python -m src.combiner --design-config my_design.json --planner-config my_planner.json
+
+Settings come from config/design.json (farm section: gap, reserve, design
+layer) and config/planner.json (production, combiner: lookahead, strategy).
 """
 
 from __future__ import annotations
@@ -18,16 +20,13 @@ import sys
 from pathlib import Path
 
 from src.config import PlayerConfig, load_player_config, validate_player_config
-from src.layout.design import DEFAULT_DECOR_BAND
 from src.layout.farm_map import load_farm_map
-from src.layout.planner import DEFAULT_GAP, DEFAULT_RESERVE_RATIO, STRATEGIES
 from src.layout.render_svg import render_svg
 from src.loaders.json_loader import load_data
 from src.models import Area
-from src.planner.quantities import DEFAULT_STORAGE_SHARE
-from src.planner.schedule import DEFAULT_MIN_EFFICIENCY
+from src.settings import load_design_settings, load_planner_settings
 
-from .combine import DEFAULT_LOOKAHEAD, DEFAULT_STRATEGY, combine
+from .combine import combine
 from .report import combined_to_dict, combined_to_markdown
 
 logger = logging.getLogger("src.combiner")
@@ -62,73 +61,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
-        "--login-interval",
-        type=float,
+        "--design-config",
+        type=Path,
         default=None,
-        help="Hours between logins (default: suggested from the candidates)",
+        help="Design settings (default: config/design.json, else the example)",
     )
     parser.add_argument(
-        "--storage-share",
-        type=float,
-        default=DEFAULT_STORAGE_SHARE,
-        help="Share of barn and silo the goods of one interval may fill (default: 0.5)",
-    )
-    parser.add_argument(
-        "--min-efficiency",
-        type=float,
-        default=DEFAULT_MIN_EFFICIENCY,
-        help="Suggested interval: longest one with at least this share of the "
-        "best production time (default: 0.8)",
-    )
-    parser.add_argument(
-        "--reserve",
-        type=float,
-        default=DEFAULT_RESERVE_RATIO,
-        help="Extra free area per block for later unlocks (default: 0.2 = 20%%)",
-    )
-    parser.add_argument(
-        "--gap",
-        type=int,
-        default=DEFAULT_GAP,
-        help="Free tiles between blocks (default: 1)",
-    )
-    parser.add_argument(
-        "--strategy",
-        choices=STRATEGIES,
-        default=DEFAULT_STRATEGY,
-        help="Block order (default: flow = upstream blocks first, then size if a "
-        "block does not fit)",
-    )
-    parser.add_argument(
-        "--lookahead",
-        type=int,
-        default=DEFAULT_LOOKAHEAD,
-        help="Levels ahead whose unlocks get space now (default: 5; 0 = none)",
-    )
-    parser.add_argument(
-        "--design",
-        action="store_true",
-        help="Add the design layer: paths and a decoration band (gap is at least 1)",
-    )
-    parser.add_argument(
-        "--decor-band",
-        type=int,
-        default=DEFAULT_DECOR_BAND,
-        help="Decoration band width in tiles next to the paths (default: 1)",
+        "--planner-config",
+        type=Path,
+        default=None,
+        help="Planner settings (default: config/planner.json, else the example)",
     )
     return parser.parse_args(argv)
-
-
-def _check_args(args: argparse.Namespace) -> str | None:
-    if args.level is not None and args.level < 1:
-        return "--level must be at least 1"
-    if args.login_interval is not None and args.login_interval <= 0:
-        return "--login-interval must be positive"
-    if not 0 < args.storage_share <= 1 or not 0 < args.min_efficiency <= 1:
-        return "--storage-share and --min-efficiency must be in (0, 1]"
-    if min(args.reserve, args.gap, args.lookahead, args.decor_band) < 0:
-        return "--reserve, --gap, --lookahead and --decor-band must not be negative"
-    return None
 
 
 def _data_max_level(data_dir: Path) -> int | None:
@@ -145,10 +89,22 @@ def main(argv: list[str] | None = None) -> int:
         level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
     )
     args = parse_args(argv)
-    problem = _check_args(args)
-    if problem:
-        logger.error(problem)
+    if args.level is not None and args.level < 1:
+        logger.error("--level must be at least 1")
         return 1
+    try:
+        design_settings, design_source = load_design_settings(args.design_config)
+        planner_settings, planner_source = load_planner_settings(args.planner_config)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid settings: %s", exc)
+        return 1
+    design = design_settings.for_area(Area.FARM)
+    production, combiner = planner_settings.production, planner_settings.combiner
+    logger.info(
+        "Settings: design %s, planner %s",
+        design_source or "built-in defaults",
+        planner_source or "built-in defaults",
+    )
 
     try:
         player = load_player_config(args.player_config)
@@ -180,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     for issue in validate_player_config(player, full):
         logger.warning("Player config: %s", issue)
     max_level = _data_max_level(args.data_dir)
-    if max_level is not None and player.level + args.lookahead > max_level:
+    if max_level is not None and player.level + combiner.lookahead > max_level:
         logger.info(
             "The data covers levels up to %d; unlocks above it are not known yet",
             max_level,
@@ -191,15 +147,19 @@ def main(argv: list[str] | None = None) -> int:
             full,
             player,
             farm_map,
-            lookahead=args.lookahead,
-            login_interval=args.login_interval,
-            storage_share=args.storage_share,
-            min_efficiency=args.min_efficiency,
-            reserve_ratio=args.reserve,
-            gap=args.gap,
-            strategy=args.strategy,
-            design=args.design,
-            decor_band=args.decor_band,
+            lookahead=combiner.lookahead,
+            login_interval=production.login_interval,
+            storage_share=production.storage_share,
+            min_efficiency=production.min_efficiency,
+            reserve_ratio=design.reserve,
+            gap=design.gap,
+            strategy=combiner.strategy,
+            design=design.design_layer,
+            decor_band=design.decor_band,
+            item_gap=design.item_gap,
+            path_style=design.path_style,
+            path_targets=design.path_targets,
+            design_zones=design.design_zones,
         )
     except RuntimeError as exc:
         logger.error("%s", exc)
@@ -213,7 +173,18 @@ def main(argv: list[str] | None = None) -> int:
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{STEM}.json").write_text(
-        json.dumps(combined_to_dict(combined, data), ensure_ascii=False, indent=2),
+        json.dumps(
+            combined_to_dict(combined, data)
+            | {
+                "settings": {
+                    "design": design.used(Area.FARM),
+                    "production": production.model_dump(),
+                    "combiner": combiner.model_dump(),
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
     (out / f"{STEM}.md").write_text(

@@ -35,11 +35,16 @@ from src.layout.sizing import Sizing
 from src.loaders.json_loader import DataSet
 from src.models import Area, LocationType
 from src.planner import PlanRun, ProductionPlan, run_planner
-from src.planner.quantities import DEFAULT_STORAGE_SHARE
-from src.planner.schedule import DEFAULT_MIN_EFFICIENCY
+from src.settings import DEFAULT_COMBINER_STRATEGY as DEFAULT_STRATEGY
+from src.settings import (
+    DEFAULT_ITEM_GAP,
+    DEFAULT_LOOKAHEAD,
+    DEFAULT_MIN_EFFICIENCY,
+    DEFAULT_PATH_STYLE,
+    DEFAULT_PATH_TARGETS,
+    DEFAULT_STORAGE_SHARE,
+)
 
-DEFAULT_LOOKAHEAD = 5  # levels whose unlocks get space now
-DEFAULT_STRATEGY = "flow"
 _EPS = 1e-6
 
 
@@ -199,7 +204,7 @@ def flow_links(layout: Layout, flows: dict[tuple[str, str], float]) -> list[Flow
 def free_tiles(layout: Layout) -> int | None:
     """Usable map tiles outside the block frames and the fixed items."""
     fm = layout.farm_map
-    area = fm.usable_tiles()
+    area = fm.usable_tiles(layout.design_zones)
     if area is None:
         if not fm.bounded:
             return None
@@ -224,6 +229,10 @@ def combine(
     strategy: str = DEFAULT_STRATEGY,
     design: bool = False,
     decor_band: int = DEFAULT_DECOR_BAND,
+    item_gap: int = DEFAULT_ITEM_GAP,
+    path_style: str = DEFAULT_PATH_STYLE,
+    path_targets: str = DEFAULT_PATH_TARGETS,
+    design_zones: bool = True,
 ) -> CombinedPlan:
     """
     Plan production, then the farm layout sized by it.
@@ -255,6 +264,10 @@ def combine(
         design=design,
         decor_band=decor_band,
         sizing=sizing,
+        item_gap=item_gap,
+        path_style=path_style,
+        path_targets=path_targets,
+        design_zones=design_zones,
     )
     result = CombinedPlan(
         level=level,

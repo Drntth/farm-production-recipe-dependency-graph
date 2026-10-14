@@ -19,13 +19,13 @@ import math
 import networkx as nx
 
 from src.loaders.json_loader import DataSet
+from src.settings import DEFAULT_MIN_EFFICIENCY
 
 from .capacity import CapacityModel, LineKind
 from .profile import ResolvedProfile
 from .quantities import DEFAULT_STORAGE_SHARE, ProductionPlan, plan_production
 
 INTERVAL_CANDIDATES = (0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0)
-DEFAULT_MIN_EFFICIENCY = 0.8
 HONEYCOMB = "honeycomb"
 NECTAR_BUSH = "nectar_bush"
 HONEYCOMB_PER_NECTAR_BUSH = 5  # 500 drops per bush, 100 per honeycomb (wiki)

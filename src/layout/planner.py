@@ -17,8 +17,9 @@ Steps:
    ``auto`` (coupling, then size if a block does not fit) or ``flow``
    (upstream blocks first along the processing order; it lowers the reserve
    first and falls back to size only if a block does not fit even without
-   reserve). If a block still
-   does not fit, steps 4-5 are repeated with a smaller reserve
+   reserve). If a block still does not fit, placing every block comes first:
+   the ``item_gap`` between the buildings of a block is lowered first (at the
+   requested reserve), then steps 4-5 are repeated with a smaller reserve
    (``RESERVE_STEP``) down to 0.
 6. Optional design layer (``design=True``, ``design.py``): paths between the
    blocks and the key fixed buildings, and a decoration band along them.
@@ -41,6 +42,14 @@ from src.config import PlayerConfig
 from src.graph import build_graph
 from src.loaders.json_loader import DataSet
 from src.models import Area, LocationType
+from src.settings import (
+    DEFAULT_FIELD_POOL,
+    DEFAULT_GAP,
+    DEFAULT_ITEM_GAP,
+    DEFAULT_PATH_STYLE,
+    DEFAULT_PATH_TARGETS,
+)
+from src.settings import DEFAULT_RESERVE as DEFAULT_RESERVE_RATIO
 
 from .blocks import (
     Block,
@@ -64,12 +73,9 @@ from .support import SupportRelation, active_relations
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_RESERVE_RATIO = 0.2
 RESERVE_STEP = 0.01
 STRATEGIES = ("auto", "coupling", "size", "flow")
 _ORDERS = {"auto": ("coupling", "size"), "flow": ("flow", "size")}
-DEFAULT_GAP = 1
-DEFAULT_FIELD_POOL = 0.0
 COPY_WEIGHT = 1.0  # keeps copies of the same building together
 
 _PATCH_TYPES = {LocationType.FIELD, LocationType.TREE, LocationType.BUSH}
@@ -129,6 +135,9 @@ class Layout:
     strategy: str = "coupling"  # the block order actually used
     design: Design | None = None  # paths and decoration band, if requested
     sized: bool = False  # block sizes from production quantities (Combiner)
+    item_gap: int = 0  # free tiles between the buildings of a block (used)
+    item_gap_requested: int = 0  # lowered when the blocks did not fit otherwise
+    design_zones: bool = False  # the map's design zones were kept free
 
     @property
     def unplaced_blocks(self) -> list[str]:
@@ -157,6 +166,10 @@ def plan_layout(
     design: bool = False,
     decor_band: int = DEFAULT_DECOR_BAND,
     sizing: Sizing | None = None,
+    item_gap: int = DEFAULT_ITEM_GAP,
+    path_style: str = DEFAULT_PATH_STYLE,
+    path_targets: str = DEFAULT_PATH_TARGETS,
+    design_zones: bool = True,
 ) -> Layout:
     """
     Plan the farm layout for the level-filtered *dataset*.
@@ -168,8 +181,12 @@ def plan_layout(
         raise ValueError(
             f"Unknown strategy {strategy!r}; use one of {', '.join(STRATEGIES)}"
         )
-    if reserve_ratio < 0 or gap < 0:
-        raise ValueError("reserve_ratio and gap must not be negative")
+    if reserve_ratio < 0 or gap < 0 or item_gap < 0:
+        raise ValueError("reserve_ratio, gap and item_gap must not be negative")
+    if path_targets not in ("blocks", "buildings"):
+        raise ValueError(f"Unknown path_targets {path_targets!r}")
+    if design and path_targets == "buildings" and item_gap < 1:
+        raise ValueError("path_targets 'buildings' needs item_gap >= 1")
     if design:
         gap = max(gap, 1)  # room for a path between two blocks
     orders = _ORDERS.get(strategy, (strategy,))
@@ -265,11 +282,17 @@ def plan_layout(
         )
 
     # 3. blocks with their items, relative to the block origin
-    block_items: dict[str, list[PlacedItem]] = {}
-    for b in blocks:
-        items = _pack_block(b, stock, P, shares.get(b.id), field_stock, crop_names)
-        if items:
-            block_items[b.id] = items
+    def pack_blocks(g: int) -> dict[str, list[PlacedItem]]:
+        packed = {}
+        for b in blocks:
+            items = _pack_block(
+                b, stock, P, shares.get(b.id), field_stock, crop_names, g
+            )
+            if items:
+                packed[b.id] = items
+        return packed
+
+    block_items = pack_blocks(item_gap)
 
     def frames(ratio: float) -> list[Box]:
         """4. Block frames grown by *ratio* free area."""
@@ -308,34 +331,55 @@ def plan_layout(
                 key = tuple(sorted((fixed_id, owner[nb])))
                 weights[key] = weights.get(key, 0.0) + P[fixed_id][nb]["weight"]
     bounds = (farm_map.width, farm_map.height) if farm_map.bounded else None
-    area = farm_map.usable_tiles()
+    area = farm_map.usable_tiles(design_zones)
     requested = reserve_ratio
+    requested_gap = item_gap
     # auto tries both orders at every reserve; flow keeps the processing order
     # down to a zero reserve before it falls back to size
     phases = [(o,) for o in orders] if strategy == "flow" else [orders]
-    for phase in phases:
-        reserve_ratio = requested
-        while True:
-            block_boxes = frames(reserve_ratio)
-            for order in phase:
-                placements, _ = pack(
-                    block_boxes,
-                    weights,
-                    gap=gap,
-                    obstacles=fixed_rects,
-                    bounds=bounds,
-                    area=area,
-                    order=order,
-                    sequence=flow_order,
-                )
-                if len(placements) == len(block_boxes):
-                    break
-            if len(placements) == len(block_boxes) or reserve_ratio <= 0:
-                break
-            # shrink the reserve until every block fits
-            reserve_ratio = max(0.0, round(reserve_ratio - RESERVE_STEP, 4))
+    sweep = [requested]
+    while sweep[-1] > 0:  # shrink the reserve until every block fits
+        sweep.append(max(0.0, round(sweep[-1] - RESERVE_STEP, 4)))
+
+    def place(ratios: list[float]):
+        for phase in phases:
+            for ratio in ratios:
+                boxes = frames(ratio)
+                for order in phase:
+                    placed, _ = pack(
+                        boxes,
+                        weights,
+                        gap=gap,
+                        obstacles=fixed_rects,
+                        bounds=bounds,
+                        area=area,
+                        order=order,
+                        sequence=flow_order,
+                    )
+                    if len(placed) == len(boxes):
+                        return placed, boxes, order, ratio
+        return placed, boxes, order, ratio
+
+    # placing every block comes first, looks second: the item gap shrinks
+    # (at the requested reserve) before the reserve does
+    for g in range(requested_gap, 0, -1):
+        if g != requested_gap:
+            block_items = pack_blocks(g)
+        placements, block_boxes, order, reserve_ratio = place([requested])
         if len(placements) == len(block_boxes):
+            item_gap = g
             break
+    else:
+        if requested_gap > 0:
+            item_gap = 0
+            block_items = pack_blocks(0)
+        placements, block_boxes, order, reserve_ratio = place(sweep)
+    if item_gap < requested_gap:
+        logger.warning(
+            "Item gap lowered from %d to %d so that every block fits",
+            requested_gap,
+            item_gap,
+        )
     if reserve_ratio < requested:
         logger.info(
             "Reserve lowered from %.0f%% to %.0f%% so that the blocks fit",
@@ -395,14 +439,38 @@ def plan_layout(
         reserve_requested=requested,
         strategy=order,
         sized=sizing is not None,
+        item_gap=item_gap,
+        item_gap_requested=requested_gap,
+        design_zones=design_zones and bool(farm_map.design_tiles()),
     )
+    if design and path_targets == "buildings" and item_gap < 1:
+        logger.warning(
+            "No item gap left: paths go to the blocks, not to every building"
+        )
+        path_targets = "blocks"
     if design:
-        layout.design = _design(layout, fixed_rects, decor_band)
+        layout.design = _design(
+            layout, fixed_rects, decor_band, path_style, path_targets, design_zones
+        )
     return layout
 
 
-def _design(layout: Layout, fixed: dict[str, Rect], decor_band: int) -> Design:
-    """6. Paths and decoration band on the usable tiles of the map."""
+def _design(
+    layout: Layout,
+    fixed: dict[str, Rect],
+    decor_band: int,
+    path_style: str = DEFAULT_PATH_STYLE,
+    path_targets: str = DEFAULT_PATH_TARGETS,
+    design_zones: bool = True,
+) -> Design:
+    """
+    6. Paths and decoration band on the usable tiles of the map.
+
+    Paths may cross design zones, but the band leaves them alone. With
+    *path_targets* ``buildings`` every building (and every patch of fields,
+    trees or bushes) of a block is a terminal, and paths run inside the
+    block frames between them; reserved space stays an obstacle.
+    """
     allowed = layout.farm_map.usable_tiles()
     if allowed is None:  # unbounded map: the drawn grid (extent + 1 tile)
         e = layout.extent()
@@ -411,8 +479,52 @@ def _design(layout: Layout, fixed: dict[str, Rect], decor_band: int) -> Design:
             for x in range(e.x - 1, e.x + e.w + 1)
             for y in range(e.y - 1, e.y + e.h + 1)
         }
-    blocks = {pb.block.id: pb.frame for pb in layout.blocks if pb.frame is not None}
-    return plan_design(allowed, blocks, fixed, decor_band)
+    walk_only = layout.farm_map.design_tiles() if design_zones else set()
+    if path_targets == "blocks":
+        blocks = {pb.block.id: pb.frame for pb in layout.blocks if pb.frame is not None}
+        return plan_design(
+            allowed,
+            blocks,
+            fixed,
+            decor_band,
+            path_style=path_style,
+            walk_only=walk_only,
+        )
+    terminals: dict[str, list[Rect]] = {}
+    reserved: list[Rect] = []
+    # paths may run inside the block frames, but the band stays out: the free
+    # part of a frame is the reserve for later unlocks
+    in_frames = {
+        (pb.frame.x + i, pb.frame.y + j)
+        for pb in layout.blocks
+        if pb.frame is not None
+        for i in range(pb.frame.w)
+        for j in range(pb.frame.h)
+    }
+    for pb in layout.blocks:
+        counts: dict[str, int] = defaultdict(int)
+        for item in pb.items:
+            if item.reserved:
+                reserved.append(item.rect)
+            elif item.in_patch:  # one terminal per patch
+                terminals.setdefault(f"{pb.block.id}/{item.location_id}", []).append(
+                    item.rect
+                )
+            else:
+                counts[item.location_id] += 1
+                key = f"{pb.block.id}/{item.location_id}#{counts[item.location_id]}"
+                terminals[key] = [item.rect]
+    design = plan_design(
+        allowed,
+        terminals,
+        fixed,
+        decor_band,
+        path_style=path_style,
+        obstacles=reserved,
+        walk_only=set(walk_only) | in_frames,
+    )
+    design.path_targets = "buildings"
+    return design
 
 
 def _apply_sizing(stock: dict[str, Stock], sizing: Sizing) -> None:
@@ -489,6 +601,7 @@ def _pack_block(
     share: FieldShare | None,
     field_stock: Stock | None,
     crop_names: dict[str, str],
+    item_gap: int = 0,
 ) -> list[PlacedItem]:
     """Pack the items of one block; returns items relative to the block origin."""
     boxes: list[Box] = []
@@ -538,7 +651,8 @@ def _pack_block(
                 weights[(a.key, b.key)] += COPY_WEIGHT
             elif P.has_edge(la, lb):
                 weights[(a.key, b.key)] += P[la][lb]["weight"]
-    placements, _ = pack(boxes, weights)
+    # item_gap: free tiles between the boxes; a patch is one box, so it stays whole
+    placements, _ = pack(boxes, weights, gap=item_gap)
 
     items: list[PlacedItem] = []
     by_key = {b.key: b for b in boxes}

@@ -43,7 +43,7 @@ const state = {
           { id: 'silo', name: '', rect: null }],
   expansions: [{ id: 'main_1', section: 'main', number: 1, unlocked: true, cells: [[2, 2, 4, 3], [6, 2, 1, 1]] },
                { id: 'base', section: 'base', number: null, unlocked: true, cells: [[10, 10, 5, 5]] }],
-  zones: [{ id: 'pond', kind: 'blocked', cells: [[2, 2, 1, 1]] }],
+  zones: [{ id: 'pond', kind: 'blocked', cells: [[2, 2, 1, 1]] }, { id: 'garden', kind: 'design', cells: [[3, 3, 1, 1]] }],
 };
 const map = Core.toFarmMap(state, 'farm_background.png');
 const again = Core.toFarmMap(Object.assign(Core.fromFarmMap(map), { imgW: 800, imgH: 600 }), 'farm_background.png');
@@ -135,7 +135,10 @@ def test_exported_json_loads_in_python(result: dict) -> None:
     assert fm.background.image_width == 800
     assert [f.id for f in fm.placed_fixed] == ["farmhouse"]
     assert fm.fixed[0].name == "Farmhouse"
-    assert [(z.id, z.kind) for z in fm.zones] == [("pond", "blocked")]
+    assert [(z.id, z.kind) for z in fm.zones] == [
+        ("pond", "blocked"),
+        ("garden", "design"),
+    ]
     assert len(fm.usable_tiles()) == 4 * 3 + 1 + 25 - 1
     assert result["same"], "toFarmMap(fromFarmMap(x)) must round-trip"
 

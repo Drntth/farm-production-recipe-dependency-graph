@@ -201,10 +201,13 @@ class Expansion(BaseModel):
 
 
 class Zone(BaseModel):
-    """Hand-marked tiles: ``buildable`` (a farm section) or ``blocked`` (water, road, …)."""
+    """
+    Hand-marked tiles: ``buildable`` (a farm section), ``blocked`` (water, road,
+    …) or ``design`` (existing decorations: no block, but paths may cross it).
+    """
 
     id: str = Field(..., description="e.g. 'main_section', 'pond'")
-    kind: Literal["buildable", "blocked"]
+    kind: Literal["buildable", "blocked", "design"]
     cells: list[tuple[int, int, int, int]] = Field(
         default_factory=list, description="Tile rectangles [x, y, width, height]"
     )
@@ -273,18 +276,21 @@ class FarmMap(BaseModel):
                         raise ValueError(f"Zone '{z.id}' lies outside the farm map")
         return self
 
-    def usable_tiles(self) -> set[tuple[int, int]] | None:
+    def usable_tiles(self, design_zones: bool = False) -> set[tuple[int, int]] | None:
         """
         Tiles the layout may use, or None if nothing limits it.
 
         Start from the unlocked plots (if any drawn plot is unlocked), keep only
-        the buildable zones (if any), then remove the blocked zones. Without
-        plots and buildable zones the whole bounded map is the start.
+        the buildable zones (if any), then remove the blocked zones and, with
+        *design_zones*, the design zones. Without plots and buildable zones the
+        whole bounded map is the start.
         """
         # an unlocked plot without cells (not drawn yet) must not block the whole map
         unlocked = [e for e in self.expansions if e.is_unlocked and e.cells]
         buildable = [z for z in self.zones if z.kind == "buildable" and z.cells]
         blocked = [z for z in self.zones if z.kind == "blocked" and z.cells]
+        if design_zones:
+            blocked += [z for z in self.zones if z.kind == "design" and z.cells]
         area = set().union(*(e.tiles() for e in unlocked)) if unlocked else None
         if buildable:
             zone_tiles = set().union(*(z.tiles() for z in buildable))
@@ -295,6 +301,10 @@ class FarmMap(BaseModel):
             if area is not None:
                 area -= set().union(*(z.tiles() for z in blocked))
         return area
+
+    def design_tiles(self) -> set[Tile]:
+        """Tiles of the design zones (existing decorations)."""
+        return set().union(*(z.tiles() for z in self.zones if z.kind == "design"))
 
     def farm_tiles(self) -> set[Tile]:
         """Every tile of the farm sections: all plots plus the buildable zones."""

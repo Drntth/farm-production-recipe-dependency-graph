@@ -567,11 +567,15 @@ def test_cli_writes_schedule(tmp_path: Path) -> None:
     out = tmp_path / "out"
     args = ["--player-config", str(player), "--output-dir", str(out)]
 
-    assert main([*args, "--login-interval", "3"]) == 0
+    settings = tmp_path / "planner.json"
+    settings.write_text(json.dumps({"production": {"login_interval": 3}}))
+    assert main([*args, "--planner-config", str(settings)]) == 0
     schedule = json.loads((out / "schedule.json").read_text(encoding="utf-8"))
     assert schedule["login_interval_hours"] == 3
+    assert schedule["settings"]["login_interval"] == 3
     assert (out / "schedule.md").exists()
-    assert main([*args, "--storage-share", "0"]) == 1
+    settings.write_text(json.dumps({"production": {"storage_share": 0}}))
+    assert main([*args, "--planner-config", str(settings)]) == 1
 
 
 def test_cli_reports_unsolvable_plan(

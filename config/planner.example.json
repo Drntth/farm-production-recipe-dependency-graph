@@ -1,0 +1,11 @@
+{
+  "production": {
+    "login_interval": null,
+    "storage_share": 0.5,
+    "min_efficiency": 0.8
+  },
+  "combiner": {
+    "lookahead": 5,
+    "strategy": "flow"
+  }
+}

@@ -39,11 +39,11 @@ from scipy.optimize import linprog
 
 from src.loaders.json_loader import DataSet
 from src.models import LocationType, ResourceType
+from src.settings import DEFAULT_STORAGE_SHARE  # rest of barn / silo: stock
 
 from .capacity import SECONDS_PER_HOUR, CapacityModel, LineKind
 from .profile import ResolvedProfile
 
-DEFAULT_STORAGE_SHARE = 0.5  # rest of the barn / silo: stock and order buffer
 CROP_HARVEST = 2  # crops harvested per planting (wiki: Crops)
 _KEEP = 1 - 1e-6  # keep a previous optimum up to solver tolerance
 _MAX_BALANCE = 1e6

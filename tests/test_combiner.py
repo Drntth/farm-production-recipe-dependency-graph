@@ -158,15 +158,23 @@ def test_cli_writes_combined_outputs(tmp_path: Path) -> None:
     player = tmp_path / "player.json"
     player.write_text(json.dumps({"level": LEVEL}))
     args = ["--player-config", str(player), "--output-dir", str(tmp_path)]
-    assert cli.main([*args, "--design", "--lookahead", "2"]) == 0
+    design = tmp_path / "design.json"
+    design.write_text(json.dumps({"default": {"design_layer": True}}))
+    planner = tmp_path / "planner.json"
+    planner.write_text(json.dumps({"combiner": {"lookahead": 2}}))
+    configs = ["--design-config", str(design), "--planner-config", str(planner)]
+    assert cli.main([*args, *configs]) == 0
     for name in ("combined.json", "combined.md", "combined.svg"):
         assert (tmp_path / name).exists()
     data = json.loads((tmp_path / "combined.json").read_text())
     assert data["level"] == LEVEL and data["summary"]["design"] is True
     assert data["expansion"]["lookahead_levels"] == 2
+    assert data["settings"]["combiner"] == {"lookahead": 2, "strategy": "flow"}
 
-    assert cli.main([*args, "--lookahead", "-1"]) == 1
-    assert cli.main([*args, "--storage-share", "0"]) == 1
+    planner.write_text(json.dumps({"combiner": {"lookahead": -1}}))
+    assert cli.main([*args, *configs]) == 1
+    planner.write_text(json.dumps({"production": {"storage_share": 0}}))
+    assert cli.main([*args, *configs]) == 1
 
 
 def test_cli_reports_unsolvable_plan(

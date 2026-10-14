@@ -5,7 +5,10 @@ Usage
 -----
     python -m src.planner                       # level from the player config
     python -m src.planner --level 30
-    python -m src.planner --login-interval 4 --storage-share 0.6
+    python -m src.planner --planner-config my_planner.json
+
+Login interval, storage share and minimum efficiency are set in
+config/planner.json (``src/settings.py``), not on the command line.
 """
 
 from __future__ import annotations
@@ -18,10 +21,10 @@ from pathlib import Path
 
 from src.config import PlayerConfig, load_player_config, validate_player_config
 from src.loaders.json_loader import load_data
+from src.settings import load_planner_settings
 
-from .quantities import DEFAULT_STORAGE_SHARE
 from .run import run_planner
-from .schedule import DEFAULT_MIN_EFFICIENCY, schedule_to_markdown
+from .schedule import schedule_to_markdown
 
 logger = logging.getLogger("src.planner")
 
@@ -45,24 +48,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
-        "--login-interval",
-        type=float,
+        "--planner-config",
+        type=Path,
         default=None,
-        help="Hours between logins (default: suggested from the candidates)",
-    )
-    parser.add_argument(
-        "--storage-share",
-        type=float,
-        default=DEFAULT_STORAGE_SHARE,
-        help="Share of barn and silo the goods of one interval may fill "
-        "(default: 0.5; the rest is stock)",
-    )
-    parser.add_argument(
-        "--min-efficiency",
-        type=float,
-        default=DEFAULT_MIN_EFFICIENCY,
-        help="Suggested interval: longest one with at least this share of the "
-        "best production time (default: 0.8)",
+        help="Planner settings (default: config/planner.json, else "
+        "config/planner.example.json, else built-in defaults)",
     )
     return parser.parse_args(argv)
 
@@ -75,12 +65,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.level is not None and args.level < 1:
         logger.error("--level must be at least 1")
         return 1
-    if args.login_interval is not None and args.login_interval <= 0:
-        logger.error("--login-interval must be positive")
+    try:
+        settings, source = load_planner_settings(args.planner_config)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid planner settings: %s", exc)
         return 1
-    if not 0 < args.storage_share <= 1 or not 0 < args.min_efficiency <= 1:
-        logger.error("--storage-share and --min-efficiency must be in (0, 1]")
-        return 1
+    production = settings.production
+    logger.info(
+        "Planner settings: %s (%s)",
+        source or "built-in defaults",
+        ", ".join(f"{k}={v}" for k, v in production.model_dump().items()),
+    )
 
     try:
         player = load_player_config(args.player_config)
@@ -108,9 +103,9 @@ def main(argv: list[str] | None = None) -> int:
         run = run_planner(
             player,
             data,
-            login_interval=args.login_interval,
-            storage_share=args.storage_share,
-            min_efficiency=args.min_efficiency,
+            login_interval=production.login_interval,
+            storage_share=production.storage_share,
+            min_efficiency=production.min_efficiency,
         )
     except RuntimeError as exc:
         logger.error("%s", exc)
@@ -127,7 +122,12 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(capacity.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
     )
     (out / "schedule.json").write_text(
-        json.dumps(schedule, ensure_ascii=False, indent=2), encoding="utf-8"
+        json.dumps(
+            schedule | {"settings": production.model_dump()},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
     )
     (out / "schedule.md").write_text(
         schedule_to_markdown(schedule, data), encoding="utf-8"

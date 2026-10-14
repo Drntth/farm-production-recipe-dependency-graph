@@ -19,14 +19,15 @@ Project knowledge that is not code and not scraped data. Read these before resea
 
 ## Where knowledge lives
 
-| Kind of knowledge                               | Place                                   | Maintained by          |
-| ----------------------------------------------- | --------------------------------------- | ---------------------- |
-| Per-entity data the wiki lists in tables        | `data/*.json`, `data/level_limits.json` | scraper                |
-| Per-entity data the wiki lacks (footprints, …)  | `data/overrides/*.json`                 | hand, measured in game |
-| Game rules (min / max values, mechanics, costs) | `docs/game-facts/*.md`                  | hand, from wiki / game |
-| Values the wiki lacks (estimates, measurements) | `docs/wiki-gaps.md` + `data/overrides/` | hand, until measured   |
-| One player's farm state                         | `config/player.json`                    | the player             |
-| One player's area maps (size, fixed buildings)  | `config/<area>_map.json`                | the player, measured   |
+| Kind of knowledge                                | Place                                       | Maintained by          |
+| ------------------------------------------------ | ------------------------------------------- | ---------------------- |
+| Per-entity data the wiki lists in tables         | `data/*.json`, `data/level_limits.json`     | scraper                |
+| Per-entity data the wiki lacks (footprints, …)   | `data/overrides/*.json`                     | hand, measured in game |
+| Game rules (min / max values, mechanics, costs)  | `docs/game-facts/*.md`                      | hand, from wiki / game |
+| Values the wiki lacks (estimates, measurements)  | `docs/wiki-gaps.md` + `data/overrides/`     | hand, until measured   |
+| One player's farm state                          | `config/player.json`                        | the player             |
+| One player's area maps (size, fixed buildings)   | `config/<area>_map.json`                    | the player, measured   |
+| Tool settings (design taste, planner parameters) | `config/design.json`, `config/planner.json` | the player, chosen     |
 
 Rules are kept in Markdown, not in the data files, until code needs them. When a planner starts using a rule (e.g. the maximum of 9 slots), move the value into data or code and keep the fact row here as its source.
 

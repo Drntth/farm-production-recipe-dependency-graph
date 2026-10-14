@@ -228,6 +228,10 @@ output/*
 # Local player config (personal level / progress)
 config/player.json
 
+# Local tool settings (design taste, planner parameters)
+config/design.json
+config/planner.json
+
 # Local farm map (measured positions of fixed buildings)
 config/farm_map.json
 config/town_map.json

@@ -9,7 +9,8 @@ none, and every item footprint is outlined on it.
 With a calibrated ``background`` in the farm map, the screenshot of the farm
 is drawn under the grid through an affine transform (image pixel → tile →
 screen), and the farm plots (expansions) are outlined: locked plots shaded.
-Zones: buildable outlined in green, blocked filled in red. With the design
+Zones: buildable outlined in green, blocked filled in red, design zones
+(existing decorations) filled in violet. With the design
 layer, path tiles are sand-coloured and the decoration band light green.
 """
 
@@ -56,6 +57,7 @@ LOCKED_COLOUR = "#B91C1C"
 FARM_OUTLINE_COLOUR = "#111827"
 BUILDABLE_COLOUR = "#16A34A"
 BLOCKED_COLOUR = "#DC2626"
+DESIGN_ZONE_COLOUR = "#8B5CF6"
 PATH_COLOUR = "#C8A165"
 DECOR_COLOUR = "#4ADE80"
 
@@ -145,8 +147,10 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
 
     # zones: buildable sections, blocked tiles (water, road, …); one outline per zone
     for z in fm.zones:
-        blocked = z.kind == "blocked"
-        colour = BLOCKED_COLOUR if blocked else BUILDABLE_COLOUR
+        blocked = z.kind in ("blocked", "design")
+        colour = {"blocked": BLOCKED_COLOUR, "design": DESIGN_ZONE_COLOUR}.get(
+            z.kind, BUILDABLE_COLOUR
+        )
         if blocked:
             for x, y, w, h in z.cells:
                 out.append(
@@ -270,7 +274,8 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
             _text(
                 MARGIN + 18,
                 y,
-                f"Path: {len(d.paths)} tiles · light green = decoration band "
+                f"Path ({d.path_style}): {len(d.paths)} tiles, {d.corners} corners, "
+                f"detour {d.detour_ratio:.2f} · light green = decoration band "
                 f"({len(d.decorations)} tiles)",
                 11,
                 "#111827",

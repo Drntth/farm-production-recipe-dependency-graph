@@ -29,6 +29,8 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
         "reserve_requested": layout.reserve_requested,
         "strategy": layout.strategy,
         "sized_by_production": layout.sized,
+        "item_gap": layout.item_gap,
+        "item_gap_requested": layout.item_gap_requested,
         "flow_order": layout.flow_order,
         "design": _design(layout),
         "blocks": [
@@ -112,7 +114,7 @@ def layout_to_markdown(layout: Layout) -> str:
         (
             f"Block order: {layout.strategy}. "
             f"Each block keeps {layout.reserve_ratio:.0%} extra area for later "
-            f"unlocks{lowered}. "
+            f"unlocks{lowered}. " + _item_gap_text(layout)
             if farm
             else "Movable buildings are placed largest first, close to the hub; "
             "fixed ones stay. "
@@ -142,14 +144,34 @@ def layout_to_markdown(layout: Layout) -> str:
             "## Design",
             "",
             (
-                f"- Paths: {len(d.paths)} tiles (1 tile wide), connecting "
-                f"{len(d.connected)} blocks and key buildings."
+                f"- Paths ({d.path_style}): {len(d.paths)} tiles (1 tile wide), "
+                f"connecting {len(d.connected)} "
+                + (
+                    "buildings and patches."
+                    if d.path_targets == "buildings"
+                    else "blocks and key buildings."
+                )
+            ),
+            (
+                f"- Corners: {d.corners}; detour ratio {d.detour_ratio:.2f} "
+                "(tiles walked per tile of grid distance; 1.00 = no detour)."
             ),
             (
                 f"- Decoration band: {len(d.decorations)} free tiles within "
                 f"{d.decor_band} tile(s) of a path, for decorations and fences."
             ),
         ]
+        free = _free_per_block(layout)
+        if free:
+            lines.append(
+                "- Free tiles per block (frame minus buildings and reserved "
+                "space): " + ", ".join(f"{names[b]} {n}" for b, n in free.items())
+            )
+        if layout.design_zones:
+            lines.append(
+                f"- Design zones: {len(fm.design_tiles())} tiles kept free of "
+                "blocks (paths may cross them)."
+            )
         if d.approached:
             lines.append(
                 "- Path ends at the connection point (non-buildable ground in "
@@ -264,6 +286,42 @@ def _design(layout: Layout) -> dict[str, Any] | None:
         "connected": d.connected,
         "unreachable": d.unreachable,
         "approached": d.approached,
+        "figures": {
+            "path_style": d.path_style,
+            "path_targets": d.path_targets,
+            "path_tiles": len(d.paths),
+            "corners": d.corners,
+            "detour_ratio": round(d.detour_ratio, 3),
+            "unreachable": len(d.unreachable),
+            "free_tiles_per_block": _free_per_block(layout),
+            "item_gap": layout.item_gap,
+            "design_zone_tiles": (
+                len(layout.farm_map.design_tiles()) if layout.design_zones else 0
+            ),
+        },
+    }
+
+
+def _item_gap_text(layout: Layout) -> str:
+    if not layout.item_gap_requested:
+        return ""
+    lowered = (
+        f" (lowered from {layout.item_gap_requested} so that every block fits)"
+        if layout.item_gap < layout.item_gap_requested
+        else ""
+    )
+    return (
+        f"Buildings of a block keep {layout.item_gap} free tile(s) between "
+        f"them{lowered}. "
+    )
+
+
+def _free_per_block(layout: Layout) -> dict[str, int]:
+    """Free tiles in every placed block frame."""
+    return {
+        pb.block.id: pb.frame.w * pb.frame.h - pb.used_tiles - pb.reserved_tiles
+        for pb in layout.blocks
+        if pb.frame is not None and pb.items
     }
 
 

@@ -89,7 +89,7 @@
   ul.list li span i { color: var(--muted); }
   ul.list li button { padding: 1px 6px; }
   .pill { display: inline-block; padding: 0 6px; border-radius: 8px; font-size: 11px; color: #fff; font-style: normal; }
-  .pill.ok { background: var(--ok); } .pill.bad { background: var(--bad); } .pill.mv { background: var(--warn); }
+  .pill.ok { background: var(--ok); } .pill.bad { background: var(--bad); } .pill.mv { background: var(--warn); } .pill.dz { background: #8b5cf6; }
 
   /* ---- canvas overlays */
   #layers { position: absolute; top: 8px; right: 8px; background: var(--panel); border: 1px solid var(--line);
@@ -237,11 +237,11 @@
     <h2>5. Zones</h2>
     <details class="help">
       <summary>How to</summary>
-      <div class="hint"><b>Buildable</b> (green): the farm sections; the layout stays inside them. <b>Blocked</b> (red): water, road, forest, … never used. Add a zone, then drag rectangles; touching rectangles merge. <kbd>Alt</kbd> + drag erases tiles of the selected zone.</div>
+      <div class="hint"><b>Buildable</b> (green): the farm sections; the layout stays inside them. <b>Blocked</b> (red): water, road, forest, paved strips, … never used. <b>Design</b> (violet): existing decorations; no block is placed there, but paths may cross it. Add a zone, then drag rectangles; touching rectangles merge. <kbd>Alt</kbd> + drag erases tiles of the selected zone.</div>
     </details>
     <div class="card">
       <div class="row">
-        <select id="zoneKind" style="max-width:120px"><option value="buildable">buildable</option><option value="blocked">blocked</option></select>
+        <select id="zoneKind" style="max-width:120px"><option value="buildable">buildable</option><option value="blocked">blocked</option><option value="design">design</option></select>
         <input type="text" id="zoneId" placeholder="name, e.g. pond">
       </div>
       <div class="row"><button id="zoneAdd" class="primary">Add zone</button><button id="zoneUndo" title="Undo the last edit of the selected zone (Ctrl+Z)">Undo</button></div>
@@ -256,7 +256,7 @@
       <div class="hint">Relative to <code>config/&lt;area&gt;_map.json</code>; save the screenshot next to it, e.g. <code>config/farm_background.png</code>.</div>
       <label><input type="checkbox" id="cropOnSave" checked> crop to the map content on save, margin
         <input type="number" id="cropMargin" min="0" value="5" style="width:4em"> tiles</label>
-      <div class="hint">Cropping keeps every plot, buildable zone and building plus the margin; blocked zones are cut at the new edge. The editor switches to the cropped map too.</div>
+      <div class="hint">Cropping keeps every plot, buildable zone and building plus the margin; blocked and design zones are cut at the new edge. The editor switches to the cropped map too.</div>
       <button id="saveJson" class="primary">Save map JSON</button>
     </div>
     <div class="card">
@@ -651,7 +651,8 @@ if (typeof module !== 'undefined') module.exports = Core;
   const defaultItem = id => ({ id, name: '', rect: null, movable: MOVABLE_IDS.has(id) });
   const COLORS = { grid: 'rgba(255,255,255,0.75)', fixed: '#374151', fixedFill: 'rgba(107,114,128,0.35)',
     ok: '#15803d', okFill: 'rgba(21,128,61,0.12)', bad: '#b91c1c', badFill: 'rgba(185,28,28,0.22)',
-    sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)' };
+    sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)',
+    design: '#8b5cf6', designFill: 'rgba(139,92,246,0.30)' };
   const STORE_BASE = 'farm_map_editor_state_v1';
   const storeKey = () => STORE_BASE + (state.area === 'farm' ? '' : '_' + state.area);
 
@@ -804,10 +805,11 @@ if (typeof module !== 'undefined') module.exports = Core;
     }
     if (bg && opts.zones) {
       for (const z of state.zones) {
-        const blocked = z.kind === 'blocked', selected = opts.selection && z === state.selZone;
-        if (blocked) for (const c of z.cells) { poly(g, Core.rectCorners(bg, c)); g.fillStyle = COLORS.blockedFill; g.fill(); }
-        outline(g, bg, z.cells, selected ? COLORS.sel : (blocked ? COLORS.blocked : COLORS.buildable), (blocked ? 2 : 4) * px);
-        if (opts.labels && z.cells.length) label(g, bg, Core.bbox(z.cells), z.id, font, blocked ? COLORS.blocked : COLORS.buildable);
+        const filled = z.kind !== 'buildable', selected = opts.selection && z === state.selZone;
+        const colour = COLORS[z.kind] || COLORS.buildable;
+        if (filled) for (const c of z.cells) { poly(g, Core.rectCorners(bg, c)); g.fillStyle = COLORS[z.kind + 'Fill']; g.fill(); }
+        outline(g, bg, z.cells, selected ? COLORS.sel : colour, (filled ? 2 : 4) * px);
+        if (opts.labels && z.cells.length) label(g, bg, Core.bbox(z.cells), z.id, font, colour);
       }
     }
     if (bg && opts.expansions) {
@@ -1206,7 +1208,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     for (const z of state.zones) {
       const li = document.createElement('li');
       if (z === state.selZone) li.className = 'sel';
-      const pill = z.kind === 'blocked' ? '<span class="pill bad">blocked</span>' : '<span class="pill ok">buildable</span>';
+      const pill = { blocked: '<span class="pill bad">blocked</span>', design: '<span class="pill dz">design</span>' }[z.kind]
+        || '<span class="pill ok">buildable</span>';
       li.innerHTML = `<span>${esc(z.id)} · ${z.cells.length} rect ${pill}</span>`;
       li.onclick = () => { state.selZone = z; refreshAll(); };
       li.append(btn('×', () => {

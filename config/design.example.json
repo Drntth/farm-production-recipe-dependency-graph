@@ -1,0 +1,18 @@
+{
+  "default": {
+    "gap": 1,
+    "design_layer": false,
+    "decor_band": 1,
+    "path_style": "shortest",
+    "design_zones": true
+  },
+  "farm": {
+    "reserve": 0.2,
+    "strategy": "auto",
+    "field_pool": 0.0,
+    "item_gap": 0,
+    "path_targets": "blocks"
+  },
+  "town": {},
+  "fishing_lake": {}
+}

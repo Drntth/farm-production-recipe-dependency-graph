@@ -5,9 +5,12 @@ Usage
 -----
     python -m src.layout                       # level from the player config
     python -m src.layout --level 30
-    python -m src.layout --farm-map config/farm_map.json --reserve 0.3
-    python -m src.layout --design              # plus paths and decoration band
-    python -m src.layout --area town --design  # town from config/town_map.json
+    python -m src.layout --map config/farm_map.json
+    python -m src.layout --area town           # town from config/town_map.json
+    python -m src.layout --design-config my_design.json
+
+Gap, reserve, strategy and the design layer are set in config/design.json
+(``src/settings.py``), not on the command line.
 """
 
 from __future__ import annotations
@@ -21,18 +24,12 @@ from pathlib import Path
 from src.config import load_player_config, validate_player_config
 from src.loaders.json_loader import load_data
 from src.models import Area
+from src.settings import AreaDesign, load_design_settings
 
 from .area import plan_area_layout
 from .describe import layout_to_dict, layout_to_markdown
-from .design import DEFAULT_DECOR_BAND
 from .farm_map import load_farm_map
-from .planner import (
-    DEFAULT_FIELD_POOL,
-    DEFAULT_GAP,
-    DEFAULT_RESERVE_RATIO,
-    STRATEGIES,
-    plan_layout,
-)
+from .planner import STRATEGIES, plan_layout
 from .render_svg import render_svg
 
 logger = logging.getLogger("src.layout")
@@ -73,50 +70,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
-        "--reserve",
-        type=float,
-        default=DEFAULT_RESERVE_RATIO,
-        help="Extra free area per block for later unlocks (default: 0.2 = 20%%)",
-    )
-    parser.add_argument(
-        "--gap",
-        type=int,
-        default=DEFAULT_GAP,
-        help="Free tiles between blocks (default: 1)",
-    )
-    parser.add_argument(
-        "--field-pool",
-        type=float,
-        default=DEFAULT_FIELD_POOL,
-        help="Share of the fields kept in a separate shared block (default: 0)",
-    )
-    parser.add_argument(
-        "--strategy",
-        choices=(*STRATEGIES, "all"),
-        default="auto",
-        help="Block order: coupling (related blocks close), size (largest first), "
-        "flow (upstream blocks first, then size if a block does not fit), auto "
-        "(coupling, then size if a block does not fit) or all (auto as layout.*, plus "
-        "layout_coupling.*, layout_size.* and layout_flow.*). Default: auto",
-    )
-    parser.add_argument(
-        "--design",
-        action="store_true",
-        help="Add the design layer: paths between blocks and key buildings, and a "
-        "decoration band along them (gap is at least 1)",
-    )
-    parser.add_argument(
-        "--decor-band",
-        type=int,
-        default=DEFAULT_DECOR_BAND,
-        help="Decoration band width in tiles next to the paths (default: 1)",
+        "--design-config",
+        type=Path,
+        default=None,
+        help="Design settings (default: config/design.json, else "
+        "config/design.example.json, else built-in defaults)",
     )
     return parser.parse_args(argv)
 
 
-def _write(layout, out: Path, stem: str) -> None:
+def _write(layout, out: Path, stem: str, settings: AreaDesign) -> None:
+    payload = layout_to_dict(layout) | {"settings": settings.used(layout.farm_map.area)}
     (out / f"{stem}.json").write_text(
-        json.dumps(layout_to_dict(layout), ensure_ascii=False, indent=2),
+        json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     (out / f"{stem}.md").write_text(layout_to_markdown(layout), encoding="utf-8")
@@ -154,14 +120,13 @@ def main(argv: list[str] | None = None) -> int:
         level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
     )
     args = parse_args(argv)
-    if args.reserve < 0 or args.gap < 0 or not 0 <= args.field_pool <= 1:
-        logger.error("--reserve and --gap must not be negative; --field-pool is 0..1")
-        return 1
-    if args.decor_band < 0:
-        logger.error("--decor-band must not be negative")
-        return 1
     if args.level is not None and args.level < 1:
         logger.error("--level must be at least 1")
+        return 1
+    try:
+        design_settings, source = load_design_settings(args.design_config)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid design settings: %s", exc)
         return 1
 
     try:
@@ -193,29 +158,24 @@ def main(argv: list[str] | None = None) -> int:
     level = args.level if args.level is not None else player.level
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
+    settings = design_settings.for_area(area)
+    logger.info(
+        "Design settings: %s (%s)",
+        source or "built-in defaults",
+        ", ".join(f"{k}={v}" for k, v in settings.used(area).items()),
+    )
     if area != Area.FARM:
-        ignored = [
-            name
-            for name, value, default in (
-                ("--strategy", args.strategy, "auto"),
-                ("--reserve", args.reserve, DEFAULT_RESERVE_RATIO),
-                ("--field-pool", args.field_pool, DEFAULT_FIELD_POOL),
-            )
-            if value != default
-        ]
-        if ignored:
-            logger.warning(
-                "Farm-only options ignored for %s: %s", area.value, ", ".join(ignored)
-            )
         layout = plan_area_layout(
             farm_map,
             level=level,
-            gap=args.gap,
-            design=args.design,
-            decor_band=args.decor_band,
+            gap=settings.gap,
+            design=settings.design_layer,
+            decor_band=settings.decor_band,
+            path_style=settings.path_style,
+            design_zones=settings.design_zones,
         )
         stem = f"layout_{area.value}"
-        _write(layout, out, stem)
+        _write(layout, out, stem, settings)
         _log_summary(layout, [stem], out)
         return 0
 
@@ -229,8 +189,8 @@ def main(argv: list[str] | None = None) -> int:
             logger.warning("Player config: %s", problem)
 
     # (output file stem, strategy); "all" adds one file set per fixed strategy
-    runs = [("layout", "auto" if args.strategy == "all" else args.strategy)]
-    if args.strategy == "all":
+    runs = [("layout", "auto" if settings.strategy == "all" else settings.strategy)]
+    if settings.strategy == "all":
         runs += [(f"layout_{s}", s) for s in STRATEGIES if s != "auto"]
 
     data = full.filter_by_max_level(level)
@@ -240,14 +200,18 @@ def main(argv: list[str] | None = None) -> int:
             level=level,
             player=player,
             farm_map=farm_map,
-            reserve_ratio=args.reserve,
-            gap=args.gap,
-            field_pool=args.field_pool,
+            reserve_ratio=settings.reserve,
+            gap=settings.gap,
+            field_pool=settings.field_pool,
             strategy=strategy,
-            design=args.design,
-            decor_band=args.decor_band,
+            design=settings.design_layer,
+            decor_band=settings.decor_band,
+            item_gap=settings.item_gap,
+            path_style=settings.path_style,
+            path_targets=settings.path_targets,
+            design_zones=settings.design_zones,
         )
-        _write(layout, out, stem)
+        _write(layout, out, stem, settings)
         logger.info(
             "%s: strategy %s (used: %s), reserve %.0f%%, %d blocks not placed",
             stem,
