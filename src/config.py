@@ -81,6 +81,7 @@ class PlayerConfig(BaseModel):
 
 
 _NO_SLOT_TYPES = {LocationType.FIELD, LocationType.TREE, LocationType.BUSH}
+MAX_SLOTS_PER_COPY = 9  # wiki: Production_Buildings; Location.max_slots overrides
 
 
 def default_config_path() -> Path:
@@ -140,6 +141,18 @@ def validate_player_config(cfg: PlayerConfig, dataset: DataSet) -> list[str]:
             problems.append(
                 f"locations.{loc_id}: slots do not apply to {loc.type.value}"
             )
+        elif progress.slots is not None and loc.base_slots is not None:
+            copies = progress.owned if progress.owned is not None else available
+            if copies is None:  # single building without level limit rows
+                copies = 1
+            per_copy = loc.max_slots or MAX_SLOTS_PER_COPY
+            if copies == 0:
+                problems.append(f"locations.{loc_id}: slots set but no copy owned")
+            elif progress.slots > copies * per_copy:
+                problems.append(
+                    f"locations.{loc_id}: slots={progress.slots} exceeds "
+                    f"{copies} x {per_copy} slots"
+                )
         if progress.animals is not None:
             copies = progress.owned if progress.owned is not None else available
             if loc.animal_capacity is None:

@@ -1,0 +1,39 @@
+# Wiki gaps
+
+Data the project needs that the Hay Day wiki does not give, or gives ambiguously. Every row has a value in use, so planning never waits for a measurement: an estimate from the existing data until the value is measured in the game. Measured values are candidates to contribute back to the wiki.
+
+## How to use this list
+
+- **New gap:** add a row. Put the value where the code reads it (usually `data/overrides/*.json`), and set the status to `estimate`.
+- **Measured in the game:** replace the value in the data, set the status to `measured` with the date, and add or update the fact row in `game-facts/`.
+- **Added to the wiki:** set the status to `on wiki` and name the page. After the next scrape the override may become unnecessary.
+- **Game update:** rows can turn stale; recheck them with the update checklist in [game-updates.md](game-updates.md).
+
+Status values: `estimate` (value in use, to measure), `measured` (from the game, not on the wiki yet), `on wiki`, `handled` (no value needed, worked around), `open` (ambiguous, not needed by the code yet).
+
+## Values in use
+
+| Gap | Value in use | Basis | Used in | Status | Checked |
+| --- | --- | --- | --- | --- | --- |
+| Tree / bush yield per harvest | 2 / 3 / 4 / 4 per harvest (the 4th after a neighbour's revive), 13 in total; the planner uses the average, 3.25 per harvest | player's estimate; matches the wiki total ("up to 13 … over 4 harvests") of apple, cherry, cacao, raspberry, blackberry | `lifetime_yield`, `lifetime_harvests` in `data/overrides/locations.json`; `src/planner/capacity.py` | estimate: measure every kind and harvest | 2026-10-14 |
+| Blueberry and coffee bush lifetime yield | 13 over 4 harvests, like the other kinds | the other kinds (their wiki pages give no total) | `data/overrides/locations.json` | estimate | 2026-10-14 |
+| Honeycomb rate per beehive | one per 35 min (2,100 s) | wiki: a honeycomb is made "once a hundred drops of nectar has been brought to the beehive … approximately 35 minutes if bushes are close"; the Goods List says "Instant" | `growth_time_seconds` in `data/overrides/resources.json`; `src/planner/capacity.py` (`hives`) | estimate: measure, also with distant bushes | 2026-10-14 |
+| Honeycomb collected per login | at most one per beehive per login, like animals | assumption; how much honey a beehive holds is not on the wiki | `src/planner/quantities.py` | estimate | 2026-10-14 |
+| Workbench (Building Mastery) bonuses | none: base production times | no wiki page; the maintainer's account still uses 3-star mastery | `WorkbenchModifier` in `src/planner/mastery.py` | estimate: fill in when the rollout reaches the account | 2026-10-14 |
+| 3-star times vs. 15 % | the scraped Goods List time (e.g. chicken feed 4 min, where 15 % of 5 min is 4 min 15 s) | Goods List and Masteries disagree by up to 60 s | `StarsModifier` in `src/planner/mastery.py` | open: check one machine in the game | 2026-10-14 |
+
+## Measured in the game (wiki contribution candidates)
+
+| Gap | Value | Basis | Used in | Status | Checked |
+| --- | --- | --- | --- | --- | --- |
+| Footprints of shelters, fields, trees, bushes, barn and silo | see `game-facts/animals.md`, `farm.md`, `storage.md` | shop info and field ruler in the game | `data/overrides/locations.json` | measured | 2026-10-09 |
+| Rotation of trees and bushes (wiki: "Both can be rotated", ambiguous) | raspberry and blackberry bushes rotate | in-game | `rotatable` in `data/overrides/locations.json` | measured | 2026-10-05 |
+
+## Handled or not needed yet
+
+| Gap | Value | Basis | Used in | Status | Checked |
+| --- | --- | --- | --- | --- | --- |
+| Lobster pool / duck salon infobox has no `slots` | 1 slot at start, 6 at most | page text | `base_slots`, `max_slots` in `data/overrides/locations.json` | handled | 2026-10-14 |
+| Goods List "Needs" names the caught animal (lobster, duck), not the trap | one trap per animal | wiki: Lobster_Tail, Duck_Feather | `NEED_ALIASES` in `src/scraper/normalizer.py` | handled | 2026-10-05 |
+| Lobster pool / duck salon slot cost: text says coins, table shows diamond icons | not used | `game-facts/animals.md` | - | open | 2026-10-05 |
+| "No limit" on fields vs. the per-level field grants | the grants (84 at level 56) | `game-facts/farm.md` | `level_limits.json`, planner field count | open: check in the game | 2026-10-05 |

@@ -1,6 +1,6 @@
 # Player profile: analysis and schema
 
-Status: the schema (option B) is implemented in `src/config.py` (`PlayerConfig`, `LocationProgress`, `validate_player_config`). `config/player.example.json` lists every configurable location. Default resolution and use by the planners follow in v0.7.
+Status: the schema (option B) is implemented in `src/config.py` (`PlayerConfig`, `LocationProgress`, `validate_player_config`). `config/player.example.json` lists every configurable location. The Production Planner resolves the defaults in `src/planner/profile.py` (`resolve_profile`) and recommends fields, trees and bushes left open (`src/planner/schedule.py`).
 
 ## Problem
 
@@ -29,7 +29,7 @@ Out of scope: helpers (Tom, Rose, Ernest), boosters and events. They are tempora
 
 ### Storage decisions
 
-- **Totals, not per copy.** `slots` and `animals` are summed over all copies (two feed mills with 6 slots each → `slots: 12`; three full coops → `animals: 18`). The planners only need the parallel capacity, and the player does not have to tell the copies apart.
+- **Totals, not per copy.** `slots` and `animals` are summed over all copies (two feed mills with 6 slots each → `slots: 12`; three full coops → `animals: 18`). The planners only need totals (copies run in parallel, slots are the queue), and the player does not have to tell the copies apart.
 - **Mastery per type.** The wiki states that mastery comes from production hours, and the copies of a building count together (e.g. the smelter "is very hard to master if you do not have five of them"). So there is one `mastery_stars` per building type.
 - **`owned` only where it varies.** Most production buildings exist only once, so the example omits `owned` for them (default: 1 when unlocked). It is listed for multi-copy buildings, shelters, trees and bushes.
 - **Optional counts that are hard to count.** Fields, trees and bushes may stay `null`. The planners then recommend a sensible number instead of requiring an exact inventory.
@@ -105,10 +105,12 @@ Validation rules (`validate_player_config`, logged as warnings by `python -m src
 - `animals` only on shelters with a known `animal_capacity`; `slots` not on fields, trees or bushes.
 - `mastery_stars` only with `mastery_system: "stars"`, `workbench_level` only with `"workbench"`.
 - `fields_owned` ≤ `fields_at(level)`.
+- `slots` ≤ copies × maximum per copy (9; lobster pool and duck salon 6, `max_slots`), for locations with `base_slots`.
 
 Future database mapping (3NF): `player(level, mastery_system, barn_capacity, silo_capacity, fields_owned, fishing_spots_unlocked)` and `player_location(player_id, location_id, owned, slots, mastery_stars, workbench_level, animals, beehives)`.
 
 ## Shared data still needed for good defaults
 
-- Base slots per building (wiki infobox `slots`; scraper extension in v0.7).
+- Base slots per building: done (`base_slots`, scraped from the infobox; lobster pool and duck salon from the overrides).
+- Tree and bush yield per harvest: estimate in use, see [wiki-gaps.md](wiki-gaps.md).
 - Farm map size and free area: player-measured in `config/farm_map.json` with `tools/farm_map_editor.html` (v0.6); no shared default exists. Unlocked farm plots are marked there too, by wiki plot number.

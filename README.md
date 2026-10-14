@@ -9,9 +9,9 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v0.6 (standalone Layout Planner for the farm) is done, measured on the real farm. v0.7 (Production Planner) is next. See the [Roadmap](#roadmap).
+**Status:** v0.7 (Production Planner) is done: capacity, quantities, recommendations and a login schedule from the player profile. See the [Roadmap](#roadmap).
 
-**Game knowledge** (rules, limits, measured sizes, game versions, data sources) is collected in [docs/](docs/README.md). Check there before researching the game again.
+**Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
 ---
 
@@ -170,6 +170,23 @@ Values missing from the profile are filled with level defaults. Fields, trees an
 
 Live truck, boat, town or event orders are intentionally ignored.
 
+### How it works
+
+`python -m src.planner` (package `src/planner/`, never imports `src.layout`):
+
+1. **Profile** (`profile.py`, option B of [docs/player-profile.md](docs/player-profile.md)): every `null` gets its level default (all unlocked copies, base slots × copies, 0 stars, full shelters, 1 beehive). Fields, trees and bushes without a count are left to the plan.
+2. **Mastery** (`mastery.py`, see [Machine mastery](#machine-mastery)): the player's production time of every recipe.
+3. **Capacity** (`capacity.py`): barn and silo, fields, and per location what runs in parallel and what queues. A machine produces one item at a time, so copies run in parallel and slots only queue; every animal produces on its own; the lobster pool and duck salon run one animal per slot. A planted crop gives two, so one planting adds one crop net. A tree / bush gives `lifetime_yield` goods over `lifetime_harvests` harvests, and every beehive one honeycomb per cycle. Values the wiki lacks are estimates for now, listed with their basis in [docs/wiki-gaps.md](docs/wiki-gaps.md).
+4. **Quantities** (`quantities.py`): a linear program (scipy, HiGHS) over the rates per hour. Fields, animals and trees are only served at a login, so their cycle is the growth time rounded up to whole login intervals; machines keep running through their queue. The goods made between two logins must fit into `--storage-share` of the barn and silo (default 50 %, the rest is stock). Four solves, each keeping the previous result:
+   1. every good gets the same spare amount per hour (`balance`);
+   2. goods without a production model (ores from the mine, fish) are used only as much as that balance needs, because their supply is unknown;
+   3. idle machines and animals are filled (maximum production hours);
+   4. the fewest fields and recommended trees / bushes for that plan.
+5. **Schedule** (`schedule.py`): the plan is solved for logins every 0.5-12 h; the suggested interval is the longest one that keeps 80 % of the best production time (`--min-efficiency`), or `--login-interval` fixes it. For that interval it lists the recommendations (fields, trees / bushes, nectar bushes per day for the honeycomb; 5 honeycomb per bush) and the actions of every login: collect → feed animals → plant fields → fill the machine queues, upstream machines first → sell or deliver the surplus. Items rarer than one per login are given as "1 every N logins".
+6. Writes `output/capacity.json`, `output/schedule.json` and `output/schedule.md`.
+
+Recipes with inputs that are not goods (vouchers, diamonds, lures, fishing spots) are not planned; `schedule.json` lists them under `plan.skipped_recipes`.
+
 ### Outputs
 
 - Recommended production quantities and ratios
@@ -182,8 +199,8 @@ Live truck, boat, town or event orders are intentionally ignored.
 
 Mastery modifies production times, so it is modelled as a pluggable modifier chosen by `mastery_system` in the player config:
 
-- `stars` (default): the classic 3-star mastery. The data holds both the base time and the full-mastery time of every recipe (`production_time_3star_seconds`).
-- `workbench`: Building Mastery / Workbench, introduced in game version 1.72 (August 2026) with a gradual rollout.
+- `stars` (default): the classic 3-star mastery. The data holds both the base time and the full-mastery time of every recipe (`production_time_3star_seconds`). At three stars the planner uses that time; below three it applies the building's speed-up from `data/mastery_bonuses.json` (the feed mill, lure workbench and net maker are 5 % / 10 % faster at one / two stars, other machines only get coin and XP bonuses there).
+- `workbench`: Building Mastery / Workbench, introduced in game version 1.72 (August 2026) with a gradual rollout. Its bonuses are not known yet, so the planner uses the base times and logs a warning.
 
 ---
 
@@ -251,7 +268,7 @@ The example file lists every configurable location unlocked at its level. Per-lo
 
 Every CLI reads the level from this file. `--level` overrides it for a single run.  
 `python -m src.main` checks the profile against the data and logs a warning for unknown ids, locations above the player level, more copies than the level allows, or more animals than `copies × animal_capacity`.  
-The analysis behind the schema, including the input options (manual, defaults, presets, wizard, account sync), is in [docs/player-profile.md](docs/player-profile.md). The planners start using the profile in v0.7.
+The analysis behind the schema, including the input options (manual, defaults, presets, wizard, account sync), is in [docs/player-profile.md](docs/player-profile.md). The Production Planner resolves it with level defaults (`python -m src.planner`); it also checks that `slots` stay within 9 per copy (6 for the lobster pool and duck salon).
 
 ---
 
@@ -385,7 +402,8 @@ Use them for data the wiki does not have, for example shelter and field footprin
 ### Timing and capacity fields
 
 All durations are stored in seconds.  
-`max_slots` (locations) and `max_in_barn` (resources) exist in the models but are not filled yet.  
+`base_slots` (locations) is the slot count per copy at purchase (wiki infobox; lobster pool and duck salon from the overrides). `max_slots` is the maximum per copy where it differs from the default 9 (lobster pool, duck salon: 6). `max_in_barn` (resources) exists in the model but is not filled yet.  
+`mastery_bonuses.json` holds one row per building and star level with the total production time reduction (`location_id`, `stars`, `time_reduction_percent`); only speed-ups are stored, not coin or XP bonuses.  
 Player-specific progress (owned copies, mastery, slots, animals, barn / silo capacity) lives in the player profile, not in the shared data. Game rules that apply to everyone (slot limits, mastery effects, costs) are documented in [docs/game-facts/](docs/README.md).
 
 ### External resources
@@ -416,7 +434,10 @@ Every Location and every Resource becomes a node.
 | `footprint_width`     | locations (opt.) | Width in tiles                    |
 | `footprint_height`    | locations (opt.) | Height in tiles                   |
 | `animal_capacity`     | locations (opt.) | Animals per shelter               |
-| `max_slots`           | locations (opt.) | Production slots                  |
+| `base_slots`          | locations (opt.) | Slots per copy at purchase        |
+| `max_slots`           | locations (opt.) | Maximum slots per copy (default 9) |
+| `lifetime_yield`      | locations (opt.) | Goods a tree / bush gives in its life |
+| `lifetime_harvests`   | locations (opt.) | Harvests of a tree / bush, incl. revive |
 | `max_in_barn`         | resources (opt.) | Storage limit for the resource    |
 | `growth_time_seconds` | resources (opt.) | Growth / animal production time   |
 
@@ -471,7 +492,7 @@ Higher weight means stronger coupling → the two locations should be placed clo
 
 ## Game update checklist
 
-Hay Day changes regularly. After each game update, follow [docs/game-updates.md](docs/game-updates.md). It has the step-by-step process, the table mapping each game mechanic to the affected code and data, the known game versions, and the known wiki gaps.
+Hay Day changes regularly. After each game update, follow [docs/game-updates.md](docs/game-updates.md). It has the step-by-step process, the table mapping each game mechanic to the affected code and data, and the known game versions. Data the wiki lacks, with the estimates in use, is in [docs/wiki-gaps.md](docs/wiki-gaps.md).
 
 In short: read the update notes → compare with `data/meta.json` → update the affected parts → `python -m src.scraper --game-version <version>` → `python -m pytest`.
 
@@ -481,10 +502,12 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-05. The 1.7
 
 ## Roadmap
 
-**Current status:** v0.6 is done (131 tests passing), with the real farm measured into `config/farm_map.json`. Next milestone: v0.7 (Production Planner).  
+**Current status:** v0.7 (Production Planner) is done (173 tests passing). Next milestone: v0.8 (area modes and Design layer).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
-Next step: start v0.7 with the capacity model and the profile defaults.
+The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
+Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are estimates collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); measuring them refines the plan but does not block the roadmap.  
+Next step: v0.8.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -538,16 +561,17 @@ Next step: start v0.7 with the capacity model and the profile defaults.
 - [x] Barn and silo as movable storage locations (Storage block); the block reserve shrinks until every block fits
 - [x] Placement strategies (`--strategy coupling | size | auto | all`); `all` writes one output set per strategy in one run
 
-### v0.7 - Production Planner
+### v0.7 - Production Planner (done)
 
-- [ ] Capacity model (barn, silo, fields, animals, machine slots)
-- [ ] Steady-state quantity calculation tuned to barn/silo limits
-- [ ] Mastery modifier: `stars` (default), `workbench` pluggable
-- [ ] Use the player profile (option B of [docs/player-profile.md](docs/player-profile.md)): resolve every `null` to its level default, then apply the player's values
-- [ ] Scrape base slots per building (wiki infobox `slots`) for the profile defaults; maximum is 9 per copy, 6 for the lobster pool and duck salon (wiki)
-- [ ] Recommend field, tree and bush counts when the profile leaves them empty
-- [ ] Ordered action list and suggested login frequency
-- [ ] `output/schedule.json` export
+- [x] Capacity model (barn, silo, fields, animals, machine slots, trees / bushes): parallel lines, queues, maximum rates
+- [x] Steady-state quantity calculation tuned to barn/silo limits (linear program, login-driven cycles)
+- [x] Mastery modifier: `stars` (default, per-star speed-ups from the Masteries page), `workbench` pluggable (placeholder until its bonuses are known)
+- [x] Use the player profile (option B of [docs/player-profile.md](docs/player-profile.md)): resolve every `null` to its level default, then apply the player's values
+- [x] Scrape base slots per building (wiki infobox `slots`) for the profile defaults; maximum is 9 per copy, 6 for the lobster pool and duck salon (wiki), checked by the profile validation
+- [x] Recommend field, tree and bush counts when the profile leaves them empty (plus nectar bushes per day for the honeycomb)
+- [x] Ordered action list and suggested login frequency
+- [x] `output/schedule.json` export (plus `schedule.md`)
+
 
 ### v0.8 - Area modes and Design layer
 
@@ -617,6 +641,11 @@ python -m src.main --no-analysis
 python -m src.layout
 python -m src.layout --level 30 --reserve 0.3 --gap 1 --field-pool 0.1
 python -m src.layout --strategy all   # also layout_coupling.* and layout_size.*
+
+# production plan: capacity, quantities, recommendations, actions per login
+python -m src.planner
+python -m src.planner --level 30
+python -m src.planner --login-interval 4 --storage-share 0.6
 ```
 
 Output lands in `output/`:
@@ -630,10 +659,11 @@ output/
 ├── analysis.json
 ├── layout.json                        # python -m src.layout
 ├── layout.md
-└── layout.svg
+├── layout.svg
+├── capacity.json                      # python -m src.planner
+├── schedule.json
+└── schedule.md
 ```
-
-Later versions will add `schedule.json` to the same directory.
 
 Update data from the wiki (level from the player config):
 
@@ -657,7 +687,8 @@ farm-production-recipe-dependency-graph/
 │   │   ├── storage.md
 │   │   └── town.md
 │   ├── data-sources.md                # what is scraped, from where; what is manual
-│   ├── game-updates.md                # update process, known versions, wiki gaps
+│   ├── game-updates.md                # update process, known versions
+│   ├── wiki-gaps.md                   # data the wiki lacks: estimates in use, measurement / wiki TODO
 │   └── player-profile.md              # player-specific settings and profile schema
 ├── config/
 │   ├── player.example.json            # example player config (committed)
@@ -671,6 +702,7 @@ farm-production-recipe-dependency-graph/
 │   ├── recipes.json                   # production transformations inside locations
 │   ├── meta.json                      # scrape date, level, wiki revisions, game version
 │   ├── level_limits.json              # field grants + building / shelter copies per level
+│   ├── mastery_bonuses.json           # production speed-up per building and mastery star
 │   ├── overrides/                     # hand-maintained patches merged by the loader
 │   │   ├── README.md                  # what to fill in and how to measure it
 │   │   ├── locations.json
@@ -698,6 +730,7 @@ farm-production-recipe-dependency-graph/
 │   ├── models/
 │   │   ├── level_limits.py
 │   │   ├── location.py
+│   │   ├── mastery.py
 │   │   ├── recipe.py
 │   │   └── resource.py
 │   ├── layout/                        # Layout Planner (farm)
@@ -711,11 +744,18 @@ farm-production-recipe-dependency-graph/
 │   │   ├── planner.py                 # plan_layout(): blocks → frames → farm
 │   │   ├── render_svg.py              # isometric SVG with tile grid
 │   │   └── support.py                 # support relations (nectar bush → beehive tree)
-│   ├── planner/                       # (planned, v0.7) Production Planner
+│   ├── planner/                       # Production Planner (farm)
+│   │   ├── capacity.py                # capacity model: storage, fields, parallel lines, rates
+│   │   ├── cli.py                     # python -m src.planner
+│   │   ├── mastery.py                 # mastery modifiers: stars, workbench (placeholder)
+│   │   ├── profile.py                 # player profile with level defaults (option B)
+│   │   ├── quantities.py              # linear program: steady-state rates per login interval
+│   │   └── schedule.py                # interval suggestion, recommendations, actions per login
 │   ├── scraper/
 │   │   ├── parsers/
 │   │   │   ├── level_limits.py        # field grants from Experience Levels pages
-│   │   │   ├── locations.py
+│   │   │   ├── locations.py           # incl. base slots from the building infoboxes
+│   │   │   ├── masteries.py           # speed-up per star from the Masteries page
 │   │   │   ├── recipes.py
 │   │   │   └── resources.py
 │   │   ├── cli.py
@@ -727,7 +767,7 @@ farm-production-recipe-dependency-graph/
 ├── tools/
 │   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
-│   ├── fixtures/wiki/                 # trimmed wiki HTML for scraper tests
+│   ├── fixtures/wiki/                 # trimmed wiki HTML / wikitext for scraper tests
 │   ├── test_analysis.py
 │   ├── test_config.py
 │   ├── test_exporters.py
@@ -738,6 +778,7 @@ farm-production-recipe-dependency-graph/
 │   ├── test_layout.py
 │   ├── test_level_limits.py
 │   ├── test_models.py
+│   ├── test_planner.py
 │   └── test_scraper.py
 ├── AGENTS.md                          # instructions for coding agents
 ├── CLAUDE.md -> AGENTS.md             # symlink

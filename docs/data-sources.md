@@ -10,6 +10,8 @@ The scraper uses the MediaWiki API (`https://hayday.fandom.com/api.php`), not th
 | ------------------------------------------ | -------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `Goods_List`                               | parse (HTML)               | `parsers/resources.py`, `parsers/recipes.py`, `parsers/locations.py` | resources, recipes, growth / production / 3-star times, field / tree / bush / mine sources |
 | `Production_Buildings_List`                | parse (HTML)               | `parsers/locations.py`                                               | production buildings, footprints, copies per level                                         |
+| building pages linked from that list       | wikitext                   | `parsers/locations.py`                                               | `base_slots` from the infobox `slots` (titles from the list links; case-sensitive)         |
+| `Masteries`                                | wikitext                   | `parsers/masteries.py`                                               | `mastery_bonuses.json`: "N% faster" per building and star                                  |
 | `Animal_Shelters`                          | parse (HTML)               | `parsers/locations.py`                                               | farm animal shelters, `animal_capacity`, copies per level                                  |
 | `Experience_Levels/Levels_X-Y`             | allpages + parse (HTML)    | `parsers/level_limits.py`                                            | field grants per level (`level_limits.json`)                                               |
 | `Category:Fishing_Lake_Buildings`          | categorymembers            | `parsers/locations.py`                                               | `area: fishing_lake`                                                                       |
@@ -24,17 +26,21 @@ Animal products with a feed in the Needs column (`Egg`: `Chicken feed (1)`) also
 
 ## Read but not scraped
 
-Pages that were read by hand for the facts in `docs/game-facts/`: Production_Buildings, Feed_Mill, Smelter, Lobster_Pool, Duck_Salon, Chicken_Coop, Beehive_Tree, Nectar_Bush, Barn, Silo, Farm, Crops, Expansion, Fishing_Lake, Town, Update, Birthday_Balloon_Maker, Category:Town_Buildings, Category:Service_Buildings.
+Pages that were read by hand for the facts in `docs/game-facts/`: Production_Buildings, Feed_Mill, Smelter, Lobster_Pool, Duck_Salon, Chicken_Coop, Beehive_Tree, Nectar_Bush, Barn, Silo, Farm, Crops, Apple_Tree, Raspberry_Bush, Expansion, Fishing_Lake, Town, Update, Birthday_Balloon_Maker, Category:Town_Buildings, Category:Service_Buildings.
 
-Candidates for future scraping: the infobox `slots` of every production building (base slots, v0.7), town and service buildings (v0.8).
+Candidates for future scraping: town and service buildings (v0.8).
 
 ## Hand-maintained
 
 | What                                              | Where                           | How                                              |
 | ------------------------------------------------- | ------------------------------- | ------------------------------------------------ |
 | Footprints the wiki lacks, `movable`, `rotatable` | `data/overrides/locations.json` | measured in game, see `data/overrides/README.md` |
+| Lobster pool / duck salon `base_slots`, `max_slots` | `data/overrides/locations.json` | from the page text (no infobox `slots`)        |
+| Tree / bush `lifetime_yield`, `lifetime_harvests`   | `data/overrides/locations.json` | estimate, see `docs/wiki-gaps.md`              |
+| Honeycomb `growth_time_seconds`                     | `data/overrides/resources.json` | estimate from the wiki text, see `docs/wiki-gaps.md` |
 | Game rules (slots, mastery, costs, …)             | `docs/game-facts/*.md`          | from wiki pages and in-game observation          |
-| Game versions and wiki gaps                       | `docs/game-updates.md`          | after every game update                          |
+| Game versions                                     | `docs/game-updates.md`          | after every game update                          |
+| Wiki gaps and the estimates in use                | `docs/wiki-gaps.md`             | when a gap is found, measured or added to the wiki |
 
 ## Player-specific
 

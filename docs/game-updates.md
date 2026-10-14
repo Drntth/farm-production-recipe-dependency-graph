@@ -25,7 +25,7 @@ Hay Day changes regularly. This file records what is known about recent versions
 | Expansion, map size                         | `game-facts/farm.md`, Layout Planner                                                                  |
 | Town, sanctuary, fishing lake               | area modes (`--area`), `game-facts/town.md`, `game-facts/fishing-lake.md`                             |
 | Decorations, paths                          | Design layer                                                                                          |
-| Wiki lags behind the game                   | `data/overrides/`, `known_game_version` in `meta.json`, "Known wiki gaps" below                       |
+| Wiki lags behind the game                   | `data/overrides/`, `known_game_version` in `meta.json`, [wiki-gaps.md](wiki-gaps.md)                         |
 
 ## Known versions
 
@@ -39,14 +39,7 @@ Data in the repository was scraped for game version 1.72 at level 56 (see `data/
 
 ## Known wiki gaps
 
-| Gap                                                                             | Handling                                    | Checked    |
-| ------------------------------------------------------------------------------- | ------------------------------------------- | ---------- |
-| No page for Building Mastery / Workbench                                        | data has 3-star times only                  | 2026-10-05 |
-| No footprints for shelters, fields, trees, bushes                               | measured in game, `data/overrides/`         | 2026-10-05 |
-| Rotation of trees and bushes is ambiguous ("Both can be rotated")               | `rotatable` in `data/overrides/`, from game | 2026-10-05 |
-| Lobster pool / duck salon slot cost: text says coins, table shows diamond icons | noted in `game-facts/animals.md`            | 2026-10-05 |
-| "No limit" on fields vs. per-level field grants                                 | noted in `game-facts/farm.md`               | 2026-10-05 |
-| Goods List "Needs" names the caught animal (lobster, duck), not the trap        | `NEED_ALIASES` in `scraper/normalizer.py`   | 2026-10-05 |
+Collected in [wiki-gaps.md](wiki-gaps.md), with the value in use for each gap. After an update, recheck its rows and add new gaps there.
 
 ## Corrections of earlier assumptions
 

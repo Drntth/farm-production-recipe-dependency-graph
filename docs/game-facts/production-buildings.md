@@ -7,6 +7,8 @@ Rules about machines that the scraper does not read. Per-building values that th
 | Fact                                                        | Value                                              | Source                       | Checked    |
 | ----------------------------------------------------------- | -------------------------------------------------- | ---------------------------- | ---------- |
 | Starting slots per machine                                  | 1-3 (infobox `slots` on each page)                 | wiki:Production_Buildings    | 2026-10-05 |
+| Starting slots up to level 56                               | 2; feed mill 3, smelter 1 (scraped as `base_slots`) | wiki:Feed_Mill, wiki:Smelter, … | 2026-10-14 |
+| A machine produces one item at a time                       | slots only queue; the mine gives several at once   | wiki:Production_Buildings    | 2026-10-14 |
 | Maximum slots per machine copy                              | 9                                                  | wiki:Production_Buildings    | 2026-10-05 |
 | Maximum slots, lobster pool and duck salon                  | 6                                                  | wiki:Production_Buildings    | 2026-10-05 |
 | Extra slots are paid with                                   | diamonds; lobster pool and duck salon: coins       | wiki:Production_Buildings    | 2026-10-05 |
@@ -24,13 +26,16 @@ Rules about machines that the scraper does not read. Per-building values that th
 | ----------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | ---------- |
 | Mastery is earned by production hours           | stars at fixed hour targets, maximum 3                     | wiki:Production_Buildings          | 2026-10-05 |
 | The final ★★★ level always speeds production up | about 15 % (e.g. 2 h → 1 h 42 min, 5 min → 4 min 15 s)     | wiki:Goods_List (times)            | 2026-10-05 |
+| ★ and ★★ bonuses of most machines               | 10 % more coins, 5-10 % more XP (no speed-up)              | wiki:Masteries                     | 2026-10-14 |
+| Feed mill, lure workbench, net maker            | 5 % / 10 % / 15 % faster at ★ / ★★ / ★★★                   | wiki:Masteries                     | 2026-10-14 |
+| Scraped 3-star times vs. 15 %                   | all 126 recipes within 60 s (the Goods List rounds; e.g. chicken feed 5 min → 4 min, not 4 min 15 s) | wiki:Goods_List, wiki:Masteries | 2026-10-14 |
 | Copies of a building share their mastery hours  | e.g. smelter is "very hard to master" with fewer than five | wiki:Smelter                       | 2026-10-05 |
 | Hours to master the feed mill                   | 6,840 h                                                    | wiki:Feed_Mill                     | 2026-10-05 |
 | Hours to master the smelter                     | 8,110 h                                                    | wiki:Smelter                       | 2026-10-05 |
 | Lobster pool and duck salon cannot be mastered  | -                                                          | wiki:Lobster_Pool, wiki:Duck_Salon | 2026-10-05 |
 | Mastered machines get golden parts and a star   | visual only                                                | wiki:Feed_Mill                     | 2026-10-05 |
 
-The 3-star production time of every recipe is scraped as `production_time_3star_seconds`.
+The 3-star production time of every recipe is scraped as `production_time_3star_seconds`. The speed-ups per star are scraped into `data/mastery_bonuses.json`; the planner uses the scraped 3-star time at three stars and the bonus percentage below.
 
 ## Building Mastery / Workbench (v1.72)
 

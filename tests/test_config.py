@@ -63,7 +63,21 @@ def _dataset() -> DataSet:
                 unlock_level=1,
                 animal_capacity=6,
             ),
-            Location(id="dairy", name="Dairy", type="production", unlock_level=6),
+            Location(
+                id="dairy",
+                name="Dairy",
+                type="production",
+                unlock_level=6,
+                base_slots=2,
+            ),
+            Location(
+                id="duck_salon",
+                name="Duck Salon",
+                type="animal",
+                unlock_level=50,
+                base_slots=1,
+                max_slots=6,
+            ),
             Location(
                 id="sushi_bar", name="Sushi Bar", type="production", unlock_level=56
             ),
@@ -123,6 +137,20 @@ def test_validate_player_config_problems() -> None:
     assert "sushi_bar: unlocks at level 56" in problems
     assert "unicorn_barn: unknown location id" in problems
     assert "dairy: workbench_level set" in problems
+
+
+def test_slots_limited_per_copy() -> None:
+    ok = PlayerConfig(level=50, locations={"dairy": {"slots": 9}})
+    too_many = PlayerConfig(level=50, locations={"dairy": {"slots": 10}})
+    salon = PlayerConfig(level=50, locations={"duck_salon": {"slots": 7}})
+    assert validate_player_config(ok, _dataset()) == []
+    assert "slots=10 exceeds 1 x 9" in validate_player_config(too_many, _dataset())[0]
+    assert "slots=7 exceeds 1 x 6" in validate_player_config(salon, _dataset())[0]
+    none_owned = PlayerConfig(level=50, locations={"dairy": {"owned": 0, "slots": 2}})
+    assert (
+        "slots set but no copy owned"
+        in validate_player_config(none_owned, _dataset())[0]
+    )
 
 
 def test_example_config_matches_data() -> None:

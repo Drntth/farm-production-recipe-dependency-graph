@@ -12,7 +12,8 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [game-facts/storage.md](game-facts/storage.md)                           | barn and silo capacity and upgrades                                                       |
 | [game-facts/fishing-lake.md](game-facts/fishing-lake.md)                 | fishing lake area, buildings, spots                                                       |
 | [game-facts/town.md](game-facts/town.md)                                 | town area, town hall, service buildings, sanctuary                                        |
-| [game-updates.md](game-updates.md)                                       | game versions, what changed, update checklist, known wiki gaps                            |
+| [game-updates.md](game-updates.md)                                       | game versions, what changed, update checklist                                             |
+| [wiki-gaps.md](wiki-gaps.md)                                             | data the wiki lacks: value in use (estimate or measured), status, wiki contribution TODO  |
 | [data-sources.md](data-sources.md)                                       | which wiki pages and categories the scraper reads, what is scraped vs. manual vs. profile |
 | [player-profile.md](player-profile.md)                                   | player-specific settings, input options, profile schema                                   |
 
@@ -23,6 +24,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | Per-entity data the wiki lists in tables        | `data/*.json`, `data/level_limits.json` | scraper                |
 | Per-entity data the wiki lacks (footprints, …)  | `data/overrides/*.json`                 | hand, measured in game |
 | Game rules (min / max values, mechanics, costs) | `docs/game-facts/*.md`                  | hand, from wiki / game |
+| Values the wiki lacks (estimates, measurements) | `docs/wiki-gaps.md` + `data/overrides/` | hand, until measured   |
 | One player's farm state                         | `config/player.json`                    | the player             |
 | One player's farm map (size, fixed buildings)   | `config/farm_map.json`                  | the player, measured   |
 

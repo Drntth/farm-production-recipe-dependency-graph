@@ -10,6 +10,7 @@
 | Field price                  | 1 coin each; planting crops is free                                                                        | wiki:Crops                         | 2026-10-05 |
 | Field limit                  | wiki: "There is no limit to how many fields you can have" (conflicts with the per-level grants; to verify) | wiki:Farm                          | 2026-10-05 |
 | Field footprint              | 1x1                                                                                                        | in-game                            | 2026-10-05 |
+| Crop yield                   | one planted crop gives two harvested ones                                                                  | wiki:Crops                         | 2026-10-14 |
 
 ## Trees and bushes
 
@@ -23,6 +24,10 @@
 | Bush footprints                         | raspberry, blackberry: 1x2; blueberry, coffee, nectar: 1x1                                                                     | in-game                           | 2026-10-05 |
 | Rotation                                | wiki: "Both can be rotated" (ambiguous); raspberry and blackberry bushes rotate in game                                        | wiki:Farm, in-game                | 2026-10-05 |
 | The nectar bush produces no goods       | feeds the beehive tree (see animals.md)                                                                                        | wiki:Nectar_Bush                  | 2026-10-05 |
+| Fruit tree / bush lifetime yield        | up to 13 goods over 4 harvests (the 4th after a revive): apple, cherry, cacao tree; raspberry, blackberry bush. Blueberry and coffee bush pages give no total (see [../wiki-gaps.md](../wiki-gaps.md)) | wiki:Apple_Tree, wiki:Cherry_Tree, wiki:Cacao_Tree, wiki:Raspberry_Bush, wiki:Blackberry_Bush | 2026-10-14 |
+| Time between harvests                   | the growth time of the fruit (e.g. apple 16 h, cherry 1 d 3 h)                                                                 | wiki:Apple_Tree, wiki:Cherry_Tree | 2026-10-14 |
+| Harvest cycle                           | 3 harvests, growing yield (the first is the smallest); a neighbour can revive the plant for a 4th; then it dies and must be cut (saw / axe) | in-game, wiki:Apple_Tree | 2026-10-14 |
+| Yield per harvest                       | not on the wiki; estimate 2 / 3 / 4 / 4 in use, see [../wiki-gaps.md](../wiki-gaps.md)                                          | player estimate                   | 2026-10-14 |
 
 ## Farm buildings (not production)
 
