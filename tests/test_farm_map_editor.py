@@ -69,6 +69,29 @@ console.log(JSON.stringify({
              farmhouse: Core.tileToPx(c.bg, ...c.fixed[0].rect.slice(0, 2)),
              farmhouseBefore: Core.tileToPx(bg, ...state.fixed[0].rect.slice(0, 2)) };
   })(),
+  town: (() => {
+    const t = { area: 'town', bg, imgW: 800, imgH: 600, expansions: [], zones: [],
+      fixed: [{ id: 'town_hall', name: '', rect: [1, 1, 4, 4] },
+              { id: 'diner', name: '', rect: [8, 1, 3, 3], movable: true }] };
+    const m = Core.toFarmMap(t, 'town_background.png');
+    return { map: m, back: Core.fromFarmMap(m) };
+  })(),
+  align: (() => {
+    // overlay = map shrunk to a third, turned 90 degrees, shifted by (50, 20)
+    const truth = [0, 1 / 3, -1 / 3, 0, 50, 20];
+    const r = [[30, 60], [300, 90], [120, 400]];
+    const pts = {};
+    r.forEach((p, i) => { pts['r' + (i + 1)] = p; pts['m' + (i + 1)] = Core.applyAffine(truth, p); });
+    const start = [1, 0, 0, 1, 0, 0];
+    const one = Core.alignOverlay({ r1: pts.r1, m1: pts.m1 }, start);
+    const two = Core.alignOverlay({ r1: pts.r1, m1: pts.m1, r2: pts.r2, m2: pts.m2 }, start);
+    return {
+      none: Core.alignOverlay({ r1: pts.r1 }, start),
+      one, oneHit: Core.applyAffine(one, pts.r1), m1: pts.m1,
+      two, three: Core.alignOverlay(pts, start), truth,
+      fit: Core.fitAffine(200, 100, [10, 20, 100, 100]),
+    };
+  })(),
   affine: (() => {
     // overlay drawn at half size, shifted by (100, 50)
     const src = [[0, 0], [200, 0], [0, 100]], dst = src.map(p => [p[0] / 2 + 100, p[1] / 2 + 50]);
@@ -117,6 +140,17 @@ def test_exported_json_loads_in_python(result: dict) -> None:
     assert result["same"], "toFarmMap(fromFarmMap(x)) must round-trip"
 
 
+def test_area_and_movable_round_trip(result: dict) -> None:
+    town = result["town"]
+    assert result["map"]["area"] == "farm"  # default area
+    fm = FarmMap.model_validate(town["map"])
+    assert fm.area.value == "town"
+    assert [f.id for f in fm.placed_fixed] == ["town_hall"]
+    assert [f.id for f in fm.placed_movable] == ["diner"]
+    assert town["back"]["area"] == "town"
+    assert [f["movable"] for f in town["back"]["fixed"]] == [False, True]
+
+
 def test_geometry_helpers(result: dict) -> None:
     assert result["moved"] == [3, 5, 2, 3]
     assert result["rect"] == [3, 2, 3, 3]
@@ -140,6 +174,19 @@ def test_affine_from_three_points(result: dict) -> None:
     assert aff["m"] == pytest.approx([0.5, 0, 0, 0.5, 100, 50])
     assert aff["p"] == pytest.approx([120, 80])
     assert aff["back"] == pytest.approx([40, 60])
+
+
+def test_overlay_snaps_closer_after_each_pair(result: dict) -> None:
+    a = result["align"]
+    assert a["none"] == [1, 0, 0, 1, 0, 0]  # an r point without its m: unchanged
+    # 1 pair: only moved, so r1 lands on m1 and the scale stays
+    assert a["one"][:4] == [1, 0, 0, 1]
+    assert a["oneHit"] == pytest.approx(a["m1"])
+    # the true map is a similarity: 2 pairs already find it, 3 pairs too
+    assert a["two"] == pytest.approx(a["truth"])
+    assert a["three"] == pytest.approx(a["truth"])
+    # a 200x100 overlay fitted into a 100x100 box: half size, centred vertically
+    assert a["fit"] == pytest.approx([0.5, 0, 0, 0.5, 10, 45])
 
 
 def test_merge_and_erase_cells(result: dict) -> None:
