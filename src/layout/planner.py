@@ -14,13 +14,18 @@ Steps:
    farm map, only on unlocked plots. The ``strategy`` sets the order of the
    blocks: ``coupling`` (strongest neighbours first, related blocks end up
    close), ``size`` (largest first, fills an irregular area better) or
-   ``auto`` (coupling, then size if a block does not fit). If a block still
+   ``auto`` (coupling, then size if a block does not fit) or ``flow``
+   (upstream blocks first along the processing order; it lowers the reserve
+   first and falls back to size only if a block does not fit even without
+   reserve). If a block still
    does not fit, steps 4-5 are repeated with a smaller reserve
    (``RESERVE_STEP``) down to 0.
 6. Optional design layer (``design=True``, ``design.py``): paths between the
    blocks and the key fixed buildings, and a decoration band along them.
 
-No production data is used: block sizes come from the profile and the level.
+Without production data block sizes come from the profile and the level. The
+Combiner passes a ``Sizing`` (``sizing.py``): copies, fields per crop and the
+goods flows of a production plan replace those estimates.
 """
 
 from __future__ import annotations
@@ -46,16 +51,23 @@ from .blocks import (
 )
 from .design import DEFAULT_DECOR_BAND, Design, plan_design
 from .farm_map import FarmMap
-from .fields import SHARED_BLOCK_ID, FieldShare, allocate_fields
-from .inventory import Stock, farm_stock
+from .fields import (
+    SHARED_BLOCK_ID,
+    FieldShare,
+    allocate_fields,
+    allocate_fields_by_use,
+)
+from .inventory import CountSource, Stock, farm_stock
 from .packing import Box, Rect, bounding_rect, oriented_units, pack, patch
+from .sizing import Sizing
 from .support import SupportRelation, active_relations
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_RESERVE_RATIO = 0.2
 RESERVE_STEP = 0.01
-STRATEGIES = ("auto", "coupling", "size")
+STRATEGIES = ("auto", "coupling", "size", "flow")
+_ORDERS = {"auto": ("coupling", "size"), "flow": ("flow", "size")}
 DEFAULT_GAP = 1
 DEFAULT_FIELD_POOL = 0.0
 COPY_WEIGHT = 1.0  # keeps copies of the same building together
@@ -116,6 +128,7 @@ class Layout:
     reserve_requested: float | None = None
     strategy: str = "coupling"  # the block order actually used
     design: Design | None = None  # paths and decoration band, if requested
+    sized: bool = False  # block sizes from production quantities (Combiner)
 
     @property
     def unplaced_blocks(self) -> list[str]:
@@ -143,8 +156,14 @@ def plan_layout(
     strategy: str = "auto",
     design: bool = False,
     decor_band: int = DEFAULT_DECOR_BAND,
+    sizing: Sizing | None = None,
 ) -> Layout:
-    """Plan the farm layout for the level-filtered *dataset*."""
+    """
+    Plan the farm layout for the level-filtered *dataset*.
+
+    *sizing* (from the Combiner) replaces the profile / level estimates of
+    copies and fields with production quantities; *field_pool* is then unused.
+    """
     if strategy not in STRATEGIES:
         raise ValueError(
             f"Unknown strategy {strategy!r}; use one of {', '.join(STRATEGIES)}"
@@ -153,10 +172,12 @@ def plan_layout(
         raise ValueError("reserve_ratio and gap must not be negative")
     if design:
         gap = max(gap, 1)  # room for a path between two blocks
-    orders = ("coupling", "size") if strategy == "auto" else (strategy,)
+    orders = _ORDERS.get(strategy, (strategy,))
     farm_map = farm_map or FarmMap()
     G = graph if graph is not None else build_graph(dataset)
     stock = {s.location.id: s for s in farm_stock(dataset, player, level)}
+    if sizing is not None:
+        _apply_sizing(stock, sizing)
 
     # "movable" on the farm only applies to locations the planner places itself
     # (barn, silo, …); any other item stays a fixed obstacle, so it never vanishes
@@ -200,9 +221,23 @@ def plan_layout(
     )
     shares: dict[str, FieldShare] = {}
     if field_stock is not None:
-        for share in allocate_fields(
-            G, blocks, field_stock.count, field_stock.reserved, pool_ratio=field_pool
-        ):
+        if sizing is not None and any(n > 0 for n in sizing.crop_fields.values()):
+            allocated = allocate_fields_by_use(
+                blocks,
+                sizing.crop_fields,
+                sizing.crop_use,
+                field_stock.count,
+                field_stock.reserved,
+            )
+        else:
+            allocated = allocate_fields(
+                G,
+                blocks,
+                field_stock.count,
+                field_stock.reserved,
+                pool_ratio=field_pool,
+            )
+        for share in allocated:
             shares[share.block_id] = share
         if SHARED_BLOCK_ID in shares:
             fid = field_stock.location.id
@@ -262,6 +297,9 @@ def plan_layout(
     }
     weights: dict[tuple[str, str], float] = dict(block_coupling(P, blocks))
     owner = {loc: b.id for b in blocks for loc in b.locations}
+    if sizing is not None and sizing.flows:
+        _add_flow_weights(weights, sizing.flows, owner)
+    flow_order = [i for i in block_flow_order(G, blocks) if i in block_items]
     for fixed_id in fixed_rects:
         if fixed_id not in P:
             continue
@@ -272,24 +310,32 @@ def plan_layout(
     bounds = (farm_map.width, farm_map.height) if farm_map.bounded else None
     area = farm_map.usable_tiles()
     requested = reserve_ratio
-    while True:
-        block_boxes = frames(reserve_ratio)
-        for order in orders:
-            placements, _ = pack(
-                block_boxes,
-                weights,
-                gap=gap,
-                obstacles=fixed_rects,
-                bounds=bounds,
-                area=area,
-                order=order,
-            )
-            if len(placements) == len(block_boxes):
+    # auto tries both orders at every reserve; flow keeps the processing order
+    # down to a zero reserve before it falls back to size
+    phases = [(o,) for o in orders] if strategy == "flow" else [orders]
+    for phase in phases:
+        reserve_ratio = requested
+        while True:
+            block_boxes = frames(reserve_ratio)
+            for order in phase:
+                placements, _ = pack(
+                    block_boxes,
+                    weights,
+                    gap=gap,
+                    obstacles=fixed_rects,
+                    bounds=bounds,
+                    area=area,
+                    order=order,
+                    sequence=flow_order,
+                )
+                if len(placements) == len(block_boxes):
+                    break
+            if len(placements) == len(block_boxes) or reserve_ratio <= 0:
                 break
-        if len(placements) == len(block_boxes) or reserve_ratio <= 0:
+            # shrink the reserve until every block fits
+            reserve_ratio = max(0.0, round(reserve_ratio - RESERVE_STEP, 4))
+        if len(placements) == len(block_boxes):
             break
-        # shrink the reserve until every block fits
-        reserve_ratio = max(0.0, round(reserve_ratio - RESERVE_STEP, 4))
     if reserve_ratio < requested:
         logger.info(
             "Reserve lowered from %.0f%% to %.0f%% so that the blocks fit",
@@ -337,7 +383,7 @@ def plan_layout(
         farm_map=farm_map,
         blocks=placed_blocks,
         stock=list(stock.values()),
-        flow_order=[i for i in block_flow_order(G, blocks) if i in block_items],
+        flow_order=flow_order,
         neighbourhoods=_neighbourhoods(
             P, blocks, weights, set(fixed_rects) | set(fixed_unplaced)
         ),
@@ -348,6 +394,7 @@ def plan_layout(
         crop_names=crop_names,
         reserve_requested=requested,
         strategy=order,
+        sized=sizing is not None,
     )
     if design:
         layout.design = _design(layout, fixed_rects, decor_band)
@@ -366,6 +413,44 @@ def _design(layout: Layout, fixed: dict[str, Rect], decor_band: int) -> Design:
         }
     blocks = {pb.block.id: pb.frame for pb in layout.blocks if pb.frame is not None}
     return plan_design(allowed, blocks, fixed, decor_band)
+
+
+def _apply_sizing(stock: dict[str, Stock], sizing: Sizing) -> None:
+    """Copies from production quantities, plus space kept for later unlocks."""
+    for loc_id, n in sizing.counts.items():
+        s = stock.get(loc_id)
+        if s is not None:
+            stock[loc_id] = replace(s, count=max(n, 0), source=CountSource.PRODUCTION)
+    for loc_id, n in sizing.extra_reserved.items():
+        s = stock.get(loc_id)
+        if s is not None and n > 0:
+            stock[loc_id] = replace(s, reserved=s.reserved + n)
+    for loc_id in [k for k, s in stock.items() if s.count + s.reserved <= 0]:
+        del stock[loc_id]
+
+
+def _add_flow_weights(
+    weights: dict[tuple[str, str], float],
+    flows: dict[tuple[str, str], float],
+    owner: dict[str, str],
+) -> None:
+    """
+    Add the goods flows between blocks to their coupling.
+
+    Flows are scaled so the largest one equals the strongest graph coupling,
+    so neither source drowns the other.
+    """
+    by_pair: dict[tuple[str, str], float] = defaultdict(float)
+    for (src, dst), amount in flows.items():
+        a, b = owner.get(src), owner.get(dst)
+        if a is None or b is None or a == b or amount <= 0:
+            continue
+        by_pair[(a, b) if a < b else (b, a)] += amount
+    if not by_pair:
+        return
+    scale = max(weights.values(), default=1.0) / max(by_pair.values())
+    for key, amount in by_pair.items():
+        weights[key] = weights.get(key, 0.0) + amount * scale
 
 
 def _pin(farm_map: FarmMap, ids: set[str]) -> FarmMap:

@@ -6,8 +6,8 @@ the level limits:
 
 - fields: ``fields_owned``, else every field granted up to the level;
 - other locations: ``owned``, else every copy unlocked at the level
-  (``level_limits.json``), else 1 - a placeholder for trees and bushes, which
-  the Combiner (v0.9) will size from production quantities.
+  (``level_limits.json``), else 1 - a placeholder for trees and bushes; the
+  Combiner sizes them from production quantities (``Sizing.counts``).
 
 Copies unlocked at the level but not owned yet are *reserved*: the layout
 keeps their space free for later (expansion-friendly placement).
@@ -28,6 +28,7 @@ class CountSource(str, Enum):
     LEVEL = "level"  # everything the level allows
     PLACEHOLDER = "placeholder"  # unknown; one copy shown, to be sized later
     SINGLE = "single"  # a single building without level limit rows
+    PRODUCTION = "production"  # sized from production quantities (Combiner)
 
 
 @dataclass(frozen=True)

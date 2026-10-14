@@ -6,7 +6,9 @@ The same placer arranges the items inside a block and the blocks on the farm:
 1. The box with the strongest total coupling goes first.
 2. Next comes the unplaced box most strongly coupled to what is already
    placed (fixed obstacles count as placed). With ``order="size"`` the
-   largest box goes next instead, which fills an irregular area better.
+   largest box goes next instead, which fills an irregular area better; with
+   ``order="flow"`` the boxes follow the given ``sequence`` (upstream blocks
+   first), each still pulled toward the placed boxes it is coupled to.
 3. Candidate positions touch a side of a placed box or obstacle (with a
    ``gap``). Each candidate costs the coupling-weighted distance to the placed
    boxes plus a compactness term (half perimeter of the bounding box) and,
@@ -105,6 +107,7 @@ def pack(
     bounds: tuple[int, int] | None = None,
     area: set[tuple[int, int]] | None = None,
     order: str = "coupling",
+    sequence: list[str] | None = None,
 ) -> tuple[dict[str, Placement], list[str]]:
     """
     Place *boxes*; return ``(placements, unplaced_keys)``.
@@ -122,10 +125,13 @@ def pack(
     unplaced: list[str] = []
     todo = {b.key: b for b in boxes}
     centre = _centroid(area)
+    rank = {k: i for i, k in enumerate(sequence or [])}
 
     while todo:
         anchors = {k: p.rect for k, p in placed.items()} | obstacles
-        if order == "size":
+        if order == "flow" and any(k in rank for k in todo):
+            key = min((k for k in todo if k in rank), key=rank.__getitem__)
+        elif order == "size":
             key = max(
                 todo,
                 key=lambda k: (

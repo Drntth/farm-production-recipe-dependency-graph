@@ -19,17 +19,9 @@ from pathlib import Path
 from src.config import PlayerConfig, load_player_config, validate_player_config
 from src.loaders.json_loader import load_data
 
-from .capacity import build_capacity
-from .mastery import mastery_modifier
-from .profile import resolve_profile
-from .quantities import DEFAULT_STORAGE_SHARE, plan_production
-from .schedule import (
-    DEFAULT_MIN_EFFICIENCY,
-    build_schedule,
-    compare_intervals,
-    schedule_to_markdown,
-    suggest_interval,
-)
+from .quantities import DEFAULT_STORAGE_SHARE
+from .run import run_planner
+from .schedule import DEFAULT_MIN_EFFICIENCY, schedule_to_markdown
 
 logger = logging.getLogger("src.planner")
 
@@ -112,29 +104,22 @@ def main(argv: list[str] | None = None) -> int:
         logger.warning("Player config: %s", problem)
 
     data = full.filter_by_max_level(player.level)
-    profile = resolve_profile(player, data)
-    for name in profile.missing():
-        logger.warning("Player config: %s is not set; storage limits are unknown", name)
-    capacity = build_capacity(
-        profile, data, mastery_modifier(profile.mastery_system, data)
-    )
-
     try:
-        plans = compare_intervals(
-            capacity, profile, data, storage_share=args.storage_share
+        run = run_planner(
+            player,
+            data,
+            login_interval=args.login_interval,
+            storage_share=args.storage_share,
+            min_efficiency=args.min_efficiency,
         )
-        if args.login_interval is None:
-            chosen = suggest_interval(plans, args.min_efficiency)
-        else:
-            chosen = plan_production(
-                capacity, profile, data, args.login_interval, args.storage_share
-            )
     except RuntimeError as exc:
         logger.error("%s", exc)
         return 1
+    for name in run.profile.missing():
+        logger.warning("Player config: %s is not set; storage limits are unknown", name)
+    capacity, chosen, schedule = run.capacity, run.chosen, run.schedule
     for warning in chosen.warnings:
         logger.warning("Plan: %s", warning)
-    schedule = build_schedule(chosen, plans, capacity, profile, data)
 
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)

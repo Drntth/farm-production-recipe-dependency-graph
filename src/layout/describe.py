@@ -28,6 +28,7 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
         "reserve_ratio": layout.reserve_ratio,
         "reserve_requested": layout.reserve_requested,
         "strategy": layout.strategy,
+        "sized_by_production": layout.sized,
         "flow_order": layout.flow_order,
         "design": _design(layout),
         "blocks": [
@@ -149,6 +150,15 @@ def layout_to_markdown(layout: Layout) -> str:
                 f"{d.decor_band} tile(s) of a path, for decorations and fences."
             ),
         ]
+        if d.approached:
+            lines.append(
+                "- Path ends at the connection point (non-buildable ground in "
+                "between): "
+                + ", ".join(
+                    f"{names.get(k, k)} ({gap} tile(s))"
+                    for k, gap in sorted(d.approached.items())
+                )
+            )
         if d.unreachable:
             lines.append(
                 "- Not reachable by a path: "
@@ -168,17 +178,24 @@ def layout_to_markdown(layout: Layout) -> str:
     for r in layout.support:
         lines.append(f"- {r.source} next to {r.target}: {r.reason}")
 
-    notes = (
-        [
+    if not farm:
+        notes = []
+    elif layout.sized:
+        notes = [
             (
-                "Field counts per block are estimates from recipe weights (crop "
-                "demand of the block's buildings); the Combiner will size them from "
-                "the Production Planner's quantities."
+                "Block sizes come from the production plan: every crop's fields "
+                "are split by how much of it the block's buildings use; owned "
+                "fields the plan leaves empty are in the Shared fields block."
             )
         ]
-        if farm
-        else []
-    )
+    else:
+        notes = [
+            (
+                "Field counts per block are estimates from recipe weights (crop "
+                "demand of the block's buildings); `python -m src.combiner` sizes "
+                "them from the Production Planner's quantities."
+            )
+        ]
     placeholders = sorted(
         s.location.name for s in layout.stock if s.source == CountSource.PLACEHOLDER
     )
@@ -246,6 +263,7 @@ def _design(layout: Layout) -> dict[str, Any] | None:
         "decorations": [list(t) for t in sorted(d.decorations)],
         "connected": d.connected,
         "unreachable": d.unreachable,
+        "approached": d.approached,
     }
 
 

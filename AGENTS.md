@@ -11,7 +11,8 @@ The project analyses Hay Day production chains. It turns locations, resources an
 - Milestones done: **v0.5** (data foundation), **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations, measured `config/farm_map.json` with plots and zones, Storage block, animal feeding recipes).
 - **v0.7** done (Production Planner: profile defaults, mastery, capacity, linear-program quantities, recommendations, login schedule).
 - **v0.8** done (area modes and design layer: `--area town | fishing_lake`, `--design` paths and decoration band).
-- Current milestone: **v0.9** (Combiner).
+- **v0.9** done (Combiner: layout sized by the production plan, `flow` block order, lookahead reserves, one combined report).
+- Current milestone: **v1.0** (local usable platform). The in-game measurements (README "In-game TODO") come after v1.0; until then the estimates in `docs/wiki-gaps.md` are used.
 
 ## Read first
 
@@ -35,7 +36,7 @@ When you learn a new game fact (from the wiki, the web or the user), add a row t
 
 - A shared core (`src/config.py`, `src/models`, `src/loaders`, `src/graph`) feeds three tools.
 - The **Layout Planner** (`src/layout/`) and the **Production Planner** (`src/planner/`) are independent. Neither may import the other. Layout must work without production data.
-- The **Combiner** (planned) is the only place that joins the two.
+- The **Combiner** (`src/combiner/`) is the only place that joins the two. It passes production quantities to the layout as a plain `Sizing` (`src/layout/sizing.py`); `tests/test_combiner.py` checks that layout and planner never import each other.
 - Layout areas: `farm` (graph-driven), plus `town` and `fishing_lake`. Town and fishing lake have no quantity calculations.
 
 ## Commands
@@ -53,7 +54,8 @@ python -m src.layout                      # farm layout: output/layout.svg, layo
 python -m src.layout --design             # plus paths and decoration band
 python -m src.layout --area town --design # town / fishing_lake from config/<area>_map.json → layout_<area>.*
 python -m src.planner                     # production plan: output/capacity.json, schedule.json, schedule.md
-# tools/farm_map_editor.html: open in a browser to measure config/farm_map.json from a screenshot
+python -m src.combiner                    # layout sized by the plan: output/combined.json, combined.md, combined.svg
+# tools/farm_map_editor.html: open in a browser to measure config/<area>_map.json from a screenshot
 python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki
 ```
 
@@ -66,8 +68,9 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 - `src/models/` - pydantic models: `Location` (with `Area`, footprint, `movable`, `rotatable`, `animal_capacity`, `base_slots`, `max_slots`, `lifetime_yield` / `lifetime_harvests`), `MasteryBonus` (time reduction per building and star), `Resource` (`growth_time_seconds`), `Recipe` (`production_time_seconds`, `production_time_3star_seconds`), `LevelLimits` (`field_grants`, `location_instances`).
 - `src/loaders/json_loader.py` - loads `data/*.json`, merges `data/overrides/*.json` (`null` = skip), validates into a `DataSet` with optional `level_limits` and `mastery_bonuses`, optional level filter.
 - `src/graph/` - graph builder, edge types (`relationship.py`), weights (`weighting.py`), analysis (`analysis.py`: proximity, Louvain blocks, centrality, paths).
-- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling or size order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size; lowers the block reserve in 1 % steps until every block fits), `farm_map.py` (model per area, `outline_segments`), `design.py` (paths as a greedy Steiner tree from the hub, decoration band), `area.py` (`plan_area_layout` for town / fishing lake from the measured map, no graph), `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
-- `src/planner/` - Production Planner: `profile.py` (`resolve_profile`: every `null` → level default), `mastery.py` (`stars` / `workbench` modifiers, chosen by `mastery_system`), `capacity.py` (storage, fields, parallel lines, queues, max rates), `quantities.py` (scipy linear program, four lexicographic solves), `schedule.py` (interval suggestion, recommendations, actions per login), `cli.py`. Machines produce one item at a time: copies are parallel, slots are only a queue. Fields, animals and trees are served only at a login. Goods without a production model (ores from the mine, fish) are external: capped at what the balance needs, never planned.
+- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling, size or flow order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size / flow; lowers the block reserve in 1 % steps until every block fits; optional `sizing`), `sizing.py` (`Sizing`: copies, fields per crop, goods flows, extra reserves from the Combiner), `farm_map.py` (model per area, `outline_segments`), `design.py` (paths as a greedy Steiner tree from the hub, cut-off key buildings reached at their connection point, decoration band), `area.py` (`plan_area_layout` for town / fishing lake from the measured map, no graph), `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
+- `src/planner/` - Production Planner: `profile.py` (`resolve_profile`: every `null` → level default), `mastery.py` (`stars` / `workbench` modifiers, chosen by `mastery_system`), `capacity.py` (storage, fields, parallel lines, queues, max rates), `quantities.py` (scipy linear program, four lexicographic solves), `schedule.py` (interval suggestion, recommendations, actions per login), `run.py` (`run_planner`: one full run, shared with the Combiner), `cli.py`. Machines produce one item at a time: copies are parallel, slots are only a queue. Fields, animals and trees are served only at a login. Goods without a production model (ores from the mine, fish) are external: capped at what the balance needs, never planned.
+- `src/combiner/` - Combiner (farm): `combine.py` (`sizing_from_plan`: fields per crop by use, recommended trees / bushes, goods flows without fields; `upcoming_unlocks` for `--lookahead`; `flow_links`, `free_tiles`; `combine`), `report.py` (`combined.json` / `combined.md`, layout and schedule sections demoted under one title), `cli.py`.
 - `src/exporters/` - JSON / CSV / GraphML export. New node attributes must be added to the CSV column list and the GraphML key list.
 - `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations incl. infobox base slots, resources, recipes, level_limits, masteries), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`), `writer.py`, `cli.py`.
 - `src/main.py` - CLI entry point.

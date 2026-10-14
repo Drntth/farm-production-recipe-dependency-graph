@@ -9,8 +9,12 @@ Without production data the split follows the graph: a block's crop demand is
 the sum of the CONSUMES weights of field crops into its buildings, and the
 fields are shared out in proportion (largest remainder, at least one field per
 block that uses crops). An optional ``pool_ratio`` keeps part of the fields in
-a separate "Shared fields" block for rarely used crops. The Production Planner
-and the Combiner will replace the estimate with real quantities.
+a separate "Shared fields" block for rarely used crops.
+
+With production quantities (``allocate_fields_by_use``, from the Combiner)
+every crop's fields are split among the blocks in proportion to how much of
+the crop their buildings use; fields of crops no block uses (sold or delivered)
+and owned fields the plan leaves empty go to the "Shared fields" block.
 """
 
 from __future__ import annotations
@@ -24,6 +28,7 @@ import networkx as nx
 from .blocks import Block, crop_demand_by_location
 
 SHARED_BLOCK_ID = "shared_fields_block"
+MIN_CROP_FIELDS = 0.5  # a crop is listed for a block from half a field on
 
 
 @dataclass
@@ -75,6 +80,59 @@ def allocate_fields(
     if pool > 0:
         shares.append(FieldShare(SHARED_BLOCK_ID, pool))
     return [s for s in shares if s.count + s.reserved > 0]
+
+
+def allocate_fields_by_use(
+    blocks: list[Block],
+    crop_fields: dict[str, int],
+    crop_use: dict[str, dict[str, float]],
+    count: int,
+    reserved: int = 0,
+) -> list[FieldShare]:
+    """Split *count* fields by the crop use of the blocks' buildings."""
+    owner = {loc: b.id for b in blocks for loc in b.locations}
+    by_block: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    for crop, n in sorted(crop_fields.items()):
+        if n <= 0:
+            continue
+        users: dict[str, float] = defaultdict(float)
+        for loc, use in crop_use.get(crop, {}).items():
+            if loc in owner and use > 0:
+                users[owner[loc]] += use
+        total = sum(users.values())
+        if total <= 0:  # sold or delivered only
+            by_block[SHARED_BLOCK_ID][crop] += n
+            continue
+        for b, use in users.items():
+            by_block[b][crop] += n * use / total
+
+    weights = {b: sum(c.values()) for b, c in by_block.items()}
+    planned = min(sum(max(n, 0) for n in crop_fields.values()), count)
+    owned = apportion(planned, weights)
+    left = count - planned  # owned but not needed by the plan: spare fields
+    if left > 0:
+        owned[SHARED_BLOCK_ID] = owned.get(SHARED_BLOCK_ID, 0) + left
+    # no planned crop at all: the reserved fields still need a place
+    spare = apportion(reserved, weights or {SHARED_BLOCK_ID: 1.0})
+
+    shares = [
+        FieldShare(
+            block_id=b,
+            count=owned.get(b, 0),
+            reserved=spare.get(b, 0),
+            crops=_main_crops(by_block.get(b, {})),
+        )
+        for b in sorted(
+            set(owned) | set(spare), key=lambda b: (b == SHARED_BLOCK_ID, b)
+        )
+    ]
+    return [s for s in shares if s.count + s.reserved > 0]
+
+
+def _main_crops(fields: dict[str, float]) -> list[str]:
+    """Crops with at least ``MIN_CROP_FIELDS`` fields, heaviest first (at least one)."""
+    ranked = sorted(fields, key=lambda c: (-fields[c], c))
+    return [c for c in ranked if fields[c] >= MIN_CROP_FIELDS] or ranked[:1]
 
 
 def apportion(

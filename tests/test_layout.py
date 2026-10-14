@@ -13,7 +13,7 @@ from src.config import LocationProgress, PlayerConfig
 from src.graph import build_graph
 from src.layout import cli
 from src.layout.area import plan_area_layout
-from src.layout.blocks import block_flow_order, detect_named_blocks
+from src.layout.blocks import Block, block_flow_order, detect_named_blocks
 from src.layout.describe import layout_to_dict, layout_to_markdown
 from src.layout.design import plan_design
 from src.layout.farm_map import (
@@ -27,11 +27,17 @@ from src.layout.farm_map import (
     load_farm_map,
     outline_segments,
 )
-from src.layout.fields import SHARED_BLOCK_ID, allocate_fields, apportion
+from src.layout.fields import (
+    SHARED_BLOCK_ID,
+    allocate_fields,
+    allocate_fields_by_use,
+    apportion,
+)
 from src.layout.inventory import CountSource, farm_stock
 from src.layout.packing import Box, Rect, bounding_rect, pack, patch
 from src.layout.planner import _grow, plan_layout
 from src.layout.render_svg import render_svg
+from src.layout.sizing import Sizing
 from src.layout.support import active_relations
 from src.loaders.json_loader import DataSet, load_data
 from src.models import (
@@ -739,6 +745,15 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
     assert (tmp_path / "layout.svg").exists()
 
 
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_strategy_flow(tmp_path: Path) -> None:
+    args = ["--level", "20", "--strategy", "flow", "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    data = json.loads((tmp_path / "layout.json").read_text())
+    assert data["strategy"] in ("flow", "size")
+    assert data["sized_by_production"] is False
+
+
 def test_plan_layout_rejects_unknown_strategy(farm: DataSet) -> None:
     with pytest.raises(ValueError, match="strategy"):
         plan_layout(farm, level=5, strategy="random")
@@ -811,9 +826,29 @@ def test_design_reports_walled_in_blocks() -> None:
 
     assert design.connected == ["left_block"]  # no farmhouse: first block is the hub
     assert design.unreachable == ["right_block"]
+    assert design.approached == {}  # only key buildings get a connection point
     assert design.decorations == set()
     with pytest.raises(ValueError):
         plan_design(allowed, blocks, fixed, decor_band=-1)
+
+
+def test_design_reaches_cut_off_key_building_at_connection_point() -> None:
+    # riverboat beyond a paved, non-buildable strip (x = 6..7 not allowed)
+    allowed = _grid(6, 6) | {(8, y) for y in range(6)}
+    blocks = {"a_block": Rect(1, 1, 2, 2)}
+    fixed = {"farmhouse": Rect(1, 4, 2, 1), "riverboat": Rect(9, 2, 2, 2)}
+    design = plan_design(allowed, blocks, fixed, decor_band=0)
+
+    assert design.connected == ["farmhouse", "a_block", "riverboat"]
+    assert not design.unreachable
+    assert design.approached == {"riverboat": 3}  # x = 6, 7, 8 between
+    assert any(x == 5 for x, _ in design.paths)  # the nearest reachable column
+    assert design.paths <= allowed and _connected(design.paths)
+
+    # too far behind non-buildable ground: no connection point, unreachable
+    far = {**fixed, "riverboat": Rect(15, 2, 2, 2)}
+    design = plan_design(allowed, blocks, far, decor_band=0)
+    assert design.unreachable == ["riverboat"] and design.approached == {}
 
 
 def test_plan_layout_with_design(farm: DataSet) -> None:
@@ -967,3 +1002,85 @@ def test_cli_area_warns_about_farm_only_options(
     with caplog.at_level("WARNING"):
         assert cli.main([*args, "--reserve", "0.5", "--output-dir", str(tmp_path)]) == 0
     assert "Farm-only options ignored for town: --reserve" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# Sizing from production quantities (input of the Combiner)
+# ---------------------------------------------------------------------------
+
+
+def test_allocate_fields_by_use_splits_every_crop_by_its_users() -> None:
+    blocks = [Block("a_block", "A", "a", ["a"]), Block("b_block", "B", "b", ["b"])]
+    shares = allocate_fields_by_use(
+        blocks,
+        {"wheat": 4, "corn": 2, "sold_crop": 1},
+        {"wheat": {"a": 3.0, "b": 1.0}, "corn": {"b": 2.0}, "sold_crop": {}},
+        count=10,
+        reserved=2,
+    )
+    by_id = {s.block_id: s for s in shares}
+    assert by_id["a_block"].count == 3 and by_id["a_block"].crops == ["wheat"]
+    assert by_id["b_block"].count == 3 and by_id["b_block"].crops == ["corn", "wheat"]
+    # the sold crop's field plus the 3 owned fields the plan leaves empty
+    assert by_id[SHARED_BLOCK_ID].count == 4
+    assert by_id[SHARED_BLOCK_ID].crops == ["sold_crop"]
+    assert sum(s.count for s in shares) == 10
+    assert sum(s.reserved for s in shares) == 2
+    # the plan never gets more fields than owned
+    capped = allocate_fields_by_use(blocks, {"wheat": 9}, {"wheat": {"a": 1.0}}, 5)
+    assert [(s.block_id, s.count) for s in capped] == [("a_block", 5)]
+    # nothing planned: owned and reserved fields both end up shared
+    idle = allocate_fields_by_use(blocks, {"wheat": 0}, {}, count=4, reserved=3)
+    assert [(s.block_id, s.count, s.reserved) for s in idle] == [
+        (SHARED_BLOCK_ID, 4, 3)
+    ]
+    # a crop below half a field is not listed, but a block lists at least one
+    small = allocate_fields_by_use(
+        blocks,
+        {"wheat": 3, "corn": 1},
+        {"wheat": {"a": 1.0}, "corn": {"a": 1.0, "b": 9.0}},
+        count=4,
+    )
+    by_id = {s.block_id: s for s in small}
+    assert by_id["a_block"].crops == ["wheat"]  # 0.1 corn field dropped
+    assert by_id["b_block"].crops == ["corn"]
+
+
+def test_pack_flow_order_follows_the_sequence() -> None:
+    boxes = [Box("a", 2, 2), Box("b", 3, 3), Box("c", 1, 1)]
+    weights = {("a", "b"): 5.0}
+    placements, unplaced = pack(boxes, weights, order="flow", sequence=["c", "a", "b"])
+    assert not unplaced
+    assert list(placements) == ["c", "a", "b"]
+    # keys missing from the sequence come last, by coupling
+    placements, _ = pack(boxes, weights, order="flow", sequence=["c"])
+    assert next(iter(placements)) == "c"
+
+
+def test_plan_layout_with_sizing(farm: DataSet) -> None:
+    sizing = Sizing(
+        counts={"apple_tree": 4},
+        crop_fields={"wheat": 5},
+        crop_use={"wheat": {"feed_mill": 4.0, "bakery": 1.0}},
+        flows={("feed_mill", "chicken_coop"): 2.0, ("dairy", "ice_cream_maker"): 1.0},
+        extra_reserved={"chicken_coop": 1, "field": 2},
+    )
+    layout = plan_layout(farm, level=5, sizing=sizing, strategy="flow")
+    _check_layout(layout)
+    assert layout.sized
+    stock = {s.location.id: s for s in layout.stock}
+    assert stock["apple_tree"].count == 4
+    assert stock["apple_tree"].source == CountSource.PRODUCTION
+    assert stock["chicken_coop"].reserved == 1  # 3 at level 5, one more kept free
+    fields = {pb.block.id: pb.fields for pb in layout.blocks if pb.fields}
+    total = sum(f.count for f in fields.values())
+    assert total == stock["field"].count  # every owned field has a block
+    assert sum(f.reserved for f in fields.values()) == 2
+    owner = {loc: pb.block.id for pb in layout.blocks for loc in pb.block.locations}
+    assert fields[owner["feed_mill"]].count >= 3  # 4 of the 5 planned wheat fields
+    assert layout.strategy in ("flow", "size")
+    assert "production plan" in layout_to_markdown(layout)
+    assert layout_to_dict(layout)["sized_by_production"] is True
+    # a count of 0 drops the location from the layout
+    none = plan_layout(farm, level=5, sizing=Sizing(counts={"apple_tree": 0}))
+    assert "apple_tree" not in {s.location.id for s in none.stock}

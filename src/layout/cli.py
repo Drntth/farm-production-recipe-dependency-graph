@@ -94,9 +94,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--strategy",
         choices=(*STRATEGIES, "all"),
         default="auto",
-        help="Block order: coupling (related blocks close), size (largest first), auto "
+        help="Block order: coupling (related blocks close), size (largest first), "
+        "flow (upstream blocks first, then size if a block does not fit), auto "
         "(coupling, then size if a block does not fit) or all (auto as layout.*, plus "
-        "layout_coupling.* and layout_size.*). Default: auto",
+        "layout_coupling.*, layout_size.* and layout_flow.*). Default: auto",
     )
     parser.add_argument(
         "--design",
@@ -126,9 +127,12 @@ def _log_summary(layout, stems: list[str], out: Path) -> None:
     if layout.design is not None:
         d = layout.design
         logger.info(
-            "Design: %d path tiles, %d decoration tiles%s",
+            "Design: %d path tiles, %d decoration tiles%s%s",
             len(d.paths),
             len(d.decorations),
+            f"; to connection point: {', '.join(sorted(d.approached))}"
+            if d.approached
+            else "",
             f"; not reachable: {', '.join(d.unreachable)}" if d.unreachable else "",
         )
     ext = layout.extent()

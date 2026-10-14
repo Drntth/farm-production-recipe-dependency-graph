@@ -583,7 +583,7 @@ def test_cli_reports_unsolvable_plan(
     def unsolvable(*args, **kwargs):
         raise RuntimeError("Production plan not solvable: test")
 
-    monkeypatch.setattr("src.planner.cli.compare_intervals", unsolvable)
+    monkeypatch.setattr("src.planner.run.compare_intervals", unsolvable)
     player = tmp_path / "player.json"
     player.write_text(json.dumps({"level": 20}))
     args = ["--player-config", str(player), "--output-dir", str(tmp_path)]
