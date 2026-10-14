@@ -9,6 +9,12 @@ Optional on top of the functional layout (``--design``):
   time adds
   the shortest path to the nearest terminal not reached yet (a greedy Steiner
   tree). A terminal is reached at any free tile next to it.
+- A key building with no reachable free tile next to it (on the farm the
+  riverboat and the leaderboard: a paved strip that is not buildable lies
+  between them and the farm) gets a path to its connection point instead: the
+  reachable free tile nearest to it, if at most ``MAX_APPROACH_GAP`` tiles
+  are left between that point and the building (``approached``); farther
+  away it stays unreachable.
 - The decoration band is the free tiles within ``decor_band`` steps of a path:
   room for decorations and fences along the paths, not for buildings.
 
@@ -27,6 +33,7 @@ from .farm_map import Tile
 from .packing import Rect
 
 DEFAULT_DECOR_BAND = 1
+MAX_APPROACH_GAP = 5  # tiles of non-buildable ground a connection point may leave
 FARM_HUBS = ("farmhouse", STORAGE_BLOCK_ID)
 # fixed farm buildings the player walks to often (ids of config/farm_map*.json)
 KEY_BUILDINGS = ("farmhouse", "barn", "silo", "truck", "roadside_shop", "riverboat")
@@ -39,6 +46,8 @@ class Design:
     decorations: set[Tile] = field(default_factory=set)
     connected: list[str] = field(default_factory=list)  # in the order reached
     unreachable: list[str] = field(default_factory=list)
+    # key building -> tiles between its connection point and the building
+    approached: dict[str, int] = field(default_factory=dict)
     decor_band: int = DEFAULT_DECOR_BAND
 
 
@@ -53,6 +62,27 @@ def _border(r: Rect, free: set[Tile]) -> set[Tile]:
     around |= {(r.x - 1, r.y + j) for j in range(r.h)}
     around |= {(r.x + r.w, r.y + j) for j in range(r.h)}
     return around & free
+
+
+def _gap(tile: Tile, r: Rect) -> int:
+    """Tiles between *tile* and *r* along the grid (0 = next to it)."""
+    dx = max(r.x - tile[0], 0, tile[0] - (r.x + r.w - 1))
+    dy = max(r.y - tile[1], 0, tile[1] - (r.y + r.h - 1))
+    return dx + dy - 1
+
+
+def _reachable(sources: set[Tile], free: set[Tile]) -> set[Tile]:
+    """Free tiles connected to *sources*."""
+    seen = set(sources)
+    queue = deque(sources)
+    while queue:
+        x, y = queue.popleft()
+        for dx, dy in _STEPS:
+            nxt = (x + dx, y + dy)
+            if nxt in free and nxt not in seen:
+                seen.add(nxt)
+                queue.append(nxt)
+    return seen
 
 
 def _shortest(
@@ -106,23 +136,34 @@ def plan_design(
         return design
 
     borders = {key: _border(r, free) for key, r in terminals.items()}
-    for key in sorted(k for k, b in borders.items() if not b):
-        design.unreachable.append(key)  # walled in: no free tile next to it
-        del borders[key]
-    if not borders:
-        return design
     hub = next(
-        (h for h in hubs if h in borders),
-        min(borders),
+        (h for h in hubs if borders.get(h)),
+        min((k for k, b in borders.items() if b), default=None),
     )
+    if hub is None:  # nothing has a free tile next to it
+        design.unreachable = sorted(terminals)
+        return design
     design.connected.append(hub)
     sources = set(borders.pop(hub))
     first = True
+    approach_done = False
     while borders:
-        found = _shortest(sources, borders, free)
+        targets = {k: b for k, b in borders.items() if b}
+        found = _shortest(sources, targets, free) if targets else None
         if found is None:
-            design.unreachable.extend(sorted(borders))
-            break
+            if approach_done:
+                break
+            # cut off key buildings: aim at the nearest reachable free tile
+            approach_done = True
+            component = _reachable(sources, free)
+            for key in sorted(borders):
+                if key in fixed and component:
+                    gap = min(_gap(t, fixed[key]) for t in component)
+                    if gap > MAX_APPROACH_GAP:
+                        continue
+                    borders[key] = {t for t in component if _gap(t, fixed[key]) == gap}
+                    design.approached[key] = gap
+            continue
         key, path = found
         if first:  # the hub's free side tiles were only candidates
             sources = set()
@@ -131,6 +172,9 @@ def plan_design(
         design.paths |= set(path)
         design.connected.append(key)
         del borders[key]
+    for key in borders:
+        design.approached.pop(key, None)
+    design.unreachable.extend(sorted(borders))
 
     # decoration band: free tiles within decor_band steps of a path
     frontier = set(design.paths)
