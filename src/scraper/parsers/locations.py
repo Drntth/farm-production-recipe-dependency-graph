@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup, Tag
 
@@ -14,6 +15,7 @@ from src.scraper.wiki_client import WikiClient
 FISHING_LAKE_CATEGORY = "Fishing_Lake_Buildings"
 TREES_AND_BUSHES_CATEGORY = "Trees_and_Bushes"
 _INFOBOX_LEVEL_RE = re.compile(r"\|\s*level\s*=\s*(\d+)")
+_INFOBOX_SLOTS_RE = re.compile(r"\|\s*slots\s*=\s*(\d+)")
 
 
 def _extract_first_int(text: str) -> int | None:
@@ -156,8 +158,28 @@ def _parse_production_buildings(
         footprint = _parse_footprint(cells[_PB_SIZE_COL].get_text(" ", strip=True))
         if footprint is not None:
             entry["footprint_width"], entry["footprint_height"] = footprint
+        href = name_link.get("href", "") if name_link else ""
+        if href.startswith("/wiki/"):
+            entry["_page"] = unquote(href.removeprefix("/wiki/").split("?")[0])
         results.append(entry)
     return results
+
+
+def _add_base_slots(client: WikiClient, entries: list[dict[str, Any]]) -> None:
+    """
+    Set ``base_slots`` from the infobox of each building page (``|slots = 2``).
+
+    Page titles come from the list links, because wiki titles are
+    case-sensitive ("Feed_Mill", not "Feed mill"). Pages without the field
+    (mine, lobster pool, duck salon) are left empty.
+    """
+    for entry in entries:
+        page = entry.get("_page")
+        if not page:
+            continue
+        match = _INFOBOX_SLOTS_RE.search(client.get_wikitext(page))
+        if match is not None:
+            entry["base_slots"] = int(match.group(1))
 
 
 def _parse_animal_shelters(
@@ -425,6 +447,7 @@ def parse_locations(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
 
     Data is taken exclusively from wiki pages – nothing is hard-coded:
     - Production_Buildings_List  → type=production
+    - building pages (infobox)   → base_slots
     - Animal_Shelters            → type=animal (farm animals only)
     - Goods_List Source column   → field / fruit trees / bushes / mine / fishing_lake
     - Category:Trees_and_Bushes  → trees / bushes without goods (nectar bush)
@@ -436,7 +459,9 @@ def parse_locations(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     seen_ids: set[str] = set()
     results: list[dict[str, Any]] = []
 
-    results.extend(_parse_production_buildings(client, max_level, seen_ids))
+    buildings = _parse_production_buildings(client, max_level, seen_ids)
+    _add_base_slots(client, buildings)
+    results.extend(buildings)
     results.extend(_parse_animal_shelters(client, max_level, seen_ids))
     results.extend(_parse_generic_sources_from_goods(client, max_level, seen_ids))
     results.extend(_parse_trees_and_bushes_category(client, max_level, seen_ids))

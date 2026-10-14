@@ -161,6 +161,29 @@ def test_level_limits_optional(data_dir: Path) -> None:
     assert load_data(data_dir).level_limits is None
 
 
+def test_mastery_bonuses_loaded_and_filtered(data_dir: Path) -> None:
+    _write(
+        data_dir / "mastery_bonuses.json",
+        [{"location_id": "dairy", "stars": 3, "time_reduction_percent": 15}],
+    )
+    ds = load_data(data_dir)
+    assert [(b.location_id, b.stars) for b in ds.mastery_bonuses] == [("dairy", 3)]
+    assert load_data(data_dir, max_level=5).mastery_bonuses == []
+
+
+def test_mastery_bonuses_unknown_location_rejected(data_dir: Path) -> None:
+    _write(
+        data_dir / "mastery_bonuses.json",
+        [{"location_id": "bakery", "stars": 3, "time_reduction_percent": 15}],
+    )
+    with pytest.raises(ValueError, match="unknown location_id 'bakery'"):
+        load_data(data_dir)
+
+
+def test_mastery_bonuses_optional(data_dir: Path) -> None:
+    assert load_data(data_dir).mastery_bonuses == []
+
+
 def test_external_inputs_logged_once(
     data_dir: Path, caplog: pytest.LogCaptureFixture
 ) -> None:

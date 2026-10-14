@@ -1,0 +1,162 @@
+[
+  {
+    "location_id": "bakery",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "bbq_grill",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "cake_oven",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "candle_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "candy_machine",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "coffee_kiosk",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "dairy",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "doner_kebab_stand",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "feed_mill",
+    "stars": 1,
+    "time_reduction_percent": 5
+  },
+  {
+    "location_id": "feed_mill",
+    "stars": 2,
+    "time_reduction_percent": 10
+  },
+  {
+    "location_id": "feed_mill",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "flower_shop",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "honey_extractor",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "ice_cream_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "jam_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "jeweler",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "juice_press",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "loom",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "lure_workbench",
+    "stars": 1,
+    "time_reduction_percent": 5
+  },
+  {
+    "location_id": "lure_workbench",
+    "stars": 2,
+    "time_reduction_percent": 10
+  },
+  {
+    "location_id": "lure_workbench",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "net_maker",
+    "stars": 1,
+    "time_reduction_percent": 5
+  },
+  {
+    "location_id": "net_maker",
+    "stars": 2,
+    "time_reduction_percent": 10
+  },
+  {
+    "location_id": "net_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "pie_oven",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "popcorn_pot",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "sauce_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "sewing_machine",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "smelter",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "soup_kitchen",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "sugar_mill",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "sushi_bar",
+    "stars": 3,
+    "time_reduction_percent": 15
+  }
+]

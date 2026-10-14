@@ -17,7 +17,13 @@ def to_snake_case(name: str) -> str:
 
 
 # Optional schema fields copied as-is from raw entries when present.
-_LOCATION_OPTIONAL = ("area", "footprint_width", "footprint_height", "animal_capacity")
+_LOCATION_OPTIONAL = (
+    "area",
+    "footprint_width",
+    "footprint_height",
+    "animal_capacity",
+    "base_slots",
+)
 _RESOURCE_OPTIONAL = ("growth_time_seconds",)
 _RECIPE_OPTIONAL = ("production_time_seconds", "production_time_3star_seconds")
 
@@ -60,6 +66,21 @@ def build_level_limits(
             )
     instances.sort(key=lambda x: (x["unlock_level"], x["location_id"], x["instance"]))
     return {"field_grants": field_grants, "location_instances": instances}
+
+
+def build_mastery_bonuses(
+    raw_bonuses: list[dict[str, Any]], known_location_ids: set[str]
+) -> list[dict[str, Any]]:
+    """
+    Build the mastery_bonuses.json payload: known locations only, one row
+    per (location_id, stars), sorted.
+    """
+    rows: dict[tuple[str, int], dict[str, Any]] = {}
+    for raw in raw_bonuses:
+        key = (raw["location_id"], int(raw["stars"]))
+        if key[0] in known_location_ids:
+            rows.setdefault(key, {**raw, "stars": key[1]})
+    return [rows[k] for k in sorted(rows)]
 
 
 def normalize(

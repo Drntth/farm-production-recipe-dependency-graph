@@ -14,9 +14,14 @@ import pytest
 from bs4 import BeautifulSoup
 
 from src.scraper.durations import parse_duration_seconds, parse_timed_cell
-from src.scraper.normalizer import build_level_limits, normalize
+from src.scraper.normalizer import (
+    build_level_limits,
+    build_mastery_bonuses,
+    normalize,
+)
 from src.scraper.parsers.level_limits import parse_field_grants
 from src.scraper.parsers.locations import parse_locations
+from src.scraper.parsers.masteries import parse_masteries
 from src.scraper.parsers.recipes import parse_recipes
 from src.scraper.parsers.resources import parse_resources
 
@@ -54,6 +59,18 @@ class FakeWikiClient:
     WIKITEXT: ClassVar[dict[str, str]] = {
         "Nectar_Bush": "{{Infobox\n |level = 39|price = 120|title = Trees & bushes}}",
         "Peanut_Bush": "{{Infobox\n |level = 62|price = 300}}",
+        # building pages: only the infobox matters (``slots`` = base slots)
+        "Feed_Mill": "{{Infobox\n |level = 2\n |slots = 3\n |size = 3x3}}",
+        "Bakery": "{{Infobox\n |level = 4\n |slots = 2}}",
+        "Dairy": "{{Infobox\n |level = 6\n |slots = 2\n |dia = 1}}",
+        "Sugar_Mill": "{{Infobox\n |level = 7\n |slots = 2}}",
+        "Mine": "{{Infobox\n |level = 24}}",
+        "Smelter": "{{Infobox\n |level = 24\n |slots = 1}}",
+        "Lure_Workbench": "{{Infobox\n |level = 27\n |slots = 2}}",
+        "Ice_Cream_Maker": "{{Infobox\n |level = 29\n |slots = 2}}",
+        "Lobster_Pool": "{{Infobox\n |level = 44}}",
+        "Sushi_Bar": "{{Infobox\n |level = 56\n |slots = 2}}",
+        "Masteries": (FIXTURES / "Masteries.wikitext").read_text(encoding="utf-8"),
     }
 
     def get_category_members(self, category: str) -> list[str]:
@@ -139,6 +156,53 @@ def test_production_building_footprints(client: FakeWikiClient) -> None:
         locs["ice_cream_maker"]["footprint_height"],
     ) == (3, 2)
     assert "footprint_width" not in locs["mine"]  # "N/A"
+
+
+def test_production_building_base_slots(client: FakeWikiClient) -> None:
+    locs = _by_id(parse_locations(client, max_level=56))
+
+    assert locs["feed_mill"]["base_slots"] == 3
+    assert locs["smelter"]["base_slots"] == 1
+    assert locs["dairy"]["base_slots"] == 2
+    # no infobox slots: left empty (lobster pool comes from the overrides)
+    assert "base_slots" not in locs["mine"]
+    assert "base_slots" not in locs["lobster_pool"]
+    # the case-sensitive page title comes from the list link
+    assert "Feed_Mill" in client.requested
+
+
+def test_base_slots_survive_normalize(client: FakeWikiClient) -> None:
+    locations, _, _ = normalize(parse_locations(client, 56), [], [])
+    by_id = _by_id(locations)
+    assert by_id["feed_mill"]["base_slots"] == 3
+    assert "_page" not in by_id["feed_mill"]
+
+
+def test_mastery_bonuses(client: FakeWikiClient) -> None:
+    rows = parse_masteries(client)
+    by_key = {(r["location_id"], r["stars"]): r["time_reduction_percent"] for r in rows}
+
+    # feed mill speeds up at every star, most machines only at three stars
+    assert by_key[("feed_mill", 1)] == 5
+    assert by_key[("feed_mill", 2)] == 10
+    assert by_key[("feed_mill", 3)] == 15
+    assert by_key[("bakery", 3)] == 15
+    assert ("bakery", 1) not in by_key  # "10% more coins"
+    # "100x100px" image size and a trailing "|link=" are both understood
+    assert by_key[("cupcake_maker", 3)] == 15
+    assert by_key[("donut_maker", 3)] == 15
+    # second table (limited-time machines) is read too
+    assert by_key[("gift_wrapping_station", 2)] == 10
+
+
+def test_mastery_bonuses_keep_known_locations(client: FakeWikiClient) -> None:
+    rows = build_mastery_bonuses(parse_masteries(client), {"feed_mill", "bakery"})
+    assert [(r["location_id"], r["stars"]) for r in rows] == [
+        ("bakery", 3),
+        ("feed_mill", 1),
+        ("feed_mill", 2),
+        ("feed_mill", 3),
+    ]
 
 
 def test_max_level_cuts_buildings(client: FakeWikiClient) -> None:

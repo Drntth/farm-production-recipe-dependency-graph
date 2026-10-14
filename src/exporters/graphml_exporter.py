@@ -80,6 +80,10 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
         ("footprint_width", "long"),
         ("footprint_height", "long"),
         ("animal_capacity", "long"),
+        ("base_slots", "long"),
+        ("max_slots", "long"),
+        ("lifetime_yield", "long"),
+        ("lifetime_harvests", "long"),
         ("growth_time_seconds", "long"),
         ("label", "string"),
     ]
@@ -181,6 +185,10 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
             "footprint_width": attrs.get("footprint_width"),
             "footprint_height": attrs.get("footprint_height"),
             "animal_capacity": attrs.get("animal_capacity"),
+            "base_slots": attrs.get("base_slots"),
+            "max_slots": attrs.get("max_slots"),
+            "lifetime_yield": attrs.get("lifetime_yield"),
+            "lifetime_harvests": attrs.get("lifetime_harvests"),
             "growth_time_seconds": attrs.get("growth_time_seconds"),
             "label": label,
         }

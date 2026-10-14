@@ -1,0 +1,92 @@
+{{PageDisplay}}
+'''Masteries''' are [[Production Buildings|production building]] boosts such as time, [[coin]]s, or [[experience]] points, which are unlocked as the player uses the building to craft items.
+
+The [[Mine]], the [[Lobster Pool]] and the [[Duck Salon]] are the only production buildings which cannot be mastered.
+
+Masteries are unlocked at [[experience]] level 15.
+----
+
+== '''Table of masteries''' ==
+{{Note|buildings are listed according to [[experience]].}}
+{| class="masteries-table" cellpadding="4" cellspacing="1"
+|-
+!scope="col" |Building
+!scope="col" |★
+!scope="col" |★★
+!scope="col" |★★★
+|-
+| rowspan="2"|'''[[Bakery]]'''<br />[[File:Bakery Mastered.png|150px]]<br />Achieved after 735 hours.
+|35 h
+|140 h
+|560 h
+|- 
+|[[File:Mastery I.png|100px|10% more coins]]
+|[[File:Mastery II 10.png|100px|10% more experience]]
+|[[File:Bakery Mastery.png|100px|15% faster]]
+|-
+| rowspan="2"|'''[[Feed Mill]]'''<br />[[File:Feed Mill Mastered.png|150px]]<br />Achieved after 6,840 hours.
+|120 h
+|840 h
+|5,880 h
+|-
+|[[File:Feed Mill Mastery I.png|100px|5% faster]]
+|[[File:Feed Mill Mastery II.png|100px|10% faster]]
+|[[File:Feed Mill Mastery III.png|100px|15% faster]]
+|-
+| rowspan="2"|'''[[Smelter]]'''<br />[[File:Smelter Mastered.png|150px]]<br />Achieved after 8,110 hours.
+|390 h
+|1,540 h
+|6,180 h
+|-
+|[[File:Mastery I.png|100px|10% more coins]]
+|[[File:Mastery II 10.png|100px|10% more experience]]
+|[[File:Smelter Mastery.png|100px|15% faster]]
+|-
+| rowspan="2"|'''[[Donut Maker]]'''<br />[[File:Donut Maker Mastered.png|150px]]<br />Achieved after 2,180 hours.
+|140 h
+|410 h
+|1,630 h
+|-
+|[[File:Mastery I.png|100px|10% more coins]]
+|[[File:Mastery II 5.png|100px|5% more experience]]
+|[[File:Donut Maker Mastery.png|100px|15% faster|link=Special:FilePath/Donut_Maker_Mastery.png]]
+|-
+| rowspan="2" |'''[[Cupcake Maker]]'''<br />[[File:Cupcake Maker Mastered.png|150px]]<br />Achieved after 2,180 hours. 
+|140 h
+|410 h
+|1,630 h
+|-
+|[[File:Mastery I.png|100px|10% more coins]]
+|[[File:Mastery II 5.png|100px|5% more experience]]
+|[[File:Cupcake Maker Mastery.png|100x100px|15% faster]]
+|-
+|}
+For limited-time production machines, boosting focus on increment of special event currency and time.
+
+{| class="masteries-table" cellpadding="4" cellspacing="1"
+|-
+!scope="col" |Building
+!scope="col" |★
+!scope="col" |★★
+!scope="col" |★★★
+|-
+| rowspan="2"|'''[[Gift Wrapping Station]]'''<br />[[File:Gift Wrapping Station Mastered.png|150px]]<br />Achieved after 600 hours.
+|200 h
+|200 h
+|200 h
+|- 
+|[[File:Gift Wrapping Station Mastery I.png|100px|10% more Holly from boat orders]]
+|[[File:Gift Wrapping Station Mastery II.png|100px|10% faster]]
+|[[File:Gift Wrapping Station Mastery III.png|100px|20% more Holly from boat orders]]
+|-
+|}
+
+{{Languages
+|de = Meisterschaft
+|es = Maestría
+|it = Maestrie
+|no = Mestringer
+}}
+[[pt-br:Domínio]]
+
+[[Category:Production Buildings]]

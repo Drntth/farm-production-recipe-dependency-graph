@@ -21,7 +21,8 @@
     "unlock_level": 2,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 3
   },
   {
     "id": "bakery",
@@ -30,7 +31,8 @@
     "unlock_level": 4,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 2
   },
   {
     "id": "cow_pasture",
@@ -47,7 +49,8 @@
     "unlock_level": 6,
     "area": "farm",
     "footprint_width": 4,
-    "footprint_height": 4
+    "footprint_height": 4,
+    "base_slots": 2
   },
   {
     "id": "sugar_mill",
@@ -56,7 +59,8 @@
     "unlock_level": 7,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "popcorn_pot",
@@ -65,7 +69,8 @@
     "unlock_level": 8,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 2
   },
   {
     "id": "bbq_grill",
@@ -74,7 +79,8 @@
     "unlock_level": 9,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "pig_pen",
@@ -91,7 +97,8 @@
     "unlock_level": 14,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 2
   },
   {
     "id": "apple_tree",
@@ -115,7 +122,8 @@
     "unlock_level": 17,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "raspberry_bush",
@@ -131,7 +139,8 @@
     "unlock_level": 19,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "cake_oven",
@@ -140,7 +149,8 @@
     "unlock_level": 21,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 2
   },
   {
     "id": "cherry_tree",
@@ -163,7 +173,8 @@
     "unlock_level": 24,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 1
   },
   {
     "id": "lamb_pasture",
@@ -187,7 +198,8 @@
     "unlock_level": 26,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "fishing_lake",
@@ -201,7 +213,8 @@
     "name": "Lure workbench",
     "type": "production",
     "unlock_level": 27,
-    "area": "fishing_lake"
+    "area": "fishing_lake",
+    "base_slots": 2
   },
   {
     "id": "ice_cream_maker",
@@ -210,7 +223,8 @@
     "unlock_level": 29,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "blueberry_bush",
@@ -224,7 +238,8 @@
     "name": "Net maker",
     "type": "production",
     "unlock_level": 30,
-    "area": "fishing_lake"
+    "area": "fishing_lake",
+    "base_slots": 2
   },
   {
     "id": "doner_kebab_stand",
@@ -233,7 +248,8 @@
     "unlock_level": 32,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "goat_yard",
@@ -250,7 +266,8 @@
     "unlock_level": 35,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "cacao_tree",
@@ -266,7 +283,8 @@
     "unlock_level": 38,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "beehive_tree",
@@ -282,7 +300,8 @@
     "unlock_level": 39,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "nectar_bush",
@@ -305,7 +324,8 @@
     "unlock_level": 42,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "lobster_pool",
@@ -321,7 +341,8 @@
     "unlock_level": 46,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "candle_maker",
@@ -330,7 +351,8 @@
     "unlock_level": 48,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "flower_shop",
@@ -339,7 +361,8 @@
     "unlock_level": 49,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "duck_salon",
@@ -355,7 +378,8 @@
     "unlock_level": 51,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   },
   {
     "id": "sauce_maker",
@@ -364,7 +388,8 @@
     "unlock_level": 54,
     "area": "farm",
     "footprint_width": 3,
-    "footprint_height": 3
+    "footprint_height": 3,
+    "base_slots": 2
   },
   {
     "id": "sushi_bar",
@@ -373,6 +398,7 @@
     "unlock_level": 56,
     "area": "farm",
     "footprint_width": 2,
-    "footprint_height": 2
+    "footprint_height": 2,
+    "base_slots": 2
   }
 ]

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from src.models import LevelLimits, Location, Recipe, Resource
+from src.models import LevelLimits, Location, MasteryBonus, Recipe, Resource
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ class DataSet:
         resources: list[Resource],
         recipes: list[Recipe],
         level_limits: LevelLimits | None = None,
+        mastery_bonuses: list[MasteryBonus] | None = None,
         *,
         log_external: bool = True,
     ) -> None:
@@ -43,6 +44,7 @@ class DataSet:
         self.resources: dict[str, Resource] = {res.id: res for res in resources}
         self.recipes: dict[str, Recipe] = {rec.id: rec for rec in recipes}
         self.level_limits: LevelLimits | None = level_limits
+        self.mastery_bonuses: list[MasteryBonus] = list(mastery_bonuses or [])
 
         self._validate_references(log_external=log_external)
 
@@ -72,8 +74,12 @@ class DataSet:
             if self.level_limits is not None
             else None
         )
+        kept = {l.id for l in locations}
+        bonuses = [b for b in self.mastery_bonuses if b.location_id in kept]
         # the full set already reported its external inputs
-        return DataSet(locations, resources, recipes, limits, log_external=False)
+        return DataSet(
+            locations, resources, recipes, limits, bonuses, log_external=False
+        )
 
     def summary(self) -> str:
         return (
@@ -125,6 +131,13 @@ class DataSet:
                         f"Level limit instance {inst.instance} references unknown "
                         f"location_id '{inst.location_id}'"
                     )
+
+        for bonus in self.mastery_bonuses:
+            if bonus.location_id not in self.locations:
+                errors.append(
+                    f"Mastery bonus references unknown location_id "
+                    f"'{bonus.location_id}'"
+                )
 
         external = self.external_inputs()
         if log_external and external:
@@ -216,6 +229,14 @@ def _load_level_limits(data_dir: Path) -> LevelLimits | None:
         raise ValueError(f"Validation error in {path}:\n{exc}") from exc
 
 
+def _load_mastery_bonuses(data_dir: Path) -> list[MasteryBonus]:
+    path = data_dir / "mastery_bonuses.json"
+    if not path.exists():
+        logger.info("No mastery_bonuses.json in %s", data_dir)
+        return []
+    return _parse_entities(_load_json_file(path), MasteryBonus, "mastery_bonuses")
+
+
 def load_data(
     data_dir: Path | str,
     max_level: int | None = None,
@@ -229,7 +250,8 @@ def load_data(
     ----------
     data_dir:
         Directory containing ``locations.json``, ``resources.json``,
-        ``recipes.json`` and optionally ``level_limits.json``.
+        ``recipes.json`` and optionally ``level_limits.json`` and
+        ``mastery_bonuses.json``.
     max_level:
         If given, only entities with ``unlock_level <= max_level`` are kept.
     apply_data_overrides:
@@ -253,7 +275,13 @@ def load_data(
     resources = _parse_entities(resources_raw, Resource, "resources")
     recipes = _parse_entities(recipes_raw, Recipe, "recipes")
 
-    dataset = DataSet(locations, resources, recipes, _load_level_limits(data_dir))
+    dataset = DataSet(
+        locations,
+        resources,
+        recipes,
+        _load_level_limits(data_dir),
+        _load_mastery_bonuses(data_dir),
+    )
     logger.info("Loaded %s", dataset.summary())
 
     if max_level is not None:

@@ -8,7 +8,7 @@ Hand-maintained values that the wiki does not provide. The loader merges these f
 
 Only **shared game facts** belong here, values that are the same for every player. Anything a player can upgrade or buy (machine slots, mastery, animals, beehives, lobster / duck slots, barn / silo) belongs in the player profile instead. See [docs/player-profile.md](../../docs/player-profile.md).
 
-`resources.json` and `recipes.json` are empty, because the wiki currently provides all of their values.
+`recipes.json` is empty, because the wiki currently provides all of its values. `resources.json` holds the honeycomb estimate.
 
 ## Fields in `locations.json`
 
@@ -18,10 +18,16 @@ Only **shared game facts** belong here, values that are the same for every playe
 | `footprint_height` | tiles along the **↙ edge** (see below)                         |
 | `movable`          | `false` for fixed buildings (mine, fishing lake buildings)     |
 | `rotatable`        | `true` if the item can be turned in the game (default `false`) |
+| `base_slots`       | slots per copy at purchase, where the wiki infobox has none    |
+| `max_slots`        | maximum slots per copy, where it differs from the default 9    |
+| `lifetime_yield`   | goods a tree / bush gives in its life (both or neither)        |
+| `lifetime_harvests`| harvests of a tree / bush, including the revive                |
 
 `footprint_width` and `footprint_height` must be filled in together. One without the other fails validation.  
 Fixed buildings (`movable: false`) need no footprint. The layout planner leaves them where they are.  
-`rotatable` only matters for non-square items. A 1×2 item that can be turned may also be placed as 2×1.
+`rotatable` only matters for non-square items. A 1×2 item that can be turned may also be placed as 2×1.  
+The lobster pool and duck salon have no `slots` in their wiki infobox; their text says 1 slot at start and 6 at most, so both fields are set here.  
+`lifetime_yield` / `lifetime_harvests` and the honeycomb `growth_time_seconds` are estimates; their basis and status are in [docs/wiki-gaps.md](../../docs/wiki-gaps.md). Replace them when they are measured in the game.
 
 ### Status
 

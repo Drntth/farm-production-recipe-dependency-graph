@@ -43,6 +43,17 @@ def write_level_limits_file(output_dir: Path, level_limits: dict[str, Any]) -> P
     return path
 
 
+def write_mastery_bonuses_file(output_dir: Path, bonuses: list[dict[str, Any]]) -> Path:
+    """Write mastery_bonuses.json (production speed-up per mastery star)."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / "mastery_bonuses.json"
+    path.write_text(
+        json.dumps(bonuses, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(f"Wrote {path} ({len(bonuses)} mastery bonuses)")
+    return path
+
+
 def write_meta_file(
     output_dir: Path,
     *,

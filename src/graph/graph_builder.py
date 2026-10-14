@@ -17,8 +17,9 @@ Node attributes (always present)
 - unlock_level  : int
 - type          : LocationType / ResourceType value (str)
 
-Additional attributes for locations: area, movable, rotatable (always); max_slots,
-footprint_width, footprint_height, animal_capacity (optional)
+Additional attributes for locations: area, movable, rotatable (always); base_slots, max_slots,
+footprint_width, footprint_height, animal_capacity, lifetime_yield,
+lifetime_harvests (optional)
 Additional attributes for resources: source_location_id, max_in_barn,
 growth_time_seconds (optional)
 
@@ -143,6 +144,8 @@ def _add_location_nodes(G: nx.DiGraph, dataset: DataSet) -> None:
             "movable": loc.movable,
             "rotatable": loc.rotatable,
         }
+        if loc.base_slots is not None:
+            attrs["base_slots"] = loc.base_slots
         if loc.max_slots is not None:
             attrs["max_slots"] = loc.max_slots
         if loc.footprint_width is not None:
@@ -150,6 +153,9 @@ def _add_location_nodes(G: nx.DiGraph, dataset: DataSet) -> None:
             attrs["footprint_height"] = loc.footprint_height
         if loc.animal_capacity is not None:
             attrs["animal_capacity"] = loc.animal_capacity
+        if loc.lifetime_yield is not None:
+            attrs["lifetime_yield"] = loc.lifetime_yield
+            attrs["lifetime_harvests"] = loc.lifetime_harvests
         if loc.description is not None:
             attrs["description"] = loc.description
         G.add_node(loc.id, **attrs)

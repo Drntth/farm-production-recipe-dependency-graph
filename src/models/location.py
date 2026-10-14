@@ -41,8 +41,13 @@ class Location(BaseModel):
     unlock_level: int = Field(..., ge=1, description="Player level required to unlock")
 
     description: str | None = None
+    base_slots: int | None = Field(
+        None, ge=1, description="Slots per copy at purchase (wiki infobox `slots`)"
+    )
     max_slots: int | None = Field(
-        None, ge=1, description="Production slots if applicable"
+        None,
+        ge=1,
+        description="Maximum slots per copy; None = the machine default of 9",
     )
     area: Area = Field(Area.FARM, description="Map area the location is placed on")
     movable: bool = Field(
@@ -58,6 +63,12 @@ class Location(BaseModel):
     animal_capacity: int | None = Field(
         None, ge=1, description="Animals per shelter (animal locations only)"
     )
+    lifetime_yield: int | None = Field(
+        None, ge=1, description="Goods a tree / bush gives over its whole life"
+    )
+    lifetime_harvests: int | None = Field(
+        None, ge=1, description="Harvests of a tree / bush, including the revive"
+    )
 
     @model_validator(mode="after")
     def footprint_is_complete(self) -> Location:
@@ -65,6 +76,15 @@ class Location(BaseModel):
             raise ValueError(
                 f"Location '{self.id}' must set both footprint_width and "
                 "footprint_height, or neither"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def lifetime_is_complete(self) -> Location:
+        if (self.lifetime_yield is None) != (self.lifetime_harvests is None):
+            raise ValueError(
+                f"Location '{self.id}' must set both lifetime_yield and "
+                "lifetime_harvests, or neither"
             )
         return self
 

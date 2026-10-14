@@ -2,6 +2,7 @@
 
 from .level_limits import FieldGrant, LevelLimits, LocationInstance
 from .location import Area, Location, LocationType
+from .mastery import MasteryBonus
 from .recipe import Recipe, RecipeInput, RecipeOutput
 from .resource import Resource, ResourceType
 
@@ -12,6 +13,7 @@ __all__ = [
     "Location",
     "LocationInstance",
     "LocationType",
+    "MasteryBonus",
     "Recipe",
     "RecipeInput",
     "RecipeOutput",
