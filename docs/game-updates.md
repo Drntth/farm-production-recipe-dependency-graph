@@ -25,7 +25,7 @@ Hay Day changes regularly. This file records what is known about recent versions
 | Expansion, map size                         | `game-facts/farm.md`, Layout Planner                                                                  |
 | Town, sanctuary, fishing lake               | area modes (`--area`), `game-facts/town.md`, `game-facts/fishing-lake.md`                             |
 | Decorations, paths                          | Design layer                                                                                          |
-| Wiki lags behind the game                   | `data/overrides/`, `known_game_version` in `meta.json`, [wiki-gaps.md](wiki-gaps.md)                         |
+| Wiki lags behind the game                   | `data/overrides/`, `known_game_version` in `meta.json`, [wiki-gaps.md](wiki-gaps.md)                  |
 
 ## Known versions
 

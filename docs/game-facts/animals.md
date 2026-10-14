@@ -33,37 +33,37 @@ The values are stored in `data/overrides/locations.json`.
 
 ## Beehive tree and nectar bush
 
-| Fact                                                                | Value                                                                          | Source            | Checked    |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------- | ---------- |
-| One beehive tree per player                                         | costs 4,000 coins                                                              | wiki:Beehive_Tree | 2026-10-05 |
-| Beehives on the tree                                                | 1 at start, up to 4; 3 bees each (12 bees)                                     | wiki:Beehive_Tree | 2026-10-05 |
-| The tree grows a beehive after collected nectar                     | 4,000 / 40,000 / 400,000 drops                                                 | wiki:Beehive_Tree | 2026-10-05 |
-| Beehive count follows the mastery stars on the maintainer's account | 2 beehives now                                                                 | in-game           | 2026-10-05 |
-| Honeycomb is produced                                               | per 100 drops of nectar, about 35 min if bushes are close                      | wiki:Beehive_Tree | 2026-10-05 |
-| Honeycomb per nectar bush                                           | 5 (500 drops per bush / 100 drops per honeycomb); used for the nectar bush recommendation | wiki:Nectar_Bush, wiki:Beehive_Tree | 2026-10-14 |
-| Honeycomb rate per beehive                                          | not exact on the wiki; estimate one per 35 min in use, see [../wiki-gaps.md](../wiki-gaps.md) | wiki:Beehive_Tree | 2026-10-14 |
-| Nectar bush unlock and price                                        | level 39, 120 coins                                                            | wiki:Nectar_Bush  | 2026-10-05 |
-| Nectar per bush                                                     | 500 drops in 2 harvests of 250; no growth cycle                                | wiki:Nectar_Bush  | 2026-10-05 |
-| An empty bush wilts                                                 | another player can revive it for one final 250-drop harvest (helper gets 8 XP) | wiki:Nectar_Bush  | 2026-10-05 |
-| Nectar is not stored by the player                                  | goes straight into the beehives                                                | wiki:Nectar_Bush  | 2026-10-05 |
-| Distance between bush and beehive tree                              | farther = slower bees while online; no effect offline                          | wiki:Nectar_Bush  | 2026-10-05 |
-| Nectar bush footprint                                               | 1x1                                                                            | in-game           | 2026-10-05 |
+| Fact                                                                | Value                                                                                         | Source                              | Checked    |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- |
+| One beehive tree per player                                         | costs 4,000 coins                                                                             | wiki:Beehive_Tree                   | 2026-10-05 |
+| Beehives on the tree                                                | 1 at start, up to 4; 3 bees each (12 bees)                                                    | wiki:Beehive_Tree                   | 2026-10-05 |
+| The tree grows a beehive after collected nectar                     | 4,000 / 40,000 / 400,000 drops                                                                | wiki:Beehive_Tree                   | 2026-10-05 |
+| Beehive count follows the mastery stars on the maintainer's account | 2 beehives now                                                                                | in-game                             | 2026-10-05 |
+| Honeycomb is produced                                               | per 100 drops of nectar, about 35 min if bushes are close                                     | wiki:Beehive_Tree                   | 2026-10-05 |
+| Honeycomb per nectar bush                                           | 5 (500 drops per bush / 100 drops per honeycomb); used for the nectar bush recommendation     | wiki:Nectar_Bush, wiki:Beehive_Tree | 2026-10-14 |
+| Honeycomb rate per beehive                                          | not exact on the wiki; estimate one per 35 min in use, see [../wiki-gaps.md](../wiki-gaps.md) | wiki:Beehive_Tree                   | 2026-10-14 |
+| Nectar bush unlock and price                                        | level 39, 120 coins                                                                           | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar per bush                                                     | 500 drops in 2 harvests of 250; no growth cycle                                               | wiki:Nectar_Bush                    | 2026-10-05 |
+| An empty bush wilts                                                 | another player can revive it for one final 250-drop harvest (helper gets 8 XP)                | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar is not stored by the player                                  | goes straight into the beehives                                                               | wiki:Nectar_Bush                    | 2026-10-05 |
+| Distance between bush and beehive tree                              | farther = slower bees while online; no effect offline                                         | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar bush footprint                                               | 1x1                                                                                           | in-game                             | 2026-10-05 |
 
 Layout consequence: nectar bushes belong next to the beehive tree (support relation in `src/layout/support.py`).
 
 ## Lobster pool and duck salon (fishing lake)
 
-| Fact                                 | Value                                                               | Source                             | Checked    |
-| ------------------------------------ | ------------------------------------------------------------------- | ---------------------------------- | ---------- |
-| Lobster pool unlock and repair       | level 44; 80,000 coins, 2 days (or 65 diamonds), 32 XP              | wiki:Lobster_Pool                  | 2026-10-05 |
-| Duck salon unlock and repair         | level 50; 90,000 coins, 2 d 5 h (or 68 diamonds), 34 XP             | wiki:Duck_Salon                    | 2026-10-05 |
-| Seats (slots) at start               | 1, up to 6                                                          | wiki:Lobster_Pool, wiki:Duck_Salon | 2026-10-05 |
-| Slot cost, lobster pool (ambiguous)  | text says coins; table shows 35, 37, 40, 42, 44 with a diamond icon | wiki:Lobster_Pool                  | 2026-10-05 |
-| Slot cost, duck salon (ambiguous)    | text says coins; table shows 37, 40, 42, 44, 46 with a diamond icon | wiki:Duck_Salon                    | 2026-10-05 |
-| Cannot be moved, rotated or mastered | -                                                                   | wiki:Lobster_Pool, wiki:Duck_Salon | 2026-10-05 |
-| Catching a lobster                   | 6 h; at most 6 tails per 12 h with steady traps                     | wiki:Lobster_Pool                  | 2026-10-05 |
-| Catching a duck                      | 2 h; at most 6 feathers per 5 h with steady traps                   | wiki:Duck_Salon                    | 2026-10-05 |
+| Fact                                 | Value                                                               | Source                               | Checked    |
+| ------------------------------------ | ------------------------------------------------------------------- | ------------------------------------ | ---------- |
+| Lobster pool unlock and repair       | level 44; 80,000 coins, 2 days (or 65 diamonds), 32 XP              | wiki:Lobster_Pool                    | 2026-10-05 |
+| Duck salon unlock and repair         | level 50; 90,000 coins, 2 d 5 h (or 68 diamonds), 34 XP             | wiki:Duck_Salon                      | 2026-10-05 |
+| Seats (slots) at start               | 1, up to 6                                                          | wiki:Lobster_Pool, wiki:Duck_Salon   | 2026-10-05 |
+| Slot cost, lobster pool (ambiguous)  | text says coins; table shows 35, 37, 40, 42, 44 with a diamond icon | wiki:Lobster_Pool                    | 2026-10-05 |
+| Slot cost, duck salon (ambiguous)    | text says coins; table shows 37, 40, 42, 44, 46 with a diamond icon | wiki:Duck_Salon                      | 2026-10-05 |
+| Cannot be moved, rotated or mastered | -                                                                   | wiki:Lobster_Pool, wiki:Duck_Salon   | 2026-10-05 |
+| Catching a lobster                   | 6 h; at most 6 tails per 12 h with steady traps                     | wiki:Lobster_Pool                    | 2026-10-05 |
+| Catching a duck                      | 2 h; at most 6 feathers per 5 h with steady traps                   | wiki:Duck_Salon                      | 2026-10-05 |
 | One trap catches one animal          | lobster trap → 1 lobster (6 h); duck trap → 1 duck (2 h)            | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
 | Time in the building per animal      | lobster pool 6 h per tail; duck salon 3 h per feather               | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
 | Traps cost nothing                   | made at the net maker without materials                             | wiki:Lobster_Tail, wiki:Duck_Feather | 2026-10-05 |
-| Maintainer's slots                   | lobster pool 3, duck salon 1                                        | in-game                            | 2026-10-05 |
+| Maintainer's slots                   | lobster pool 3, duck salon 1                                        | in-game                              | 2026-10-05 |
