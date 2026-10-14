@@ -1,6 +1,6 @@
 # Town
 
-Layout area `town` (planned for v0.8). The town has no production, so its layout needs no quantity calculations. Nothing from the town is scraped yet.
+Layout area `town` (`python -m src.layout --area town`). The town has no production, so its layout needs no quantity calculations. Nothing from the town is scraped: the player measures the buildings into `config/town_map.json` with the map editor.
 
 | Fact                              | Value                                                                                                                                   | Source                                 | Checked    |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ---------- |
@@ -16,5 +16,6 @@ Layout area `town` (planned for v0.8). The town has no production, so its layout
 | Expansion                         | map pieces plus two of: land deed, mallet, marker stake                                                                                 | wiki:Town                              | 2026-10-05 |
 | Layout Edit Mode                  | available from level 34; town layouts can be saved                                                                                      | wiki:Town                              | 2026-10-05 |
 | Space                             | much more room than on the farm and the fishing lake                                                                                    | wiki:Town                              | 2026-10-05 |
+| Service building pages            | reputation level and price only (e.g. Diner: reputation 3, 19,000 coins); no size                                                       | wiki:Diner, wiki:Spa                   | 2026-10-14 |
 
-Open for v0.8: footprints of service buildings, decorations and paths; which town buildings can be moved.
+Sizes come from the measured map; which buildings can be moved is an estimate, see [../wiki-gaps.md](../wiki-gaps.md).

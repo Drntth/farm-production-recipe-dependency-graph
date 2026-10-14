@@ -12,8 +12,10 @@ from pydantic import ValidationError
 from src.config import LocationProgress, PlayerConfig
 from src.graph import build_graph
 from src.layout import cli
+from src.layout.area import plan_area_layout
 from src.layout.blocks import block_flow_order, detect_named_blocks
 from src.layout.describe import layout_to_dict, layout_to_markdown
+from src.layout.design import plan_design
 from src.layout.farm_map import (
     EXAMPLE_MAP,
     Background,
@@ -746,3 +748,222 @@ def test_plan_layout_rejects_unknown_strategy(farm: DataSet) -> None:
 def test_cli_rejects_invalid_level(tmp_path: Path, level: str) -> None:
     assert cli.main(["--level", level, "--output-dir", str(tmp_path)]) == 1
     assert not (tmp_path / "layout.json").exists()
+
+
+# ---------------------------------------------------------------------------
+# Design layer: paths and decoration band
+# ---------------------------------------------------------------------------
+
+
+def _grid(w: int, h: int) -> set[tuple[int, int]]:
+    return {(x, y) for x in range(w) for y in range(h)}
+
+
+def _touches(tiles: set[tuple[int, int]], r: Rect) -> bool:
+    return any(
+        (x + dx, y + dy) in tiles
+        for x in range(r.x, r.x + r.w)
+        for y in range(r.y, r.y + r.h)
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
+    )
+
+
+def _connected(tiles: set[tuple[int, int]]) -> bool:
+    if not tiles:
+        return True
+    start = min(tiles)
+    seen, todo = {start}, [start]
+    while todo:
+        x, y = todo.pop()
+        for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if n in tiles and n not in seen:
+                seen.add(n)
+                todo.append(n)
+    return seen == tiles
+
+
+def test_design_connects_blocks_and_key_buildings() -> None:
+    blocks = {"a_block": Rect(1, 1, 3, 3), "b_block": Rect(8, 6, 3, 2)}
+    fixed = {"farmhouse": Rect(5, 1, 2, 2), "mine": Rect(0, 8, 2, 2)}
+    design = plan_design(_grid(12, 10), blocks, fixed, decor_band=1)
+
+    assert design.connected[0] == "farmhouse"  # the hub
+    assert set(design.connected) == {"farmhouse", "a_block", "b_block"}
+    assert "mine" not in design.connected  # an obstacle, not a key building
+    assert _connected(design.paths)
+    for r in [*blocks.values(), *fixed.values()]:
+        assert not any(
+            r.x <= x < r.x + r.w and r.y <= y < r.y + r.h for x, y in design.paths
+        )
+    for key in ("farmhouse", "a_block", "b_block"):
+        assert _touches(design.paths, {**blocks, **fixed}[key])
+    # the band: next to a path, never on it or on a building
+    assert design.decorations and not design.decorations & design.paths
+    assert all(_touches(design.paths, Rect(x, y, 1, 1)) for x, y in design.decorations)
+
+
+def test_design_reports_walled_in_blocks() -> None:
+    # the right half is cut off by a wall of fixed tiles
+    allowed = _grid(10, 5)
+    fixed = {f"wall_{y}": Rect(5, y, 1, 1) for y in range(5)}
+    blocks = {"left_block": Rect(1, 1, 2, 2), "right_block": Rect(7, 1, 2, 2)}
+    design = plan_design(allowed, blocks, fixed, decor_band=0)
+
+    assert design.connected == ["left_block"]  # no farmhouse: first block is the hub
+    assert design.unreachable == ["right_block"]
+    assert design.decorations == set()
+    with pytest.raises(ValueError):
+        plan_design(allowed, blocks, fixed, decor_band=-1)
+
+
+def test_plan_layout_with_design(farm: DataSet) -> None:
+    farm_map = FarmMap(
+        width=40,
+        height=40,
+        fixed=[FixedItem(id="farmhouse", x=17, y=17, width=6, height=6)],
+    )
+    layout = plan_layout(farm, level=5, farm_map=farm_map, gap=0, design=True)
+    _check_layout(layout)
+    frames = [b.frame for b in layout.blocks if b.frame is not None]
+    assert _no_overlap(frames, gap=1)  # design forces room for paths
+    d = layout.design
+    assert d is not None and not d.unreachable
+    assert d.connected[0] == "farmhouse"
+    assert plan_layout(farm, level=5, farm_map=farm_map).design is None
+
+    data = layout_to_dict(layout)["design"]
+    assert len(data["paths"]) == len(d.paths)
+    assert "## Design" in layout_to_markdown(layout)
+    assert "<title>path</title>" in render_svg(layout)
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_design(tmp_path: Path) -> None:
+    args = ["--level", "20", "--design", "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    assert json.loads((tmp_path / "layout.json").read_text())["design"] is not None
+    assert cli.main([*args, "--decor-band", "-1"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# Town and fishing lake (--area)
+# ---------------------------------------------------------------------------
+
+
+def _town_map(**kw) -> FarmMap:
+    return FarmMap(
+        area="town",
+        width=30,
+        height=20,
+        fixed=[
+            FixedItem(id="town_hall", x=1, y=1, width=4, height=4),
+            FixedItem(id="town_station", x=25, y=15, width=4, height=3),
+            FixedItem(id="diner", x=10, y=10, width=3, height=3, movable=True),
+            FixedItem(id="spa", x=15, y=10, width=4, height=3, movable=True),
+            FixedItem(id="cinema", movable=True),  # not measured yet
+            FixedItem(id="sanctuary_entrance"),
+        ],
+        **kw,
+    )
+
+
+def test_movable_map_items_are_not_obstacles() -> None:
+    m = _town_map()
+    assert [f.id for f in m.placed_fixed] == ["town_hall", "town_station"]
+    assert [f.id for f in m.placed_movable] == ["diner", "spa"]
+
+
+def test_town_layout_rearranges_movable_buildings() -> None:
+    layout = plan_area_layout(_town_map(), level=40, gap=1, design=True)
+
+    placed = {b.block.id: b.frame for b in layout.blocks if b.frame is not None}
+    assert set(placed) == {"diner", "spa"}
+    assert (placed["diner"].w, placed["diner"].h) == (3, 3)  # measured size kept
+    obstacles = [Rect(1, 1, 4, 4), Rect(25, 15, 4, 3)]
+    assert _no_overlap([*placed.values(), *obstacles], gap=1)
+    assert layout.missing_footprint == ["cinema"]
+    assert layout.fixed_unplaced == ["sanctuary_entrance"]
+    d = layout.design
+    assert d.connected[0] == "town_hall"  # the hub
+    assert set(d.connected) == {"town_hall", "town_station", "diner", "spa"}
+    assert _connected(d.paths)
+
+    md = layout_to_markdown(layout)
+    assert md.startswith("# Town layout") and "config/town_map.json" in md
+    assert "Field counts" not in md
+    assert layout_to_dict(layout)["area"] == "town"
+    assert "<title>Town layout" in render_svg(layout)
+
+
+def test_fishing_lake_layout_is_design_only() -> None:
+    lake = FarmMap(
+        area="fishing_lake",
+        width=20,
+        height=12,
+        fixed=[
+            FixedItem(id="fishermans_hut", x=1, y=1, width=3, height=3),
+            FixedItem(id="net_maker", x=10, y=2, width=3, height=3),
+            FixedItem(id="lobster_pool", x=4, y=8, width=4, height=3),
+        ],
+    )
+    layout = plan_area_layout(lake, level=50, design=True)
+    assert layout.blocks == []
+    assert layout.design.connected[0] == "fishermans_hut"
+    assert not layout.design.unreachable
+    with pytest.raises(ValueError):
+        plan_area_layout(FarmMap(), level=50)
+
+
+def test_example_area_maps_load() -> None:
+    for area in ("town", "fishing_lake"):
+        m = load_farm_map(f"config/{area}_map.example.json")
+        assert m.area.value == area
+
+
+def test_cli_area_town(tmp_path: Path) -> None:
+    town = tmp_path / "town_map.json"
+    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
+    args = ["--level", "40", "--area", "town", "--map", str(town)]
+    assert cli.main([*args, "--design", "--output-dir", str(tmp_path)]) == 0
+    data = json.loads((tmp_path / "layout_town.json").read_text())
+    assert data["area"] == "town" and data["design"] is not None
+    assert not (tmp_path / "layout.json").exists()
+    # a town map passed as the fishing lake map is rejected
+    lake = ["--level", "40", "--area", "fishing_lake", "--map", str(town)]
+    assert cli.main([*lake, "--output-dir", str(tmp_path)]) == 1
+
+
+def test_farm_movable_flag_only_for_placeable_items(
+    farm: DataSet, caplog: pytest.LogCaptureFixture
+) -> None:
+    farm_map = FarmMap(
+        width=40,
+        height=40,
+        fixed=[
+            # the planner cannot place a farmhouse: it stays a fixed obstacle
+            FixedItem(id="farmhouse", x=17, y=17, width=6, height=6, movable=True),
+            # the barn is a location the planner places itself
+            FixedItem(id="barn", x=0, y=0, width=4, height=4, movable=True),
+        ],
+    )
+    with caplog.at_level("WARNING"):
+        layout = plan_layout(farm, level=5, farm_map=farm_map)
+
+    assert "kept fixed: farmhouse" in caplog.text
+    assert [f.id for f in layout.farm_map.placed_fixed] == ["farmhouse"]
+    house = Rect(17, 17, 6, 6)
+    frames = [b.frame for b in layout.blocks if b.frame is not None]
+    assert _no_overlap([*frames, house])
+    storage = [b for b in layout.blocks if "barn" in b.block.locations]
+    assert storage and storage[0].frame is not None  # the barn is still planned
+
+
+def test_cli_area_warns_about_farm_only_options(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    town = tmp_path / "town_map.json"
+    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
+    args = ["--level", "40", "--area", "town", "--map", str(town)]
+    with caplog.at_level("WARNING"):
+        assert cli.main([*args, "--reserve", "0.5", "--output-dir", str(tmp_path)]) == 0
+    assert "Farm-only options ignored for town: --reserve" in caplog.text

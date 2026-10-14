@@ -10,7 +10,8 @@ The project analyses Hay Day production chains. It turns locations, resources an
 
 - Milestones done: **v0.5** (data foundation), **v0.6** (standalone Layout Planner for the farm: named blocks with footprints, isometric SVG grid, fixed / rotatable items, support relations, measured `config/farm_map.json` with plots and zones, Storage block, animal feeding recipes).
 - **v0.7** done (Production Planner: profile defaults, mastery, capacity, linear-program quantities, recommendations, login schedule).
-- Current milestone: **v0.8** (area modes and Design layer).
+- **v0.8** done (area modes and design layer: `--area town | fishing_lake`, `--design` paths and decoration band).
+- Current milestone: **v0.9** (Combiner).
 
 ## Read first
 
@@ -49,6 +50,8 @@ ruff check src tests                      # lint and format check: ruff format -
 python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
 python -m src.main --level 30             # override the player level
 python -m src.layout                      # farm layout: output/layout.svg, layout.md, layout.json
+python -m src.layout --design             # plus paths and decoration band
+python -m src.layout --area town --design # town / fishing_lake from config/<area>_map.json → layout_<area>.*
 python -m src.planner                     # production plan: output/capacity.json, schedule.json, schedule.md
 # tools/farm_map_editor.html: open in a browser to measure config/farm_map.json from a screenshot
 python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki
@@ -57,13 +60,13 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 ## Code map
 
 - `config/player.example.json` - the player profile (committed; currently holds the maintainer's values). `config/player.json` is local, git-ignored and takes precedence.
-- `config/farm_map.example.json` - fixed farm buildings with empty positions. `config/farm_map.json` (local, git-ignored) holds the player's measured map size, fixed positions, the calibrated screenshot (`background`, `config/*.png` and `config/*.zip` are git-ignored; map sources live in the git-ignored `config/screenshots/` (GIMP file) and `config/reference/` (wiki plot maps)), the farm plots (`expansions`; section `base` always counts as unlocked) and hand-marked `zones` (`buildable` / `blocked`). Barn and silo are optional there: without a position the planner places them as the Storage block.
-- `tools/farm_map_editor.html` - self-contained browser tool that writes `farm_map.json` and exports PNGs. Its pure JS functions sit between `CORE-START` / `CORE-END` and are tested with node in `tests/test_farm_map_editor.py`; keep the JSON it writes in sync with `src/layout/farm_map.py`.
+- `config/farm_map.example.json` - fixed farm buildings with empty positions. `config/farm_map.json` (local, git-ignored) holds the player's measured map size, fixed positions, the calibrated screenshot (`background`, `config/*.png` and `config/*.zip` are git-ignored; map sources live in the git-ignored `config/screenshots/` (GIMP file) and `config/reference/` (wiki plot maps)), the farm plots (`expansions`; section `base` always counts as unlocked) and hand-marked `zones` (`buildable` / `blocked`). Barn and silo are optional there: without a position the planner places them as the Storage block. `config/town_map*.json` and `config/fishing_lake_map*.json` use the same schema with `area` set; an item with `movable: true` is measured but placed by the planner (town service buildings); on the farm only locations the planner places (barn, silo) honour it, any other movable item is kept fixed with a warning.
+- `tools/farm_map_editor.html` - self-contained browser tool that writes `<area>_map.json` (area selector, `movable` flag) and exports PNGs. Its pure JS functions sit between `CORE-START` / `CORE-END` and are tested with node in `tests/test_farm_map_editor.py`; keep the JSON it writes in sync with `src/layout/farm_map.py`.
 - `src/config.py` - `PlayerConfig` (level, mastery system, barn / silo, fields, fishing spots, per-location `LocationProgress`), `load_player_config()`, `validate_player_config()`.
 - `src/models/` - pydantic models: `Location` (with `Area`, footprint, `movable`, `rotatable`, `animal_capacity`, `base_slots`, `max_slots`, `lifetime_yield` / `lifetime_harvests`), `MasteryBonus` (time reduction per building and star), `Resource` (`growth_time_seconds`), `Recipe` (`production_time_seconds`, `production_time_3star_seconds`), `LevelLimits` (`field_grants`, `location_instances`).
 - `src/loaders/json_loader.py` - loads `data/*.json`, merges `data/overrides/*.json` (`null` = skip), validates into a `DataSet` with optional `level_limits` and `mastery_bonuses`, optional level filter.
 - `src/graph/` - graph builder, edge types (`relationship.py`), weights (`weighting.py`), analysis (`analysis.py`: proximity, Louvain blocks, centrality, paths).
-- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling or size order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size; lowers the block reserve in 1 % steps until every block fits), `farm_map.py` (model, `outline_segments`), `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
+- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling or size order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size; lowers the block reserve in 1 % steps until every block fits), `farm_map.py` (model per area, `outline_segments`), `design.py` (paths as a greedy Steiner tree from the hub, decoration band), `area.py` (`plan_area_layout` for town / fishing lake from the measured map, no graph), `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
 - `src/planner/` - Production Planner: `profile.py` (`resolve_profile`: every `null` → level default), `mastery.py` (`stars` / `workbench` modifiers, chosen by `mastery_system`), `capacity.py` (storage, fields, parallel lines, queues, max rates), `quantities.py` (scipy linear program, four lexicographic solves), `schedule.py` (interval suggestion, recommendations, actions per login), `cli.py`. Machines produce one item at a time: copies are parallel, slots are only a queue. Fields, animals and trees are served only at a login. Goods without a production model (ores from the mine, fish) are external: capped at what the balance needs, never planned.
 - `src/exporters/` - JSON / CSV / GraphML export. New node attributes must be added to the CSV column list and the GraphML key list.
 - `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations incl. infobox base slots, resources, recipes, level_limits, masteries), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`), `writer.py`, `cli.py`.
@@ -97,13 +100,13 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 
 ### Where data goes
 
-| Kind                                      | Place                                                                                           |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Per-entity data from wiki tables          | `data/*.json` via the scraper; fix problems in the scraper or normalizer, never by hand-editing |
-| Per-entity data the wiki lacks            | `data/overrides/*.json` (existing ids patched field by field, new ids added)                    |
-| Game rules (min / max, costs, mechanics)  | `docs/game-facts/*.md`; move into data or code only when code needs them                        |
-| Anything a player buys, upgrades or earns | the player profile (`config/player*.json`)                                                      |
-| The player's farm area and fixed building positions | `config/farm_map*.json`                                                               |
+| Kind                                                                     | Place                                                                                           |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Per-entity data from wiki tables                                         | `data/*.json` via the scraper; fix problems in the scraper or normalizer, never by hand-editing |
+| Per-entity data the wiki lacks                                           | `data/overrides/*.json` (existing ids patched field by field, new ids added)                    |
+| Game rules (min / max, costs, mechanics)                                 | `docs/game-facts/*.md`; move into data or code only when code needs them                        |
+| Anything a player buys, upgrades or earns                                | the player profile (`config/player*.json`)                                                      |
+| The player's area maps (farm, town, fishing lake) and building positions | `config/<area>_map*.json`                                                                       |
 
 ### Player profile
 

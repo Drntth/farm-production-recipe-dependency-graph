@@ -5,8 +5,12 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+from src.models import Area
+
 from .inventory import CountSource
 from .planner import Layout, PlacedBlock
+
+AREA_TITLES = {Area.FARM: "Farm", Area.TOWN: "Town", Area.FISHING_LAKE: "Fishing lake"}
 
 
 def layout_to_dict(layout: Layout) -> dict[str, Any]:
@@ -14,6 +18,7 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
     fm = layout.farm_map
     return {
         "level": layout.level,
+        "area": fm.area.value,
         "map": {
             "bounded": fm.bounded,
             "width": fm.width,
@@ -24,6 +29,7 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
         "reserve_requested": layout.reserve_requested,
         "strategy": layout.strategy,
         "flow_order": layout.flow_order,
+        "design": _design(layout),
         "blocks": [
             {
                 "id": pb.block.id,
@@ -91,21 +97,26 @@ def layout_to_markdown(layout: Layout) -> str:
         if requested is not None and layout.reserve_ratio < requested
         else ""
     )
+    title = AREA_TITLES[fm.area]
+    farm = fm.area == Area.FARM
     lines = [
-        f"# Farm layout - level {layout.level}",
+        f"# {title} layout - level {layout.level}",
         "",
         (
-            f"Farm map: {fm.width} x {fm.height} tiles."
+            f"{title} map: {fm.width} x {fm.height} tiles."
             if fm.bounded
-            else f"Farm map: unbounded (no `config/farm_map.json` size); layout spans "
-            f"{ext.w} x {ext.h} tiles."
+            else f"{title} map: unbounded (no `config/{fm.area.value}_map.json` "
+            f"size); layout spans {ext.w} x {ext.h} tiles."
         ),
         (
             f"Block order: {layout.strategy}. "
             f"Each block keeps {layout.reserve_ratio:.0%} extra area for later "
             f"unlocks{lowered}. "
-            "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge."
-        ),
+            if farm
+            else "Movable buildings are placed largest first, close to the hub; "
+            "fixed ones stay. "
+        )
+        + "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge.",
         "",
         "## Blocks",
         "",
@@ -123,10 +134,33 @@ def layout_to_markdown(layout: Layout) -> str:
             + f" | {pb.used_tiles} / {pb.reserved_tiles} |"
         )
 
-    lines += ["", "## Relative order (upstream → downstream)", ""]
-    lines += [f"{i}. {names[b]}" for i, b in enumerate(layout.flow_order, 1)]
+    d = layout.design
+    if d is not None:
+        lines += [
+            "",
+            "## Design",
+            "",
+            (
+                f"- Paths: {len(d.paths)} tiles (1 tile wide), connecting "
+                f"{len(d.connected)} blocks and key buildings."
+            ),
+            (
+                f"- Decoration band: {len(d.decorations)} free tiles within "
+                f"{d.decor_band} tile(s) of a path, for decorations and fences."
+            ),
+        ]
+        if d.unreachable:
+            lines.append(
+                "- Not reachable by a path: "
+                + ", ".join(names.get(k, k) for k in d.unreachable)
+            )
 
-    lines += ["", "## Recommended neighbourhoods", ""]
+    if layout.flow_order:
+        lines += ["", "## Relative order (upstream → downstream)", ""]
+        lines += [f"{i}. {names[b]}" for i, b in enumerate(layout.flow_order, 1)]
+
+    if layout.neighbourhoods or layout.support:
+        lines += ["", "## Recommended neighbourhoods", ""]
     for n in layout.neighbourhoods:
         a = names.get(n.a, n.a)
         b = names.get(n.b, n.b)
@@ -134,13 +168,17 @@ def layout_to_markdown(layout: Layout) -> str:
     for r in layout.support:
         lines.append(f"- {r.source} next to {r.target}: {r.reason}")
 
-    notes = [
-        (
-            "Field counts per block are estimates from recipe weights (crop demand of "
-            "the block's buildings); the Production Planner will size them from real "
-            "quantities."
-        )
-    ]
+    notes = (
+        [
+            (
+                "Field counts per block are estimates from recipe weights (crop "
+                "demand of the block's buildings); the Combiner will size them from "
+                "the Production Planner's quantities."
+            )
+        ]
+        if farm
+        else []
+    )
     placeholders = sorted(
         s.location.name for s in layout.stock if s.source == CountSource.PLACEHOLDER
     )
@@ -151,7 +189,7 @@ def layout_to_markdown(layout: Layout) -> str:
         )
     if layout.fixed_unplaced:
         notes.append(
-            "Fixed, position unknown (add to `config/farm_map.json`): "
+            f"Fixed, position unknown (add to `config/{fm.area.value}_map.json`): "
             + ", ".join(layout.fixed_unplaced)
         )
     if layout.unplaced_blocks:
@@ -160,7 +198,12 @@ def layout_to_markdown(layout: Layout) -> str:
             + ", ".join(names[b] for b in layout.unplaced_blocks)
         )
     if layout.missing_footprint:
-        notes.append("No footprint (skipped): " + ", ".join(layout.missing_footprint))
+        notes.append(
+            "No footprint (skipped): " + ", ".join(layout.missing_footprint)
+            if farm
+            else "Movable, not measured yet (draw it in the map editor): "
+            + ", ".join(layout.missing_footprint)
+        )
     if notes:
         lines += ["", "## Notes", ""] + [f"- {n}" for n in notes]
     return "\n".join(lines) + "\n"
@@ -191,6 +234,19 @@ def _items(pb: PlacedBlock, stock, crop_names: dict[str, str]) -> str:
             part += f" (+{reserved[loc_id]} reserved)"
         parts.append(part)
     return ", ".join(parts)
+
+
+def _design(layout: Layout) -> dict[str, Any] | None:
+    d = layout.design
+    if d is None:
+        return None
+    return {
+        "decor_band": d.decor_band,
+        "paths": [list(t) for t in sorted(d.paths)],
+        "decorations": [list(t) for t in sorted(d.decorations)],
+        "connected": d.connected,
+        "unreachable": d.unreachable,
+    }
 
 
 def _rect(r) -> dict[str, int]:

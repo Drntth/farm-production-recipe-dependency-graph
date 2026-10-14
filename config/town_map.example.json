@@ -1,0 +1,17 @@
+{
+  "area": "town",
+  "width": null,
+  "height": null,
+  "fixed": [
+    {"id": "town_hall", "x": null, "y": null, "width": null, "height": null},
+    {"id": "town_station", "x": null, "y": null, "width": null, "height": null},
+    {"id": "beach_cafe", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "bed_and_breakfast", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "cinema", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "diner", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "gift_shop", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "grocery_store", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "spa", "x": null, "y": null, "width": null, "height": null, "movable": true},
+    {"id": "sanctuary_entrance", "x": null, "y": null, "width": null, "height": null}
+  ]
+}

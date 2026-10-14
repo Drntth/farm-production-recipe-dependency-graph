@@ -9,7 +9,8 @@ none, and every item footprint is outlined on it.
 With a calibrated ``background`` in the farm map, the screenshot of the farm
 is drawn under the grid through an affine transform (image pixel → tile →
 screen), and the farm plots (expansions) are outlined: locked plots shaded.
-Zones: buildable outlined in green, blocked filled in red.
+Zones: buildable outlined in green, blocked filled in red. With the design
+layer, path tiles are sand-coloured and the decoration band light green.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import os
 from html import escape
 from pathlib import Path
 
+from .describe import AREA_TITLES
 from .farm_map import outline_segments
 from .packing import Rect, bounding_rect
 from .planner import Layout
@@ -54,6 +56,8 @@ LOCKED_COLOUR = "#B91C1C"
 FARM_OUTLINE_COLOUR = "#111827"
 BUILDABLE_COLOUR = "#16A34A"
 BLOCKED_COLOUR = "#DC2626"
+PATH_COLOUR = "#C8A165"
+DECOR_COLOUR = "#4ADE80"
 
 
 def render_svg(layout: Layout, path: Path | str | None = None) -> str:
@@ -85,6 +89,7 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
     grid_h = (gw + gh) * TILE_H / 2
     fixed_lines = _wrap(layout.fixed_unplaced, 8)
     legend_rows = len(layout.blocks) + 2 + len(fixed_lines)
+    legend_rows += 1 if layout.design is not None else 0
     height = MARGIN * 2 + grid_h + 20 + legend_rows * LEGEND_ROW
 
     fm = layout.farm_map
@@ -96,7 +101,10 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
             f'width="{width:.0f}" height="{height:.0f}" '
             f'viewBox="0 0 {width:.0f} {height:.0f}" font-family="sans-serif">'
         ),
-        f"<title>Farm layout - level {layout.level}</title>",
+        (
+            f"<title>{AREA_TITLES[layout.farm_map.area]} layout - level "
+            f"{layout.level}</title>"
+        ),
         '<rect width="100%" height="100%" fill="#FFFFFF"/>',
     ]
 
@@ -208,6 +216,20 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
                 f'<polygon points="{poly(it.rect)}" {style} stroke="{c}" stroke-width="1">'
                 f"<title>{escape(tip)}</title></polygon>"
             )
+    # design layer: paths and decoration band (between the frames)
+    if layout.design is not None:
+        for x, y in sorted(layout.design.decorations):
+            out.append(
+                f'<polygon points="{poly(Rect(x, y, 1, 1))}" fill="{DECOR_COLOUR}" '
+                'fill-opacity="0.35"><title>decoration band</title></polygon>'
+            )
+        for x, y in sorted(layout.design.paths):
+            out.append(
+                f'<polygon points="{poly(Rect(x, y, 1, 1))}" fill="{PATH_COLOUR}" '
+                f'fill-opacity="0.85" stroke="{_tint(PATH_COLOUR, 0.3)}" '
+                'stroke-width="0.5"><title>path</title></polygon>'
+            )
+
     # labels last, so no block covers them: one per building, one per patch
     for pb in placed:
         patches: dict[str, list[Rect]] = {}
@@ -237,6 +259,23 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
             "#374151",
         )
     )
+    if layout.design is not None:
+        y += LEGEND_ROW
+        d = layout.design
+        out.append(
+            f'<rect x="{MARGIN}" y="{y - 10}" width="12" height="12" '
+            f'fill="{PATH_COLOUR}"/>'
+        )
+        out.append(
+            _text(
+                MARGIN + 18,
+                y,
+                f"Path: {len(d.paths)} tiles · light green = decoration band "
+                f"({len(d.decorations)} tiles)",
+                11,
+                "#111827",
+            )
+        )
     for pb in layout.blocks:
         y += LEGEND_ROW
         c = colours[pb.block.id]
@@ -255,7 +294,7 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
             _text(
                 MARGIN,
                 y,
-                "Fixed, position unknown (add to config/farm_map.json):",
+                f"Fixed, position unknown (add to config/{fm.area.value}_map.json):",
                 11,
                 FIXED_COLOUR,
             )

@@ -1,0 +1,13 @@
+{
+  "area": "fishing_lake",
+  "width": null,
+  "height": null,
+  "fixed": [
+    {"id": "fishermans_hut", "x": null, "y": null, "width": null, "height": null},
+    {"id": "lure_workbench", "x": null, "y": null, "width": null, "height": null},
+    {"id": "net_maker", "x": null, "y": null, "width": null, "height": null},
+    {"id": "tackle_box", "x": null, "y": null, "width": null, "height": null},
+    {"id": "lobster_pool", "x": null, "y": null, "width": null, "height": null},
+    {"id": "duck_salon", "x": null, "y": null, "width": null, "height": null}
+  ]
+}

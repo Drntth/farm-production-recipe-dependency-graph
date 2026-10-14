@@ -17,6 +17,8 @@ Steps:
    ``auto`` (coupling, then size if a block does not fit). If a block still
    does not fit, steps 4-5 are repeated with a smaller reserve
    (``RESERVE_STEP``) down to 0.
+6. Optional design layer (``design=True``, ``design.py``): paths between the
+   blocks and the key fixed buildings, and a decoration band along them.
 
 No production data is used: block sizes come from the profile and the level.
 """
@@ -42,6 +44,7 @@ from .blocks import (
     detect_named_blocks,
     direct_coupling,
 )
+from .design import DEFAULT_DECOR_BAND, Design, plan_design
 from .farm_map import FarmMap
 from .fields import SHARED_BLOCK_ID, FieldShare, allocate_fields
 from .inventory import Stock, farm_stock
@@ -112,6 +115,7 @@ class Layout:
     crop_names: dict[str, str] = field(default_factory=dict)
     reserve_requested: float | None = None
     strategy: str = "coupling"  # the block order actually used
+    design: Design | None = None  # paths and decoration band, if requested
 
     @property
     def unplaced_blocks(self) -> list[str]:
@@ -137,6 +141,8 @@ def plan_layout(
     field_pool: float = DEFAULT_FIELD_POOL,
     graph: nx.DiGraph | None = None,
     strategy: str = "auto",
+    design: bool = False,
+    decor_band: int = DEFAULT_DECOR_BAND,
 ) -> Layout:
     """Plan the farm layout for the level-filtered *dataset*."""
     if strategy not in STRATEGIES:
@@ -145,10 +151,22 @@ def plan_layout(
         )
     if reserve_ratio < 0 or gap < 0:
         raise ValueError("reserve_ratio and gap must not be negative")
+    if design:
+        gap = max(gap, 1)  # room for a path between two blocks
     orders = ("coupling", "size") if strategy == "auto" else (strategy,)
     farm_map = farm_map or FarmMap()
     G = graph if graph is not None else build_graph(dataset)
     stock = {s.location.id: s for s in farm_stock(dataset, player, level)}
+
+    # "movable" on the farm only applies to locations the planner places itself
+    # (barn, silo, …); any other item stays a fixed obstacle, so it never vanishes
+    stray = [f.id for f in farm_map.placed_movable if f.id not in stock]
+    if stray:
+        logger.warning(
+            "Map items marked movable but not placeable on the farm, kept fixed: %s",
+            ", ".join(stray),
+        )
+        farm_map = _pin(farm_map, set(stray))
 
     # a movable location placed on the map by hand (e.g. the barn) stays there as
     # fixed: that copy leaves the stock, the other copies are still planned
@@ -314,7 +332,7 @@ def plan_layout(
             if loc.area == Area.FARM and not loc.movable and loc.id not in fixed_rects
         }
     )
-    return Layout(
+    layout = Layout(
         level=level,
         farm_map=farm_map,
         blocks=placed_blocks,
@@ -331,6 +349,34 @@ def plan_layout(
         reserve_requested=requested,
         strategy=order,
     )
+    if design:
+        layout.design = _design(layout, fixed_rects, decor_band)
+    return layout
+
+
+def _design(layout: Layout, fixed: dict[str, Rect], decor_band: int) -> Design:
+    """6. Paths and decoration band on the usable tiles of the map."""
+    allowed = layout.farm_map.usable_tiles()
+    if allowed is None:  # unbounded map: the drawn grid (extent + 1 tile)
+        e = layout.extent()
+        allowed = {
+            (x, y)
+            for x in range(e.x - 1, e.x + e.w + 1)
+            for y in range(e.y - 1, e.y + e.h + 1)
+        }
+    blocks = {pb.block.id: pb.frame for pb in layout.blocks if pb.frame is not None}
+    return plan_design(allowed, blocks, fixed, decor_band)
+
+
+def _pin(farm_map: FarmMap, ids: set[str]) -> FarmMap:
+    """Copy of *farm_map* with the items *ids* no longer movable."""
+    fixed = [
+        f.model_copy(update={"movable": False}) if f.id in ids else f
+        for f in farm_map.fixed
+    ]
+    pinned = farm_map.model_copy(update={"fixed": fixed})
+    pinned._base_dir = farm_map._base_dir
+    return pinned
 
 
 def _grow(w: int, h: int, ratio: float) -> tuple[int, int]:

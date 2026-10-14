@@ -1,5 +1,11 @@
 """
-Farm map - the player's usable farm area and the fixed buildings on it.
+Farm map - the player's usable area and the fixed buildings on it.
+
+One file per game area (``area``: farm, town, fishing_lake), all with the same
+schema: ``config/<area>_map.json`` (local, git-ignored) over the committed
+``config/<area>_map.example.json``. An item marked ``movable`` was measured on
+the map but the planner may rearrange it (town buildings); it is not an
+obstacle.
 
 Every farm has different expansions and a different spot for the farmhouse,
 barn, silo, mine, …, so the map is player data in ``config/``. A local
@@ -28,9 +34,19 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
+from src.models import Area
+
 CONFIG_DIR = Path("config")
 LOCAL_MAP = CONFIG_DIR / "farm_map.json"
 EXAMPLE_MAP = CONFIG_DIR / "farm_map.example.json"
+
+
+def map_paths(area: Area = Area.FARM) -> tuple[Path, Path]:
+    """Local and example map file of *area*."""
+    return (
+        CONFIG_DIR / f"{area.value}_map.json",
+        CONFIG_DIR / f"{area.value}_map.example.json",
+    )
 
 
 Tile = tuple[int, int]
@@ -84,6 +100,9 @@ class FixedItem(BaseModel):
     y: int | None = Field(None, ge=0)
     width: int | None = Field(None, ge=1, description="Tiles along the ↘ edge")
     height: int | None = Field(None, ge=1, description="Tiles along the ↙ edge")
+    movable: bool = Field(
+        False, description="Measured here, but the planner may rearrange it"
+    )
 
     @field_validator("id")
     @classmethod
@@ -212,6 +231,7 @@ class Zone(BaseModel):
 
 
 class FarmMap(BaseModel):
+    area: Area = Area.FARM
     width: int | None = Field(None, ge=1, description="Usable tiles along the ↘ edge")
     height: int | None = Field(None, ge=1, description="Usable tiles along the ↙ edge")
     background: Background | None = None
@@ -238,7 +258,7 @@ class FarmMap(BaseModel):
         if self.background is not None and not self.bounded:
             raise ValueError("A farm map with a background must set width and height")
         if self.bounded:
-            for f in self.placed_fixed:
+            for f in (f for f in self.fixed if f.is_placed):
                 if f.x + f.width > self.width or f.y + f.height > self.height:
                     raise ValueError(f"Fixed item '{f.id}' lies outside the farm map")
             for e in self.expansions:
@@ -297,20 +317,27 @@ class FarmMap(BaseModel):
 
     @property
     def placed_fixed(self) -> list[FixedItem]:
-        return [f for f in self.fixed if f.is_placed]
+        """Placed items the planner keeps where they are (obstacles)."""
+        return [f for f in self.fixed if f.is_placed and not f.movable]
+
+    @property
+    def placed_movable(self) -> list[FixedItem]:
+        """Placed items the planner may rearrange (their size is measured)."""
+        return [f for f in self.fixed if f.is_placed and f.movable]
 
 
-def default_map_path() -> Path:
-    return LOCAL_MAP if LOCAL_MAP.exists() else EXAMPLE_MAP
+def default_map_path(area: Area = Area.FARM) -> Path:
+    local, example = map_paths(area)
+    return local if local.exists() else example
 
 
-def load_farm_map(path: Path | str | None = None) -> FarmMap:
-    """Load the farm map from *path* or the default location; empty map if none."""
-    p = Path(path) if path is not None else default_map_path()
+def load_farm_map(path: Path | str | None = None, area: Area = Area.FARM) -> FarmMap:
+    """Load the map of *area* from *path* or the default location; empty if none."""
+    p = Path(path) if path is not None else default_map_path(area)
     if not p.exists():
         if path is not None:
             raise FileNotFoundError(f"Farm map not found: {p}")
-        return FarmMap()
+        return FarmMap(area=area)
     farm_map = FarmMap.model_validate(json.loads(p.read_text(encoding="utf-8")))
     farm_map._base_dir = p.parent
     return farm_map
