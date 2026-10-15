@@ -111,5 +111,8 @@ def test_design_options_of_v1() -> None:
     assert shared.for_area(Area.FARM).item_gap == 2
     with pytest.raises(ValidationError, match="farm-only"):
         s.DesignSettings(town={"item_gap": 1})
+    with pytest.raises(ValidationError, match="farm-only"):
+        s.DesignSettings(town={"block_images": False})
+    assert s.AreaDesign().block_images is True
     with pytest.raises(ValidationError):
         s.DesignSettings(default={"path_style": "curvy"})

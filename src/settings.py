@@ -45,7 +45,14 @@ Strategy = Literal["auto", "coupling", "size", "flow", "all"]
 CombinerStrategy = Literal["auto", "coupling", "size", "flow"]
 PathStyle = Literal["shortest", "straight"]
 PathTargets = Literal["blocks", "buildings"]
-FARM_ONLY = ("reserve", "strategy", "field_pool", "item_gap", "path_targets")
+FARM_ONLY = (
+    "reserve",
+    "strategy",
+    "field_pool",
+    "item_gap",
+    "path_targets",
+    "block_images",
+)
 
 
 class _Strict(BaseModel):
@@ -86,6 +93,9 @@ class DesignSection(_Strict):
     design_zones: bool | None = Field(
         None, description="Keep the map's design zones free of blocks"
     )
+    block_images: bool | None = Field(
+        None, description="Farm: one SVG per block and a collage of every block"
+    )
 
 
 class AreaDesign(_Strict):
@@ -101,6 +111,7 @@ class AreaDesign(_Strict):
     path_style: PathStyle = DEFAULT_PATH_STYLE
     path_targets: PathTargets = DEFAULT_PATH_TARGETS
     design_zones: bool = True
+    block_images: bool = True
 
     @model_validator(mode="after")
     def buildings_need_room(self) -> AreaDesign:

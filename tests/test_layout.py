@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from src.config import LocationProgress, PlayerConfig
 from src.graph import build_graph
-from src.layout import cli
+from src.layout import cli, visuals
 from src.layout.area import plan_area_layout
 from src.layout.blocks import Block, block_flow_order, detect_named_blocks
 from src.layout.describe import layout_to_dict, layout_to_markdown
@@ -35,7 +35,7 @@ from src.layout.fields import (
 )
 from src.layout.inventory import CountSource, farm_stock
 from src.layout.packing import Box, Rect, bounding_rect, pack, patch
-from src.layout.planner import _grow, plan_layout
+from src.layout.planner import PlacedBlock, _grow, plan_layout
 from src.layout.render_svg import render_svg
 from src.layout.sizing import Sizing
 from src.layout.support import active_relations
@@ -1285,3 +1285,91 @@ def test_item_gap_shrinks_before_blocks_are_left_out(
     assert "paths go to the blocks" in caplog.text
     assert not any("/" in k for k in no_gap.design.connected)
     assert no_gap.design.path_targets == "blocks"
+
+
+# ---------------------------------------------------------------------------
+# Block images and collage
+# ---------------------------------------------------------------------------
+
+
+def _designed(farm: DataSet):
+    farm_map = FarmMap(
+        width=40,
+        height=40,
+        fixed=[FixedItem(id="farmhouse", x=17, y=17, width=6, height=6)],
+    )
+    return plan_layout(farm, level=5, farm_map=farm_map, design=True)
+
+
+def test_block_layout_puts_one_block_on_its_own_grid(farm: DataSet) -> None:
+    layout = _designed(farm)
+    pb = next(b for b in layout.blocks if b.frame is not None and b.items)
+    small = visuals.block_layout(layout, pb)
+    (only,) = small.blocks
+    m = visuals.MARGIN_TILES
+    assert (only.frame.x, only.frame.y) == (m, m)
+    assert (small.farm_map.width, small.farm_map.height) == (
+        pb.frame.w + 2 * m,
+        pb.frame.h + 2 * m,
+    )
+    # the items keep their place inside the frame
+    dx, dy = m - pb.frame.x, m - pb.frame.y
+    assert [(i.rect.x - dx, i.rect.y - dy) for i in only.items] == [
+        (i.rect.x, i.rect.y) for i in pb.items
+    ]
+    # paths: only those around the block, moved with it
+    assert small.design is not None
+    for x, y in small.design.paths:
+        assert 0 <= x < small.farm_map.width and 0 <= y < small.farm_map.height
+    # the legend tells the map position
+    svg = render_svg(small, offset=(pb.frame.x - m, pb.frame.y - m), scale=2)
+    assert f"at ({pb.frame.x}, {pb.frame.y})" in svg
+    unplaced = PlacedBlock(pb.block, None)
+    with pytest.raises(ValueError):
+        visuals.block_layout(layout, unplaced)
+
+
+def test_collage_lays_every_block_side_by_side(farm: DataSet) -> None:
+    layout = plan_layout(farm, level=5)
+    collage = visuals.collage_layout(layout)
+    placed = {b.block.id for b in layout.blocks if b.frame is not None}
+    assert {b.block.id for b in collage.blocks} == placed
+    frames = [b.frame for b in collage.blocks]
+    assert _no_overlap(frames, gap=visuals.COLLAGE_GAP)
+    assert all(
+        f.x >= 0
+        and f.y >= 0
+        and f.x + f.w <= collage.farm_map.width
+        and f.y + f.h <= collage.farm_map.height
+        for f in frames
+    )
+    assert collage.design is None and collage.fixed_unplaced == []
+    _check_layout(collage)
+
+
+def test_write_block_images(farm: DataSet, tmp_path: Path) -> None:
+    layout = _designed(farm)
+    stale = tmp_path / "gone_block.svg"
+    stale.parent.mkdir(exist_ok=True)
+    stale.write_text("<svg/>")
+    paths = visuals.write_block_images(layout, tmp_path)
+    placed = [b for b in layout.blocks if b.frame is not None]
+    assert len(paths) == len(placed) + 1
+    assert paths[-1].name == "collage.svg"
+    assert not stale.exists()  # images of an earlier run are removed
+    text = (tmp_path / f"{placed[0].block.id}.svg").read_text()
+    assert f"<title>{placed[0].block.name} - level 5</title>" in text
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_block_images_setting(tmp_path: Path) -> None:
+    args = ["--level", "20", "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    assert (tmp_path / "blocks" / "collage.svg").exists()
+    off = tmp_path / "off"
+    config = _design_config(tmp_path, farm={"block_images": False})
+    assert (
+        cli.main(["--level", "20", "--design-config", config, "--output-dir", str(off)])
+        == 0
+    )
+    assert not (off / "blocks").exists()

@@ -29,6 +29,7 @@ TILE_W = 28  # screen width of one diamond
 TILE_H = TILE_W // 2
 MARGIN = 40
 LEGEND_ROW = 18
+MIN_WIDTH = 720
 
 # Okabe-Ito based palette, readable on white; cycled for many blocks
 PALETTE = (
@@ -62,8 +63,21 @@ PATH_COLOUR = "#C8A165"
 DECOR_COLOUR = "#4ADE80"
 
 
-def render_svg(layout: Layout, path: Path | str | None = None) -> str:
-    """Return the SVG text for *layout*; also write it to *path* if given."""
+def render_svg(
+    layout: Layout,
+    path: Path | str | None = None,
+    title: str | None = None,
+    *,
+    scale: float = 1.0,
+    offset: tuple[int, int] = (0, 0),
+) -> str:
+    """
+    Return the SVG text for *layout*; also write it to *path* if given.
+
+    *scale* enlarges the displayed size (the drawing keeps its units);
+    *offset* is added to the block positions in the legend, for a layout
+    moved away from its map position (block images).
+    """
     ext = layout.extent()
     gx0, gy0 = ext.x - 1, ext.y - 1
     gw, gh = ext.w + 2, ext.h + 2
@@ -87,7 +101,8 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         ]
         return " ".join(f"{a:.1f},{b:.1f}" for a, b in corners)
 
-    width = MARGIN * 2 + (gw + gh) * TILE_W / 2
+    # small layouts (block images): wide enough for the legend lines
+    width = max(MARGIN * 2 + (gw + gh) * TILE_W / 2, MIN_WIDTH)
     grid_h = (gw + gh) * TILE_H / 2
     fixed_lines = _wrap(layout.fixed_unplaced, 8)
     legend_rows = len(layout.blocks) + 2 + len(fixed_lines)
@@ -100,11 +115,13 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         (
             '<svg xmlns="http://www.w3.org/2000/svg" '
             'xmlns:xlink="http://www.w3.org/1999/xlink" '
-            f'width="{width:.0f}" height="{height:.0f}" '
+            f'width="{width * scale:.0f}" height="{height * scale:.0f}" '
             f'viewBox="0 0 {width:.0f} {height:.0f}" font-family="sans-serif">'
         ),
         (
-            f"<title>{AREA_TITLES[layout.farm_map.area]} layout - level "
+            f"<title>{escape(title)}</title>"
+            if title
+            else f"<title>{AREA_TITLES[layout.farm_map.area]} layout - level "
             f"{layout.level}</title>"
         ),
         '<rect width="100%" height="100%" fill="#FFFFFF"/>',
@@ -287,7 +304,8 @@ def render_svg(layout: Layout, path: Path | str | None = None) -> str:
         where = (
             "not placed"
             if pb.frame is None
-            else f"{pb.frame.w}x{pb.frame.h} at ({pb.frame.x}, {pb.frame.y})"
+            else f"{pb.frame.w}x{pb.frame.h} at "
+            f"({pb.frame.x + offset[0]}, {pb.frame.y + offset[1]})"
         )
         out.append(
             f'<rect x="{MARGIN}" y="{y - 10}" width="12" height="12" fill="{c}"/>'

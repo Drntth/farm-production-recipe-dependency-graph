@@ -11,7 +11,8 @@
     "strategy": "auto",
     "field_pool": 0.0,
     "item_gap": 0,
-    "path_targets": "blocks"
+    "path_targets": "blocks",
+    "block_images": true
   },
   "town": {},
   "fishing_lake": {}

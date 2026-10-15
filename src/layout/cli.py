@@ -31,6 +31,7 @@ from .describe import layout_to_dict, layout_to_markdown
 from .farm_map import load_farm_map
 from .planner import STRATEGIES, plan_layout
 from .render_svg import render_svg
+from .visuals import write_block_images
 
 logger = logging.getLogger("src.layout")
 
@@ -212,6 +213,8 @@ def main(argv: list[str] | None = None) -> int:
             design_zones=settings.design_zones,
         )
         _write(layout, out, stem, settings)
+        if stem == "layout":
+            main_layout = layout
         logger.info(
             "%s: strategy %s (used: %s), reserve %.0f%%, %d blocks not placed",
             stem,
@@ -221,6 +224,9 @@ def main(argv: list[str] | None = None) -> int:
             len(layout.unplaced_blocks),
         )
 
+    if settings.block_images:  # of the main layout
+        images = write_block_images(main_layout, out / "blocks")
+        logger.info("Wrote %d block images → %s", len(images), out / "blocks")
     _log_summary(layout, [stem for stem, _ in runs], out)
     return 0
 

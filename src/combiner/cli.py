@@ -22,6 +22,7 @@ from pathlib import Path
 from src.config import PlayerConfig, load_player_config, validate_player_config
 from src.layout.farm_map import load_farm_map
 from src.layout.render_svg import render_svg
+from src.layout.visuals import write_block_images
 from src.loaders.json_loader import load_data
 from src.models import Area
 from src.settings import load_design_settings, load_planner_settings
@@ -191,6 +192,9 @@ def main(argv: list[str] | None = None) -> int:
         combined_to_markdown(combined, data), encoding="utf-8"
     )
     render_svg(combined.layout, out / f"{STEM}.svg")
+    if design.block_images:
+        images = write_block_images(combined.layout, out / f"{STEM}_blocks")
+        logger.info("Wrote %d block images → %s", len(images), out / f"{STEM}_blocks")
 
     layout, plan = combined.layout, combined.run.chosen
     logger.info(
