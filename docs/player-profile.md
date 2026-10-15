@@ -55,13 +55,13 @@ Not on the wiki or any official page: the player's own counts (owned copies, bou
 | A. Full manual profile                          | very high             | exact                    | yes             | 40+ locations × several fields. Too much to fill in at once, and it goes stale quickly.                                                                                                                                                 |
 | B. Level defaults + sparse overrides            | low                   | good                     | yes             | Everything not listed is derived from the level and the base data. The player lists only what differs (e.g. bought slots).                                                                                                              |
 | C. Presets on top of B (e.g. `free`, `spender`) | very low              | rough                    | yes             | A quick estimate. A preset sets typical slots and animals, and overrides still win.                                                                                                                                                     |
-| D. Interactive wizard (CLI, later web form)     | low                   | exact for answered items | later           | Asks only about items unlocked at the player's level and writes the sparse file from option B.                                                                                                                                          |
+| D. Interactive wizard (CLI, later web form)     | low                   | exact for answered items | yes (CLI)       | Asks only about items unlocked at the player's level and writes the sparse file from option B.                                                                                                                                          |
 | E. Automatic sync with the game account         | none                  | exact                    | no              | Supercell has no public API for Hay Day (official APIs exist only for Clash of Clans, Clash Royale and Brawl Stars). Reading the game client is against the terms of service. A screenshot / OCR import could be a v2.0+ research item. |
 
 ## Recommendation
 
-1. **Now / v0.7: option B.** It is the smallest file that still gives exact results where the player cares.
-2. **v1.0: option D** as the UX on top of B, so nobody has to edit JSON by hand.
+1. **Now / v0.7: option B.** It is the smallest file that still gives exact results where the player cares. Since v1.0, `config/examples/player_level_<N>.json` shows option B written out for levels 10-50 (level defaults only), as a starting point to edit.
+2. **v1.0: option D** as the UX on top of B, so nobody has to edit JSON by hand: `python -m src wizard` (`src/planner/wizard.py`) asks the level, barn / silo, fields, fishing spots (once the lake is open) and one line per unlocked location; Enter keeps the level default, `slots=5 stars=3` changes values; only the changed values are written to `config/player.json`.
 3. **Option C** if testing shows that defaults are too far off for typical players.
 4. **Option E** stays on the watch list for v2.0+, in case an official API appears.
 

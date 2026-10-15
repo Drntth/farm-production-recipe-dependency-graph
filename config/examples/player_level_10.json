@@ -1,0 +1,19 @@
+{
+  "level": 10,
+  "mastery_system": "stars",
+  "barn_capacity": null,
+  "silo_capacity": null,
+  "fields_owned": 18,
+  "fishing_spots_unlocked": null,
+  "locations": {
+    "chicken_coop": {"owned": 1, "animals": 6},
+    "feed_mill": {"owned": 1, "slots": 3, "mastery_stars": 0},
+    "bakery": {"owned": 1, "slots": 2, "mastery_stars": 0},
+    "cow_pasture": {"owned": 1, "animals": 5},
+    "dairy": {"owned": 1, "slots": 2, "mastery_stars": 0},
+    "sugar_mill": {"owned": 1, "slots": 2, "mastery_stars": 0},
+    "popcorn_pot": {"owned": 1, "slots": 2, "mastery_stars": 0},
+    "bbq_grill": {"owned": 1, "slots": 2, "mastery_stars": 0},
+    "pig_pen": {"owned": 1, "animals": 5}
+  }
+}
