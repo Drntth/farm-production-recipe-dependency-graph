@@ -5,9 +5,9 @@ Hay Day changes regularly. This file records what is known about recent versions
 ## Process after a game update
 
 1. Read the update notes: [Fandom Update page](https://hayday.fandom.com/wiki/Update) and the official in-game / Supercell announcements.
-2. Compare them with `data/meta.json`: game version and wiki revision dates.
+2. Compare them with `data/meta.json`: game version and wiki revision dates. `python -m src check-facts` lists the game fact rows whose wiki page changed since they were checked, or whose numbers are no longer on the page (`output/fact_check.md`).
 3. Work through the table below for every changed mechanic.
-4. Re-scrape: `python -m src.scraper --game-version <version>`. Run `python -m pytest` and `python -m src.main`.
+4. Re-scrape: `python -m src.scraper --game-version <version>`. Regenerate the example profiles with `python -m src examples`. Run `python -m pytest` and `python -m src.main`.
 5. Fill in values the wiki does not have in `data/overrides/` and new rules in `docs/game-facts/`.
 6. Add the version to "Known versions" below.
 

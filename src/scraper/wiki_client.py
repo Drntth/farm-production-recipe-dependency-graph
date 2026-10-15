@@ -85,23 +85,25 @@ class WikiClient:
         return [p["title"] for p in query.get("allpages", [])]
 
     def get_revision_timestamps(self, page_names: set[str]) -> dict[str, str | None]:
-        """Return the last-revision timestamp (ISO 8601) of each page, None if missing."""
+        """
+        Last-revision timestamp (ISO 8601) of each page, None if missing.
+
+        Redirects are followed, like ``get_wikitext``: a renamed page reports
+        the revision of the page it points to, under the name asked for.
+        """
         result: dict[str, str | None] = {}
         names = sorted(page_names)
         for i in range(0, len(names), 50):  # MediaWiki limit per query
+            batch = names[i : i + 50]
             query = self._query(
                 {
-                    "titles": "|".join(names[i : i + 50]),
+                    "titles": "|".join(batch),
                     "prop": "revisions",
                     "rvprop": "timestamp",
+                    "redirects": "1",
                 }
             )
-            # The API answers with normalised titles ("Goods List"); map them back.
-            aliases = {n["to"]: n["from"] for n in query.get("normalized", [])}
-            for page in query.get("pages", {}).values():
-                title = aliases.get(page["title"], page["title"])
-                revisions = page.get("revisions")
-                result[title] = revisions[0]["timestamp"] if revisions else None
+            result.update(_timestamps_by_name(batch, query))
         return result
 
     def get_wikitext(self, page_name: str) -> str:
@@ -139,3 +141,24 @@ class WikiClient:
             return self.get_page(page_name)
         except (requests.RequestException, RuntimeError, ValueError):
             return None
+
+
+def _timestamps_by_name(names: list[str], query: dict) -> dict[str, str | None]:
+    """
+    Map a revisions query answer back to the names asked for.
+
+    The API answers with normalised titles ("Goods List") and, with
+    ``redirects``, with the redirect targets; both steps are followed.
+    """
+    normalized = {n["from"]: n["to"] for n in query.get("normalized", [])}
+    redirects = {r["from"]: r["to"] for r in query.get("redirects", [])}
+    stamps: dict[str, str | None] = {}
+    for page in query.get("pages", {}).values():
+        revisions = page.get("revisions")
+        stamps[page["title"]] = revisions[0]["timestamp"] if revisions else None
+    result: dict[str, str | None] = {}
+    for name in names:
+        title = normalized.get(name, name)
+        title = redirects.get(title, title)
+        result[name] = stamps.get(title)
+    return result

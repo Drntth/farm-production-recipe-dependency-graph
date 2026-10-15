@@ -383,3 +383,31 @@ def test_full_pipeline_builds_valid_level_limits(client: FakeWikiClient) -> None
     assert limits.fields_at(5) == 12
     # private helper keys never reach the normalised output
     assert all(not k.startswith("_") for loc in locations for k in loc)
+
+
+def test_revision_timestamps_follow_normalised_titles_and_redirects() -> None:
+    from src.scraper.wiki_client import _timestamps_by_name
+
+    query = {
+        "normalized": [
+            {"from": "Goods_List", "to": "Goods List"},
+            {"from": "Old_Name", "to": "Old Name"},
+        ],
+        "redirects": [{"from": "Old Name", "to": "New Name"}],
+        "pages": {
+            "1": {
+                "title": "Goods List",
+                "revisions": [{"timestamp": "2026-07-29T00:00:00Z"}],
+            },
+            "2": {
+                "title": "New Name",
+                "revisions": [{"timestamp": "2026-10-08T00:00:00Z"}],
+            },
+            "-1": {"title": "Gone", "missing": ""},
+        },
+    }
+    assert _timestamps_by_name(["Goods_List", "Old_Name", "Gone"], query) == {
+        "Goods_List": "2026-07-29T00:00:00Z",
+        "Old_Name": "2026-10-08T00:00:00Z",  # the redirect target's revision
+        "Gone": None,
+    }
