@@ -29,7 +29,7 @@ from .writer import (
 )
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Scrape Hay Day production data from Fandom Wiki"
     )
@@ -65,7 +65,7 @@ def main() -> None:
         default=None,
         help="Game version the data was checked against, stored in meta.json",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     level = args.level
     if level is None:

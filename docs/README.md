@@ -16,6 +16,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [wiki-gaps.md](wiki-gaps.md)                                             | data the wiki lacks: value in use (estimate or measured), status, wiki contribution TODO  |
 | [data-sources.md](data-sources.md)                                       | which wiki pages and categories the scraper reads, what is scraped vs. manual vs. profile |
 | [player-profile.md](player-profile.md)                                   | player-specific settings, input options, profile schema                                   |
+| [user-guide.md](user-guide.md)                                           | how to use the tools: profile, map, settings, commands, outputs                           |
 
 ## Where knowledge lives
 

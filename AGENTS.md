@@ -12,7 +12,8 @@ The project analyses Hay Day production chains. It turns locations, resources an
 - **v0.7** done (Production Planner: profile defaults, mastery, capacity, linear-program quantities, recommendations, login schedule).
 - **v0.8** done (area modes and design layer: `--area town | fishing_lake`, paths and decoration band).
 - **v0.9** done (Combiner: layout sized by the production plan, `flow` block order, lookahead reserves, one combined report).
-- Current milestone: **v1.0** (local usable platform). The in-game measurements (README "In-game TODO") come after v1.0; until then the estimates in `docs/wiki-gaps.md` are used.
+- **v1.0** done (unified CLI `python -m src`, settings in config files, design options, block images, profile wizard and examples, game fact checker, user guide in `docs/user-guide.md`).
+- Next: the in-game measurements (README "In-game TODO"), then **v1.x** (design templates). Until measured, the estimates in `docs/wiki-gaps.md` are used.
 
 ## Read first
 
@@ -28,6 +29,7 @@ Game knowledge is already collected. **Before researching the game or the wiki, 
 | barn, silo                                       | `docs/game-facts/storage.md`                 |
 | fishing lake, town                               | `docs/game-facts/fishing-lake.md`, `town.md` |
 | game versions, update process                    | `docs/game-updates.md`                       |
+| how a player uses the tools (commands, outputs)  | `docs/user-guide.md`                         |
 | data the wiki lacks, estimates in use            | `docs/wiki-gaps.md`                          |
 | which wiki pages the scraper reads               | `docs/data-sources.md`                       |
 | player-specific settings, profile schema         | `docs/player-profile.md`                     |
@@ -50,6 +52,8 @@ pip install -r requirements-dev.txt       # ruff
 
 python -m pytest                          # all tests must pass (no network needed)
 ruff check src tests                      # lint and format check: ruff format --check src tests (ruff from requirements-dev.txt)
+python -m src all                         # unified CLI: graph, farm layout, plan, combined plan in one run
+python -m src <graph|layout|plan|combine|scrape> [options]   # one tool; same options as its own entry point below
 python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
 python -m src.main --level 30             # override the player level
 python -m src.layout                      # farm layout: output/layout.svg, layout.md, layout.json
@@ -59,11 +63,12 @@ python -m src.planner                     # production plan: output/capacity.jso
 python -m src.combiner                    # layout sized by the plan: output/combined.json, combined.md, combined.svg
 # tools/farm_map_editor.html: open in a browser to measure config/<area>_map.json from a screenshot
 python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki
+python -m src check-facts                 # docs/game-facts rows vs. the wiki → output/fact_check.md (network)
 ```
 
 ## Code map
 
-- `config/player.example.json` - the player profile (committed; currently holds the maintainer's values). `config/player.json` is local, git-ignored and takes precedence.
+- `config/player.example.json` - the player profile (committed; currently holds the maintainer's values). `config/player.json` is local, git-ignored and takes precedence. `config/examples/player_level_<N>.json` are generated level-default profiles (`python -m src examples`, `src/planner/examples.py`); never hand-edit them, regenerate after a re-scrape (`tests/test_examples.py` fails when they are stale).
 - `config/farm_map.example.json` - fixed farm buildings with empty positions. `config/farm_map.json` (local, git-ignored) holds the player's measured map size, fixed positions, the calibrated screenshot (`background`, `config/*.png` and `config/*.zip` are git-ignored; map sources live in the git-ignored `config/screenshots/` (GIMP file) and `config/reference/` (wiki plot maps)), the farm plots (`expansions`; section `base` always counts as unlocked) and hand-marked `zones` (`buildable` / `blocked`). Barn and silo are optional there: without a position the planner places them as the Storage block. `config/town_map*.json` and `config/fishing_lake_map*.json` use the same schema with `area` set; an item with `movable: true` is measured but placed by the planner (town service buildings); on the farm only locations the planner places (barn, silo) honour it, any other movable item is kept fixed with a warning.
 - `tools/farm_map_editor.html` - self-contained browser tool that writes `<area>_map.json` (area selector, `movable` flag) and exports PNGs. Its pure JS functions sit between `CORE-START` / `CORE-END` and are tested with node in `tests/test_farm_map_editor.py`; keep the JSON it writes in sync with `src/layout/farm_map.py`.
 - `src/config.py` - `PlayerConfig` (level, mastery system, barn / silo, fields, fishing spots, per-location `LocationProgress`), `load_player_config()`, `validate_player_config()`.
@@ -71,12 +76,13 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 - `src/models/` - pydantic models: `Location` (with `Area`, footprint, `movable`, `rotatable`, `animal_capacity`, `base_slots`, `max_slots`, `lifetime_yield` / `lifetime_harvests`), `MasteryBonus` (time reduction per building and star), `Resource` (`growth_time_seconds`), `Recipe` (`production_time_seconds`, `production_time_3star_seconds`), `LevelLimits` (`field_grants`, `location_instances`).
 - `src/loaders/json_loader.py` - loads `data/*.json`, merges `data/overrides/*.json` (`null` = skip), validates into a `DataSet` with optional `level_limits` and `mastery_bonuses`, optional level filter.
 - `src/graph/` - graph builder, edge types (`relationship.py`), weights (`weighting.py`), analysis (`analysis.py`: proximity, Louvain blocks, centrality, paths).
-- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling, size or flow order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size / flow; placing every block comes first: lowers `item_gap` first, then the block reserve in 1 % steps; optional `sizing`), `sizing.py` (`Sizing`: copies, fields per crop, goods flows, extra reserves from the Combiner), `farm_map.py` (model per area, `outline_segments`), `design.py` (paths as a greedy Steiner tree from the hub, `shortest` or `straight` (turn cost) style, terminals of one or more rects, cut-off key buildings reached at their connection point, decoration band outside design zones, figures: corners, detour ratio), `area.py` (`plan_area_layout` for town / fishing lake from the measured map, no graph), `render_svg.py` (isometric grid), `describe.py`, `cli.py`.
-- `src/planner/` - Production Planner: `profile.py` (`resolve_profile`: every `null` → level default), `mastery.py` (`stars` / `workbench` modifiers, chosen by `mastery_system`), `capacity.py` (storage, fields, parallel lines, queues, max rates), `quantities.py` (scipy linear program, four lexicographic solves), `schedule.py` (interval suggestion, recommendations, actions per login), `run.py` (`run_planner`: one full run, shared with the Combiner), `cli.py`. Machines produce one item at a time: copies are parallel, slots are only a queue. Fields, animals and trees are served only at a login. Goods without a production model (ores from the mine, fish) are external: capped at what the balance needs, never planned.
+- `src/layout/` - Layout Planner: `blocks.py` (named blocks, anchor method), `fields.py` (dedicated fields per block by crop demand), `support.py` (nectar bush → beehive tree), `inventory.py` (copies: profile → level → placeholder), `packing.py` (greedy rect packing; coupling, size or flow order, pull toward the area centre), `planner.py` (`plan_layout`; `strategy` auto / coupling / size / flow; placing every block comes first: lowers `item_gap` first, then the block reserve in 1 % steps; optional `sizing`), `sizing.py` (`Sizing`: copies, fields per crop, goods flows, extra reserves from the Combiner), `farm_map.py` (model per area, `outline_segments`), `design.py` (paths as a greedy Steiner tree from the hub, `shortest` or `straight` (turn cost) style, terminals of one or more rects, cut-off key buildings reached at their connection point, decoration band outside design zones, figures: corners, detour ratio), `area.py` (`plan_area_layout` for town / fishing lake from the measured map, no graph), `render_svg.py` (isometric grid; `scale`, legend `offset`), `visuals.py` (one SVG per block on its own grid and a collage of every block, setting `block_images`; old SVGs of the target directory are removed), `describe.py`, `cli.py`.
+- `src/planner/` - Production Planner: `profile.py` (`resolve_profile`: every `null` → level default), `mastery.py` (`stars` / `workbench` modifiers, chosen by `mastery_system`), `capacity.py` (storage, fields, parallel lines, queues, max rates), `quantities.py` (scipy linear program, four lexicographic solves), `schedule.py` (interval suggestion, recommendations, actions per login), `run.py` (`run_planner`: one full run, shared with the Combiner), `examples.py` (level-default profiles), `wizard.py` (interactive sparse profile; `ask` / `say` injectable for tests), `cli.py`. Machines produce one item at a time: copies are parallel, slots are only a queue. Fields, animals and trees are served only at a login. Goods without a production model (ores from the mine, fish) are external: capped at what the balance needs, never planned.
 - `src/combiner/` - Combiner (farm): `combine.py` (`sizing_from_plan`: fields per crop by use, recommended trees / bushes, goods flows without fields; `upcoming_unlocks` for the lookahead; `flow_links`, `free_tiles`; `combine`), `report.py` (`combined.json` / `combined.md`, layout and schedule sections demoted under one title), `cli.py`.
 - `src/exporters/` - JSON / CSV / GraphML export. New node attributes must be added to the CSV column list and the GraphML key list.
-- `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations incl. infobox base slots, resources, recipes, level_limits, masteries), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`), `writer.py`, `cli.py`.
-- `src/main.py` - CLI entry point.
+- `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations incl. infobox base slots, resources, recipes, level_limits, masteries), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`), `writer.py`, `cli.py`, `factcheck.py` (`python -m src check-facts`: game fact rows with `wiki:` sources vs. page revisions and page numbers; the client is injectable, tests use a fake wiki).
+- `src/cli.py` (+ `src/__main__.py`) - unified CLI: `python -m src <command>` dispatches to each tool's `main(argv)`; `all` runs graph → layout → plan → combine with the shared options. A new tool gets a `COMMANDS` entry.
+- `src/main.py` - graph CLI (`python -m src graph`).
 - `data/overrides/` - hand-maintained shared facts the wiki lacks; its `README.md` explains how to measure them.
 - `docs/` - game knowledge and design analyses (see "Read first").
 - `tests/` - pytest suite, one file per module area; `tests/fixtures/wiki/` holds trimmed wiki HTML and wikitext for scraper tests.
@@ -90,7 +96,7 @@ python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.js
 - Never present a guess as a fact. If the wiki lacks a value the code needs, use an estimate derived from existing data (or the user's game experience), put it where the code reads it, and add a row to `docs/wiki-gaps.md` with its basis and status. Gaps never block a milestone.
 - Every new module gets tests in `tests/`. New scraper parsing needs a fixture-based test in `tests/test_scraper.py` (no network in tests).
 - `output/` is generated and git-ignored. Do not commit it.
-- Tool settings (how a tool works) go into `config/design*.json` or `config/planner*.json` via `src/settings.py`, never into new CLI options. The CLI only says what to run (area, level, file paths). A new setting needs a model field, a value in the example file, a README "Settings" table row and a test.
+- Tool settings (how a tool works) go into `config/design*.json` or `config/planner*.json` via `src/settings.py`, never into new CLI options. The CLI only says what to run (area, level, file paths). The one kind of exception: flags that change only the exit code of a check, not its result (`check-facts --fail-on-findings`). A new setting needs a model field, a value in the example file, a README "Settings" table row and a test.
 - When a roadmap item is finished, tick it in `README.md` and update the "Current status" line and the milestone lines above.
 
 ### Data model

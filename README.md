@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v0.9 is done: the Combiner sizes the farm layout by the production plan and places the blocks along the processing order, in one report. Layouts exist for the farm, the town and the fishing lake (v0.8), with an optional design layer; the Production Planner (v0.7) gives quantities and a login schedule. See the [Roadmap](#roadmap).
+**Status:** v1.0 is done: one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -285,6 +285,7 @@ How the tools work is set in config files, never on the command line: the CLI on
 | `path_style`   | all   | `shortest`, or `straight` (fewer corners and detours)                                             | shortest |
 | `path_targets` | farm  | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)         | blocks   |
 | `design_zones` | all   | keep the map's `design` zones free of blocks (paths may cross them)                               | true     |
+| `block_images` | farm  | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                    | true     |
 
 Farm-only keys are rejected in the town and fishing lake sections; in the `default` section they apply to the farm only.
 
@@ -313,6 +314,8 @@ Player-specific, static settings live in `config/`:
 
 - `config/player.example.json`: committed example.
 - `config/player.json`: your own copy. It is git-ignored and takes precedence when present.
+- `python -m src wizard`: answers a few questions and writes `config/player.json` with only the values that differ from the level defaults (Enter keeps a default; per location e.g. `slots=5 stars=3`; asks before overwriting).
+- `config/examples/player_level_<N>.json` (levels 10, 20, 30, 40, 50): a player who bought nothing beyond the level, every value written out as its level default (all fields and copies, base slots, 0 mastery, full shelters, one beehive; trees / bushes left to the planner; barn, silo and fishing spots `null`, because supplies upgrade them, not the level). Copy one to `config/player.json` and edit what differs, or pass it with `--player-config`. `python -m src examples` regenerates them after a re-scrape.
 
 The config is the **player profile**: everything the player buys, upgrades or earns rather than unlocks by level. `null` means unknown; the planners then use a default derived from the level and the shared data.
 
@@ -585,14 +588,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v0.9 (Combiner) is done (215 tests passing). Next milestone: v1.0 (local usable platform).  
+**Current status:** v1.0 (local usable platform) is done (238 tests passing). Next: the [In-game TODO](#in-game-todo) measurements, then v1.x (design templates).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point); `--area town` / `--area fishing_lake` lay out the measured town and lake maps (`config/town_map.json`, `config/fishing_lake_map.json`, measured with the map editor).  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses, town building sizes) are estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); measuring them refines the plans but does not block the roadmap.  
-Next step: v1.0. The [In-game TODO](#in-game-todo) measurements follow after v1.0, to check the results against the game.
+Next step: the [In-game TODO](#in-game-todo) measurements, to check the results against the game; then v1.x.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -673,15 +676,15 @@ Next step: v1.0. The [In-game TODO](#in-game-todo) measurements follow after v1.
 - [x] Single combined report / data file (`output/combined.md`, `.json`, `.svg`)
 - [x] Expansion-friendly full-farm suggestion (lookahead: reserved copies and fields, space check for new buildings)
 
-### v1.0 - Local usable platform
+### v1.0 - Local usable platform (done)
 
 - [x] Settings only in config files: `config/design.json` (layout and design, `default` plus per-area sections) and `config/planner.json` (production, Combiner); the CLI only says what to run (`--area`, `--level`, file paths), and every output records the settings it used
-- [ ] Unified CLI: one entry point for the tools (`--area`, `--level`, config paths)
-- [ ] Game fact checker: a script that reads every row of `docs/game-facts/*.md` (`Source` = `wiki:<Page>`), fetches the page through the wiki API and reports rows whose value is no longer found or whose page changed after `Checked`. It can be pulled forward if game updates make manual checks too slow.
-- [ ] Visual outputs (block frames, block collages, optional whole-map collage)
-- [ ] Ready-to-use player-config examples for common levels
-- [ ] Interactive profile wizard (option D of [docs/player-profile.md](docs/player-profile.md)): asks only about items unlocked at the level and writes the sparse profile
-- [ ] Documentation
+- [x] Unified CLI: `python -m src <command>` (`graph`, `layout`, `plan`, `combine`, `scrape`, `all`); the tools' own entry points keep working
+- [x] Game fact checker: `python -m src check-facts` reads every row of `docs/game-facts/*.md` with a `wiki:<Page>` source, fetches each page once through the wiki API and reports rows whose page changed after `Checked` or whose numbers are no longer in the page (`output/fact_check.md` / `.json`)
+- [x] Visual outputs: one SVG per block (the block on its own grid with the paths around it, legend with its map position) and a collage of every block (`output/blocks/`, `output/combined_blocks/`; setting `block_images`); the whole map stays `layout.svg` / `combined.svg`
+- [x] Ready-to-use player-config examples for common levels (`config/examples/`, level defaults only; `python -m src examples`)
+- [x] Interactive profile wizard (option D of [docs/player-profile.md](docs/player-profile.md)): `python -m src wizard` asks only about items unlocked at the level and writes the sparse profile
+- [x] Documentation: [user guide](docs/user-guide.md) (profile, map, settings, commands, outputs, typical situations)
 - [x] Design options: every design option below is off by default and is switched on or tuned in `config/design.json` (per area), so a chosen style is kept between runs
 - [x] Nicer paths (option): `path_style` `shortest` (default) or `straight` (a cost per turn: fewer corners and detours); `path_targets` `blocks` (blocks and key buildings, default) or `buildings` (every building; needs `item_gap` ≥ 1)
 - [x] Space inside blocks (option): `item_gap` free tiles between the buildings of a block (default 0), so blocks look less packed; field, tree and bush patches stay together. Every block must fit first: the gap is lowered before the reserve, and the report shows it
@@ -734,6 +737,14 @@ cp config/player.example.json config/player.json
 
 # run tests
 python -m pytest
+
+# unified CLI: one entry point, one command per tool
+python -m src                       # list the commands
+python -m src all                   # graph, farm layout, plan and combined plan in one run
+python -m src layout --area town    # any tool: python -m src <graph|layout|plan|combine|scrape> [options]
+python -m src wizard                # questions → config/player.json (sparse profile)
+python -m src examples              # regenerate config/examples/player_level_<N>.json
+python -m src check-facts           # docs/game-facts vs. the wiki → output/fact_check.md (network)
 
 # build graph + analysis for the configured player level
 python -m src.main
@@ -788,7 +799,9 @@ output/
 ├── schedule.md
 ├── combined.json                      # python -m src.combiner
 ├── combined.md
-└── combined.svg
+├── combined.svg
+├── blocks/                            # one SVG per block + collage.svg (block_images)
+└── combined_blocks/                   # the same for the combined layout
 ```
 
 Update data from the wiki (level from the player config):
@@ -815,9 +828,11 @@ farm-production-recipe-dependency-graph/
 │   ├── data-sources.md                # what is scraped, from where; what is manual
 │   ├── game-updates.md                # update process, known versions
 │   ├── wiki-gaps.md                   # data the wiki lacks: estimates in use, measurement / wiki TODO
+│   ├── user-guide.md                  # how to use the tools: profile, map, settings, run, outputs
 │   └── player-profile.md              # player-specific settings and profile schema
 ├── config/
 │   ├── player.example.json            # example player config (committed)
+│   ├── examples/                      # level-default profiles: player_level_10 … _50.json
 │   ├── player.json                    # your own config (git-ignored)
 │   ├── design.example.json            # layout / design settings (committed)
 │   ├── planner.example.json           # production / Combiner settings (committed)
@@ -852,6 +867,8 @@ farm-production-recipe-dependency-graph/
 │   │   ├── cli.py                     # python -m src.combiner
 │   │   ├── combine.py                 # sizing from the plan, lookahead, flows between blocks
 │   │   └── report.py                  # combined.json / combined.md
+│   ├── __main__.py                    # python -m src <command>
+│   ├── cli.py                         # unified CLI: graph, layout, plan, combine, scrape, all
 │   ├── config.py                      # player profile: model, loader, validation
 │   ├── settings.py                    # design / planner settings: models, defaults, loader
 │   ├── exporters/
@@ -885,15 +902,18 @@ farm-production-recipe-dependency-graph/
 │   │   ├── planner.py                 # plan_layout(): blocks → frames → farm
 │   │   ├── render_svg.py              # isometric SVG with tile grid
 │   │   ├── sizing.py                  # block sizes from production quantities (Combiner input)
-│   │   └── support.py                 # support relations (nectar bush → beehive tree)
+│   │   ├── support.py                 # support relations (nectar bush → beehive tree)
+│   │   └── visuals.py                 # block images and collage
 │   ├── planner/                       # Production Planner (farm)
 │   │   ├── capacity.py                # capacity model: storage, fields, parallel lines, rates
 │   │   ├── cli.py                     # python -m src.planner
 │   │   ├── mastery.py                 # mastery modifiers: stars, workbench (placeholder)
 │   │   ├── profile.py                 # player profile with level defaults (option B)
+│   │   ├── examples.py                # level-default profiles for config/examples/
 │   │   ├── quantities.py              # linear program: steady-state rates per login interval
 │   │   ├── run.py                     # one planner run: profile → capacity → plans → schedule
-│   │   └── schedule.py                # interval suggestion, recommendations, actions per login
+│   │   ├── schedule.py                # interval suggestion, recommendations, actions per login
+│   │   └── wizard.py                  # interactive profile wizard (python -m src wizard)
 │   ├── scraper/
 │   │   ├── parsers/
 │   │   │   ├── level_limits.py        # field grants from Experience Levels pages
@@ -903,6 +923,7 @@ farm-production-recipe-dependency-graph/
 │   │   │   └── resources.py
 │   │   ├── cli.py
 │   │   ├── durations.py               # "1 d 3 h" / "★★★" → seconds
+│   │   ├── factcheck.py               # game fact tables vs. the wiki (python -m src check-facts)
 │   │   ├── normalizer.py
 │   │   ├── wiki_client.py
 │   │   └── writer.py
@@ -912,9 +933,12 @@ farm-production-recipe-dependency-graph/
 ├── tests/
 │   ├── fixtures/wiki/                 # trimmed wiki HTML / wikitext for scraper tests
 │   ├── test_analysis.py
+│   ├── test_cli.py
 │   ├── test_combiner.py
 │   ├── test_config.py
+│   ├── test_examples.py
 │   ├── test_exporters.py
+│   ├── test_factcheck.py
 │   ├── test_farm_map_editor.py        # editor JS core via node (skipped without node)
 │   ├── test_graph_builder.py
 │   ├── test_graph_quality.py
@@ -924,7 +948,8 @@ farm-production-recipe-dependency-graph/
 │   ├── test_models.py
 │   ├── test_planner.py
 │   ├── test_scraper.py
-│   └── test_settings.py
+│   ├── test_settings.py
+│   └── test_wizard.py
 ├── AGENTS.md                          # instructions for coding agents
 ├── CLAUDE.md -> AGENTS.md             # symlink
 ├── LICENSE
