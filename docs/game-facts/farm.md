@@ -2,15 +2,16 @@
 
 ## Fields
 
-| Fact                         | Value                                                                                                      | Source                             | Checked    |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------- |
-| Fields at level 1            | 6                                                                                                          | wiki:Experience_Levels/Levels_1-25 | 2026-10-05 |
-| New fields per level         | every other level: 3 until level 49, 2 until 99, then 1                                                    | wiki:Farm                          | 2026-10-05 |
-| Fields available at level 56 | 84 (computed from the grants)                                                                              | data/level_limits.json             | 2026-10-05 |
-| Field price                  | 1 coin each; planting crops is free                                                                        | wiki:Crops                         | 2026-10-05 |
-| Field limit                  | wiki: "There is no limit to how many fields you can have" (conflicts with the per-level grants; to verify) | wiki:Farm                          | 2026-10-05 |
-| Field footprint              | 1x1                                                                                                        | in-game                            | 2026-10-05 |
-| Crop yield                   | one planted crop gives two harvested ones                                                                  | wiki:Crops                         | 2026-10-14 |
+| Fact                         | Value                                                                                                                    | Source                             | Checked    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- | ---------- |
+| Fields at level 1            | 6                                                                                                                        | wiki:Experience_Levels/Levels_1-25 | 2026-10-05 |
+| New fields per level         | every other level: 3 until level 49, 2 until 99, then 1                                                                  | wiki:Farm                          | 2026-10-05 |
+| Fields available at level 56 | 84 (computed from the grants)                                                                                            | data/level_limits.json             | 2026-10-05 |
+| Field price                  | 1 coin each; planting crops is free                                                                                      | wiki:Crops                         | 2026-10-05 |
+| Field limit on the wiki      | "There is no limit to how many fields you can have" (does not hold in the game, see the next row)                        | wiki:Farm                          | 2026-10-05 |
+| Field limit in the game      | limited by level: new fields come only with a level-up, and the level sets how many can be placed (the per-level grants) | in-game                            | 2026-10-21 |
+| Field footprint              | 1x1                                                                                                                      | in-game                            | 2026-10-05 |
+| Crop yield                   | one planted crop gives two harvested ones                                                                                | wiki:Crops                         | 2026-10-14 |
 
 ## Trees and bushes
 
@@ -27,7 +28,7 @@
 | Fruit tree / bush lifetime yield        | up to 13 goods over 4 harvests (the 4th after a revive): apple, cherry, cacao tree; raspberry, blackberry bush. Blueberry and coffee bush pages give no total (see [../wiki-gaps.md](../wiki-gaps.md)) | wiki:Apple_Tree, wiki:Cherry_Tree, wiki:Cacao_Tree, wiki:Raspberry_Bush, wiki:Blackberry_Bush | 2026-10-14 |
 | Time between harvests                   | the growth time of the fruit (e.g. apple 16 h, cherry 1 d 3 h)                                                                                                                                         | wiki:Apple_Tree, wiki:Cherry_Tree                                                             | 2026-10-14 |
 | Harvest cycle                           | 3 harvests, growing yield (the first is the smallest); a neighbour can revive the plant for a 4th; then it dies and must be cut (saw / axe)                                                            | in-game, wiki:Apple_Tree                                                                      | 2026-10-14 |
-| Yield per harvest                       | not on the wiki; estimate 2 / 3 / 4 / 4 in use, see [../wiki-gaps.md](../wiki-gaps.md)                                                                                                                 | player estimate                                                                               | 2026-10-14 |
+| Yield per harvest                       | not on the wiki; accepted estimate 2 / 3 / 4 / 4, see [../wiki-gaps.md](../wiki-gaps.md)                                                                                                               | player estimate                                                                               | 2026-10-21 |
 
 ## Farm buildings (not production)
 

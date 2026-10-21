@@ -33,21 +33,21 @@ The values are stored in `data/overrides/locations.json`.
 
 ## Beehive tree and nectar bush
 
-| Fact                                                                | Value                                                                                         | Source                              | Checked    |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- |
-| One beehive tree per player                                         | costs 4,000 coins                                                                             | wiki:Beehive_Tree                   | 2026-10-05 |
-| Beehives on the tree                                                | 1 at start, up to 4; 3 bees each (12 bees)                                                    | wiki:Beehive_Tree                   | 2026-10-05 |
-| The tree grows a beehive after collected nectar                     | 4,000 / 40,000 / 400,000 drops                                                                | wiki:Beehive_Tree                   | 2026-10-05 |
-| Beehive count follows the mastery stars on the maintainer's account | 2 beehives now                                                                                | in-game                             | 2026-10-05 |
-| Honeycomb is produced                                               | per 100 drops of nectar, about 35 min if bushes are close                                     | wiki:Beehive_Tree                   | 2026-10-05 |
-| Honeycomb per nectar bush                                           | 5 (500 drops per bush / 100 drops per honeycomb); used for the nectar bush recommendation     | wiki:Nectar_Bush, wiki:Beehive_Tree | 2026-10-14 |
-| Honeycomb rate per beehive                                          | not exact on the wiki; estimate one per 35 min in use, see [../wiki-gaps.md](../wiki-gaps.md) | wiki:Beehive_Tree                   | 2026-10-14 |
-| Nectar bush unlock and price                                        | level 39, 120 coins                                                                           | wiki:Nectar_Bush                    | 2026-10-05 |
-| Nectar per bush                                                     | 500 drops in 2 harvests of 250; no growth cycle                                               | wiki:Nectar_Bush                    | 2026-10-05 |
-| An empty bush wilts                                                 | another player can revive it for one final 250-drop harvest (helper gets 8 XP)                | wiki:Nectar_Bush                    | 2026-10-05 |
-| Nectar is not stored by the player                                  | goes straight into the beehives                                                               | wiki:Nectar_Bush                    | 2026-10-05 |
-| Distance between bush and beehive tree                              | farther = slower bees while online; no effect offline                                         | wiki:Nectar_Bush                    | 2026-10-05 |
-| Nectar bush footprint                                               | 1x1                                                                                           | in-game                             | 2026-10-05 |
+| Fact                                                                | Value                                                                                                                          | Source                              | Checked    |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- | ---------- |
+| One beehive tree per player                                         | costs 4,000 coins                                                                                                              | wiki:Beehive_Tree                   | 2026-10-05 |
+| Beehives on the tree                                                | 1 at start, up to 4; 3 bees each (12 bees)                                                                                     | wiki:Beehive_Tree                   | 2026-10-05 |
+| The tree grows a beehive after collected nectar                     | 4,000 / 40,000 / 400,000 drops                                                                                                 | wiki:Beehive_Tree                   | 2026-10-05 |
+| Beehive count follows the mastery stars on the maintainer's account | 2 beehives now                                                                                                                 | in-game                             | 2026-10-05 |
+| Honeycomb is produced                                               | per 100 drops of nectar, about 35 min if bushes are close                                                                      | wiki:Beehive_Tree                   | 2026-10-05 |
+| Honeycomb per nectar bush                                           | 5 (500 drops per bush / 100 drops per honeycomb); used for the nectar bush recommendation                                      | wiki:Nectar_Bush, wiki:Beehive_Tree | 2026-10-14 |
+| Honeycomb rate per beehive                                          | not exact on the wiki and not measurable in the game; accepted estimate one per 35 min, see [../wiki-gaps.md](../wiki-gaps.md) | wiki:Beehive_Tree                   | 2026-10-14 |
+| Nectar bush unlock and price                                        | level 39, 120 coins                                                                                                            | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar per bush                                                     | 500 drops in 2 harvests of 250; no growth cycle                                                                                | wiki:Nectar_Bush                    | 2026-10-05 |
+| An empty bush wilts                                                 | another player can revive it for one final 250-drop harvest (helper gets 8 XP)                                                 | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar is not stored by the player                                  | goes straight into the beehives                                                                                                | wiki:Nectar_Bush                    | 2026-10-05 |
+| Distance between bush and beehive tree                              | farther = slower bees while online; no effect offline                                                                          | wiki:Nectar_Bush                    | 2026-10-05 |
+| Nectar bush footprint                                               | 1x1                                                                                                                            | in-game                             | 2026-10-05 |
 
 Layout consequence: nectar bushes belong next to the beehive tree (support relation in `src/layout/support.py`).
 

@@ -13,7 +13,7 @@ The project analyses Hay Day production chains. It turns locations, resources an
 - **v0.8** done (area modes and design layer: `--area town | fishing_lake`, paths and decoration band).
 - **v0.9** done (Combiner: layout sized by the production plan, `flow` block order, lookahead reserves, one combined report).
 - **v1.0** done (unified CLI `python -m src`, settings in config files, design options, block images, profile wizard and examples, game fact checker, user guide in `docs/user-guide.md`).
-- Next: the in-game measurements (README "In-game TODO"), then **v1.x** (design templates). Until measured, the estimates in `docs/wiki-gaps.md` are used.
+- Next: measure the town and fishing lake maps (README "In-game TODO"), then **v1.x** (design templates). The other values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
 

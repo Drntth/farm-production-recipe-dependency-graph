@@ -293,7 +293,11 @@ Farm-only keys are rejected in the town and fishing lake sections; in the `defau
 
 ```json
 {
-  "production": { "login_interval": null, "storage_share": 0.5, "min_efficiency": 0.8 },
+  "production": {
+    "login_interval": null,
+    "storage_share": 0.5,
+    "min_efficiency": 0.8
+  },
   "combiner": { "lookahead": 5, "strategy": "flow" }
 }
 ```
@@ -588,14 +592,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.0 (local usable platform) is done (238 tests passing). Next: the [In-game TODO](#in-game-todo) measurements, then v1.x (design templates).  
+**Current status:** v1.0 (local usable platform) is done (241 tests passing). Next: measure the town and fishing lake maps ([In-game TODO](#in-game-todo)), then v1.x (design templates).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point); `--area town` / `--area fishing_lake` lay out the measured town and lake maps (`config/town_map.json`, `config/fishing_lake_map.json`, measured with the map editor).  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
-Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses, town building sizes) are estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); measuring them refines the plans but does not block the roadmap.  
-Next step: the [In-game TODO](#in-game-todo) measurements, to check the results against the game; then v1.x.
+Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses, town building sizes) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
+Next step: the town and fishing lake maps ([In-game TODO](#in-game-todo)); then v1.x.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -707,19 +711,12 @@ Next step: the [In-game TODO](#in-game-todo) measurements, to check the results 
 
 ### In-game TODO
 
-Tasks that need the real game, because the wiki does not give the values. Until they are done the code uses an estimate or an empty map, so **none of them blocks the next versions**; they make the results more accurate. They are planned after v1.0, to check the finished tools against the game. Basis and status of every estimate: [docs/wiki-gaps.md](docs/wiki-gaps.md).
+Tasks that need the real game, because the wiki does not give the values. Until they are done the layout lists what is not measured, so **none of them blocks the next versions**. Only the two area maps remain: the other values are measured (field limit, barn footprint) or kept as accepted estimates (tree / bush yield, honeycomb rate, 3-star times). The Workbench bonuses wait for the game rollout to reach the account; until then the base times are used. Basis and status of every value: [docs/wiki-gaps.md](docs/wiki-gaps.md).
 
-| Task                                                                                                                    | Needed for                                                                                      | Until then                                | Blocks a version?                            | Record the result in                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| [ ] Yield of every tree and bush kind per harvest (1st, 2nd, 3rd, after a revive), incl. blueberry and coffee bush      | v0.7 Production Planner (fruit rates, tree / bush recommendations), v0.9 Combiner (patch sizes) | estimate 2 / 3 / 4 / 4 per harvest        | no                                           | `data/overrides/locations.json` (`lifetime_yield`, `lifetime_harvests`), `docs/game-facts/farm.md`, `docs/wiki-gaps.md` |
-| [ ] Honeycomb rate per beehive, with close and with distant nectar bushes                                               | v0.7 Production Planner (honeycomb, nectar bushes per day)                                      | estimate one per 35 min                   | no                                           | `data/overrides/resources.json` (`growth_time_seconds`), `docs/game-facts/animals.md`                                   |
-| [ ] Measure the town map with the editor (screenshot, calibration, every building, `movable` for the service buildings) | v0.8 `--area town`                                                                              | the layout lists what is not measured     | no; needed for a usable town layout          | `config/town_map.json`                                                                                                  |
-| [ ] Check which town buildings can be moved in Layout Edit Mode                                                         | v0.8 `--area town`                                                                              | service buildings movable, the rest fixed | no                                           | `config/town_map.example.json`, map editor defaults, `docs/wiki-gaps.md`                                                |
-| [ ] Measure the fishing lake map with the editor                                                                        | v0.8 `--area fishing_lake`                                                                      | the layout lists what is not measured     | no; needed for a usable lake layout          | `config/fishing_lake_map.json`                                                                                          |
-| [ ] Workbench (Building Mastery) bonuses, once the rollout reaches the account                                          | v0.7 mastery modifier (`mastery_system: workbench`)                                             | base production times                     | no; only matters after the switch from stars | `src/planner/mastery.py`, `docs/game-facts/production-buildings.md`                                                     |
-| [ ] Real 3-star time of one machine (e.g. chicken feed: 4 min or 4 min 15 s)                                            | v0.7 mastery modifier (precision)                                                               | the scraped Goods List time               | no                                           | `docs/wiki-gaps.md`                                                                                                     |
-| [ ] Whether fields are limited by level (wiki: "no limit" vs. the per-level grants)                                     | v0.7 field recommendation, v0.6 layout field count                                              | the per-level grants                      | no                                           | `docs/game-facts/farm.md`, `docs/wiki-gaps.md`                                                                          |
-| [ ] Barn footprint at the other barn appearance stages                                                                  | v0.6 layout (Storage block)                                                                     | 3x3, measured at capacity 675             | no                                           | `data/overrides/locations.json`, `docs/game-facts/storage.md`                                                           |
+| Task                                                                                                                                                                     | Needed for                 | Until then                                                                       | Blocks a version?                   | Record the result in                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ] Measure the town map with the editor (screenshot, calibration, every building; `movable` for the buildings that move in Layout Edit Mode; how the sanctuary appears) | v0.8 `--area town`         | the layout lists what is not measured; service buildings movable, the rest fixed | no; needed for a usable town layout | `config/town_map.json`; movable buildings and the sanctuary in `config/town_map.example.json`, map editor defaults, `docs/wiki-gaps.md` |
+| [ ] Measure the fishing lake map with the editor                                                                                                                         | v0.8 `--area fishing_lake` | the layout lists what is not measured                                            | no; needed for a usable lake layout | `config/fishing_lake_map.json`                                                                                                          |
 
 ---
 

@@ -27,7 +27,7 @@ Only **shared game facts** belong here, values that are the same for every playe
 Fixed buildings (`movable: false`) need no footprint. The layout planner leaves them where they are.  
 `rotatable` only matters for non-square items. A 1×2 item that can be turned may also be placed as 2×1.  
 The lobster pool and duck salon have no `slots` in their wiki infobox; their text says 1 slot at start and 6 at most, so both fields are set here.  
-`lifetime_yield` / `lifetime_harvests` and the honeycomb `growth_time_seconds` are estimates; their basis and status are in [docs/wiki-gaps.md](../../docs/wiki-gaps.md). Replace them when they are measured in the game.
+`lifetime_yield` / `lifetime_harvests` and the honeycomb `growth_time_seconds` are accepted estimates (not measured in the game); their basis and status are in [docs/wiki-gaps.md](../../docs/wiki-gaps.md).
 
 ### Status
 
