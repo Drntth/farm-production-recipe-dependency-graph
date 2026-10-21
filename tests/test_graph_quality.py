@@ -32,7 +32,7 @@ HAS_REAL_DATA = (DATA_DIR / "locations.json").exists()
 
 
 # ---------------------------------------------------------------------------
-# Shared fixture – classic dairy / bakery chains (always available)
+# Shared fixture - classic dairy / bakery chains (always available)
 # ---------------------------------------------------------------------------
 
 

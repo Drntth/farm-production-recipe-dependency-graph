@@ -445,7 +445,7 @@ def parse_locations(client: WikiClient, max_level: int) -> list[dict[str, Any]]:
     """
     Return raw list of locations up to max_level.
 
-    Data is taken exclusively from wiki pages – nothing is hard-coded:
+    Data is taken exclusively from wiki pages - nothing is hard-coded:
     - Production_Buildings_List  → type=production
     - building pages (infobox)   → base_slots
     - Animal_Shelters            → type=animal (farm animals only)

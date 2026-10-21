@@ -13,7 +13,7 @@
     },
     "type": {
       "type": "enum",
-      "description": "Location category – everything that occupies space on the farm",
+      "description": "Location category - everything that occupies space on the farm",
       "allowed_values": [
         "production",
         "animal",
