@@ -9,9 +9,11 @@ through the MediaWiki API and reports:
 - ``changed``: a source page was edited after the row's ``Checked`` date, so
   the value may be stale;
 - ``value not found``: a number of the value (``9``, ``1,000``, ``4.5``) is
-  in none of the source pages' wikitext (category pages hold no values). Values without numbers are only
-  checked for page changes. The value check is a hint, not a proof: derived
-  or rounded numbers need a look by hand;
+  in none of the source pages' wikitext, where number words count too
+  (``one to three``; category pages hold no values). A step remark
+  ``(+N each)`` is derived and not checked. Values without numbers are only
+  checked for page changes. The value check is a hint, not a proof: other
+  derived or rounded numbers need a look by hand;
 - ``page error``: a source page could not be fetched (missing, network).
 
 Rows with other sources (``in-game``, ``data/…``, player estimates) are
@@ -46,6 +48,43 @@ _WIKI = re.compile(r"wiki:([^,|…\s][^,|…]*)")
 _FETCH_ERRORS = (requests.RequestException, RuntimeError, KeyError, ValueError)
 _DATE = re.compile(r"\b\d{4}-\d{2}(?:-\d{2})?\b")
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
+_THOUSANDS = re.compile(r"\d{1,3}(,\d{3})+")
+# "(+9,500 each)": a step derived from the listed values, not on the page
+_STEP = re.compile(r"\(\+[\d.,]+ each\)")
+# the wiki writes small numbers as words ("one to three slots")
+_WORDS = {
+    w: str(n)
+    for n, w in enumerate(
+        [
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+            "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
+            "twenty",
+        ]
+    )
+} | {"thirty": "30", "forty": "40", "fifty": "50", "hundred": "100"}
+_WORD = re.compile(r"\b(" + "|".join(_WORDS) + r")\b", re.IGNORECASE)
+# "one" / "two" also fill prose ("one of the", "the last one"): they count
+# only before a word other than "of" ("two slots", "one to three")
+_COMMON = {"one", "two"}
+_COUNTING = re.compile(r"\s+(?!of\b)[a-z]", re.IGNORECASE)
 
 
 class WikiPages(Protocol):
@@ -115,17 +154,32 @@ def load_fact_rows(directory: Path = FACT_DIR) -> list[FactRow]:
     return rows
 
 
-def _numbers(text: str) -> set[str]:
+def _word_number(m: re.Match[str], text: str) -> str:
+    word = m.group(1).lower()
+    if word in _COMMON and not _COUNTING.match(text, m.end()):
+        return m.group(1)
+    return f" {_WORDS[word]} "
+
+
+def _numbers(text: str, words: bool = False) -> set[str]:
     """
     Numbers of *text*, thousands separators removed (``1,000`` -> ``1000``).
 
-    Dates (``2026-08``, ``2026-10-05``) are not values: they are left out.
+    A comma list without spaces (``1,12,23``) gives each number. Dates
+    (``2026-08``, ``2026-10-05``) are not values: they are left out. With
+    *words* (the page text), number words count too (``three`` -> ``3``;
+    ``one`` and ``two`` only before a word other than ``of``).
     """
     text = _DATE.sub(" ", text)
-    return {
-        n.replace(",", "") if re.fullmatch(r"\d{1,3}(,\d{3})+", n) else n
-        for n in _NUMBER.findall(text)
-    }
+    if words:
+        text = _WORD.sub(lambda m: _word_number(m, text), text)
+    found: set[str] = set()
+    for n in _NUMBER.findall(text):
+        if _THOUSANDS.fullmatch(n):
+            found.add(n.replace(",", ""))
+        else:
+            found.update(n.split(","))
+    return found
 
 
 def check_facts(rows: list[FactRow], client: WikiPages) -> list[Finding]:
@@ -162,8 +216,8 @@ def check_facts(rows: list[FactRow], client: WikiPages) -> list[Finding]:
                     status = "changed"
         # a category page lists members, it holds no values
         content = [p for p in row.pages if not p.startswith("Category:")]
-        found = set().union(*(_numbers(texts[p] or "") for p in content))
-        missing = sorted(_numbers(row.value) - found)
+        found = set().union(*(_numbers(texts[p] or "", words=True) for p in content))
+        missing = sorted(_numbers(_STEP.sub(" ", row.value)) - found)
         if missing and content and not failed:
             details.append(f"not in the page text: {', '.join(missing)}")
             status = "value not found"

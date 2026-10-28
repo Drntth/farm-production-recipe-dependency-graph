@@ -76,6 +76,27 @@ def test_numbers_skip_dates_and_join_thousands() -> None:
     }
 
 
+def test_numbers_split_comma_lists_and_read_number_words() -> None:
+    assert fc._numbers("3 houses unlocked at level 1,12,23") == {"3", "1", "12", "23"}
+    text = "Each machine has one to three slots; Twelve at most"
+    assert fc._numbers(text, words=True) == {"1", "3", "12"}
+    assert fc._numbers(text) == set()  # a row value is read as written
+    assert fc._numbers("someone often") == set()
+    # "one" / "two" are everywhere in prose: they count only before a noun
+    assert fc._numbers("one of the barns, the last one.", words=True) == set()
+    assert fc._numbers("one or two cows, room for two squirrels", words=True) == {
+        "1",
+        "2",
+    }
+    assert fc._numbers("1,000 to 2,000 coins", words=True) == {"1000", "2000"}
+
+
+def test_step_remark_is_not_checked() -> None:
+    table = TABLE.replace("| 50 |", "| 50, 1000 (+950 each) |")
+    first = fc.check_facts(fc.parse_fact_tables(table, "storage.md"), FakeWiki())[0]
+    assert first.status == "ok"
+
+
 def test_check_facts() -> None:
     wiki = FakeWiki()
     findings = fc.check_facts(fc.parse_fact_tables(TABLE, "storage.md"), wiki)

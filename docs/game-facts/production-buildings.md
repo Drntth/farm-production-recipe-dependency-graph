@@ -6,25 +6,25 @@ Rules about machines that the scraper does not read. Per-building values that th
 
 | Fact                                                        | Value                                               | Source                          | Checked    |
 | ----------------------------------------------------------- | --------------------------------------------------- | ------------------------------- | ---------- |
-| Starting slots per machine                                  | 1-3 (infobox `slots` on each page)                  | wiki:Production_Buildings       | 2026-10-05 |
+| Starting slots per machine                                  | 1-3 (infobox `slots` on each page)                  | wiki:Production_Buildings       | 2026-10-28 |
 | Starting slots up to level 56                               | 2; feed mill 3, smelter 1 (scraped as `base_slots`) | wiki:Feed_Mill, wiki:Smelter, … | 2026-10-14 |
-| A machine produces one item at a time                       | slots only queue; the mine gives several at once    | wiki:Production_Buildings       | 2026-10-14 |
-| Maximum slots per machine copy                              | 9                                                   | wiki:Production_Buildings       | 2026-10-05 |
-| Maximum slots, lobster pool and duck salon                  | 6                                                   | wiki:Production_Buildings       | 2026-10-05 |
-| Extra slots are paid with                                   | diamonds; lobster pool and duck salon: coins        | wiki:Production_Buildings       | 2026-10-05 |
-| Diamond cost of extra slots                                 | 6, 9, 12, … (+3 each)                               | wiki:Production_Buildings       | 2026-10-05 |
-| Lure workbench and net maker slots are much more expensive  | 9th slot: 415 diamonds                              | wiki:Production_Buildings       | 2026-10-05 |
+| A machine produces one item at a time                       | slots only queue; the mine gives several at once    | wiki:Production_Buildings       | 2026-10-28 |
+| Maximum slots per machine copy                              | 9                                                   | wiki:Production_Buildings       | 2026-10-28 |
+| Maximum slots, lobster pool and duck salon                  | 6                                                   | wiki:Production_Buildings       | 2026-10-28 |
+| Extra slots are paid with                                   | diamonds; lobster pool and duck salon: coins        | wiki:Production_Buildings       | 2026-10-28 |
+| Diamond cost of extra slots                                 | 6, 9, 12, … (+3 each)                               | wiki:Production_Buildings       | 2026-10-28 |
+| Lure workbench and net maker slots are much more expensive  | 9th slot: 415 diamonds                              | wiki:Production_Buildings       | 2026-10-28 |
 | Feed mill: starting slots                                   | 3; 4th costs 6 diamonds; full upgrade 81 diamonds   | wiki:Feed_Mill                  | 2026-10-05 |
 | Smelter: starting slots                                     | 1; 2nd costs 6 diamonds; full upgrade 132 diamonds  | wiki:Smelter                    | 2026-10-05 |
 | Slots are bought per copy                                   | each copy has its own slots                         | wiki:Feed_Mill, wiki:Smelter    | 2026-10-05 |
-| Finished products that can be stacked in front of a machine | 52                                                  | wiki:Production_Buildings       | 2026-10-05 |
-| Queued products cannot be discarded or switched             | -                                                   | wiki:Production_Buildings       | 2026-10-05 |
+| Finished products that can be stacked in front of a machine | 52                                                  | wiki:Production_Buildings       | 2026-10-28 |
+| Queued products cannot be discarded or switched             | -                                                   | wiki:Production_Buildings       | 2026-10-28 |
 
 ## Mastery (3-star system)
 
 | Fact                                            | Value                                                                                                | Source                             | Checked    |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------- |
-| Mastery is earned by production hours           | stars at fixed hour targets, maximum 3                                                               | wiki:Production_Buildings          | 2026-10-05 |
+| Mastery is earned by production hours           | stars at fixed hour targets, maximum 3                                                               | wiki:Production_Buildings          | 2026-10-28 |
 | The final ★★★ level always speeds production up | about 15 % (e.g. 2 h → 1 h 42 min, 5 min → 4 min 15 s)                                               | wiki:Goods_List (times)            | 2026-10-05 |
 | ★ and ★★ bonuses of most machines               | 10 % more coins, 5-10 % more XP (no speed-up)                                                        | wiki:Masteries                     | 2026-10-14 |
 | Feed mill, lure workbench, net maker            | 5 % / 10 % / 15 % faster at ★ / ★★ / ★★★                                                             | wiki:Masteries                     | 2026-10-14 |
@@ -41,8 +41,8 @@ The 3-star production time of every recipe is scraped as `production_time_3star_
 
 | Fact                                                   | Value                         | Source        | Checked    |
 | ------------------------------------------------------ | ----------------------------- | ------------- | ---------- |
-| Workbench screen to upgrade and level up all buildings | introduced 2026-08-10 (v1.72) | wiki:Update   | 2026-10-05 |
-| Rolled out gradually, not available to all players     | -                             | wiki:Update   | 2026-10-05 |
+| Workbench screen to upgrade and level up all buildings | introduced 2026-08-10 (v1.72) | wiki:Update   | 2026-10-28 |
+| Rolled out gradually, not available to all players     | -                             | wiki:Update   | 2026-10-28 |
 | No wiki page with levels or bonuses yet                | -                             | wiki (search) | 2026-10-05 |
 | Maintainer's account still uses the 3-star system      | -                             | in-game       | 2026-10-05 |
 
