@@ -669,6 +669,8 @@ Next step: v1.1.
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
+The items of v1.1-v1.5 are plans; their details are updated when they are built.
+
 ### v1.1 - Release basics (next)
 
 - [ ] Python 3.14: `requires-python = ">=3.14"`, the local `venv` and CI use it (the tests pass on 3.14)
@@ -727,7 +729,7 @@ Nothing left: the values the wiki lacks are measured (field limit, barn footprin
 ## Usage
 
 ```bash
-# install (Python 3.14)
+# install (tested with Python 3.14)
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
