@@ -4,8 +4,9 @@ Farm map - the player's usable area and the fixed buildings on it.
 Every farm has different expansions and a different spot for the farmhouse,
 barn, silo, mine, …, so the map is player data in ``config/``. A local
 ``config/farm_map.json`` (git-ignored) takes precedence over the committed
-``config/farm_map.example.json``. An item marked ``movable`` (barn, silo) was
-measured on the map but the planner may place it; it is not an obstacle.
+``config/farm_map.example.json``. ``fixed`` holds only buildings the game
+never moves; the barn, the silo and every other movable item are placed by the
+planner.
 
 Coordinates are tiles. ``x`` runs along the ↘ edge (footprint width) and ``y``
 along the ↙ edge (footprint height), seen from the farm's top corner (0, 0).
@@ -19,6 +20,8 @@ drawn plot is marked ``unlocked``, the layout only uses unlocked plots; plots
 without cells are ignored, plots of section ``base`` count as unlocked.
 ``zones`` mark tiles by hand: ``buildable`` zones (the farm sections) limit the
 layout to them, ``blocked`` zones (water, road, forest, …) are never used.
+``current`` lists where the player's movable items stand now (the start of a
+relocation plan, ``src/relocation``); the Layout Planner ignores it.
 """
 
 from __future__ import annotations
@@ -85,9 +88,6 @@ class FixedItem(BaseModel):
     y: int | None = Field(None, ge=0)
     width: int | None = Field(None, ge=1, description="Tiles along the ↘ edge")
     height: int | None = Field(None, ge=1, description="Tiles along the ↙ edge")
-    movable: bool = Field(
-        False, description="Measured here, but the planner may rearrange it"
-    )
 
     @field_validator("id")
     @classmethod
@@ -114,6 +114,46 @@ class FixedItem(BaseModel):
         return self.name or self.id.replace("_", " ").capitalize()
 
     model_config = {"extra": "forbid", "str_strip_whitespace": True}
+
+
+class CurrentItem(BaseModel):
+    """
+    A movable item of the current farm: one copy at its position, or (fields,
+    trees, bushes) ``count`` copies without a position.
+    """
+
+    id: str = Field(..., description="Location id")
+    x: int | None = Field(None, ge=0)
+    y: int | None = Field(None, ge=0)
+    width: int | None = Field(None, ge=1, description="Tiles along the ↘ edge")
+    height: int | None = Field(None, ge=1, description="Tiles along the ↙ edge")
+    count: int = Field(1, ge=1, description="Copies; above 1 only without a position")
+
+    model_config = {"extra": "forbid", "str_strip_whitespace": True}
+
+    @field_validator("id")
+    @classmethod
+    def id_must_be_snake_case(cls, v: str) -> str:
+        if not v or not v.replace("_", "").isalnum() or v != v.lower():
+            raise ValueError(
+                f"Current item id must be lower-case snake_case, got: {v!r}"
+            )
+        return v
+
+    @model_validator(mode="after")
+    def position_is_complete(self) -> CurrentItem:
+        values = (self.x, self.y, self.width, self.height)
+        if any(v is None for v in values) and any(v is not None for v in values):
+            raise ValueError(
+                f"Current item '{self.id}' must set x, y, width and height, or none of them"
+            )
+        if self.is_placed and self.count != 1:
+            raise ValueError(f"Current item '{self.id}' with a position is one copy")
+        return self
+
+    @property
+    def is_placed(self) -> bool:
+        return self.x is not None
 
 
 class Background(BaseModel):
@@ -225,6 +265,7 @@ class FarmMap(BaseModel):
     fixed: list[FixedItem] = Field(default_factory=list)
     expansions: list[Expansion] = Field(default_factory=list)
     zones: list[Zone] = Field(default_factory=list)
+    current: list[CurrentItem] = Field(default_factory=list)
 
     model_config = {"extra": "forbid"}
     _base_dir: Path = PrivateAttr(default_factory=Path)
@@ -240,6 +281,15 @@ class FarmMap(BaseModel):
                 raise ValueError(
                     f"Only farm maps are supported (area {area!r} is not laid out)"
                 )
+        # before v1.3, barn and silo sat in "fixed" with a "movable" flag
+        if isinstance(data, dict) and any(
+            isinstance(f, dict) and "movable" in f for f in data.get("fixed") or []
+        ):
+            raise ValueError(
+                "Farm map from an older editor: the 'movable' flag was removed and "
+                "'fixed' holds only buildings the game never moves. Open the file in "
+                "tools/farm_map_editor.html and save it again"
+            )
         return data
 
     @model_validator(mode="after")
@@ -255,6 +305,14 @@ class FarmMap(BaseModel):
         zone_ids = [z.id for z in self.zones]
         if len(zone_ids) != len(set(zone_ids)):
             raise ValueError("Farm map contains duplicate zone ids")
+        in_both = sorted({c.id for c in self.current} & set(ids))
+        if in_both:
+            raise ValueError(
+                f"Fixed buildings cannot be current items: {', '.join(in_both)}"
+            )
+        counted = [c.id for c in self.current if not c.is_placed]
+        if len(counted) != len(set(counted)):
+            raise ValueError("Farm map counts a current item without position twice")
         if self.background is not None and not self.bounded:
             raise ValueError("A farm map with a background must set width and height")
         if self.bounded:
@@ -271,6 +329,9 @@ class FarmMap(BaseModel):
                 for x, y, w, h in z.cells:
                     if x + w > self.width or y + h > self.height:
                         raise ValueError(f"Zone '{z.id}' lies outside the farm map")
+            for c in (c for c in self.current if c.is_placed):
+                if c.x + c.width > self.width or c.y + c.height > self.height:
+                    raise ValueError(f"Current item '{c.id}' lies outside the farm map")
         return self
 
     def usable_tiles(self, design_zones: bool = False) -> set[tuple[int, int]] | None:
@@ -324,13 +385,8 @@ class FarmMap(BaseModel):
 
     @property
     def placed_fixed(self) -> list[FixedItem]:
-        """Placed items the planner keeps where they are (obstacles)."""
-        return [f for f in self.fixed if f.is_placed and not f.movable]
-
-    @property
-    def placed_movable(self) -> list[FixedItem]:
-        """Placed items the planner may rearrange (their size is measured)."""
-        return [f for f in self.fixed if f.is_placed and f.movable]
+        """Placed fixed buildings (obstacles)."""
+        return [f for f in self.fixed if f.is_placed]
 
 
 def default_map_path() -> Path:

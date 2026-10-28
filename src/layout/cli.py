@@ -80,6 +80,25 @@ def _write(layout, out: Path, stem: str, settings: DesignSettings) -> None:
     render_svg(layout, out / f"{stem}.svg")
 
 
+def _plan(data, level, player, farm_map, settings: DesignSettings, strategy: str):
+    return plan_layout(
+        data,
+        level=level,
+        player=player,
+        farm_map=farm_map,
+        reserve_ratio=settings.reserve,
+        gap=settings.gap,
+        field_pool=settings.field_pool,
+        strategy=strategy,
+        design=settings.design_layer,
+        decor_band=settings.decor_band,
+        item_gap=settings.item_gap,
+        path_style=settings.path_style,
+        path_targets=settings.path_targets,
+        design_zones=settings.design_zones,
+    )
+
+
 def _log_summary(layout, stems: list[str], out: Path) -> None:
     if layout.design is not None:
         d = layout.design
@@ -166,22 +185,11 @@ def main(argv: list[str] | None = None) -> int:
 
     data = full.filter_by_max_level(level)
     for stem, strategy in runs:
-        layout = plan_layout(
-            data,
-            level=level,
-            player=player,
-            farm_map=farm_map,
-            reserve_ratio=settings.reserve,
-            gap=settings.gap,
-            field_pool=settings.field_pool,
-            strategy=strategy,
-            design=settings.design_layer,
-            decor_band=settings.decor_band,
-            item_gap=settings.item_gap,
-            path_style=settings.path_style,
-            path_targets=settings.path_targets,
-            design_zones=settings.design_zones,
-        )
+        try:
+            layout = _plan(data, level, player, farm_map, settings, strategy)
+        except ValueError as exc:
+            logger.error("%s", exc)
+            return 1
         _write(layout, out, stem, settings)
         if stem == "layout":
             main_layout = layout

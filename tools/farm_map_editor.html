@@ -151,6 +151,7 @@
     <button data-tab="zones"><span class="num">5</span><span class="label">Zones</span><span class="badge" id="badge-zones"></span></button>
     <button data-tab="export"><span class="num">6</span><span class="label">Export</span><span class="badge" id="badge-export"></span></button>
     <button data-tab="layout"><span class="num">7</span><span class="label">Layout overlay</span><span class="badge" id="badge-layout"></span></button>
+    <button data-tab="current"><span class="num">8</span><span class="label">Current farm</span><span class="badge" id="badge-current"></span></button>
   </nav>
 
   <div class="panes">
@@ -179,13 +180,12 @@
     <h2>2. Buildings</h2>
     <details class="help">
       <summary>How to</summary>
-      <div class="hint">Pick an id (or type a new one), then drag over every tile the building blocks (e.g. the truck with its order board). Dragging again moves it. Click a row to select it. Barn and silo are optional; without a position the planner places them. Tick <b>movable</b> to let the planner rearrange them.</div>
+      <div class="hint">Buildings the game never moves. Pick an id (or type a new one), then drag over every tile the building blocks (e.g. the truck with its order board). Dragging again moves it. Click a row to select it. The barn, the silo and every other movable item belong to step 8 (Current farm).</div>
     </details>
     <div class="card">
       <div class="row"><label>Id</label><input type="text" id="fixedId" list="fixedIds" placeholder="farmhouse"></div>
       <datalist id="fixedIds"></datalist>
       <div class="row"><label>Name</label><input type="text" id="fixedName" placeholder="(optional)"></div>
-      <label><input type="checkbox" id="fixedMovable"> movable: the planner may rearrange it</label>
     </div>
     <div class="row"><input type="search" id="fixedFilter" placeholder="Filter ids…"><span class="hint" id="fixedCount" style="flex:0 0 auto"></span></div>
     <ul class="list" id="fixedList"></ul>
@@ -274,6 +274,22 @@
     <div class="hint" id="layoutInfo">No layout loaded.</div>
     <ul class="list" id="layoutList"></ul>
   </section>
+
+  <section class="pane" id="pane-current">
+    <h2>8. Current farm</h2>
+    <details class="help" open>
+      <summary>How to</summary>
+      <div class="hint">Where your production buildings, shelters, barn and silo stand now: the start of the relocation plan (<code>python -m src relocate</code>); the layout ignores it. Pick an id, then drag over the building's tiles; every drag adds one copy. Load the layout in step 7 first: its ids and sizes are offered here, a click places the item at its size and a wrong size is reported. Without a layout any id can be typed. Fields, trees and bushes are counted only: enter the number of copies and press <b>Set count</b> (0 removes it).</div>
+    </details>
+    <div class="card">
+      <div class="row"><label>Id</label><input type="text" id="curId" list="curIds" placeholder="bakery"></div>
+      <datalist id="curIds"></datalist>
+      <div class="hint" id="curSize">No layout loaded: free ids, no size check.</div>
+      <div class="row"><label class="grow">Copies (no position)</label><input type="number" id="curCount" min="0" value="1" style="max-width:80px"><button id="curSetCount">Set count</button></div>
+    </div>
+    <div class="row"><input type="search" id="curFilter" placeholder="Filter ids…"><span class="hint" id="curTotal" style="flex:0 0 auto"></span></div>
+    <ul class="list" id="curList"></ul>
+  </section>
   </div>
 </aside>
 <div id="handle" title="Drag to resize the panel, double-click to reset"><button id="collapseBtn" title="Hide the panel (\)">◀</button></div>
@@ -289,6 +305,7 @@
     <label><input type="checkbox" id="lyZones" checked> zones</label>
     <label><input type="checkbox" id="lyRef" checked> overlay</label>
     <label><input type="checkbox" id="lyLayout" checked> layout</label>
+    <label><input type="checkbox" id="lyCurrent" checked> current</label>
     <label><input type="checkbox" id="lyLabels" checked> labels</label>
   </details>
   <div id="pad">
@@ -304,11 +321,11 @@
 <dialog id="help">
   <h3 style="margin-top:0">Shortcuts</h3>
   <table>
-    <tr><td><kbd>1</kbd> … <kbd>7</kbd></td><td>switch step</td></tr>
+    <tr><td><kbd>1</kbd> … <kbd>8</kbd></td><td>switch step</td></tr>
     <tr><td>wheel, pinch, <kbd>+</kbd> / <kbd>-</kbd></td><td>zoom</td></tr>
     <tr><td><kbd>0</kbd></td><td>fit the image</td></tr>
     <tr><td>right / middle drag, <kbd>Space</kbd> + drag, arrows</td><td>pan (<kbd>Shift</kbd>: bigger steps); in Calibrate, Reference and Layout overlay a left drag pans too</td></tr>
-    <tr><td>drag</td><td>draw a building, plot or zone rectangle; on a ruler / overlay point: move it (<kbd>Shift</kbd>: the r point where r and m overlap)</td></tr>
+    <tr><td>drag</td><td>draw a building, plot, zone or current item rectangle; on a ruler / overlay point: move it (<kbd>Shift</kbd>: the r point where r and m overlap)</td></tr>
     <tr><td><kbd>Alt</kbd> + drag</td><td>erase tiles of the selected plot / zone</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>undo the last edit of the selected plot / zone</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>save the map JSON</td></tr>
@@ -412,7 +429,6 @@ const Core = (() => {
     out.fixed = state.fixed.map(f => {
       const item = { id: f.id };
       if (f.name) item.name = f.name;
-      if (f.movable) item.movable = true;
       Object.assign(item, f.rect
         ? { x: f.rect[0], y: f.rect[1], width: f.rect[2], height: f.rect[3] }
         : { x: null, y: null, width: null, height: null });
@@ -422,10 +438,18 @@ const Core = (() => {
       id: e.id, section: e.section, number: e.number, unlocked: e.unlocked, cells: e.cells,
     }));
     out.zones = (state.zones || []).map(z => ({ id: z.id, kind: z.kind, cells: z.cells }));
+    out.current = (state.current || []).map(c => c.rect
+      ? { id: c.id, x: c.rect[0], y: c.rect[1], width: c.rect[2], height: c.rect[3] }
+      : { id: c.id, count: c.count });
     return out;
   }
 
+  // Before v1.3 barn and silo sat in `fixed` (with a `movable` flag): a measured one
+  // becomes a current item, an unmeasured one is dropped (the planner places it).
+  const LEGACY_MOVABLE = ['barn', 'silo'];
   function fromFarmMap(json) {
+    const legacy = f => f.movable || LEGACY_MOVABLE.includes(f.id);
+    const rectOf = f => f.x == null ? null : [f.x, f.y, f.width, f.height];
     const bg = json.background ? {
       origin: json.background.origin_px, ex: json.background.x_axis_px, ey: json.background.y_axis_px,
       width: json.width, height: json.height,
@@ -435,15 +459,14 @@ const Core = (() => {
       imgW: json.background ? json.background.image_width : null,
       imgH: json.background ? json.background.image_height : null,
       imagePath: json.background ? json.background.image : null,
-      fixed: (json.fixed || []).map(f => ({
-        id: f.id, name: f.name || '', movable: !!f.movable,
-        rect: f.x == null ? null : [f.x, f.y, f.width, f.height],
-      })),
+      fixed: (json.fixed || []).filter(f => !legacy(f)).map(f => ({ id: f.id, name: f.name || '', rect: rectOf(f) })),
       expansions: (json.expansions || []).map(e => ({
         id: e.id, section: e.section, number: e.number == null ? null : e.number,
         unlocked: !!e.unlocked, cells: (e.cells || []).map(c => c.slice()),
       })),
       zones: (json.zones || []).map(z => ({ id: z.id, kind: z.kind, cells: (z.cells || []).map(c => c.slice()) })),
+      current: (json.fixed || []).filter(f => legacy(f) && f.x != null).map(f => ({ id: f.id, rect: rectOf(f), count: 1 }))
+        .concat((json.current || []).map(c => ({ id: c.id, rect: rectOf(c), count: c.x == null ? (c.count || 1) : 1 }))),
     };
   }
 
@@ -617,7 +640,7 @@ const Core = (() => {
       map: { bounded: !!l.map.bounded, width: l.map.width, height: l.map.height },
       blocks: l.blocks.filter(b => b.frame).map(b => ({
         id: b.id, name: b.name || b.id, frame: rect(b.frame),
-        items: (b.items || []).map(i => ({ id: i.location_id, rect: rect(i), reserved: !!i.reserved })),
+        items: (b.items || []).map(i => ({ id: i.location_id, rect: rect(i), rotated: !!i.rotated, reserved: !!i.reserved })),
       })),
       unplaced: l.blocks.filter(b => !b.frame).map(b => b.id),
       fixed: (l.fixed || []).filter(f => f.x != null).map(f => ({ id: f.id, rect: [f.x, f.y, f.width, f.height] })),
@@ -641,6 +664,28 @@ const Core = (() => {
     return null;
   }
 
+  // Item sizes of a loaded layout overlay: id -> [width, height] as stored in the data
+  // (a rotated item swapped back); used to place and check current items.
+  function layoutSizes(layout) {
+    const sizes = {};
+    for (const b of (layout ? layout.blocks : [])) {
+      for (const it of b.items) {
+        if (sizes[it.id]) continue;
+        sizes[it.id] = it.rotated ? [it.rect[3], it.rect[2]] : [it.rect[2], it.rect[3]];
+      }
+    }
+    return sizes;
+  }
+
+  // Warning text when rect [x, y, w, h] has neither the size nor the rotated size, else null.
+  // Only a hint: `python -m src relocate` checks the data footprint and rotatability.
+  function sizeWarning(id, rect, size) {
+    if (!size) return null;
+    const [w, h] = [rect[2], rect[3]];
+    if ((w === size[0] && h === size[1]) || (w === size[1] && h === size[0])) return null;
+    return `${id} is ${size[0]}x${size[1]} in the layout, this rectangle is ${w}x${h}.`;
+  }
+
   // A stored overlay from an older editor version: usable only with the current shape.
   function isLayoutOverlay(d) {
     return !!d && !!d.map && ['blocks', 'unplaced', 'fixed', 'paths', 'decorations'].every(k => Array.isArray(d[k]));
@@ -652,14 +697,15 @@ const Core = (() => {
     return x1 > x0 && y1 > y0 ? [x0, y0, x1 - x0, y1 - y0] : null;
   }
 
-  // Crop the map to the farm (plots, buildable zones, fixed buildings) plus `margin` tiles.
-  // Returns {bg, fixed, expansions, zones} with shifted coordinates, or null if there is nothing to keep.
+  // Crop the map to the farm (plots, buildable zones, fixed buildings, current items) plus `margin` tiles.
+  // Returns {bg, fixed, expansions, zones, current} with shifted coordinates, or null if there is nothing to keep.
   function cropMap(state, margin) {
     const bg = state.bg;
     const rects = [
       ...state.expansions.flatMap(e => e.cells),
       ...state.zones.filter(z => z.kind === 'buildable').flatMap(z => z.cells),
       ...state.fixed.filter(f => f.rect).map(f => f.rect),
+      ...(state.current || []).filter(c => c.rect).map(c => c.rect),
     ];
     if (!bg || !rects.length) return null;
     const box = bbox(rects);
@@ -673,12 +719,15 @@ const Core = (() => {
       expansions: state.expansions.map(e => Object.assign({}, e, { cells: e.cells.map(move).filter(Boolean) })),
       zones: state.zones.map(z => Object.assign({}, z, { cells: z.cells.map(move).filter(Boolean) }))
         .filter(z => z.cells.length),
+      current: (state.current || []).map(c => Object.assign({}, c, { rect: c.rect ? move(c.rect) : null }))
+        .filter(c => !c.rect || c.rect.length),
     };
   }
 
   return { SNAKE, toSnake, tileToPx, pxToTile, calibrate, moveRect, rectFromTiles, rectCorners,
            cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip, affine3, applyAffine, invertAffine,
-           mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay, fromLayout, layoutMismatch, isLayoutOverlay };
+           mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay, fromLayout, layoutMismatch, isLayoutOverlay,
+           layoutSizes, sizeWarning };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 // CORE-END
@@ -688,14 +737,14 @@ if (typeof module !== 'undefined') module.exports = Core;
 (() => {
   // default ids (config/farm_map.example.json)
   const FARM_IDS = ['farmhouse', 'mailbox', 'newspaper_mailbox', 'roadside_shop', 'truck', 'riverboat',
-      'wheel_of_fortune_truck', 'silo', 'barn', 'mine', 'maggies_workbench', 'helpers_house', 'event_board',
+      'wheel_of_fortune_truck', 'mine', 'maggies_workbench', 'helpers_house', 'event_board',
       'neighborhood_house', 'derby_stand', 'leaderboard', 'fishing_boat', 'train_station', 'valley_board',
       'neighborhood_requests', 'farm_pass', 'decoration_collection', 'decorate_event', 'toms_box'];
-  const defaultItem = id => ({ id, name: '', rect: null, movable: false });
+  const defaultItem = id => ({ id, name: '', rect: null });
   const COLORS = { grid: 'rgba(255,255,255,0.75)', fixed: '#374151', fixedFill: 'rgba(107,114,128,0.35)',
     ok: '#15803d', okFill: 'rgba(21,128,61,0.12)', bad: '#b91c1c', badFill: 'rgba(185,28,28,0.22)',
     sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)',
-    design: '#8b5cf6', designFill: 'rgba(139,92,246,0.30)' };
+    design: '#8b5cf6', designFill: 'rgba(139,92,246,0.30)', current: '#c2410c', currentFill: 'rgba(234,88,12,0.30)' };
   const STORE_BASE = 'farm_map_editor_state_v1';
   // layout overlay colours, as in src/layout/render_svg.py (block palette cycled)
   const BLOCK_PALETTE = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#8C6D1F', '#6A3D9A', '#B22222',
@@ -736,8 +785,8 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
   const canvas = $('view'), ctx = canvas.getContext('2d');
   const state = { img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
-    fixed: FARM_IDS.map(defaultItem), expansions: [], zones: [],
-    selFixed: null, selExp: null, selZone: null, tab: 'calibrate' };
+    fixed: FARM_IDS.map(defaultItem), expansions: [], zones: [], current: [],
+    selFixed: null, selExp: null, selZone: null, selCur: null, tab: 'calibrate' };
   const view = { s: 1, tx: 0, ty: 0 };
   let drag = null, spaceDown = false, mouseImg = null;
   // reference overlay: image (not stored), matrix overlay px -> farm px, alignment points
@@ -812,6 +861,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     state.fixed = s.fixed.concat(FARM_IDS.filter(id => !known.has(id)).map(defaultItem));
     state.expansions = s.expansions;
     state.zones = s.zones;
+    state.current = s.current;
+    state.selCur = null;
     if (s.imagePath) $('bgPath').value = s.imagePath;
     refreshAll();
   }
@@ -901,6 +952,16 @@ if (typeof module !== 'undefined') module.exports = Core;
       outline(g, bg, farm, COLORS.farm, 4 * px);
     }
     if (bg && opts.layout && lay.data) drawLayout(g, bg, px, font, opts);
+    if (bg && opts.current) {
+      for (const c of state.current) {
+        if (!c.rect) continue;
+        poly(g, Core.rectCorners(bg, c.rect));
+        g.fillStyle = COLORS.currentFill; g.fill();
+        g.strokeStyle = opts.selection && c === state.selCur ? COLORS.sel : COLORS.current;
+        g.lineWidth = 2 * px; g.stroke();
+        if (opts.labels) label(g, bg, c.rect, c.id, font * 0.8, COLORS.current);
+      }
+    }
     if (bg && opts.fixed) {
       for (const f of state.fixed) {
         if (!f.rect) continue;
@@ -972,7 +1033,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
   function layerOpts(selection) {
     return { grid: $('lyGrid').checked, fixed: $('lyFixed').checked, expansions: $('lyExp').checked, zones: $('lyZones').checked,
-             layout: $('lyLayout').checked, labels: $('lyLabels').checked, selection };
+             layout: $('lyLayout').checked, current: $('lyCurrent').checked, labels: $('lyLabels').checked, selection };
   }
 
   function draw() {
@@ -1095,7 +1156,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (!state.bg) { notify('Calibrate the grid first.'); return; }
     const t = Core.pxToTile(state.bg, p[0], p[1]);
     const erase = e.altKey && (state.tab === 'expansions' || state.tab === 'zones');
-    if (['fixed', 'expansions', 'zones'].includes(state.tab)) drag = { kind: 'rect', t0: t, t1: t, erase };
+    if (['fixed', 'expansions', 'zones', 'current'].includes(state.tab)) drag = { kind: 'rect', t0: t, t1: t, erase };
   });
 
   window.addEventListener('mousemove', e => {
@@ -1158,7 +1219,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       else notify('Select a plot or zone to undo its last edit.', 'info');
       return;
     }
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-7]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
     if (e.key === '\\') { toggleSide(); return; }
     if (e.key === '?') { if (!$('help').open) $('help').showModal(); return; }
     if (e.code === 'Space') {
@@ -1221,6 +1282,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
 
   function finishRect(r, erase = false) {
+    if (state.tab === 'current') { addCurrent(r); return; }
     if (!inMap(r)) { notify('The rectangle is outside the calibrated grid.'); return; }
     if (state.tab === 'fixed') {
       const id = Core.toSnake($('fixedId').value);
@@ -1228,7 +1290,6 @@ if (typeof module !== 'undefined') module.exports = Core;
       let f = state.fixed.find(x => x.id === id);
       if (!f) { f = defaultItem(id); state.fixed.push(f); }
       f.rect = r;
-      f.movable = $('fixedMovable').checked;
       if ($('fixedName').value.trim()) f.name = $('fixedName').value.trim();
       state.selFixed = f;
     } else if (state.tab === 'expansions') {
@@ -1239,6 +1300,28 @@ if (typeof module !== 'undefined') module.exports = Core;
       editCells(state.selZone, r, erase);
     }
     refreshAll();
+  }
+
+  // current farm: every drag adds one copy; a click (1x1) takes the size from the layout
+  function addCurrent(r) {
+    const id = Core.toSnake($('curId').value);
+    if (!id) { notify('Enter an id first.'); return; }
+    if (state.fixed.some(f => f.id === id)) { notify(`${id} is a fixed building (step 2).`); return; }
+    const size = Core.layoutSizes(lay.data)[id];
+    if (size && r[2] === 1 && r[3] === 1) r = [r[0], r[1], size[0], size[1]];
+    if (!inMap(r)) { notify('The rectangle is outside the calibrated grid.'); return; }
+    const warn = Core.sizeWarning(id, r, size);
+    if (warn) notify(warn, 'info');
+    const c = { id, rect: r, count: 1 };
+    state.current.push(c);
+    state.selCur = c;
+    refreshAll();
+  }
+  function curSizeInfo() {
+    if (!lay.data) return 'No layout loaded: free ids, no size check.';
+    const id = Core.toSnake($('curId').value), size = Core.layoutSizes(lay.data)[id];
+    if (!id) return 'Pick an id of the layout.';
+    return size ? `${id}: ${size[0]}x${size[1]} in the layout (a click places it).` : `${id} is not in the layout.`;
   }
 
   // ---------------------------------------------------------------- calibration
@@ -1254,6 +1337,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       for (const f of state.fixed) if (f.rect) f.rect = Core.moveRect(old, bg, f.rect);
       for (const e of state.expansions) e.cells = e.cells.map(c => Core.moveRect(old, bg, c));
       for (const z of state.zones) z.cells = z.cells.map(c => Core.moveRect(old, bg, c));
+      for (const c of state.current) if (c.rect) c.rect = Core.moveRect(old, bg, c.rect);
     }
     state.bg = bg;
     refreshAll();
@@ -1282,12 +1366,8 @@ if (typeof module !== 'undefined') module.exports = Core;
       const li = document.createElement('li');
       if (f === state.selFixed) li.className = 'sel';
       const pos = f.rect ? `(${f.rect.join(', ')})` : '<i>not placed</i>';
-      const mv = f.movable ? ' <span class="pill mv">movable</span>' : '';
-      li.innerHTML = `<span title="${esc(f.id)}">${esc(f.id)} ${pos}${mv}</span>`;
-      li.onclick = () => {
-        state.selFixed = f; $('fixedId').value = f.id; $('fixedName').value = f.name;
-        $('fixedMovable').checked = !!f.movable; refreshAll();
-      };
+      li.innerHTML = `<span title="${esc(f.id)}">${esc(f.id)} ${pos}</span>`;
+      li.onclick = () => { state.selFixed = f; $('fixedId').value = f.id; $('fixedName').value = f.name; refreshAll(); };
       li.append(btn('clear', () => { f.rect = null; refreshAll(); }));
       li.append(btn('×', () => { state.fixed.splice(state.fixed.indexOf(f), 1); refreshAll(); }));
       $('fixedList').append(li);
@@ -1328,6 +1408,29 @@ if (typeof module !== 'undefined') module.exports = Core;
       }));
       $('zoneList').append(li);
     }
+    const sizes = Core.layoutSizes(lay.data);
+    $('curIds').innerHTML = Object.keys(sizes).sort()
+      .map(id => `<option value="${esc(id)}">${sizes[id][0]}x${sizes[id][1]}</option>`).join('');
+    $('curSize').textContent = curSizeInfo();
+    $('curList').innerHTML = '';
+    const curFilter = Core.toSnake($('curFilter').value);
+    const copies = state.current.reduce((n, c) => n + c.count, 0);
+    $('curTotal').textContent = `${copies} copies`;
+    for (const c of state.current) {
+      if (curFilter && !c.id.includes(curFilter)) continue;
+      const li = document.createElement('li');
+      if (c === state.selCur) li.className = 'sel';
+      const pos = c.rect ? `(${c.rect.join(', ')})` : `× ${c.count}`;
+      const warn = c.rect && Core.sizeWarning(c.id, c.rect, sizes[c.id]);
+      li.innerHTML = `<span title="${esc(warn || c.id)}">${esc(c.id)} ${pos}${warn ? ' <span class="pill bad">size</span>' : ''}</span>`;
+      li.onclick = () => { state.selCur = c; $('curId').value = c.id; if (!c.rect) $('curCount').value = c.count; refreshAll(); };
+      li.append(btn('×', () => {
+        state.current.splice(state.current.indexOf(c), 1);
+        if (state.selCur === c) state.selCur = null;
+        refreshAll();
+      }));
+      $('curList').append(li);
+    }
     $('layoutInfo').textContent = layoutInfo();
     $('layoutList').innerHTML = '';
     (lay.data ? lay.data.blocks : []).forEach((b, i) => {
@@ -1358,6 +1461,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     set('zones', state.zones.length ? `${state.zones.length}` : '');
     const warn = lay.data && Core.layoutMismatch(lay.data, state.bg, state.fixed);
     set('layout', lay.data ? (warn ? '⚠ size' : `${lay.data.blocks.length} blocks`) : '', lay.data && !warn);
+    set('current', state.current.length ? `${state.current.reduce((n, c) => n + c.count, 0)}` : '');
   }
 
   $('expAdd').onclick = () => {
@@ -1382,18 +1486,25 @@ if (typeof module !== 'undefined') module.exports = Core;
     refreshAll();
   };
   $('fixedFilter').oninput = () => refreshAll();
-  // the movable box follows the id: the item's own value, else off
-  $('fixedId').oninput = () => {
-    const id = Core.toSnake($('fixedId').value);
-    const f = state.fixed.find(x => x.id === id);
-    $('fixedMovable').checked = f ? !!f.movable : false;
+  $('curFilter').oninput = () => refreshAll();
+  $('curId').oninput = () => { $('curSize').textContent = curSizeInfo(); };
+  // fields, trees and bushes: one counted entry per id, without a position
+  $('curSetCount').onclick = () => {
+    const id = Core.toSnake($('curId').value), n = Math.max(0, Math.floor(+$('curCount').value || 0));
+    if (!id) { notify('Enter an id first.'); return; }
+    if (state.fixed.some(f => f.id === id)) { notify(`${id} is a fixed building (step 2).`); return; }
+    const c = state.current.find(x => x.id === id && !x.rect);
+    if (c && n) c.count = n;
+    else if (c) state.current.splice(state.current.indexOf(c), 1);
+    else if (n) state.current.push({ id, rect: null, count: n });
+    refreshAll();
   };
   $('expFilter').oninput = () => refreshAll();
   $('zoneUndo').onclick = () => { if (state.selZone) undo(state.selZone); };
   $('expUndo').onclick = () => { if (state.selExp) undo(state.selExp); };
 
   // ---------------------------------------------------------------- tabs, layers, files
-  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export', 'layout'];
+  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export', 'layout', 'current'];
   function setTab(tab) {
     state.tab = tab;
     document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
@@ -1402,7 +1513,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     draw();
   }
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
-  ['lyGrid', 'lyFixed', 'lyExp', 'lyZones', 'lyRef', 'lyLayout', 'lyLabels'].forEach(id => $(id).onchange = draw);
+  ['lyGrid', 'lyFixed', 'lyExp', 'lyZones', 'lyRef', 'lyLayout', 'lyCurrent', 'lyLabels'].forEach(id => $(id).onchange = draw);
   $('fileLayout').onchange = async e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1493,7 +1604,8 @@ if (typeof module !== 'undefined') module.exports = Core;
       const c = Core.cropMap(state, Math.max(0, +$('cropMargin').value || 0));
       if (c) {
         state.bg = c.bg; state.fixed = c.fixed; state.expansions = c.expansions; state.zones = c.zones;
-        state.selFixed = state.selExp = state.selZone = null;
+        state.current = c.current;
+        state.selFixed = state.selExp = state.selZone = state.selCur = null;
         history.length = 0;
       }
     }

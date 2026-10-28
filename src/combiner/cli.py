@@ -157,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
             path_targets=design.path_targets,
             design_zones=design.design_zones,
         )
-    except RuntimeError as exc:
+    except (RuntimeError, ValueError) as exc:
         logger.error("%s", exc)
         return 1
     for name in combined.run.profile.missing():

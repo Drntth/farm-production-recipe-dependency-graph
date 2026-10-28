@@ -9,8 +9,6 @@
     {"id": "truck", "x": null, "y": null, "width": null, "height": null},
     {"id": "riverboat", "x": null, "y": null, "width": null, "height": null},
     {"id": "wheel_of_fortune_truck", "x": null, "y": null, "width": null, "height": null},
-    {"id": "silo", "x": null, "y": null, "width": null, "height": null},
-    {"id": "barn", "x": null, "y": null, "width": null, "height": null},
     {"id": "mine", "x": null, "y": null, "width": null, "height": null},
     {"id": "maggies_workbench", "x": null, "y": null, "width": null, "height": null},
     {"id": "helpers_house", "x": null, "y": null, "width": null, "height": null},
@@ -26,5 +24,6 @@
     {"id": "decoration_collection", "x": null, "y": null, "width": null, "height": null},
     {"id": "decorate_event", "x": null, "y": null, "width": null, "height": null},
     {"id": "toms_box", "x": null, "y": null, "width": null, "height": null}
-  ]
+  ],
+  "current": []
 }

@@ -196,33 +196,22 @@ def plan_layout(
     if sizing is not None:
         _apply_sizing(stock, sizing)
 
-    # "movable" on the farm only applies to locations the planner places itself
-    # (barn, silo, …); any other item stays a fixed obstacle, so it never vanishes
-    stray = [f.id for f in farm_map.placed_movable if f.id not in stock]
-    if stray:
-        logger.warning(
-            "Map items marked movable but not placeable on the farm, kept fixed: %s",
-            ", ".join(stray),
+    # "fixed" holds only buildings the game never moves; movable items are planned
+    movable = sorted(
+        f.id
+        for f in farm_map.fixed
+        if (loc := dataset.locations.get(f.id)) is not None
+        and loc.area == Area.FARM
+        and loc.movable
+    )
+    if movable:
+        raise ValueError(
+            f"Farm map lists movable items as fixed: {', '.join(movable)}. 'fixed' "
+            "holds only buildings the game never moves; where they stand now goes "
+            "into 'current' (open the map in tools/farm_map_editor.html and save it "
+            "again)"
         )
-        farm_map = _pin(farm_map, set(stray))
-
-    # a movable location placed on the map by hand (e.g. the barn) stays there as
-    # fixed: that copy leaves the stock, the other copies are still planned
-    pinned_out: set[str] = set()
-    for f in farm_map.placed_fixed:
-        s = stock.get(f.id)
-        if s is None:
-            continue
-        if s.count + s.reserved <= 1:
-            pinned_out.add(f.id)
-        elif s.count > 0:
-            stock[f.id] = replace(s, count=s.count - 1)
-        else:
-            stock[f.id] = replace(s, reserved=s.reserved - 1)
-    blocks = [
-        Block(b.id, b.name, b.anchor, [x for x in b.locations if x not in pinned_out])
-        for b in detect_named_blocks(G)
-    ]
+    blocks = detect_named_blocks(G)
     blocks = [b for b in blocks if b.locations]
 
     farm_ids = {
@@ -415,7 +404,7 @@ def plan_layout(
         _shift_to_origin(placed_blocks)
 
     fixed_unplaced = sorted(
-        {f.id for f in farm_map.fixed if not f.is_placed and f.id not in stock}
+        {f.id for f in farm_map.fixed if not f.is_placed}
         | {
             loc.id
             for loc in dataset.location_list
@@ -563,17 +552,6 @@ def _add_flow_weights(
     scale = max(weights.values(), default=1.0) / max(by_pair.values())
     for key, amount in by_pair.items():
         weights[key] = weights.get(key, 0.0) + amount * scale
-
-
-def _pin(farm_map: FarmMap, ids: set[str]) -> FarmMap:
-    """Copy of *farm_map* with the items *ids* no longer movable."""
-    fixed = [
-        f.model_copy(update={"movable": False}) if f.id in ids else f
-        for f in farm_map.fixed
-    ]
-    pinned = farm_map.model_copy(update={"fixed": fixed})
-    pinned._base_dir = farm_map._base_dir
-    return pinned
 
 
 def _grow(w: int, h: int, ratio: float) -> tuple[int, int]:

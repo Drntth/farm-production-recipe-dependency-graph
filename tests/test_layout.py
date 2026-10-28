@@ -18,6 +18,7 @@ from src.layout.design import plan_design
 from src.layout.farm_map import (
     EXAMPLE_MAP,
     Background,
+    CurrentItem,
     Expansion,
     FarmMap,
     FixedItem,
@@ -619,26 +620,6 @@ def test_barn_and_silo_form_a_storage_block(farm: DataSet) -> None:
     assert "barn" not in layout.fixed_unplaced
 
 
-def test_barn_placed_on_the_map_stays_fixed(farm: DataSet) -> None:
-    barn = FixedItem(id="barn", x=0, y=0, width=4, height=4)
-    silo = FixedItem(id="silo")  # listed without a position: the planner places it
-    layout = plan_layout(
-        farm, level=5, farm_map=FarmMap(width=60, height=60, fixed=[barn, silo])
-    )
-    storage = next(b for b in layout.blocks if b.block.id == "storage_block")
-    assert [i.location_id for i in storage.items] == ["silo"]
-    assert layout.fixed_unplaced == ["mine"]
-
-
-def test_pinned_copy_of_a_multi_copy_building_keeps_the_others(farm: DataSet) -> None:
-    player = PlayerConfig(level=5, locations={"dairy": LocationProgress(owned=2)})
-    dairy = FixedItem(id="dairy", x=0, y=0, width=4, height=4)
-    fm = FarmMap(width=60, height=60, fixed=[dairy])
-    layout = plan_layout(farm, level=5, player=player, farm_map=fm)
-    planned = [i for b in layout.blocks for i in b.items if i.location_id == "dairy"]
-    assert len(planned) == 1  # the second copy is still placed in its block
-
-
 def test_plan_layout_rejects_negative_reserve(farm: DataSet) -> None:
     with pytest.raises(ValueError, match="negative"):
         plan_layout(farm, level=5, reserve_ratio=-0.1)
@@ -899,48 +880,55 @@ def test_cli_design(tmp_path: Path) -> None:
     assert cli.main(["--level", "20", "--design-config", missing]) == 1
 
 
-def test_movable_map_items_are_not_obstacles() -> None:
-    m = FarmMap(
-        width=30,
-        height=20,
-        fixed=[
-            FixedItem(id="farmhouse", x=1, y=1, width=6, height=6),
-            FixedItem(id="barn", x=10, y=10, width=4, height=4, movable=True),
-            FixedItem(id="silo", movable=True),  # not measured yet
+def test_movable_location_in_fixed_is_an_error(farm: DataSet) -> None:
+    barn = FixedItem(id="barn", x=0, y=0, width=4, height=4)
+    silo = FixedItem(id="silo")  # also without a position
+    mine = FixedItem(id="mine", x=10, y=10, width=3, height=3)
+    fm = FarmMap(width=60, height=60, fixed=[barn, silo, mine])
+    with pytest.raises(ValueError, match="movable items as fixed: barn, silo"):
+        plan_layout(farm, level=5, farm_map=fm)
+
+
+def test_old_movable_flag_is_a_clear_error() -> None:
+    old = {"fixed": [{"id": "barn", "x": 0, "y": 0, "width": 4, "height": 4,
+                      "movable": True}]}  # fmt: skip
+    with pytest.raises(ValidationError, match="save it again"):
+        FarmMap.model_validate(old)
+
+
+def test_current_items_are_ignored_by_the_layout(farm: DataSet) -> None:
+    fm = FarmMap(
+        width=60,
+        height=60,
+        current=[
+            CurrentItem(id="barn", x=0, y=0, width=4, height=4),
+            CurrentItem(id="field", count=12),
         ],
     )
-    assert [f.id for f in m.placed_fixed] == ["farmhouse"]
-    assert [f.id for f in m.placed_movable] == ["barn"]
+    assert fm.placed_fixed == []
+    layout = plan_layout(farm, level=5, farm_map=fm)
+    plain = plan_layout(farm, level=5, farm_map=FarmMap(width=60, height=60))
+    assert layout_to_dict(layout)["blocks"] == layout_to_dict(plain)["blocks"]
 
 
-def test_farm_movable_flag_only_for_placeable_items(
-    farm: DataSet, caplog: pytest.LogCaptureFixture
-) -> None:
-    farm_map = FarmMap(
-        width=40,
-        height=40,
-        fixed=[
-            # the planner cannot place a farmhouse: it stays a fixed obstacle
-            FixedItem(id="farmhouse", x=17, y=17, width=6, height=6, movable=True),
-            # the barn is a location the planner places itself
-            FixedItem(id="barn", x=0, y=0, width=4, height=4, movable=True),
-        ],
-    )
-    with caplog.at_level("WARNING"):
-        layout = plan_layout(farm, level=5, farm_map=farm_map)
-
-    assert "kept fixed: farmhouse" in caplog.text
-    assert [f.id for f in layout.farm_map.placed_fixed] == ["farmhouse"]
-    house = Rect(17, 17, 6, 6)
-    frames = [b.frame for b in layout.blocks if b.frame is not None]
-    assert _no_overlap([*frames, house])
-    storage = [b for b in layout.blocks if "barn" in b.block.locations]
-    assert storage and storage[0].frame is not None  # the barn is still planned
-
-
-# ---------------------------------------------------------------------------
-# Sizing from production quantities (input of the Combiner)
-# ---------------------------------------------------------------------------
+def test_current_item_validation() -> None:
+    with pytest.raises(ValidationError, match="one copy"):
+        CurrentItem(id="dairy", x=0, y=0, width=4, height=4, count=2)
+    with pytest.raises(ValidationError, match="x, y, width and height"):
+        CurrentItem(id="dairy", x=0, y=0)
+    with pytest.raises(ValidationError, match="outside"):
+        FarmMap(
+            width=5,
+            height=5,
+            current=[CurrentItem(id="dairy", x=3, y=3, width=4, height=4)],
+        )
+    with pytest.raises(ValidationError, match="cannot be current items: mine"):
+        FarmMap(fixed=[FixedItem(id="mine")], current=[CurrentItem(id="mine")])
+    with pytest.raises(ValidationError, match="twice"):
+        FarmMap(current=[CurrentItem(id="field", count=3), CurrentItem(id="field")])
+    # several placed copies of one id are fine
+    FarmMap(current=[CurrentItem(id="dairy", x=0, y=0, width=4, height=4),
+                     CurrentItem(id="dairy", x=4, y=0, width=4, height=4)])  # fmt: skip
 
 
 def test_allocate_fields_by_use_splits_every_crop_by_its_users() -> None:

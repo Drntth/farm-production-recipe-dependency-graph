@@ -40,7 +40,7 @@ const back = Core.pxToTile(bg, roundTrip[0], roundTrip[1]);
 const state = {
   bg, imgW: 800, imgH: 600,
   fixed: [{ id: 'farmhouse', name: 'Farmhouse', rect: [Math.round(tA[0]), Math.round(tA[1]), 3, 3] },
-          { id: 'silo', name: '', rect: null }],
+          { id: 'mine', name: '', rect: null }],
   expansions: [{ id: 'main_1', section: 'main', number: 1, unlocked: true, cells: [[2, 2, 4, 3], [6, 2, 1, 1]] },
                { id: 'base', section: 'base', number: null, unlocked: true, cells: [[10, 10, 5, 5]] }],
   zones: [{ id: 'pond', kind: 'blocked', cells: [[2, 2, 1, 1]] }, { id: 'garden', kind: 'design', cells: [[3, 3, 1, 1]] }],
@@ -69,12 +69,25 @@ console.log(JSON.stringify({
              farmhouse: Core.tileToPx(c.bg, ...c.fixed[0].rect.slice(0, 2)),
              farmhouseBefore: Core.tileToPx(bg, ...state.fixed[0].rect.slice(0, 2)) };
   })(),
-  movable: (() => {
+  current: (() => {
     const t = { bg, imgW: 800, imgH: 600, expansions: [], zones: [],
-      fixed: [{ id: 'farmhouse', name: '', rect: [1, 1, 4, 4] },
-              { id: 'barn', name: '', rect: [8, 1, 3, 3], movable: true }] };
+      fixed: [{ id: 'farmhouse', name: '', rect: [1, 1, 4, 4] }],
+      current: [{ id: 'bakery', rect: [8, 1, 3, 3], count: 1 }, { id: 'field', rect: null, count: 12 }] };
     const m = Core.toFarmMap(t, 'farm_background.png');
-    return { map: m, back: Core.fromFarmMap(m) };
+    // a map from before v1.3: barn and silo in `fixed`, the barn measured
+    const old = Core.fromFarmMap({ width: 20, height: 20, fixed: [
+      { id: 'farmhouse', x: 1, y: 1, width: 4, height: 4 },
+      { id: 'barn', movable: true, x: 8, y: 1, width: 3, height: 3 },
+      { id: 'silo', x: null, y: null, width: null, height: null }] });
+    const layout = { blocks: [{ items: [
+      { id: 'bakery', rect: [0, 0, 3, 3], rotated: false },
+      { id: 'ice_cream_maker', rect: [0, 0, 2, 3], rotated: true }] }] };
+    const sizes = Core.layoutSizes(layout);
+    return { map: m, back: Core.toFarmMap(Object.assign(Core.fromFarmMap(m), { imgW: 800, imgH: 600 }), 'farm_background.png'),
+             old: Core.toFarmMap(Object.assign(old, { bg: null }), null),
+             sizes, ok: Core.sizeWarning('ice_cream_maker', [5, 5, 2, 3], sizes.ice_cream_maker),
+             bad: Core.sizeWarning('bakery', [5, 5, 2, 2], sizes.bakery),
+             free: Core.sizeWarning('windmill', [5, 5, 2, 2], sizes.windmill) };
   })(),
   align: (() => {
     // overlay = map shrunk to a third, turned 90 degrees, shifted by (50, 20)
@@ -147,12 +160,32 @@ def test_exported_json_loads_in_python(result: dict) -> None:
     assert result["same"], "toFarmMap(fromFarmMap(x)) must round-trip"
 
 
-def test_movable_round_trip(result: dict) -> None:
-    moved = result["movable"]
-    fm = FarmMap.model_validate(moved["map"])
+def test_current_farm_round_trip(result: dict) -> None:
+    cur = result["current"]
+    fm = FarmMap.model_validate(cur["map"])
     assert [f.id for f in fm.placed_fixed] == ["farmhouse"]
-    assert [f.id for f in fm.placed_movable] == ["barn"]
-    assert [f["movable"] for f in moved["back"]["fixed"]] == [False, True]
+    assert [(c.id, c.x, c.count) for c in fm.current] == [
+        ("bakery", 8, 1),
+        ("field", None, 12),
+    ]
+    assert cur["back"] == cur["map"]
+
+
+def test_old_fixed_barn_and_silo_move_to_current(result: dict) -> None:
+    old = result["current"]["old"]
+    assert [f["id"] for f in old["fixed"]] == ["farmhouse"]
+    assert "movable" not in old["fixed"][0]
+    # the measured barn becomes a current item, the unmeasured silo is dropped
+    assert old["current"] == [{"id": "barn", "x": 8, "y": 1, "width": 3, "height": 3}]
+
+
+def test_current_sizes_from_the_layout(result: dict) -> None:
+    cur = result["current"]
+    # a rotated layout item is offered at its stored (data) size
+    assert cur["sizes"] == {"bakery": [3, 3], "ice_cream_maker": [3, 2]}
+    assert cur["ok"] is None  # rotated size accepted
+    assert "3x3 in the layout" in cur["bad"]
+    assert cur["free"] is None  # not in the layout: no check
 
 
 def test_geometry_helpers(result: dict) -> None:
