@@ -568,14 +568,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.0 (local usable platform) is done (235 tests passing). Next: v1.x (design templates).  
+**Current status:** v1.0 (local usable platform) is done (235 tests passing). Next: v1.1 (release basics).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
-Next step: v1.x.
+Next step: v1.1.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -669,11 +669,37 @@ Next step: v1.x.
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-### v1.x - Design templates (after v1.0)
+### v1.1 - Release basics (next)
+
+- [ ] Continuous integration (GitHub Actions): `pytest`, `ruff check` and `ruff format --check` on every push and pull request
+- [ ] `pyproject.toml` with the project metadata and version (the `requirements*.txt` files stay)
+- [ ] `CHANGELOG.md`: v0.3-v1.0 in short from this roadmap, then one entry per version
+- [ ] `v1.0.0` git tag on the v1.0 commit, a tag for every later version
+
+### v1.2 - Layout in the map editor
+
+- [ ] Load `output/layout.json` or `output/combined.json` into `tools/farm_map_editor.html` as an overlay: blocks, paths, decoration band, as a layer that can be switched on and off
+- [ ] The editor reads the layout JSON format of `src/layout` and stays in sync with it
+
+### v1.3 - Relocation plan
+
+- [ ] Current farm: the current positions of the movable buildings, fields, trees and bushes in `config/farm_map.json`, measured in the map editor
+- [ ] Move list from the current farm to the suggested layout: what goes where and in which order, with as few moves as possible
+- [ ] Items the suggested layout does not keep or does not yet have, listed apart
+- [ ] Report: `output/relocation.md` / `.json`
+
+### v1.4 - Path network
 
 - [ ] Path network from the farmhouse: main paths and side paths, with more styles (straight, curved with stepped corners, mixed)
+
+### v1.5 - Design templates
+
 - [ ] Design templates per block: load an existing design (buildings and decorations on the grid, drawn or loaded in the map editor), pick the blocks it applies to, and let the layout either keep room for it or arrange the block around it
-- [ ] Template import from a screenshot: the editor finds the grid and the buildings on an image of an existing design (image recognition), the player corrects the result
+
+### v1.6 - Template import from a screenshot
+
+- [ ] Semi-automatic import: on the calibrated grid the player marks a building on the screenshot, the editor snaps it to the measured footprint, the player corrects the result
+- [ ] Optional image recognition: the editor finds the grid and the buildings on an image of an existing design, the player corrects the result
 
 ### v2.0+ - Full application (future)
 
