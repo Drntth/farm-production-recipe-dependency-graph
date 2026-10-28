@@ -20,7 +20,6 @@ Many values that the planners need are not tied to the player level. The player 
 | Fields owned                                        | field                          | coins, granted by level                | `fields_owned`                                    | the planner recommends                      | Layout, Production |
 | Trees / bushes owned, per kind                      | apple tree, nectar bush, …     | coins                                  | `owned`                                           | the planner recommends                      | Layout, Production |
 | Fishing spots unlocked                              | fishing lake                   | expansion supplies (15 in total)       | `fishing_spots_unlocked`                          | unknown                                     | Production (fish)  |
-| Town hall / train station / service building levels | town                           | upgrades                               | not needed: sizes come from the measured town map | -                                           | Town layout        |
 | Mastery system                                      | whole farm                     | game rollout (stars → Workbench)       | `mastery_system`                                  | `stars`                                     | Production         |
 
 Dropped: **farm land expansions**. Players cannot reliably count cleared expansions afterwards. The usable farm area is handled by the layout planner instead: the player measures the map size and the fixed buildings into `config/farm_map.json`.

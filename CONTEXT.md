@@ -5,7 +5,7 @@ Hay Day production chains as a graph: which buildings make which goods, how to g
 ## Game data
 
 **`Location`**: anything that takes space or produces: production building, animal shelter, field, tree, bush, storage, fixed building.
-_Not to be confused with_: `FixedItem` (a measured position on an area map, not a data entity)
+_Not to be confused with_: `FixedItem` (a measured position on the farm map, not a data entity)
 
 **`Resource`**: a good: crop, animal product, processed good, ore. Called "good" in prose.
 _Not to be confused with_: external input (voucher, diamond, lure, fishing spot), which is no good and never a graph node
@@ -15,7 +15,7 @@ _Related_: feeding recipe
 
 **Feeding recipe**: a recipe at an animal shelter (chicken feed → egg); the animal time is its production time.
 
-**`Area`**: a game area with its own map: `farm`, `town`, `fishing_lake`.
+**`Area`**: the game area a location belongs to: `farm`, `town`, `fishing_lake`. Only `farm` locations are laid out.
 
 **Footprint**: size of a location in tiles, `width` along the ↘ edge and `height` along the ↙ edge, seen from the top corner.
 
@@ -35,16 +35,16 @@ _Not to be confused with_: movable map item (`movable: true`): measured, but pla
 ## Player
 
 **Player profile**: what the player bought, upgraded or earned (level, barn / silo, copies, slots, mastery, animals); `null` means level default.
-_Not to be confused with_: area map (positions), design settings (taste)
+_Not to be confused with_: farm map (positions), design settings (taste)
 
 **Level default**: the value used when the profile leaves an item open, derived from the level and the shared data.
 
-**Area map**: the player's measured map of one area: size, fixed items, plots, zones, background screenshot.
+**Farm map**: the player's measured farm map: size, fixed items, plots, zones, background screenshot.
 _Related_: `FarmMap` (one model for every area)
 
 **Plot**: one farm expansion, numbered like the wiki, unlocked or not; the starting land is section `base`.
 
-**Zone**: hand-marked tiles of an area map: `buildable` (land the layout may use), `blocked` (water, road, paved strip) or `design` (a design zone).
+**Zone**: hand-marked tiles of the farm map: `buildable` (land the layout may use), `blocked` (water, road, paved strip) or `design` (a design zone).
 
 ## Layout
 
@@ -82,13 +82,13 @@ _Not to be confused with_: goods flow (an amount per hour between two blocks)
 
 **Key building**: a fixed building the player walks to often (farmhouse, barn, silo, truck, roadside shop, riverboat); paths connect it.
 
-**Hub**: where the path network starts: farmhouse (else the Storage block), town hall, fisherman's hut.
+**Hub**: where the path network starts: farmhouse (else the Storage block).
 
 **Connection point**: the reachable free tile nearest to a key building that non-buildable ground cuts off; the path ends there.
 
 **Decoration band**: free tiles within a given distance of a path, kept for decorations and fences.
 
-**Design zone**: tiles of an area map with existing decorations; no block goes there, paths may cross it.
+**Design zone**: tiles of the farm map with existing decorations; no block goes there, paths may cross it.
 _Not to be confused with_: decoration band (free tiles the layout leaves along paths)
 
 **Item gap**: free tiles between the buildings of one block; a wish, lowered when the blocks would not fit otherwise.
@@ -96,7 +96,7 @@ _Not to be confused with_: gap (free tiles between blocks)
 
 **Design figures**: numbers to compare design settings: path tiles, corners, detour ratio, free tiles per block.
 
-**Design settings**: the player's chosen layout and design options, a `default` section plus one per area, kept in the design settings file.
+**Design settings**: the player's chosen layout and design options, one flat object kept in the design settings file.
 _Not to be confused with_: player profile (progress), planner settings (production and Combiner parameters)
 
 **Planner settings**: production and Combiner parameters (login interval, storage share, lookahead), kept in the planner settings file.

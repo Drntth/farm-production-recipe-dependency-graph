@@ -10,8 +10,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [game-facts/animals.md](game-facts/animals.md)                           | animal shelters, capacities, beehive tree, nectar bush, lobster pool, duck salon          |
 | [game-facts/farm.md](game-facts/farm.md)                                 | fields, trees, bushes, farm buildings, layout edit mode, measured footprints              |
 | [game-facts/storage.md](game-facts/storage.md)                           | barn and silo capacity and upgrades                                                       |
-| [game-facts/fishing-lake.md](game-facts/fishing-lake.md)                 | fishing lake area, buildings, spots                                                       |
-| [game-facts/town.md](game-facts/town.md)                                 | town area, town hall, service buildings, sanctuary                                        |
+| [game-facts/fishing-lake.md](game-facts/fishing-lake.md)                 | fishing lake buildings, spots                                                            |
 | [game-updates.md](game-updates.md)                                       | game versions, what changed, update checklist                                             |
 | [wiki-gaps.md](wiki-gaps.md)                                             | data the wiki lacks: value in use (estimate or measured), status, wiki contribution TODO  |
 | [data-sources.md](data-sources.md)                                       | which wiki pages and categories the scraper reads, what is scraped vs. manual vs. profile |
@@ -27,7 +26,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | Game rules (min / max values, mechanics, costs)  | `docs/game-facts/*.md`                      | hand, from wiki / game |
 | Values the wiki lacks (estimates, measurements)  | `docs/wiki-gaps.md` + `data/overrides/`     | hand, until measured   |
 | One player's farm state                          | `config/player.json`                        | the player             |
-| One player's area maps (size, fixed buildings)   | `config/<area>_map.json`                    | the player, measured   |
+| One player's farm map (size, fixed buildings)   | `config/farm_map.json`                      | the player, measured   |
 | Tool settings (design taste, planner parameters) | `config/design.json`, `config/planner.json` | the player, chosen     |
 
 Rules are kept in Markdown, not in the data files, until code needs them. When a planner starts using a rule (e.g. the maximum of 9 slots), move the value into data or code and keep the fact row here as its source.

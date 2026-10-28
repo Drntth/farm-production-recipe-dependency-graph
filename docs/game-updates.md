@@ -23,7 +23,7 @@ Hay Day changes regularly. This file records what is known about recent versions
 | Barn / silo capacity, upgrade tables        | player config, `game-facts/storage.md`, capacity model                                                |
 | Building sizes, rotation, fixed buildings   | `data/overrides/locations.json`, Layout Planner                                                       |
 | Expansion, map size                         | `game-facts/farm.md`, Layout Planner                                                                  |
-| Town, sanctuary, fishing lake               | area modes (`--area`), `game-facts/town.md`, `game-facts/fishing-lake.md`                             |
+| Town, sanctuary, fishing lake               | not laid out; `game-facts/fishing-lake.md` (lake goods, fishing spots)                                |
 | Decorations, paths                          | Design layer                                                                                          |
 | Wiki lags behind the game                   | `data/overrides/`, `known_game_version` in `meta.json`, [wiki-gaps.md](wiki-gaps.md)                  |
 

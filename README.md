@@ -2,7 +2,7 @@
 
 A graph-based system for analysing Hay Day production chains, designing farm layouts around reusable production blocks, and generating capacity-aware production schedules.
 
-The system converts locations, resources and recipes into a weighted directed graph. From this graph it identifies tightly coupled production blocks, supports expansion-friendly arrangement of the farm, the town and the fishing lake, and, using only static player data, produces practical production quantities and login schedules.
+The system converts locations, resources and recipes into a weighted directed graph. From this graph it identifies tightly coupled production blocks, supports expansion-friendly arrangement of the farm, and, using only static player data, produces practical production quantities and login schedules.
 
 Planning is organised in two layers:
 
@@ -31,8 +31,6 @@ Three independent tools share one core. Each tool can run on its own. The Combin
      │ 1. Layout Planner     │             │ 2. Production Planner │
      │ blocks, footprints,   │             │ quantities, capacity, │
      │ visual layout         │             │ schedule              │
-     │ areas: farm / town /  │             │ (farm only)           │
-     │ fishing lake          │             │                       │
      └───────────┬───────────┘             └───────────┬───────────┘
                  └──────────────────┬──────────────────┘
                                     ▼
@@ -56,33 +54,18 @@ Design decisions:
 
 Help the player design an efficient and expandable layout by discovering natural groups of buildings that belong together.
 
-### Areas
-
-The layout is planned per game area, selected with `--area` (default `farm`):
-
-| Area           | Content                                                                                   | Quantity calculations                 |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------- |
-| `farm`         | production buildings, animal shelters, fields, trees, bushes, storage, decorations, paths | yes (from graph / Production Planner) |
-| `town`         | service buildings, town hall, train station, sanctuary entrance, decorations, paths       | no                                    |
-| `fishing_lake` | lake buildings, decorations, paths                                                        | no                                    |
-
-The farm layout is driven by the dependency graph. The town and fishing lake layouts use only the measured area map (`config/<area>_map.json`, same schema and editor as the farm map) and the design layer:
-
-- **town** (`src/layout/area.py`): items marked `movable` in the map (the service buildings) keep their measured size and are rearranged around the fixed items, largest first, pulled toward the town hall. Output: `output/layout_town.*`.
-- **fishing_lake**: every lake building is fixed, so the layout only adds the design layer. Output: `output/layout_fishing_lake.*`.
-
-### Design layer (optional, every area)
+### Design layer (optional)
 
 `design_layer: true` in [`config/design.json`](#settings) adds walkable paths and a decoration band on top of the functional layout (`src/layout/design.py`):
 
-- Paths (1 tile wide) connect every block and the key buildings into one network: on the farm the farmhouse, barn, silo, truck, roadside shop and riverboat (hub: the farmhouse, else the Storage block); in the town and on the lake every measured building (hub: town hall / fisherman's hut). The network grows from the hub, each time by the shortest path on free tiles to the nearest building not reached yet.
+- Paths (1 tile wide) connect every block and the key buildings into one network: on the farm the farmhouse, barn, silo, truck, roadside shop and riverboat (hub: the farmhouse, else the Storage block). The network grows from the hub, each time by the shortest path on free tiles to the nearest building not reached yet.
 - A key building with no reachable free tile next to it gets a path to its **connection point**, the reachable free tile nearest to it. On the farm the riverboat and the leaderboard stand behind a paved strip that is not buildable (mark it as a `blocked` zone): the path ends at the edge of the buildable land, and the notes give the tiles left in between. A building more than 5 tiles beyond the reachable land stays unreachable.
 - The decoration band is the free tiles within `decor_band` tiles of a path (default 1): room for decorations and fences, not for buildings.
 - With the design layer the blocks keep at least one free tile between them (`gap` ≥ 1), so a path always fits. Buildings no path can reach are listed in the notes.
 - `path_style`: `shortest` (default) takes any shortest path; `straight` adds a cost to every change of direction, so paths have fewer corners and detours (on the measured farm 12 corners instead of 17).
 - `path_targets` (farm): `blocks` (default) connects the blocks and the key buildings; `buildings` connects every building and every field / tree / bush patch inside the blocks; the paths may cross the free part of a block frame, but the decoration band stays out of it (it is the reserve for later unlocks). With the design layer on it needs `item_gap` ≥ 1, so a path fits between the buildings.
 - `item_gap` (farm, default 0): free tiles between the buildings of a block, so blocks look less packed; patches stay whole. Placing every block comes first, looks second: when the blocks do not fit, the item gap is lowered step by step (at the requested reserve) before the reserve is; with no gap left, `path_targets: buildings` falls back to `blocks`. The report shows the gap used and the one asked for (on the measured farm `item_gap: 1` drops to 0).
-- Design zones (`design` zones of the area map, `design_zones`, default on): existing decorations; no block is placed there, paths may cross them, and the decoration band leaves them alone.
+- Design zones (`design` zones of the farm map, `design_zones`, default on): existing decorations; no block is placed there, paths may cross them, and the decoration band leaves them alone.
 - Figures in `layout.md` / `layout.json` (`design.figures`) to compare settings: path tiles, corners (turns and junctions), detour ratio (tiles walked per tile of grid distance), free tiles per block, unreachable buildings, design zone tiles.
 
 ### How it works (farm)
@@ -117,7 +100,7 @@ A production block is a movable logical unit, for example:
 ### Placement inputs (already in the data)
 
 - **Footprints** in tiles (`footprint_width` × `footprint_height`) for every movable location at the current level. Machine sizes come from the wiki, the rest were measured in the game.
-- **Fixed buildings** (`movable: false`): the mine and the fishing lake buildings stay where they are.
+- **Fixed buildings** (`movable: false`): the mine stays where it is; fishing lake buildings are never placed on the farm.
 - **Rotation** (`rotatable`): non-square items that can be turned, e.g. the 1×2 raspberry and blackberry bushes and the 3×2 ice cream maker.
 - **Copies per level** (`level_limits.json`): how many feed mills, coops, … are available.
 - **Support relations** (`src/layout/support.py`): non-production neighbours, e.g. nectar bushes next to the beehive tree.
@@ -140,11 +123,11 @@ Every farm has its own expansions and its own spot for the farmhouse, barn, silo
 
 The values above are only an illustration. Coordinates are tiles from the farm's top corner, with `x` along the ↘ edge and `y` along the ↙ edge. `null` means not measured yet: without `width` / `height` the layout is unbounded, and a fixed item without a position is listed in the notes but not drawn. A fixed item whose id is a location (`mine`) also pulls the coupled block (smelter) toward it.
 
-The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored. Plots of section `base` (the starting land) always count as unlocked. The barn and silo are movable: without a position in `fixed` the planner places them as the Storage block. An item with `"movable": true` is measured but not an obstacle: the planner places it itself (on the farm like an item without a position, but only for locations the planner places, such as the barn and silo; any other movable farm item stays fixed and is reported; in the town it keeps the measured size). `zones` are hand-marked tile rectangles: blocks stay inside the `buildable` zones (if any) and never touch `blocked` ones (water, road, forest, …).
+The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored. Plots of section `base` (the starting land) always count as unlocked. The barn and silo are movable: without a position in `fixed` the planner places them as the Storage block. An item with `"movable": true` is measured but not an obstacle: the planner places it itself (like an item without a position, but only for locations the planner places, such as the barn and silo; any other movable item stays fixed and is reported). `zones` are hand-marked tile rectangles: blocks stay inside the `buildable` zones (if any) and never touch `blocked` ones (water, road, forest, …).
 
 #### Measuring with the map editor
 
-`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). Pick the **Area** first (farm, town, fishing lake): each area has its own default ids, is kept separately in the browser and is saved as `<area>_map.json` (save it as `config/<area>_map.json`). In the town, use path tiles as the calibration ruler, and tick **movable** for the service buildings (default for their ids). The steps below are for the farm; the town and the lake work the same way without plots. The toolbar holds the area, opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`6` steps, `Ctrl+S` save, `Ctrl+Z` undo).
+`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`6` steps, `Ctrl+S` save, `Ctrl+Z` undo).
 
 1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
 2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored). Keep the GIMP file (`.xcf`) and the raw screenshots in `config/screenshots/`, and the wiki plot maps used on the Reference tab in `config/reference/`; both folders are git-ignored (player data, wiki licence, file size). Manual stitching in GIMP:
@@ -167,7 +150,7 @@ The game's Layout Edit Mode shows no tile grid, so the graphical output always d
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Short term  | Weighted graph + detected production blocks (done)                                                                                                                                                         |
 | Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, measured farm map)                                                                                              |
-| Long term   | Complete expansion-friendly layout per area, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations (v0.8: paths and decoration band). |
+| Long term   | Complete expansion-friendly farm layout, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations (v0.8: paths and decoration band). |
 
 ---
 
@@ -248,48 +231,41 @@ The sizes inherit the estimates of the Production Planner (tree / bush yield, ho
 
 ## Settings
 
-How the tools work is set in config files, never on the command line: the CLI only says what to run (`--area`, `--level`, `--player-config`, `--map`, `--design-config`, `--planner-config`, `--data-dir`, `--output-dir`). Each file has a committed example and a local, git-ignored copy that wins; without either, the built-in defaults of `src/settings.py` apply. Every run logs the file it used, and `layout*.json`, `schedule.json` and `combined.json` record the settings in a `settings` key.
+How the tools work is set in config files, never on the command line: the CLI only says what to run (`--level`, `--player-config`, `--map`, `--design-config`, `--planner-config`, `--data-dir`, `--output-dir`). Each file has a committed example and a local, git-ignored copy that wins; without either, the built-in defaults of `src/settings.py` apply. Every run logs the file it used, and `layout*.json`, `schedule.json` and `combined.json` record the settings in a `settings` key.
 
-`config/design.json` (Layout Planner, design layer, Combiner layout): a `default` section, and `farm` / `town` / `fishing_lake` sections that set only what differs.
+`config/design.json` (Layout Planner, design layer, Combiner layout): one flat object; a missing key keeps its default.
 
 ```json
 {
-  "default": {
-    "gap": 1,
-    "design_layer": false,
-    "decor_band": 1,
-    "path_style": "shortest",
-    "design_zones": true
-  },
-  "farm": {
-    "reserve": 0.2,
-    "strategy": "auto",
-    "field_pool": 0.0,
-    "item_gap": 0,
-    "path_targets": "blocks"
-  },
-  "town": { "design_layer": true },
-  "fishing_lake": {}
+  "gap": 1,
+  "design_layer": false,
+  "decor_band": 1,
+  "path_style": "shortest",
+  "design_zones": true,
+  "reserve": 0.2,
+  "strategy": "auto",
+  "field_pool": 0.0,
+  "item_gap": 0,
+  "path_targets": "blocks",
+  "block_images": true
 }
 ```
 
-| Key            | Areas | Meaning                                                                                           | Default  |
-| -------------- | ----- | ------------------------------------------------------------------------------------------------- | -------- |
-| `gap`          | all   | free tiles between blocks                                                                         | 1        |
-| `design_layer` | all   | paths and decoration band (gap is then at least 1)                                                | false    |
-| `decor_band`   | all   | decoration band width next to the paths                                                           | 1        |
-| `reserve`      | farm  | extra free area per block for later unlocks                                                       | 0.2      |
-| `strategy`     | farm  | block order: `auto`, `coupling`, `size`, `flow`, or `all` (one output set per order)              | auto     |
-| `field_pool`   | farm  | share of the fields in a separate Shared fields block (without production sizing)                 | 0        |
-| `item_gap`     | farm  | free tiles between the buildings of a block; patches stay whole; lowered if the blocks do not fit | 0        |
-| `path_style`   | all   | `shortest`, or `straight` (fewer corners and detours)                                             | shortest |
-| `path_targets` | farm  | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)         | blocks   |
-| `design_zones` | all   | keep the map's `design` zones free of blocks (paths may cross them)                               | true     |
-| `block_images` | farm  | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                    | true     |
+| Key            | Meaning                                                                                           | Default  |
+| -------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| `gap`          | free tiles between blocks                                                                         | 1        |
+| `design_layer` | paths and decoration band (gap is then at least 1)                                                | false    |
+| `decor_band`   | decoration band width next to the paths                                                           | 1        |
+| `reserve`      | extra free area per block for later unlocks                                                       | 0.2      |
+| `strategy`     | block order: `auto`, `coupling`, `size`, `flow`, or `all` (one output set per order)              | auto     |
+| `field_pool`   | share of the fields in a separate Shared fields block (without production sizing)                 | 0        |
+| `item_gap`     | free tiles between the buildings of a block; patches stay whole; lowered if the blocks do not fit | 0        |
+| `path_style`   | `shortest`, or `straight` (fewer corners and detours)                                             | shortest |
+| `path_targets` | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)         | blocks   |
+| `design_zones` | keep the map's `design` zones free of blocks (paths may cross them)                               | true     |
+| `block_images` | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                    | true     |
 
-Farm-only keys are rejected in the town and fishing lake sections; in the `default` section they apply to the farm only.
-
-`config/planner.json` (farm only):
+`config/planner.json`:
 
 ```json
 {
@@ -383,7 +359,7 @@ Everything that occupies space (production buildings, animal shelters, fields, t
 ```
 
 Allowed `type` values: `production`, `animal`, `field`, `tree`, `bush`, `storage`, `other`.  
-Allowed `area` values: `farm` (default), `town`, `fishing_lake`. The scraper sets `fishing_lake` from the wiki category _Fishing Lake Buildings_.  
+Allowed `area` values: `farm` (default), `town`, `fishing_lake`. The scraper sets `fishing_lake` from the wiki category _Fishing Lake Buildings_. The Layout Planner places only `farm` locations; the farm map itself has no `area` key.  
 `movable` is `true` by default. It is `false` for fixed buildings the player cannot move (mine, fishing lake buildings).  
 `rotatable` is `false` by default. It is `true` when the footprint can be turned (width and height swapped). It only matters for non-square footprints such as the 1×2 bushes or the 3×2 ice cream maker.  
 Every fruit tree and bush kind is its own location (`apple_tree`, `raspberry_bush`, …), because each is placed separately and has its own footprint and fruit. Trees and bushes that produce no goods (the nectar bush) come from the wiki category _Trees and Bushes_.  
@@ -592,14 +568,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.0 (local usable platform) is done (241 tests passing). Next: measure the town and fishing lake maps ([In-game TODO](#in-game-todo)), then v1.x (design templates).  
+**Current status:** v1.0 (local usable platform) is done (235 tests passing). Next: v1.x (design templates).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
-The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point); `--area town` / `--area fishing_lake` lay out the measured town and lake maps (`config/town_map.json`, `config/fishing_lake_map.json`, measured with the map editor).  
+The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
-Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses, town building sizes) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
-Next step: the town and fishing lake maps ([In-game TODO](#in-game-todo)); then v1.x.
+Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
+Next step: v1.x.
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -664,13 +640,11 @@ Next step: the town and fishing lake maps ([In-game TODO](#in-game-todo)); then 
 - [x] Ordered action list and suggested login frequency
 - [x] `output/schedule.json` export (plus `schedule.md`)
 
-### v0.8 - Area modes and Design layer (done)
+### v0.8 - Design layer (done)
 
-- [x] `--area town`: service buildings rearranged with their measured size around the town hall, train station and sanctuary entrance (fixed)
-- [x] `--area fishing_lake`: fixed lake buildings, design layer only
-- [x] Map editor and map file per area (`area`, `movable` items, `config/<area>_map*.json`)
-- [x] Design layer for every area (`design_layer`): walkable paths between blocks and key buildings, decoration band for decorations and fences (`decor_band`)
-- [x] No quantity calculations outside the farm
+- [x] `movable` items in the farm map (barn, silo measured but placed by the planner)
+- [x] Design layer (`design_layer`): walkable paths between blocks and key buildings, decoration band for decorations and fences (`decor_band`)
+- [x] Town and fishing lake layouts were dropped later: the tools plan only the farm
 
 ### v0.9 - Combiner (done)
 
@@ -682,14 +656,14 @@ Next step: the town and fishing lake maps ([In-game TODO](#in-game-todo)); then 
 
 ### v1.0 - Local usable platform (done)
 
-- [x] Settings only in config files: `config/design.json` (layout and design, `default` plus per-area sections) and `config/planner.json` (production, Combiner); the CLI only says what to run (`--area`, `--level`, file paths), and every output records the settings it used
+- [x] Settings only in config files: `config/design.json` (layout and design) and `config/planner.json` (production, Combiner); the CLI only says what to run (`--level`, file paths), and every output records the settings it used
 - [x] Unified CLI: `python -m src <command>` (`graph`, `layout`, `plan`, `combine`, `scrape`, `all`); the tools' own entry points keep working
 - [x] Game fact checker: `python -m src check-facts` reads every row of `docs/game-facts/*.md` with a `wiki:<Page>` source, fetches each page once through the wiki API and reports rows whose page changed after `Checked` or whose numbers are no longer in the page (`output/fact_check.md` / `.json`)
 - [x] Visual outputs: one SVG per block (the block on its own grid with the paths around it, legend with its map position) and a collage of every block (`output/blocks/`, `output/combined_blocks/`; setting `block_images`); the whole map stays `layout.svg` / `combined.svg`
 - [x] Ready-to-use player-config examples for common levels (`config/examples/`, level defaults only; `python -m src examples`)
 - [x] Interactive profile wizard (option D of [docs/player-profile.md](docs/player-profile.md)): `python -m src wizard` asks only about items unlocked at the level and writes the sparse profile
 - [x] Documentation: [user guide](docs/user-guide.md) (profile, map, settings, commands, outputs, typical situations)
-- [x] Design options: every design option below is off by default and is switched on or tuned in `config/design.json` (per area), so a chosen style is kept between runs
+- [x] Design options: every design option below is off by default and is switched on or tuned in `config/design.json`, so a chosen style is kept between runs
 - [x] Nicer paths (option): `path_style` `shortest` (default) or `straight` (a cost per turn: fewer corners and detours); `path_targets` `blocks` (blocks and key buildings, default) or `buildings` (every building; needs `item_gap` ≥ 1)
 - [x] Space inside blocks (option): `item_gap` free tiles between the buildings of a block (default 0), so blocks look less packed; field, tree and bush patches stay together. Every block must fit first: the gap is lowered before the reserve, and the report shows it
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
@@ -711,12 +685,7 @@ Next step: the town and fishing lake maps ([In-game TODO](#in-game-todo)); then 
 
 ### In-game TODO
 
-Tasks that need the real game, because the wiki does not give the values. Until they are done the layout lists what is not measured, so **none of them blocks the next versions**. Only the two area maps remain: the other values are measured (field limit, barn footprint) or kept as accepted estimates (tree / bush yield, honeycomb rate, 3-star times). The Workbench bonuses wait for the game rollout to reach the account; until then the base times are used. Basis and status of every value: [docs/wiki-gaps.md](docs/wiki-gaps.md).
-
-| Task                                                                                                                                                                     | Needed for                 | Until then                                                                       | Blocks a version?                   | Record the result in                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [ ] Measure the town map with the editor (screenshot, calibration, every building; `movable` for the buildings that move in Layout Edit Mode; how the sanctuary appears) | v0.8 `--area town`         | the layout lists what is not measured; service buildings movable, the rest fixed | no; needed for a usable town layout | `config/town_map.json`; movable buildings and the sanctuary in `config/town_map.example.json`, map editor defaults, `docs/wiki-gaps.md` |
-| [ ] Measure the fishing lake map with the editor                                                                                                                         | v0.8 `--area fishing_lake` | the layout lists what is not measured                                            | no; needed for a usable lake layout | `config/fishing_lake_map.json`                                                                                                          |
+Nothing left: the values the wiki lacks are measured (field limit, barn footprint) or kept as accepted estimates (tree / bush yield, honeycomb rate, 3-star times). The Workbench bonuses wait for the game rollout to reach the account; until then the base times are used. Basis and status of every value: [docs/wiki-gaps.md](docs/wiki-gaps.md).
 
 ---
 
@@ -738,7 +707,7 @@ python -m pytest
 # unified CLI: one entry point, one command per tool
 python -m src                       # list the commands
 python -m src all                   # graph, farm layout, plan and combined plan in one run
-python -m src layout --area town    # any tool: python -m src <graph|layout|plan|combine|scrape> [options]
+python -m src layout --level 30     # any tool: python -m src <graph|layout|plan|combine|scrape> [options]
 python -m src wizard                # questions → config/player.json (sparse profile)
 python -m src examples              # regenerate config/examples/player_level_<N>.json
 python -m src check-facts           # docs/game-facts vs. the wiki → output/fact_check.md (network)
@@ -763,8 +732,6 @@ python -m src.main --no-analysis
 # settings (gap, reserve, strategy, design layer): config/design.json, see "Settings"
 python -m src.layout
 python -m src.layout --level 30
-python -m src.layout --area town           # config/town_map.json → layout_town.*
-python -m src.layout --area fishing_lake   # config/fishing_lake_map.json
 python -m src.layout --design-config my_design.json
 
 # production plan: capacity, quantities, recommendations, actions per login
@@ -789,8 +756,6 @@ output/
 ├── layout.json                        # python -m src.layout
 ├── layout.md
 ├── layout.svg
-├── layout_town.*                      # python -m src.layout --area town
-├── layout_fishing_lake.*
 ├── capacity.json                      # python -m src.planner
 ├── schedule.json
 ├── schedule.md
@@ -820,8 +785,7 @@ farm-production-recipe-dependency-graph/
 │   │   ├── farm.md
 │   │   ├── fishing-lake.md
 │   │   ├── production-buildings.md
-│   │   ├── storage.md
-│   │   └── town.md
+│   │   └── storage.md
 │   ├── data-sources.md                # what is scraped, from where; what is manual
 │   ├── game-updates.md                # update process, known versions
 │   ├── wiki-gaps.md                   # data the wiki lacks: estimates in use, measurement / wiki TODO
@@ -837,10 +801,6 @@ farm-production-recipe-dependency-graph/
 │   ├── planner.json
 │   ├── farm_map.example.json          # fixed farm buildings, positions empty (committed)
 │   ├── farm_map.json                  # your measured farm map (git-ignored)
-│   ├── town_map.example.json          # town buildings, positions empty; service buildings movable
-│   ├── fishing_lake_map.example.json  # fishing lake buildings, positions empty
-│   ├── town_map.json                  # your measured town / lake maps (git-ignored)
-│   ├── fishing_lake_map.json
 │   └── farm_background.png            # your stitched farm screenshot (git-ignored)
 ├── data/
 │   ├── locations.json                 # locations (buildings, fields, animals…)
@@ -886,13 +846,12 @@ farm-production-recipe-dependency-graph/
 │   │   ├── mastery.py
 │   │   ├── recipe.py
 │   │   └── resource.py
-│   ├── layout/                        # Layout Planner (farm, town, fishing lake)
-│   │   ├── area.py                    # town / fishing lake layout from the measured map
+│   ├── layout/                        # Layout Planner (farm)
 │   │   ├── blocks.py                  # named blocks (anchor method), flow order
 │   │   ├── cli.py                     # python -m src.layout
 │   │   ├── describe.py                # layout.md / layout.json
 │   │   ├── design.py                  # design layer: paths, decoration band
-│   │   ├── farm_map.py                # config/<area>_map*.json model and loader
+│   │   ├── farm_map.py                # config/farm_map*.json model and loader
 │   │   ├── fields.py                  # dedicated fields per block (crop demand)
 │   │   ├── inventory.py               # copies per location (profile → level)
 │   │   ├── packing.py                 # greedy rectangle packing on the tile grid
@@ -926,7 +885,7 @@ farm-production-recipe-dependency-graph/
 │   │   └── writer.py
 │   └── main.py
 ├── tools/
-│   └── farm_map_editor.html           # screenshot calibration → config/<area>_map.json, PNG exports
+│   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
 │   ├── fixtures/wiki/                 # trimmed wiki HTML / wikitext for scraper tests
 │   ├── test_analysis.py

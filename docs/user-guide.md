@@ -29,13 +29,11 @@ Without a map the layout is drawn on an unbounded grid: useful to see the blocks
 - `blocked` (red): water, roads, paved strips; nothing is built there.
 - `design` (violet): decorations you want to keep; no block goes there, paths may cross.
 
-The town and the fishing lake work the same way (`config/town_map.json`, `config/fishing_lake_map.json`).
-
 ## 4. Choose how it should look: settings
 
 Settings are files, not command-line options. Copy the examples and edit them; the tools tell you in their log which file they used, and every output records the settings it was made with.
 
-- `config/design.json`: layout and design, per area. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`.
+- `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`.
 - `config/planner.json`: `production.login_interval` (fix how often you log in; empty = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
 
 Every key with its default is in the README section "Settings". Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first and then the reserve, and the report says so.
@@ -45,7 +43,6 @@ Every key with its default is in the README section "Settings". Placing every bl
 ```bash
 python -m src all                        # graph, farm layout, production plan, combined plan
 python -m src combine                    # only the combined plan (layout sized by production)
-python -m src layout --area town         # the town
 python -m src plan --level 30            # try another level for one run
 ```
 
@@ -59,7 +56,6 @@ Every command takes the files it uses (`--player-config`, `--map`, `--design-con
 | `combined.svg`, `combined_blocks/*.svg`  | the farm with every block; one image per block to rebuild it in the game, plus `collage.svg` |
 | `schedule.md`                            | how often to log in and what to do at every login, recommended fields, trees and bushes      |
 | `layout.md`, `layout.svg`, `blocks/`     | the layout without production sizing (graph and profile only)                                |
-| `layout_town.*`, `layout_fishing_lake.*` | the town and the lake                                                                        |
 
 The SVG files open in any browser. Coordinates are tiles from the top corner of the map: x along the ↘ edge, y along the ↙ edge. The game's Layout Edit Mode shows no grid, so count tiles from a fixed building.
 

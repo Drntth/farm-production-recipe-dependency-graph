@@ -1,6 +1,6 @@
 # Fishing lake
 
-Layout area `fishing_lake` (`python -m src.layout --area fishing_lake`). The scraper sets it from the wiki category *Fishing Lake Buildings*. The buildings are fixed, so the layout only adds the design layer (paths, decoration band) on the measured `config/fishing_lake_map.json`.
+Location area `fishing_lake`, set by the scraper from the wiki category *Fishing Lake Buildings*. The tools do not lay out the lake; its buildings and fishing spots matter only for the Production Planner (lake goods, `fishing_spots_unlocked`).
 
 | Fact                               | Value                                                                                                         | Source                               | Checked    |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ---------- |

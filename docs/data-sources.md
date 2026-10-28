@@ -26,9 +26,9 @@ Animal products with a feed in the Needs column (`Egg`: `Chicken feed (1)`) also
 
 ## Read but not scraped
 
-Pages that were read by hand for the facts in `docs/game-facts/`: Production_Buildings, Feed_Mill, Smelter, Lobster_Pool, Duck_Salon, Chicken_Coop, Beehive_Tree, Nectar_Bush, Barn, Silo, Farm, Crops, Apple_Tree, Raspberry_Bush, Expansion, Fishing_Lake, Town, Update, Birthday_Balloon_Maker, Category:Town_Buildings, Category:Service_Buildings.
+Pages that were read by hand for the facts in `docs/game-facts/`: Production_Buildings, Feed_Mill, Smelter, Lobster_Pool, Duck_Salon, Chicken_Coop, Beehive_Tree, Nectar_Bush, Barn, Silo, Farm, Crops, Apple_Tree, Raspberry_Bush, Expansion, Fishing_Lake, Update, Birthday_Balloon_Maker.
 
-Candidates for future scraping: none needed now; town buildings come from the measured town map (their wiki pages have no size).
+Candidates for future scraping: none needed now.
 
 ## Hand-maintained
 
@@ -46,7 +46,7 @@ Candidates for future scraping: none needed now; town buildings come from the me
 
 `config/player.json` (or the committed example): level, mastery system, barn / silo, fields, fishing spots, and per-location slots, mastery, copies, animals, beehives. See [player-profile.md](player-profile.md).
 
-`config/farm_map.json` (or the committed example): the usable farm size, the positions of the fixed buildings (farmhouse, barn, silo, mine, …), the calibrated farm screenshot and the farm plots with their unlocked state, measured by the player with `tools/farm_map_editor.html`. See the README section "Farm map". `config/town_map.json` and `config/fishing_lake_map.json` have the same schema (`area`, `movable` items) for the town and the lake.
+`config/farm_map.json` (or the committed example): the usable farm size, the positions of the fixed buildings (farmhouse, barn, silo, mine, …), the calibrated farm screenshot and the farm plots with their unlocked state, measured by the player with `tools/farm_map_editor.html`. See the README section "Farm map".
 
 ## Not available
 
