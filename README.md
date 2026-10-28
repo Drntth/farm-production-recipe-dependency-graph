@@ -127,7 +127,7 @@ The file can also hold a calibrated screenshot (`background`) and the farm plots
 
 #### Measuring with the map editor
 
-`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`6` steps, `Ctrl+S` save, `Ctrl+Z` undo).
+`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`7` steps, `Ctrl+S` save, `Ctrl+Z` undo).
 
 1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
 2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored). Keep the GIMP file (`.xcf`) and the raw screenshots in `config/screenshots/`, and the wiki plot maps used on the Reference tab in `config/reference/`; both folders are git-ignored (player data, wiki licence, file size). Manual stitching in GIMP:
@@ -141,15 +141,16 @@ The file can also hold a calibrated screenshot (`background`) and the farm plots
 6. **Expansions**: add a plot (section + wiki number, unlocked or not) and drag one or more rectangles over its tiles; touching rectangles of one plot merge into one shape, Alt + drag erases tiles.
 7. **Zones**: mark the farm sections as **buildable** (green), water, roads, forest, paved strips (e.g. in front of the riverboat), … as **blocked** (red), and existing decorations the layout should keep as **design** (violet), each as tile rectangles.
 8. **Export**: `farm_map.json` (save it as `config/farm_map.json`; by default the map is cropped to the farm with a 5-tile margin, so the outline follows the real farm), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
+9. **Layout overlay** (step 7 in the editor, view only): load `output/layout.json` or `output/combined.json` to check the planned layout on the screenshot: block frames with names, items (reserved space dashed), paths and the decoration band, as the `layout` layer. Hovering an item shows its block and id in the status bar. The overlay uses the tile coordinates of the farm map it was planned on and is never shifted; when its map size or a fixed building's position differs from the loaded map (e.g. planned before the map was cropped on save, or without a farm map), the editor warns: plan again after every re-save of `farm_map.json`. It is kept in the browser, not in the map JSON.
 
 The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
 
 ### Evolution
 
-| Horizon     | Output                                                                                                                                                                                                     |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Short term  | Weighted graph + detected production blocks (done)                                                                                                                                                         |
-| Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, measured farm map)                                                                                              |
+| Horizon     | Output                                                                                                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Short term  | Weighted graph + detected production blocks (done)                                                                                                                                                     |
+| Medium term | Named blocks with footprints and a simple graphical layout, without production data (v0.6, measured farm map)                                                                                          |
 | Long term   | Complete expansion-friendly farm layout, so the farm does not need a full rebuild at every level. With Design planning, space is reserved for paths and decorations (v0.8: paths and decoration band). |
 
 ---
@@ -568,14 +569,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.1 (release basics) is done (235 tests passing, CI on every push). Next: v1.2 (layout in the map editor).  
+**Current status:** v1.2 (layout in the map editor) is done (236 tests passing, CI on every push). Next: v1.3 (relocation plan).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
-Next step: v1.2. Changes per version: [CHANGELOG.md](CHANGELOG.md).
+Next step: v1.3. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -669,7 +670,7 @@ Next step: v1.2. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-The items of v1.2-v1.5 are plans; their details are updated when they are built.
+The items of v1.3-v1.5 are plans; their details are updated when they are built.
 
 ### v1.1 - Release basics (done)
 
@@ -680,13 +681,13 @@ The items of v1.2-v1.5 are plans; their details are updated when they are built.
 - [x] `CHANGELOG.md`: one `## [x.y.z] - date` heading per version with a few lines; v0.3-v0.9 in short from this roadmap (`?` where the date is not certain)
 - [x] `v1.0.0` git tag on the v1.0 commit, a tag for every later version; older milestones get no tag
 
-### v1.2 - Layout in the map editor (next)
+### v1.2 - Layout in the map editor (done)
 
-- [ ] Load `output/layout.json` or `output/combined.json` (its `layout` part) into `tools/farm_map_editor.html` as an overlay: block frames with names, items, paths, decoration band, as a layer that can be switched on and off
-- [ ] View only: blocks are not dragged or edited (that is the v2.0+ layout editor)
-- [ ] Same tile coordinates as the farm map; when the layout's map size differs from the loaded farm map, the editor warns and does not shift anything
+- [x] Load `output/layout.json` or `output/combined.json` (its `layout` part) into `tools/farm_map_editor.html` as an overlay (step 7): block frames with names, items, paths, decoration band, as a layer that can be switched on and off
+- [x] View only: blocks are not dragged or edited (that is the v2.0+ layout editor); the block list highlights a block, the status bar names the item under the mouse
+- [x] Same tile coordinates as the farm map; when the layout's map size differs from the loaded farm map (or it was planned without one), the editor warns and does not shift anything
 
-### v1.3 - Relocation plan
+### v1.3 - Relocation plan (next)
 
 - [ ] Current farm: a `current` list in `config/farm_map.json` with the positions of the player's production buildings, shelters, barn and silo now (fields, trees and bushes only as counts), measured in a new editor tab; the Layout Planner ignores it
 - [ ] Farm map clean-up: `fixed` holds only buildings the game never moves; the barn and the silo leave it and the `movable` flag is removed (old farm maps fail with a clear error; re-save them in the editor)

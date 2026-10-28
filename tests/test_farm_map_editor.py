@@ -102,21 +102,25 @@ console.log(JSON.stringify({
 """
 
 
-@pytest.fixture(scope="module")
-def result(tmp_path_factory) -> dict:
-    tmp = tmp_path_factory.mktemp("editor")
+def _run_core(tmp: Path, script: str, *args: str) -> dict:
+    """Run *script* in node with the editor core as argv[2]; returns its JSON output."""
     html = EDITOR.read_text(encoding="utf-8")
     core = html.split("// CORE-START", 1)[1].split("// CORE-END", 1)[0]
     core = core.split("\n", 1)[1]  # drop the rest of the marker line
     (tmp / "core.js").write_text(core, encoding="utf-8")
-    (tmp / "run.js").write_text(SCRIPT, encoding="utf-8")
+    (tmp / "run.js").write_text(script, encoding="utf-8")
     out = subprocess.run(
-        [NODE, str(tmp / "run.js"), str(tmp / "core.js")],
+        [NODE, str(tmp / "run.js"), str(tmp / "core.js"), *args],
         capture_output=True,
         text=True,
         check=True,
     )
     return json.loads(out.stdout)
+
+
+@pytest.fixture(scope="module")
+def result(tmp_path_factory) -> dict:
+    return _run_core(tmp_path_factory.mktemp("editor"), SCRIPT)
 
 
 def test_calibration_covers_image_and_keeps_ruler_on_grid(result: dict) -> None:
@@ -206,3 +210,81 @@ def test_crop_keeps_the_farm_in_place(result: dict) -> None:
     assert fm.zones[0].cells == [(1, 1, 1, 1)]
     # same physical spot: the pixel of the farmhouse corner is unchanged
     assert c["farmhouse"] == pytest.approx(c["farmhouseBefore"])
+
+
+LAYOUT_SCRIPT = r"""
+const Core = require(process.argv[2]);
+const payload = JSON.parse(require('fs').readFileSync(process.argv[3], 'utf8'));
+const plain = Core.fromLayout(payload);
+let error = null;
+try { Core.fromLayout({ width: 10, fixed: [] }); } catch (e) { error = e.message; }
+const same = { width: payload.map.width, height: payload.map.height };
+console.log(JSON.stringify({
+  plain,
+  combined: JSON.stringify(Core.fromLayout({ summary: {}, layout: payload })) === JSON.stringify(plain),
+  error,
+  fits: Core.layoutMismatch(plain, same),
+  other: Core.layoutMismatch(plain, { width: same.width - 1, height: same.height }),
+  noMap: Core.layoutMismatch(plain, null),
+  unbounded: Core.layoutMismatch(Object.assign({}, plain, { map: { bounded: false } }), same),
+  // same size, but the map was cropped: the farmhouse stands one tile further
+  shifted: Core.layoutMismatch(plain, same, plain.fixed.map(f => ({ id: f.id, rect: [f.rect[0] - 1, ...f.rect.slice(1)] }))),
+  sameFixed: Core.layoutMismatch(plain, same, plain.fixed),
+  stored: Core.isLayoutOverlay(JSON.parse(JSON.stringify(plain))),
+  oldStored: Core.isLayoutOverlay({ map: plain.map, blocks: plain.blocks }),
+}));
+"""
+
+
+@pytest.mark.skipif(
+    not Path("data/locations.json").exists(), reason="data/locations.json not found"
+)
+def test_layout_overlay_reads_the_layout_json(tmp_path: Path) -> None:
+    from src.layout.describe import layout_to_dict
+    from src.layout.farm_map import FixedItem
+    from src.layout.planner import plan_layout
+    from src.loaders.json_loader import load_data
+
+    farm_map = FarmMap(
+        width=60,
+        height=60,
+        fixed=[FixedItem(id="farmhouse", x=27, y=27, width=4, height=3)],
+    )
+    layout = plan_layout(
+        load_data("data", 15), level=15, farm_map=farm_map, design=True
+    )
+    payload = layout_to_dict(layout)
+    (tmp_path / "layout.json").write_text(json.dumps(payload), encoding="utf-8")
+    out = _run_core(tmp_path, LAYOUT_SCRIPT, str(tmp_path / "layout.json"))
+
+    plain = out["plain"]
+    assert out["combined"], "combined.json must give the same overlay as its layout"
+    assert out["error"] == "Not a layout.json or combined.json file"
+    assert plain["map"] == {"bounded": True, "width": 60, "height": 60}
+    placed = [b for b in payload["blocks"] if b["frame"]]
+    assert [b["id"] for b in plain["blocks"]] == [b["id"] for b in placed]
+    first, src = plain["blocks"][0], placed[0]
+    f = src["frame"]
+    assert first["frame"] == [f["x"], f["y"], f["width"], f["height"]]
+    assert len(first["items"]) == len(src["items"])
+    assert first["items"][0]["id"] == src["items"][0]["location_id"]
+
+    # paths and the decoration band: the same tiles as few rects
+    def tiles(cells: list) -> set:
+        return {
+            (x + i, y + j) for x, y, w, h in cells for i in range(w) for j in range(h)
+        }
+
+    design = payload["design"]
+    assert design["paths"]
+    assert tiles(plain["paths"]) == {tuple(t) for t in design["paths"]}
+    assert tiles(plain["decorations"]) == {tuple(t) for t in design["decorations"]}
+
+    # same map size: no warning; another size or no farm map: a warning, never a shift
+    assert out["fits"] is None and out["noMap"] is None
+    assert "60x60" in out["other"] and "59x60" in out["other"]
+    assert "unbounded" in out["unbounded"]
+    assert plain["fixed"] == [{"id": "farmhouse", "rect": [27, 27, 4, 3]}]
+    assert out["sameFixed"] is None and "farmhouse" in out["shifted"]
+    # a stored overlay is restored only in the current shape
+    assert out["stored"] is True and out["oldStored"] is False

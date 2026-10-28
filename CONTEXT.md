@@ -46,6 +46,9 @@ _Related_: `FarmMap` (one model for every area)
 
 **Zone**: hand-marked tiles of the farm map: `buildable` (land the layout may use), `blocked` (water, road, paved strip) or `design` (a design zone).
 
+**Layout overlay**: a planned layout (`layout.json` or the `layout` part of `combined.json`) drawn over the farm map in the map editor, view only, at its own tile coordinates; never shifted, only a warning when it was planned on another map.
+_Not to be confused with_: reference overlay (another image aligned to the screenshot to trace plots)
+
 **Current farm** (planned, v1.3): where the player's production buildings, shelters, barn and silo stand now, measured on the farm map; the start of a relocation plan.
 _Not to be confused with_: fixed building (never moves), layout (the suggested arrangement)
 

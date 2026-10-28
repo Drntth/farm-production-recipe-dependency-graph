@@ -150,6 +150,7 @@
     <button data-tab="expansions"><span class="num">4</span><span class="label">Plots (expansions)</span><span class="badge" id="badge-expansions"></span></button>
     <button data-tab="zones"><span class="num">5</span><span class="label">Zones</span><span class="badge" id="badge-zones"></span></button>
     <button data-tab="export"><span class="num">6</span><span class="label">Export</span><span class="badge" id="badge-export"></span></button>
+    <button data-tab="layout"><span class="num">7</span><span class="label">Layout overlay</span><span class="badge" id="badge-layout"></span></button>
   </nav>
 
   <div class="panes">
@@ -259,6 +260,20 @@
       <div class="hint">PNG and pieces use the visible layers. The ZIP holds one PNG per plot, <code>index.json</code> (crop and tile bounds) and the map JSON.</div>
     </div>
   </section>
+
+  <section class="pane" id="pane-layout">
+    <h2>7. Layout overlay (view only)</h2>
+    <details class="help" open>
+      <summary>How to</summary>
+      <div class="hint">Load <code>output/layout.json</code> or <code>output/combined.json</code> to see the planned layout on this map: block frames with names, items (dashed: reserved space), paths (sand) and the decoration band (green). It uses the tile coordinates of the farm map it was planned on and is never shifted: load that farm map JSON, and plan again after saving a cropped map (the editor warns when the size or a fixed building differs). Hover an item to see its id in the status bar; click a block in the list to highlight it. Switch it off with the <b>layout</b> layer; like every layer it is also in the exported PNGs while switched on. Nothing here is saved in the map JSON.</div>
+    </details>
+    <div class="card">
+      <span class="file-btn"><button tabindex="-1" style="width:100%">Load layout JSON…</button><input type="file" id="fileLayout" accept="application/json,.json"></span>
+      <div class="row"><button id="layoutClear">Remove overlay</button></div>
+    </div>
+    <div class="hint" id="layoutInfo">No layout loaded.</div>
+    <ul class="list" id="layoutList"></ul>
+  </section>
   </div>
 </aside>
 <div id="handle" title="Drag to resize the panel, double-click to reset"><button id="collapseBtn" title="Hide the panel (\)">◀</button></div>
@@ -273,6 +288,7 @@
     <label><input type="checkbox" id="lyExp" checked> plots</label>
     <label><input type="checkbox" id="lyZones" checked> zones</label>
     <label><input type="checkbox" id="lyRef" checked> overlay</label>
+    <label><input type="checkbox" id="lyLayout" checked> layout</label>
     <label><input type="checkbox" id="lyLabels" checked> labels</label>
   </details>
   <div id="pad">
@@ -288,10 +304,10 @@
 <dialog id="help">
   <h3 style="margin-top:0">Shortcuts</h3>
   <table>
-    <tr><td><kbd>1</kbd> … <kbd>6</kbd></td><td>switch step</td></tr>
+    <tr><td><kbd>1</kbd> … <kbd>7</kbd></td><td>switch step</td></tr>
     <tr><td>wheel, pinch, <kbd>+</kbd> / <kbd>-</kbd></td><td>zoom</td></tr>
     <tr><td><kbd>0</kbd></td><td>fit the image</td></tr>
-    <tr><td>right / middle drag, <kbd>Space</kbd> + drag, arrows</td><td>pan (<kbd>Shift</kbd>: bigger steps); in Calibrate and Reference a left drag pans too</td></tr>
+    <tr><td>right / middle drag, <kbd>Space</kbd> + drag, arrows</td><td>pan (<kbd>Shift</kbd>: bigger steps); in Calibrate, Reference and Layout overlay a left drag pans too</td></tr>
     <tr><td>drag</td><td>draw a building, plot or zone rectangle; on a ruler / overlay point: move it (<kbd>Shift</kbd>: the r point where r and m overlap)</td></tr>
     <tr><td><kbd>Alt</kbd> + drag</td><td>erase tiles of the selected plot / zone</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>undo the last edit of the selected plot / zone</td></tr>
@@ -589,6 +605,47 @@ const Core = (() => {
     return segs;
   }
 
+  // View-only overlay from output/layout.json or output/combined.json (its `layout` part);
+  // schema: layout_to_dict in src/layout/describe.py. Paths and decoration tiles become few rects.
+  function fromLayout(json) {
+    const l = json && json.layout && Array.isArray(json.layout.blocks) ? json.layout : json;
+    if (!l || !Array.isArray(l.blocks) || !l.map) throw new Error('Not a layout.json or combined.json file');
+    const rect = r => [r.x, r.y, r.width, r.height];
+    const tiles = list => tilesToCells(new Set((list || []).map(t => tileKey(t[0], t[1]))));
+    return {
+      level: l.level == null ? null : l.level,
+      map: { bounded: !!l.map.bounded, width: l.map.width, height: l.map.height },
+      blocks: l.blocks.filter(b => b.frame).map(b => ({
+        id: b.id, name: b.name || b.id, frame: rect(b.frame),
+        items: (b.items || []).map(i => ({ id: i.location_id, rect: rect(i), reserved: !!i.reserved })),
+      })),
+      unplaced: l.blocks.filter(b => !b.frame).map(b => b.id),
+      fixed: (l.fixed || []).filter(f => f.x != null).map(f => ({ id: f.id, rect: [f.x, f.y, f.width, f.height] })),
+      paths: tiles(l.design && l.design.paths),
+      decorations: tiles(l.design && l.design.decorations),
+    };
+  }
+
+  // Warning text when the layout was not planned on this map, else null: another grid size
+  // (bg), or a fixed building at another tile (`fixed` = editor items with `rect`, e.g. after
+  // a crop on save). The overlay is never shifted: it is drawn at its own tile coordinates.
+  function layoutMismatch(layout, bg, fixed = []) {
+    if (!layout.map.bounded) return 'The layout was planned without a farm map (unbounded grid); its tiles do not belong to this map.';
+    const again = 'it is drawn unshifted. Plan again with this farm map (or load the farm map it was planned on).';
+    if (bg && (layout.map.width !== bg.width || layout.map.height !== bg.height)) {
+      return `The layout was planned on a ${layout.map.width}x${layout.map.height} map, this grid is ${bg.width}x${bg.height}; ${again}`;
+    }
+    const here = new Map(fixed.filter(f => f.rect).map(f => [f.id, f.rect.join(',')]));
+    const moved = (layout.fixed || []).filter(f => here.has(f.id) && here.get(f.id) !== f.rect.join(',')).map(f => f.id);
+    if (moved.length) return `Fixed buildings stand elsewhere on this map (${moved.join(', ')}); ${again}`;
+    return null;
+  }
+
+  // A stored overlay from an older editor version: usable only with the current shape.
+  function isLayoutOverlay(d) {
+    return !!d && !!d.map && ['blocks', 'unplaced', 'fixed', 'paths', 'decorations'].every(k => Array.isArray(d[k]));
+  }
+
   function clipRect(r, w, h) {
     const x0 = Math.max(0, r[0]), y0 = Math.max(0, r[1]);
     const x1 = Math.min(w, r[0] + r[2]), y1 = Math.min(h, r[1] + r[3]);
@@ -621,7 +678,7 @@ const Core = (() => {
 
   return { SNAKE, toSnake, tileToPx, pxToTile, calibrate, moveRect, rectFromTiles, rectCorners,
            cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip, affine3, applyAffine, invertAffine,
-           mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay };
+           mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay, fromLayout, layoutMismatch, isLayoutOverlay };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 // CORE-END
@@ -640,6 +697,34 @@ if (typeof module !== 'undefined') module.exports = Core;
     sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)',
     design: '#8b5cf6', designFill: 'rgba(139,92,246,0.30)' };
   const STORE_BASE = 'farm_map_editor_state_v1';
+  // layout overlay colours, as in src/layout/render_svg.py (block palette cycled)
+  const BLOCK_PALETTE = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#8C6D1F', '#6A3D9A', '#B22222',
+    '#2E8B57', '#4B5563', '#C71585', '#1F4E79', '#9A6324', '#469990', '#911EB4', '#808000', '#E6194B'];
+  const PATH_COLOUR = '#C8A165', DECOR_COLOUR = '#4ADE80';
+  // layout overlay (Core.fromLayout result), kept in this browser only, never in the map JSON
+  const LAYOUT_KEY = 'farm_map_editor_layout_v1';
+  const lay = { data: null, file: '', sel: null };
+  function saveLayout() {
+    try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(lay.data ? { data: lay.data, file: lay.file } : null)); }
+    catch (e) { /* storage unavailable: the overlay works until a reload */ }
+  }
+  function restoreLayout() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
+      if (saved && Core.isLayoutOverlay(saved.data)) { lay.data = saved.data; lay.file = saved.file || ''; }
+    } catch (e) { /* ignore broken storage */ }
+  }
+  function layoutInfo() {
+    if (!lay.data) return 'No layout loaded.';
+    const d = lay.data, items = d.blocks.reduce((n, b) => n + b.items.length, 0);
+    const level = d.level == null ? '' : `level ${d.level}, `;
+    let text = `${lay.file || 'Layout'}: ${level}${d.blocks.length} blocks, ${items} items`;
+    if (d.paths.length || d.decorations.length) text += ', paths and decoration band';
+    if (d.unplaced.length) text += `; not placed: ${d.unplaced.join(', ')}`;
+    if (!state.bg) return text + '. Calibrate the grid or open the farm map JSON to see it.';
+    const warn = Core.layoutMismatch(d, state.bg, state.fixed);
+    return warn ? `${text}. ⚠ ${warn}` : text + '.';
+  }
 
   const $ = id => document.getElementById(id);
   // non-blocking messages instead of alert(); kind: 'bad' (default), 'ok', 'info'
@@ -815,6 +900,7 @@ if (typeof module !== 'undefined') module.exports = Core;
         .concat(state.zones.filter(z => z.kind === 'buildable').flatMap(z => z.cells));
       outline(g, bg, farm, COLORS.farm, 4 * px);
     }
+    if (bg && opts.layout && lay.data) drawLayout(g, bg, px, font, opts);
     if (bg && opts.fixed) {
       for (const f of state.fixed) {
         if (!f.rect) continue;
@@ -825,6 +911,41 @@ if (typeof module !== 'undefined') module.exports = Core;
         if (opts.labels) label(g, bg, f.rect, f.name || f.id, font, COLORS.fixed);
       }
     }
+  }
+  // planned layout at its own tile coordinates: decoration band, paths, items, block frames
+  function drawLayout(g, bg, px, font, opts) {
+    const d = lay.data;
+    const fill = (cells, colour, alpha) => {
+      g.save(); g.globalAlpha = alpha; g.fillStyle = colour;
+      for (const c of cells) { poly(g, Core.rectCorners(bg, c)); g.fill(); }
+      g.restore();
+    };
+    fill(d.decorations, DECOR_COLOUR, 0.45);
+    fill(d.paths, PATH_COLOUR, 0.8);
+    d.blocks.forEach((b, i) => {
+      const colour = BLOCK_PALETTE[i % BLOCK_PALETTE.length], selected = opts.selection && b.id === lay.sel;
+      for (const it of b.items) {
+        poly(g, Core.rectCorners(bg, it.rect));
+        g.save(); g.globalAlpha = it.reserved ? 0.12 : 0.4; g.fillStyle = colour; g.fill(); g.restore();
+        if (it.reserved) g.setLineDash([4 * px, 3 * px]);
+        g.strokeStyle = colour; g.lineWidth = px; g.stroke();
+        g.setLineDash([]);
+      }
+      poly(g, Core.rectCorners(bg, b.frame));
+      g.strokeStyle = selected ? COLORS.sel : colour; g.lineWidth = (selected ? 5 : 3) * px; g.stroke();
+      if (opts.labels) label(g, bg, b.frame, b.name, font, colour);
+    });
+  }
+  // block and item under the tile, for the status bar
+  function layoutAt(t) {
+    if (!lay.data) return null;
+    const inside = r => t[0] >= r[0] && t[0] < r[0] + r[2] && t[1] >= r[1] && t[1] < r[1] + r[3];
+    for (const b of lay.data.blocks) {
+      if (!inside(b.frame)) continue;
+      const it = b.items.find(i => inside(i.rect));
+      return b.name + (it ? `: ${it.id}${it.reserved ? ' (reserved)' : ''}` : '');
+    }
+    return null;
   }
   // the starting land (section base) always counts as unlocked, like in src/layout/farm_map.py
   const isUnlocked = e => e.unlocked || e.section === 'base';
@@ -851,7 +972,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
   function layerOpts(selection) {
     return { grid: $('lyGrid').checked, fixed: $('lyFixed').checked, expansions: $('lyExp').checked, zones: $('lyZones').checked,
-             labels: $('lyLabels').checked, selection };
+             layout: $('lyLayout').checked, labels: $('lyLabels').checked, selection };
   }
 
   function draw() {
@@ -932,6 +1053,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (mouseImg && state.bg) {
       const t = Core.pxToTile(state.bg, mouseImg[0], mouseImg[1]);
       text += ` · tile (${Math.floor(t[0])}, ${Math.floor(t[1])})`;
+      const hit = $('lyLayout').checked ? layoutAt([Math.floor(t[0]), Math.floor(t[1])]) : null;
+      if (hit) text += ` · ${hit}`;
     }
     if (drag && drag.kind === 'rect') {
       const r = Core.rectFromTiles(drag.t0, drag.t1);
@@ -960,7 +1083,9 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (hit) { drag = { kind: 'marker', set: hit.set, key: hit.key, pos: hit.p }; return; }
     // Calibrate: a left drag pans, a click without movement sets the point (on mouseup).
     const calClick = e.button === 0 && !spaceDown && (state.tab === 'calibrate' || state.tab === 'reference');
-    if (e.button === 1 || e.button === 2 || spaceDown || calClick) {
+    // Layout overlay is view only: a left drag pans there too
+    const viewDrag = e.button === 0 && state.tab === 'layout';
+    if (e.button === 1 || e.button === 2 || spaceDown || calClick || viewDrag) {
       drag = { kind: 'pan', x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty, moved: false,
                point: calClick ? p : null };
       return;
@@ -1033,7 +1158,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       else notify('Select a plot or zone to undo its last edit.', 'info');
       return;
     }
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-6]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-7]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
     if (e.key === '\\') { toggleSide(); return; }
     if (e.key === '?') { if (!$('help').open) $('help').showModal(); return; }
     if (e.code === 'Space') {
@@ -1203,6 +1328,17 @@ if (typeof module !== 'undefined') module.exports = Core;
       }));
       $('zoneList').append(li);
     }
+    $('layoutInfo').textContent = layoutInfo();
+    $('layoutList').innerHTML = '';
+    (lay.data ? lay.data.blocks : []).forEach((b, i) => {
+      const li = document.createElement('li');
+      if (b.id === lay.sel) li.className = 'sel';
+      const colour = BLOCK_PALETTE[i % BLOCK_PALETTE.length];
+      li.innerHTML = `<span><i class="pill" style="background:${colour}">&nbsp;</i> ${esc(b.name)} · ${b.items.length} items · ` +
+        `${b.frame[2]}x${b.frame[3]}</span>`;
+      li.onclick = () => { lay.sel = lay.sel === b.id ? null : b.id; refreshAll(); };
+      $('layoutList').append(li);
+    });
     updateBadges();
     save(); draw();
   }
@@ -1220,6 +1356,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     set('reference', REF_ORDER.every(k => ref.pts[k]) ? '✓ aligned' : (ref.img ? 'loaded' : ''), REF_ORDER.every(k => ref.pts[k]));
     set('expansions', state.expansions.length ? `${state.expansions.length}` : '');
     set('zones', state.zones.length ? `${state.zones.length}` : '');
+    const warn = lay.data && Core.layoutMismatch(lay.data, state.bg, state.fixed);
+    set('layout', lay.data ? (warn ? '⚠ size' : `${lay.data.blocks.length} blocks`) : '', lay.data && !warn);
   }
 
   $('expAdd').onclick = () => {
@@ -1255,16 +1393,30 @@ if (typeof module !== 'undefined') module.exports = Core;
   $('expUndo').onclick = () => { if (state.selExp) undo(state.selExp); };
 
   // ---------------------------------------------------------------- tabs, layers, files
-  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export'];
+  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export', 'layout'];
   function setTab(tab) {
     state.tab = tab;
     document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + tab));
-    canvas.style.cursor = tab === 'export' ? 'default' : 'crosshair';
+    canvas.style.cursor = { export: 'default', layout: 'grab' }[tab] || 'crosshair';
     draw();
   }
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
-  ['lyGrid', 'lyFixed', 'lyExp', 'lyZones', 'lyRef', 'lyLabels'].forEach(id => $(id).onchange = draw);
+  ['lyGrid', 'lyFixed', 'lyExp', 'lyZones', 'lyRef', 'lyLayout', 'lyLabels'].forEach(id => $(id).onchange = draw);
+  $('fileLayout').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';  // the same file can be loaded again after a re-plan
+    try { lay.data = Core.fromLayout(JSON.parse(await file.text())); }
+    catch (err) { notify('Cannot read the layout: ' + err.message); return; }
+    lay.file = file.name; lay.sel = null;
+    $('lyLayout').checked = true;
+    saveLayout();
+    const warn = Core.layoutMismatch(lay.data, state.bg, state.fixed);
+    if (warn) notify(warn);
+    refreshAll();
+  };
+  $('layoutClear').onclick = () => { lay.data = null; lay.file = ''; lay.sel = null; saveLayout(); refreshAll(); };
   $('refOpacity').oninput = () => { saveRef(); requestDraw(); };
   $('refImage').onchange = e => {
     const file = e.target.files[0];
@@ -1417,6 +1569,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   window.addEventListener('resize', resize);
   restore();
   restoreRef();
+  restoreLayout();
   $('refInfo').textContent = refInfo();
   refreshAll();
   resize();

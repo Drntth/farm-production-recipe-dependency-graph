@@ -59,7 +59,7 @@ Every command takes the files it uses (`--player-config`, `--map`, `--design-con
 | `schedule.md`                            | how often to log in and what to do at every login, recommended fields, trees and bushes      |
 | `layout.md`, `layout.svg`, `blocks/`     | the layout without production sizing (graph and profile only)                                |
 
-The SVG files open in any browser. Coordinates are tiles from the top corner of the map: x along the ↘ edge, y along the ↙ edge. The game's Layout Edit Mode shows no grid, so count tiles from a fixed building.
+The SVG files open in any browser. To see the layout on your own screenshot, load `layout.json` or `combined.json` in the map editor (step 7, Layout overlay). Coordinates are tiles from the top corner of the map: x along the ↘ edge, y along the ↙ edge. The game's Layout Edit Mode shows no grid, so count tiles from a fixed building.
 
 ## 7. Typical situations
 

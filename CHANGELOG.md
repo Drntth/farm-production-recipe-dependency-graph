@@ -2,6 +2,11 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [1.2.0] - 2026-10-28
+
+- Map editor step 7 "Layout overlay": loads `output/layout.json` or `output/combined.json` and draws block frames, items, paths and the decoration band as a switchable `layout` layer (view only).
+- A warning instead of any shift when the layout was planned on a map of another size or without a farm map.
+
 ## [1.1.0] - 2026-10-28
 
 - Python 3.14 required (`requires-python = ">=3.14"`).
