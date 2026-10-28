@@ -46,7 +46,7 @@ def _bare(layout: Layout, width: int, height: int, blocks: list[PlacedBlock]):
     """*layout* reduced to *blocks* on an empty map of the given size."""
     return replace(
         layout,
-        farm_map=FarmMap(area=layout.farm_map.area, width=width, height=height),
+        farm_map=FarmMap(width=width, height=height),
         blocks=blocks,
         fixed_unplaced=[],
         design=None,

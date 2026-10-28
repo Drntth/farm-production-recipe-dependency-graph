@@ -12,7 +12,6 @@ from pydantic import ValidationError
 from src.config import LocationProgress, PlayerConfig
 from src.graph import build_graph
 from src.layout import cli, visuals
-from src.layout.area import plan_area_layout
 from src.layout.blocks import Block, block_flow_order, detect_named_blocks
 from src.layout.describe import layout_to_dict, layout_to_markdown
 from src.layout.design import plan_design
@@ -197,6 +196,10 @@ def test_farm_map_validation() -> None:
     )
     assert not m.bounded
     assert [f.id for f in m.placed_fixed] == ["mine"]
+    # older editor files carry "area": farm is dropped, other areas are rejected
+    assert FarmMap.model_validate({"area": "farm", "width": 4, "height": 4}).bounded
+    with pytest.raises(ValidationError, match="Only farm maps"):
+        FarmMap.model_validate({"area": "town"})
 
 
 def test_background_and_expansions(tmp_path: Path) -> None:
@@ -735,16 +738,16 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
     assert json.loads((tmp_path / "layout.json").read_text())["level"] == 20
 
 
-def _design_config(tmp_path: Path, **sections) -> str:
-    """A design.json in *tmp_path* with the given sections."""
+def _design_config(tmp_path: Path, **keys) -> str:
+    """A design.json in *tmp_path* with the given keys."""
     path = tmp_path / "design.json"
-    path.write_text(json.dumps(sections), encoding="utf-8")
+    path.write_text(json.dumps(keys), encoding="utf-8")
     return str(path)
 
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
-    config = _design_config(tmp_path, farm={"strategy": "all"})
+    config = _design_config(tmp_path, strategy="all")
     args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     for stem, used in (("layout_coupling", "coupling"), ("layout_size", "size")):
@@ -755,7 +758,7 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_flow(tmp_path: Path) -> None:
-    config = _design_config(tmp_path, farm={"strategy": "flow", "reserve": 0.1})
+    config = _design_config(tmp_path, strategy="flow", reserve=0.1)
     args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     data = json.loads((tmp_path / "layout.json").read_text())
@@ -886,106 +889,28 @@ def test_plan_layout_with_design(farm: DataSet) -> None:
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_design(tmp_path: Path) -> None:
-    config = _design_config(tmp_path, default={"design_layer": True})
+    config = _design_config(tmp_path, design_layer=True)
     args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
     assert json.loads((tmp_path / "layout.json").read_text())["design"] is not None
-    bad = _design_config(tmp_path, default={"decor_band": -1})
+    bad = _design_config(tmp_path, decor_band=-1)
     assert cli.main(["--level", "20", "--design-config", bad]) == 1
     missing = str(tmp_path / "missing.json")
     assert cli.main(["--level", "20", "--design-config", missing]) == 1
 
 
-# ---------------------------------------------------------------------------
-# Town and fishing lake (--area)
-# ---------------------------------------------------------------------------
-
-
-def _town_map(**kw) -> FarmMap:
-    return FarmMap(
-        area="town",
+def test_movable_map_items_are_not_obstacles() -> None:
+    m = FarmMap(
         width=30,
         height=20,
         fixed=[
-            FixedItem(id="town_hall", x=1, y=1, width=4, height=4),
-            FixedItem(id="town_station", x=25, y=15, width=4, height=3),
-            FixedItem(id="diner", x=10, y=10, width=3, height=3, movable=True),
-            FixedItem(id="spa", x=15, y=10, width=4, height=3, movable=True),
-            FixedItem(id="cinema", movable=True),  # not measured yet
-            FixedItem(id="sanctuary_entrance"),
-        ],
-        **kw,
-    )
-
-
-def test_movable_map_items_are_not_obstacles() -> None:
-    m = _town_map()
-    assert [f.id for f in m.placed_fixed] == ["town_hall", "town_station"]
-    assert [f.id for f in m.placed_movable] == ["diner", "spa"]
-
-
-def test_town_layout_rearranges_movable_buildings() -> None:
-    layout = plan_area_layout(_town_map(), level=40, gap=1, design=True)
-
-    placed = {b.block.id: b.frame for b in layout.blocks if b.frame is not None}
-    assert set(placed) == {"diner", "spa"}
-    assert (placed["diner"].w, placed["diner"].h) == (3, 3)  # measured size kept
-    obstacles = [Rect(1, 1, 4, 4), Rect(25, 15, 4, 3)]
-    assert _no_overlap([*placed.values(), *obstacles], gap=1)
-    assert layout.missing_footprint == ["cinema"]
-    assert layout.fixed_unplaced == ["sanctuary_entrance"]
-    d = layout.design
-    assert d.connected[0] == "town_hall"  # the hub
-    assert set(d.connected) == {"town_hall", "town_station", "diner", "spa"}
-    assert _connected(d.paths)
-
-    md = layout_to_markdown(layout)
-    assert md.startswith("# Town layout") and "config/town_map.json" in md
-    assert "Field counts" not in md
-    assert layout_to_dict(layout)["area"] == "town"
-    assert "<title>Town layout" in render_svg(layout)
-
-
-def test_fishing_lake_layout_is_design_only() -> None:
-    lake = FarmMap(
-        area="fishing_lake",
-        width=20,
-        height=12,
-        fixed=[
-            FixedItem(id="fishermans_hut", x=1, y=1, width=3, height=3),
-            FixedItem(id="net_maker", x=10, y=2, width=3, height=3),
-            FixedItem(id="lobster_pool", x=4, y=8, width=4, height=3),
+            FixedItem(id="farmhouse", x=1, y=1, width=6, height=6),
+            FixedItem(id="barn", x=10, y=10, width=4, height=4, movable=True),
+            FixedItem(id="silo", movable=True),  # not measured yet
         ],
     )
-    layout = plan_area_layout(lake, level=50, design=True)
-    assert layout.blocks == []
-    assert layout.design.connected[0] == "fishermans_hut"
-    assert not layout.design.unreachable
-    with pytest.raises(ValueError):
-        plan_area_layout(FarmMap(), level=50)
-
-
-def test_example_area_maps_load() -> None:
-    for area in ("town", "fishing_lake"):
-        m = load_farm_map(f"config/{area}_map.example.json")
-        assert m.area.value == area
-
-
-def test_cli_area_town(tmp_path: Path) -> None:
-    town = tmp_path / "town_map.json"
-    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
-    config = _design_config(tmp_path, town={"design_layer": True})
-    args = ["--level", "40", "--area", "town", "--map", str(town)]
-    assert (
-        cli.main([*args, "--design-config", config, "--output-dir", str(tmp_path)]) == 0
-    )
-    data = json.loads((tmp_path / "layout_town.json").read_text())
-    assert data["area"] == "town" and data["design"] is not None
-    assert "reserve" not in data["settings"]  # farm-only keys are not shown
-    assert not (tmp_path / "layout.json").exists()
-    # a town map passed as the fishing lake map is rejected
-    lake = ["--level", "40", "--area", "fishing_lake", "--map", str(town)]
-    assert cli.main([*lake, "--output-dir", str(tmp_path)]) == 1
+    assert [f.id for f in m.placed_fixed] == ["farmhouse"]
+    assert [f.id for f in m.placed_movable] == ["barn"]
 
 
 def test_farm_movable_flag_only_for_placeable_items(
@@ -1011,30 +936,6 @@ def test_farm_movable_flag_only_for_placeable_items(
     assert _no_overlap([*frames, house])
     storage = [b for b in layout.blocks if "barn" in b.block.locations]
     assert storage and storage[0].frame is not None  # the barn is still planned
-
-
-def test_cli_town_ignores_farm_only_keys_of_default(tmp_path: Path) -> None:
-    town = tmp_path / "town_map.json"
-    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
-    config = _design_config(
-        tmp_path,
-        default={"design_layer": True, "path_targets": "buildings"},
-        farm={"item_gap": 1},
-    )
-    args = ["--level", "40", "--area", "town", "--map", str(town)]
-    assert (
-        cli.main([*args, "--design-config", config, "--output-dir", str(tmp_path)]) == 0
-    )
-    settings = json.loads((tmp_path / "layout_town.json").read_text())["settings"]
-    assert "path_targets" not in settings and settings["design_layer"] is True
-
-
-def test_cli_rejects_farm_only_settings_for_town(tmp_path: Path) -> None:
-    town = tmp_path / "town_map.json"
-    town.write_text(_town_map().model_dump_json(), encoding="utf-8")
-    config = _design_config(tmp_path, town={"reserve": 0.5})
-    args = ["--level", "40", "--area", "town", "--map", str(town)]
-    assert cli.main([*args, "--design-config", config]) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -1367,7 +1268,7 @@ def test_cli_block_images_setting(tmp_path: Path) -> None:
     assert cli.main(args) == 0
     assert (tmp_path / "blocks" / "collage.svg").exists()
     off = tmp_path / "off"
-    config = _design_config(tmp_path, farm={"block_images": False})
+    config = _design_config(tmp_path, block_images=False)
     assert (
         cli.main(["--level", "20", "--design-config", config, "--output-dir", str(off)])
         == 0

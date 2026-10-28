@@ -69,11 +69,11 @@ console.log(JSON.stringify({
              farmhouse: Core.tileToPx(c.bg, ...c.fixed[0].rect.slice(0, 2)),
              farmhouseBefore: Core.tileToPx(bg, ...state.fixed[0].rect.slice(0, 2)) };
   })(),
-  town: (() => {
-    const t = { area: 'town', bg, imgW: 800, imgH: 600, expansions: [], zones: [],
-      fixed: [{ id: 'town_hall', name: '', rect: [1, 1, 4, 4] },
-              { id: 'diner', name: '', rect: [8, 1, 3, 3], movable: true }] };
-    const m = Core.toFarmMap(t, 'town_background.png');
+  movable: (() => {
+    const t = { bg, imgW: 800, imgH: 600, expansions: [], zones: [],
+      fixed: [{ id: 'farmhouse', name: '', rect: [1, 1, 4, 4] },
+              { id: 'barn', name: '', rect: [8, 1, 3, 3], movable: true }] };
+    const m = Core.toFarmMap(t, 'farm_background.png');
     return { map: m, back: Core.fromFarmMap(m) };
   })(),
   align: (() => {
@@ -143,15 +143,12 @@ def test_exported_json_loads_in_python(result: dict) -> None:
     assert result["same"], "toFarmMap(fromFarmMap(x)) must round-trip"
 
 
-def test_area_and_movable_round_trip(result: dict) -> None:
-    town = result["town"]
-    assert result["map"]["area"] == "farm"  # default area
-    fm = FarmMap.model_validate(town["map"])
-    assert fm.area.value == "town"
-    assert [f.id for f in fm.placed_fixed] == ["town_hall"]
-    assert [f.id for f in fm.placed_movable] == ["diner"]
-    assert town["back"]["area"] == "town"
-    assert [f["movable"] for f in town["back"]["fixed"]] == [False, True]
+def test_movable_round_trip(result: dict) -> None:
+    moved = result["movable"]
+    fm = FarmMap.model_validate(moved["map"])
+    assert [f.id for f in fm.placed_fixed] == ["farmhouse"]
+    assert [f.id for f in fm.placed_movable] == ["barn"]
+    assert [f["movable"] for f in moved["back"]["fixed"]] == [False, True]
 
 
 def test_geometry_helpers(result: dict) -> None:

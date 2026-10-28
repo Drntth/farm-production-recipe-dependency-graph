@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class Area(str, Enum):
-    """Game map area a location is placed on (Layout Planner `--area`)."""
+    """Game map area a location is placed on (the Layout Planner uses only farm)."""
 
     FARM = "farm"
     TOWN = "town"

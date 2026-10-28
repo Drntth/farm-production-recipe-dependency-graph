@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Map Editor - farm, town, fishing lake</title>
+<title>Farm Map Editor</title>
 <style>
   :root {
     --bg: #eef0f3; --panel: #ffffff; --panel-2: #f7f8fa; --text: #1f2937; --muted: #6b7280; --line: #d9dde3;
@@ -122,18 +122,12 @@
 <header>
   <h1>Map Editor</h1>
   <div class="group">
-    <label for="area">Area</label>
-    <select id="area" title="Each area is its own file (config/&lt;area&gt;_map.json) and is kept separately in this browser">
-      <option value="farm">farm</option><option value="town">town</option><option value="fishing_lake">fishing lake</option>
-    </select>
-  </div>
-  <div class="group">
     <span class="file-btn"><button tabindex="-1">Open image…</button><input type="file" id="fileImage" accept="image/png,image/*" title="Stitched screenshot (PNG)"></span>
-    <span class="file-btn"><button tabindex="-1">Open JSON…</button><input type="file" id="fileJson" accept="application/json,.json" title="A saved &lt;area&gt;_map.json"></span>
+    <span class="file-btn"><button tabindex="-1">Open JSON…</button><input type="file" id="fileJson" accept="application/json,.json" title="A saved farm_map.json"></span>
     <span class="file-name" id="fileName"></span>
   </div>
   <div class="group">
-    <button id="saveJsonTop" class="primary" title="Save &lt;area&gt;_map.json (Ctrl+S)">Save JSON</button>
+    <button id="saveJsonTop" class="primary" title="Save farm_map.json (Ctrl+S)">Save JSON</button>
   </div>
   <div class="group">
     <button id="zoomOut" class="icon" title="Zoom out (-)">−</button>
@@ -163,7 +157,7 @@
     <h2>1. Calibrate the tile grid</h2>
     <details class="help" open>
       <summary>How to</summary>
-      <div class="hint">Ruler: two rows of fields (town / lake: path tiles or other 1x1 items) in an L shape from one corner tile, one row along ↘ and one along ↙. Click the three points (zoom in for precision); a left drag pans. Drag a placed point to move it.</div>
+      <div class="hint">Ruler: two rows of fields in an L shape from one corner tile, one row along ↘ and one along ↙. Click the three points (zoom in for precision); a left drag pans. Drag a placed point to move it.</div>
       <ol class="hint">
         <li><b>A</b>: top corner of the corner field</li>
         <li><b>B</b>: right corner of the last field of the ↘ row</li>
@@ -184,7 +178,7 @@
     <h2>2. Buildings</h2>
     <details class="help">
       <summary>How to</summary>
-      <div class="hint">Pick an id (or type a new one), then drag over every tile the building blocks (e.g. the truck with its order board). Dragging again moves it. Click a row to select it. Farm: barn and silo are optional; without a position the planner places them. Town: tick <b>movable</b> for buildings the planner may rearrange (the service buildings).</div>
+      <div class="hint">Pick an id (or type a new one), then drag over every tile the building blocks (e.g. the truck with its order board). Dragging again moves it. Click a row to select it. Barn and silo are optional; without a position the planner places them. Tick <b>movable</b> to let the planner rearrange them.</div>
     </details>
     <div class="card">
       <div class="row"><label>Id</label><input type="text" id="fixedId" list="fixedIds" placeholder="farmhouse"></div>
@@ -253,7 +247,7 @@
     <h2>6. Export</h2>
     <div class="card">
       <div class="row"><label>Image path in JSON</label><input type="text" id="bgPath" value="farm_background.png"></div>
-      <div class="hint">Relative to <code>config/&lt;area&gt;_map.json</code>; save the screenshot next to it, e.g. <code>config/farm_background.png</code>.</div>
+      <div class="hint">Relative to <code>config/farm_map.json</code>; save the screenshot next to it, e.g. <code>config/farm_background.png</code>.</div>
       <label><input type="checkbox" id="cropOnSave" checked> crop to the map content on save, margin
         <input type="number" id="cropMargin" min="0" value="5" style="width:4em"> tiles</label>
       <div class="hint">Cropping keeps every plot, buildable zone and building plus the margin; blocked and design zones are cut at the new edge. The editor switches to the cropped map too.</div>
@@ -270,7 +264,7 @@
 <div id="handle" title="Drag to resize the panel, double-click to reset"><button id="collapseBtn" title="Hide the panel (\)">◀</button></div>
 <main>
   <canvas id="view"></canvas>
-  <div id="empty"><b>No image loaded</b><span>Pick the area, then <i>Open image…</i> (stitched screenshot, PNG) or <i>Open JSON…</i> to continue a saved map.</span></div>
+  <div id="empty"><b>No image loaded</b><span><i>Open image…</i> (stitched screenshot, PNG) or <i>Open JSON…</i> to continue a saved map.</span></div>
   <div id="toasts"></div>
   <details id="layers" open>
     <summary>Layers</summary>
@@ -305,7 +299,7 @@
     <tr><td><kbd>\</kbd></td><td>show / hide the side panel (drag its edge to resize)</td></tr>
     <tr><td><kbd>?</kbd></td><td>this help</td></tr>
   </table>
-  <p class="hint">Everything stays in this browser; nothing is uploaded. Each area (farm, town, fishing lake) is kept separately and saved as <code>&lt;area&gt;_map.json</code>.</p>
+  <p class="hint">Everything stays in this browser; nothing is uploaded. The map is saved as <code>farm_map.json</code>.</p>
   <form method="dialog" style="text-align:right"><button class="primary">Close</button></form>
 </dialog>
 
@@ -386,7 +380,7 @@ const Core = (() => {
 
   // farm_map.json payload (schema: src/layout/farm_map.py)
   function toFarmMap(state, imagePath) {
-    const out = { area: state.area || 'farm', width: null, height: null };
+    const out = { width: null, height: null };
     if (state.bg) {
       out.width = state.bg.width;
       out.height = state.bg.height;
@@ -421,7 +415,6 @@ const Core = (() => {
       width: json.width, height: json.height,
     } : null;
     return {
-      area: json.area || 'farm',
       bg,
       imgW: json.background ? json.background.image_width : null,
       imgH: json.background ? json.background.image_height : null,
@@ -636,25 +629,17 @@ if (typeof module !== 'undefined') module.exports = Core;
 
 <script>
 (() => {
-  // default ids per area (config/<area>_map.example.json); town buildings marked movable
-  const AREA_IDS = {
-    farm: ['farmhouse', 'mailbox', 'newspaper_mailbox', 'roadside_shop', 'truck', 'riverboat',
+  // default ids (config/farm_map.example.json)
+  const FARM_IDS = ['farmhouse', 'mailbox', 'newspaper_mailbox', 'roadside_shop', 'truck', 'riverboat',
       'wheel_of_fortune_truck', 'silo', 'barn', 'mine', 'maggies_workbench', 'helpers_house', 'event_board',
       'neighborhood_house', 'derby_stand', 'leaderboard', 'fishing_boat', 'train_station', 'valley_board',
-      'neighborhood_requests', 'farm_pass', 'decoration_collection', 'decorate_event', 'toms_box'],
-    town: ['town_hall', 'town_station', 'beach_cafe', 'bed_and_breakfast', 'cinema', 'diner', 'gift_shop',
-      'grocery_store', 'spa', 'sanctuary_entrance'],
-    fishing_lake: ['fishermans_hut', 'lure_workbench', 'net_maker', 'tackle_box', 'lobster_pool', 'duck_salon'],
-  };
-  const MOVABLE_IDS = new Set(['beach_cafe', 'bed_and_breakfast', 'cinema', 'diner', 'gift_shop',
-    'grocery_store', 'spa']);
-  const defaultItem = id => ({ id, name: '', rect: null, movable: MOVABLE_IDS.has(id) });
+      'neighborhood_requests', 'farm_pass', 'decoration_collection', 'decorate_event', 'toms_box'];
+  const defaultItem = id => ({ id, name: '', rect: null, movable: false });
   const COLORS = { grid: 'rgba(255,255,255,0.75)', fixed: '#374151', fixedFill: 'rgba(107,114,128,0.35)',
     ok: '#15803d', okFill: 'rgba(21,128,61,0.12)', bad: '#b91c1c', badFill: 'rgba(185,28,28,0.22)',
     sel: '#2563eb', ruler: '#f59e0b', buildable: '#16a34a', farm: '#111827', blocked: '#dc2626', blockedFill: 'rgba(220,38,38,0.35)',
     design: '#8b5cf6', designFill: 'rgba(139,92,246,0.30)' };
   const STORE_BASE = 'farm_map_editor_state_v1';
-  const storeKey = () => STORE_BASE + (state.area === 'farm' ? '' : '_' + state.area);
 
   const $ = id => document.getElementById(id);
   // non-blocking messages instead of alert(); kind: 'bad' (default), 'ok', 'info'
@@ -665,8 +650,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     setTimeout(() => t.remove(), kind === 'bad' ? 5000 : 2500);
   }
   const canvas = $('view'), ctx = canvas.getContext('2d');
-  const state = { area: 'farm', img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
-    fixed: AREA_IDS.farm.map(defaultItem), expansions: [], zones: [],
+  const state = { img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
+    fixed: FARM_IDS.map(defaultItem), expansions: [], zones: [],
     selFixed: null, selExp: null, selZone: null, tab: 'calibrate' };
   const view = { s: 1, tx: 0, ty: 0 };
   let drag = null, spaceDown = false, mouseImg = null;
@@ -719,12 +704,12 @@ if (typeof module !== 'undefined') module.exports = Core;
 
   // ---------------------------------------------------------------- storage
   function save() {
-    try { localStorage.setItem(storeKey(), JSON.stringify({ map: Core.toFarmMap(state, $('bgPath').value), cal: state.cal })); }
+    try { localStorage.setItem(STORE_BASE, JSON.stringify({ map: Core.toFarmMap(state, $('bgPath').value), cal: state.cal })); }
     catch (e) { /* storage unavailable: editing still works */ }
   }
   function restore() {
     try {
-      const raw = localStorage.getItem(storeKey());
+      const raw = localStorage.getItem(STORE_BASE);
       if (!raw) return;
       const data = JSON.parse(raw);
       applyFarmMap(data.map, false);
@@ -737,11 +722,9 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (warnSize && state.img && s.imgW && (s.imgW !== state.imgW || s.imgH !== state.imgH)) {
       notify(`The JSON was made for a ${s.imgW}x${s.imgH} image; the loaded image is ${state.imgW}x${state.imgH}.`);
     }
-    state.area = AREA_IDS[s.area] ? s.area : 'farm';
-    $('area').value = state.area;
     state.bg = s.bg;
     const known = new Set(s.fixed.map(f => f.id));
-    state.fixed = s.fixed.concat(AREA_IDS[state.area].filter(id => !known.has(id)).map(defaultItem));
+    state.fixed = s.fixed.concat(FARM_IDS.filter(id => !known.has(id)).map(defaultItem));
     state.expansions = s.expansions;
     state.zones = s.zones;
     if (s.imagePath) $('bgPath').value = s.imagePath;
@@ -1261,11 +1244,11 @@ if (typeof module !== 'undefined') module.exports = Core;
     refreshAll();
   };
   $('fixedFilter').oninput = () => refreshAll();
-  // the movable box follows the id: the item's own value, else the area default
+  // the movable box follows the id: the item's own value, else off
   $('fixedId').oninput = () => {
     const id = Core.toSnake($('fixedId').value);
     const f = state.fixed.find(x => x.id === id);
-    $('fixedMovable').checked = f ? !!f.movable : MOVABLE_IDS.has(id);
+    $('fixedMovable').checked = f ? !!f.movable : false;
   };
   $('expFilter').oninput = () => refreshAll();
   $('zoneUndo').onclick = () => { if (state.selZone) undo(state.selZone); };
@@ -1325,12 +1308,6 @@ if (typeof module !== 'undefined') module.exports = Core;
     let json;
     try { json = JSON.parse(await file.text()); }
     catch (err) { notify('Cannot read the JSON: ' + err.message); return; }
-    // a map of another area: keep the current one, then open that area empty
-    const area = AREA_IDS[json.area] ? json.area : 'farm';
-    if (area !== state.area) {
-      switchArea(area, false);
-      notify(`Switched to the ${area.replace('_', ' ')} area; open its screenshot too.`, 'info');
-    }
     applyFarmMap(json, true);
   };
 
@@ -1374,11 +1351,11 @@ if (typeof module !== 'undefined') module.exports = Core;
   $('saveJson').onclick = () => {
     tidyForSave();
     const json = JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n';
-    download(new Blob([json], { type: 'application/json' }), `${state.area}_map.json`);
+    download(new Blob([json], { type: 'application/json' }), 'farm_map.json');
   };
   $('savePng').onclick = async () => {
     if (!state.img) return;
-    try { download(await toBlob(renderCrop([0, 0, state.imgW, state.imgH])), `${state.area}_map_full.png`); }
+    try { download(await toBlob(renderCrop([0, 0, state.imgW, state.imgH])), 'farm_map_full.png'); }
     catch (err) { notify(err.message); }
   };
   $('saveZip').onclick = async () => {
@@ -1397,27 +1374,9 @@ if (typeof module !== 'undefined') module.exports = Core;
     }
     const enc = new TextEncoder();
     files.push({ name: 'pieces/index.json', data: enc.encode(JSON.stringify(index, null, 2) + '\n') });
-    files.push({ name: `${state.area}_map.json`, data: enc.encode(JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n') });
-    download(new Blob([Core.zip(files)], { type: 'application/zip' }), `${state.area}_map_pieces.zip`);
+    files.push({ name: 'farm_map.json', data: enc.encode(JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n') });
+    download(new Blob([Core.zip(files)], { type: 'application/zip' }), 'farm_map_pieces.zip');
   };
-
-  // switching the area keeps the current map in this browser and starts the other
-  // one empty: its own image and ruler points; `stored` also loads its saved map
-  function switchArea(area, stored) {
-    save();
-    state.area = area;
-    $('area').value = area;
-    Object.assign(state, { img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
-      fixed: AREA_IDS[area].map(defaultItem), expansions: [], zones: [],
-      selFixed: null, selExp: null, selZone: null });
-    history.length = 0;
-    $('bgPath').value = `${area}_background.png`;
-    $('fileName').textContent = '';
-    if (stored) restore();
-    refreshAll();
-    resize();
-  }
-  $('area').onchange = () => switchArea($('area').value, true);
 
   $('saveJsonTop').onclick = () => $('saveJson').click();
   $('helpBtn').onclick = () => $('help').showModal();

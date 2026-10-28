@@ -20,7 +20,6 @@ import os
 from html import escape
 from pathlib import Path
 
-from .describe import AREA_TITLES
 from .farm_map import outline_segments
 from .packing import Rect, bounding_rect
 from .planner import Layout
@@ -121,8 +120,7 @@ def render_svg(
         (
             f"<title>{escape(title)}</title>"
             if title
-            else f"<title>{AREA_TITLES[layout.farm_map.area]} layout - level "
-            f"{layout.level}</title>"
+            else f"<title>Farm layout - level {layout.level}</title>"
         ),
         '<rect width="100%" height="100%" fill="#FFFFFF"/>',
     ]
@@ -317,7 +315,7 @@ def render_svg(
             _text(
                 MARGIN,
                 y,
-                f"Fixed, position unknown (add to config/{fm.area.value}_map.json):",
+                "Fixed, position unknown (add to config/farm_map.json):",
                 11,
                 FIXED_COLOUR,
             )

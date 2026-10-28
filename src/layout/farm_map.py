@@ -1,16 +1,11 @@
 """
 Farm map - the player's usable area and the fixed buildings on it.
 
-One file per game area (``area``: farm, town, fishing_lake), all with the same
-schema: ``config/<area>_map.json`` (local, git-ignored) over the committed
-``config/<area>_map.example.json``. An item marked ``movable`` was measured on
-the map but the planner may rearrange it (town buildings); it is not an
-obstacle.
-
 Every farm has different expansions and a different spot for the farmhouse,
 barn, silo, mine, …, so the map is player data in ``config/``. A local
 ``config/farm_map.json`` (git-ignored) takes precedence over the committed
-``config/farm_map.example.json``.
+``config/farm_map.example.json``. An item marked ``movable`` (barn, silo) was
+measured on the map but the planner may place it; it is not an obstacle.
 
 Coordinates are tiles. ``x`` runs along the ↘ edge (footprint width) and ``y``
 along the ↙ edge (footprint height), seen from the farm's top corner (0, 0).
@@ -34,19 +29,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
-from src.models import Area
-
 CONFIG_DIR = Path("config")
 LOCAL_MAP = CONFIG_DIR / "farm_map.json"
 EXAMPLE_MAP = CONFIG_DIR / "farm_map.example.json"
-
-
-def map_paths(area: Area = Area.FARM) -> tuple[Path, Path]:
-    """Local and example map file of *area*."""
-    return (
-        CONFIG_DIR / f"{area.value}_map.json",
-        CONFIG_DIR / f"{area.value}_map.example.json",
-    )
 
 
 Tile = tuple[int, int]
@@ -234,7 +219,6 @@ class Zone(BaseModel):
 
 
 class FarmMap(BaseModel):
-    area: Area = Area.FARM
     width: int | None = Field(None, ge=1, description="Usable tiles along the ↘ edge")
     height: int | None = Field(None, ge=1, description="Usable tiles along the ↙ edge")
     background: Background | None = None
@@ -244,6 +228,19 @@ class FarmMap(BaseModel):
 
     model_config = {"extra": "forbid"}
     _base_dir: Path = PrivateAttr(default_factory=Path)
+
+    @model_validator(mode="before")
+    @classmethod
+    def drop_legacy_area(cls, data):
+        # older editor versions wrote "area"; only farm maps are laid out
+        if isinstance(data, dict) and "area" in data:
+            data = dict(data)
+            area = data.pop("area")
+            if area != "farm":
+                raise ValueError(
+                    f"Only farm maps are supported (area {area!r} is not laid out)"
+                )
+        return data
 
     @model_validator(mode="after")
     def check_map(self) -> FarmMap:
@@ -336,18 +333,17 @@ class FarmMap(BaseModel):
         return [f for f in self.fixed if f.is_placed and f.movable]
 
 
-def default_map_path(area: Area = Area.FARM) -> Path:
-    local, example = map_paths(area)
-    return local if local.exists() else example
+def default_map_path() -> Path:
+    return LOCAL_MAP if LOCAL_MAP.exists() else EXAMPLE_MAP
 
 
-def load_farm_map(path: Path | str | None = None, area: Area = Area.FARM) -> FarmMap:
-    """Load the map of *area* from *path* or the default location; empty if none."""
-    p = Path(path) if path is not None else default_map_path(area)
+def load_farm_map(path: Path | str | None = None) -> FarmMap:
+    """Load the farm map from *path* or the default location; empty if none."""
+    p = Path(path) if path is not None else default_map_path()
     if not p.exists():
         if path is not None:
             raise FileNotFoundError(f"Farm map not found: {p}")
-        return FarmMap(area=area)
+        return FarmMap()
     farm_map = FarmMap.model_validate(json.loads(p.read_text(encoding="utf-8")))
     farm_map._base_dir = p.parent
     return farm_map

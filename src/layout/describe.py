@@ -5,12 +5,8 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-from src.models import Area
-
 from .inventory import CountSource
 from .planner import Layout, PlacedBlock
-
-AREA_TITLES = {Area.FARM: "Farm", Area.TOWN: "Town", Area.FISHING_LAKE: "Fishing lake"}
 
 
 def layout_to_dict(layout: Layout) -> dict[str, Any]:
@@ -18,7 +14,6 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
     fm = layout.farm_map
     return {
         "level": layout.level,
-        "area": fm.area.value,
         "map": {
             "bounded": fm.bounded,
             "width": fm.width,
@@ -100,24 +95,19 @@ def layout_to_markdown(layout: Layout) -> str:
         if requested is not None and layout.reserve_ratio < requested
         else ""
     )
-    title = AREA_TITLES[fm.area]
-    farm = fm.area == Area.FARM
     lines = [
-        f"# {title} layout - level {layout.level}",
+        f"# Farm layout - level {layout.level}",
         "",
         (
-            f"{title} map: {fm.width} x {fm.height} tiles."
+            f"Farm map: {fm.width} x {fm.height} tiles."
             if fm.bounded
-            else f"{title} map: unbounded (no `config/{fm.area.value}_map.json` "
+            else "Farm map: unbounded (no `config/farm_map.json` "
             f"size); layout spans {ext.w} x {ext.h} tiles."
         ),
         (
             f"Block order: {layout.strategy}. "
             f"Each block keeps {layout.reserve_ratio:.0%} extra area for later "
             f"unlocks{lowered}. " + _item_gap_text(layout)
-            if farm
-            else "Movable buildings are placed largest first, close to the hub; "
-            "fixed ones stay. "
         )
         + "Coordinates are tiles: x along the ↘ edge, y along the ↙ edge.",
         "",
@@ -200,9 +190,7 @@ def layout_to_markdown(layout: Layout) -> str:
     for r in layout.support:
         lines.append(f"- {r.source} next to {r.target}: {r.reason}")
 
-    if not farm:
-        notes = []
-    elif layout.sized:
+    if layout.sized:
         notes = [
             (
                 "Block sizes come from the production plan: every crop's fields "
@@ -228,7 +216,7 @@ def layout_to_markdown(layout: Layout) -> str:
         )
     if layout.fixed_unplaced:
         notes.append(
-            f"Fixed, position unknown (add to `config/{fm.area.value}_map.json`): "
+            "Fixed, position unknown (add to `config/farm_map.json`): "
             + ", ".join(layout.fixed_unplaced)
         )
     if layout.unplaced_blocks:
@@ -237,12 +225,7 @@ def layout_to_markdown(layout: Layout) -> str:
             + ", ".join(names[b] for b in layout.unplaced_blocks)
         )
     if layout.missing_footprint:
-        notes.append(
-            "No footprint (skipped): " + ", ".join(layout.missing_footprint)
-            if farm
-            else "Movable, not measured yet (draw it in the map editor): "
-            + ", ".join(layout.missing_footprint)
-        )
+        notes.append("No footprint (skipped): " + ", ".join(layout.missing_footprint))
     if notes:
         lines += ["", "## Notes", ""] + [f"- {n}" for n in notes]
     return "\n".join(lines) + "\n"

@@ -6,7 +6,6 @@ Usage
     python -m src.layout                       # level from the player config
     python -m src.layout --level 30
     python -m src.layout --map config/farm_map.json
-    python -m src.layout --area town           # town from config/town_map.json
     python -m src.layout --design-config my_design.json
 
 Gap, reserve, strategy and the design layer are set in config/design.json
@@ -23,10 +22,8 @@ from pathlib import Path
 
 from src.config import load_player_config, validate_player_config
 from src.loaders.json_loader import load_data
-from src.models import Area
-from src.settings import AreaDesign, load_design_settings
+from src.settings import DesignSettings, load_design_settings
 
-from .area import plan_area_layout
 from .describe import layout_to_dict, layout_to_markdown
 from .farm_map import load_farm_map
 from .planner import STRATEGIES, plan_layout
@@ -54,20 +51,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Player config (default: config/player.json, else config/player.example.json)",
     )
     parser.add_argument(
-        "--area",
-        choices=[a.value for a in Area],
-        default=Area.FARM.value,
-        help="Game area (default: farm). town / fishing_lake use only the measured "
-        "map; their outputs are layout_<area>.*",
-    )
-    parser.add_argument(
         "--farm-map",
         "--map",
         dest="farm_map",
         type=Path,
         default=None,
-        help="Area map (default: config/<area>_map.json, else "
-        "config/<area>_map.example.json)",
+        help="Farm map (default: config/farm_map.json, else "
+        "config/farm_map.example.json)",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
@@ -80,8 +70,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _write(layout, out: Path, stem: str, settings: AreaDesign) -> None:
-    payload = layout_to_dict(layout) | {"settings": settings.used(layout.farm_map.area)}
+def _write(layout, out: Path, stem: str, settings: DesignSettings) -> None:
+    payload = layout_to_dict(layout) | {"settings": settings.model_dump()}
     (out / f"{stem}.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -104,8 +94,7 @@ def _log_summary(layout, stems: list[str], out: Path) -> None:
         )
     ext = layout.extent()
     logger.info(
-        "%s level %d: %d blocks on %d x %d tiles",
-        layout.farm_map.area.value,
+        "Farm level %d: %d blocks on %d x %d tiles",
         layout.level,
         len(layout.blocks),
         ext.w,
@@ -125,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("--level must be at least 1")
         return 1
     try:
-        design_settings, source = load_design_settings(args.design_config)
+        settings, source = load_design_settings(args.design_config)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid design settings: %s", exc)
         return 1
@@ -141,14 +130,10 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("Invalid player config: %s", exc)
         return 1
 
-    area = Area(args.area)
     try:
-        farm_map = load_farm_map(args.farm_map, area)
+        farm_map = load_farm_map(args.farm_map)
     except (FileNotFoundError, ValueError) as exc:
-        logger.error("Invalid %s map: %s", area.value, exc)
-        return 1
-    if farm_map.area != area:
-        logger.error("The map is for area %s, not %s", farm_map.area.value, area.value)
+        logger.error("Invalid farm map: %s", exc)
         return 1
     bg_path = farm_map.background_path()
     if bg_path is not None and not bg_path.exists():
@@ -159,26 +144,11 @@ def main(argv: list[str] | None = None) -> int:
     level = args.level if args.level is not None else player.level
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
-    settings = design_settings.for_area(area)
     logger.info(
         "Design settings: %s (%s)",
         source or "built-in defaults",
-        ", ".join(f"{k}={v}" for k, v in settings.used(area).items()),
+        ", ".join(f"{k}={v}" for k, v in settings.model_dump().items()),
     )
-    if area != Area.FARM:
-        layout = plan_area_layout(
-            farm_map,
-            level=level,
-            gap=settings.gap,
-            design=settings.design_layer,
-            decor_band=settings.decor_band,
-            path_style=settings.path_style,
-            design_zones=settings.design_zones,
-        )
-        stem = f"layout_{area.value}"
-        _write(layout, out, stem, settings)
-        _log_summary(layout, [stem], out)
-        return 0
 
     try:
         full = load_data(args.data_dir)
