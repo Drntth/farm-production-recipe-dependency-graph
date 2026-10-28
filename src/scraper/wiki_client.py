@@ -139,7 +139,7 @@ class WikiClient:
         """Fetch a page; return None on 404 / missing page."""
         try:
             return self.get_page(page_name)
-        except (requests.RequestException, RuntimeError, ValueError):
+        except requests.RequestException, RuntimeError, ValueError:
             return None
 
 

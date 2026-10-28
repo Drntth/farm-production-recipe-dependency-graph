@@ -1,0 +1,16 @@
+# Project metadata and tool settings. Not a package: install with requirements*.txt.
+
+[project]
+name = "farm-production-recipe-dependency-graph"
+version = "1.1.0"
+description = "Hay Day production chains as a weighted directed graph: farm layout and production planning"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.14"
+
+[tool.ruff]
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

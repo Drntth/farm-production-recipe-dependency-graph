@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None, ask: Ask = input, say: Say = print) -> i
                 say("Nothing written.")
                 return 1
         player = run_wizard(dataset, ask, say)
-    except (EOFError, KeyboardInterrupt):
+    except EOFError, KeyboardInterrupt:
         say("\nStopped; nothing written.")
         return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)

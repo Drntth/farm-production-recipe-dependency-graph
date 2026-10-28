@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +69,7 @@ def write_meta_file(
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     meta = {
-        "scraped_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "scraped_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "max_level": max_level,
         "known_game_version": known_game_version,
         "wiki_revisions": dict(sorted(wiki_revisions.items())),

@@ -78,7 +78,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def _data_max_level(data_dir: Path) -> int | None:
     try:
         meta = json.loads((data_dir / "meta.json").read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except OSError, ValueError:
         return None
     level = meta.get("max_level")
     return level if isinstance(level, int) else None

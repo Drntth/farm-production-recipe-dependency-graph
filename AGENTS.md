@@ -13,7 +13,8 @@ The project analyses Hay Day production chains. It turns locations, resources an
 - **v0.8** done (design layer: paths and decoration band).
 - **v0.9** done (Combiner: layout sized by the production plan, `flow` block order, lookahead reserves, one combined report).
 - **v1.0** done (unified CLI `python -m src`, settings in config files, design options, block images, profile wizard and examples, game fact checker, user guide in `docs/user-guide.md`).
-- Next: **v1.1** (release basics); v1.2-v1.5 (layout in the map editor, relocation plan, path network, design templates) in the README roadmap. The other values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
+- **v1.1** done (release basics: Python 3.14, `pyproject.toml`, CI, `CHANGELOG.md`, version tags).
+- Next: **v1.2** (layout in the map editor); v1.3-v1.5 (relocation plan, path network, design templates) in the README roadmap. The other values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
 
@@ -48,10 +49,10 @@ When you learn a new game fact (from the wiki, the web or the user), add a row t
 ```bash
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-pip install -r requirements-dev.txt       # ruff
+pip install -r requirements-dev.txt       # pytest, ruff
 
 python -m pytest                          # all tests must pass (no network needed)
-ruff check src tests                      # lint and format check: ruff format --check src tests (ruff from requirements-dev.txt)
+ruff check src tests                      # lint; format check: ruff format --check src tests
 python -m src all                         # unified CLI: graph, farm layout, plan, combined plan in one run
 python -m src <graph|layout|plan|combine|scrape> [options]   # one tool; same options as its own entry point below
 python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
@@ -97,6 +98,8 @@ python -m src check-facts                 # docs/game-facts rows vs. the wiki â†
 - `output/` is generated and git-ignored. Do not commit it.
 - Tool settings (how a tool works) go into `config/design*.json` or `config/planner*.json` via `src/settings.py`, never into new CLI options. The CLI only says what to run (level, file paths). The one kind of exception: flags that change only the exit code of a check, not its result (`check-facts --fail-on-findings`). A new setting needs a model field, a value in the example file, a README "Settings" table row and a test.
 - When a roadmap item is finished, tick it in `README.md` and update the "Current status" line and the milestone lines above.
+- Python 3.14+ (`requires-python` in `pyproject.toml`); ruff targets it, so 3.14-only syntax is fine. CI (`.github/workflows/ci.yml`) runs pytest, `ruff check` and `ruff format --check` on every push.
+- Releases: the version lives only in `pyproject.toml`. A finished milestone bumps it, adds a `CHANGELOG.md` entry (`## [x.y.z] - date`, a few lines) and gets a `vX.Y.Z` git tag on its commit.
 
 ### Data model
 

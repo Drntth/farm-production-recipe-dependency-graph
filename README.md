@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.0 is done: one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
+**Status:** v1.1 is done (Python 3.14, CI, `pyproject.toml`, [changelog](CHANGELOG.md)). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -568,14 +568,14 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.0 (local usable platform) is done (235 tests passing). Next: v1.1 (release basics).  
+**Current status:** v1.1 (release basics) is done (235 tests passing, CI on every push). Next: v1.2 (layout in the map editor).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
-Next step: v1.1.
+Next step: v1.2. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -669,18 +669,18 @@ Next step: v1.1.
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-The items of v1.1-v1.5 are plans; their details are updated when they are built.
+The items of v1.2-v1.5 are plans; their details are updated when they are built.
 
-### v1.1 - Release basics (next)
+### v1.1 - Release basics (done)
 
-- [ ] Python 3.14: `requires-python = ">=3.14"`, the local `venv` and CI use it (the tests pass on 3.14)
-- [ ] Continuous integration (GitHub Actions): one job on Python 3.14 with Node (so the map editor tests run), `pytest`, `ruff check` and `ruff format --check` on every push and pull request
-- [ ] `pyproject.toml` with the project metadata, the version (kept only here) and the ruff settings; no packaging, the `requirements*.txt` files stay the way to install
-- [ ] `pytest` moves from `requirements.txt` to `requirements-dev.txt`; install docs updated
-- [ ] `CHANGELOG.md`: one `## [x.y.z] - date` heading per version with a few lines; v0.3-v0.9 in short from this roadmap (`?` where the date is not certain)
-- [ ] `v1.0.0` git tag on the v1.0 commit, a tag for every later version; older milestones get no tag
+- [x] Python 3.14: `requires-python = ">=3.14"`, the local `venv` and CI use it (the tests pass on 3.14)
+- [x] Continuous integration (GitHub Actions): one job on Python 3.14 with Node (so the map editor tests run), `pytest`, `ruff check` and `ruff format --check` on every push and pull request
+- [x] `pyproject.toml` with the project metadata, the version (kept only here) and the ruff settings; no packaging, the `requirements*.txt` files stay the way to install
+- [x] `pytest` moves from `requirements.txt` to `requirements-dev.txt`; install docs updated
+- [x] `CHANGELOG.md`: one `## [x.y.z] - date` heading per version with a few lines; v0.3-v0.9 in short from this roadmap (`?` where the date is not certain)
+- [x] `v1.0.0` git tag on the v1.0 commit, a tag for every later version; older milestones get no tag
 
-### v1.2 - Layout in the map editor
+### v1.2 - Layout in the map editor (next)
 
 - [ ] Load `output/layout.json` or `output/combined.json` (its `layout` part) into `tools/farm_map_editor.html` as an overlay: block frames with names, items, paths, decoration band, as a layer that can be switched on and off
 - [ ] View only: blocks are not dragged or edited (that is the v2.0+ layout editor)
@@ -729,17 +729,19 @@ Nothing left: the values the wiki lacks are measured (field limit, barn footprin
 ## Usage
 
 ```bash
-# install (tested with Python 3.14)
+# install (Python 3.14 or newer)
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-pip install -r requirements-dev.txt   # optional: ruff
+pip install -r requirements-dev.txt   # for development: pytest, ruff
 
 # personal player config (optional; otherwise the example is used)
 cp config/player.example.json config/player.json
 
-# run tests
+# run tests and lint (the same checks run in CI)
 python -m pytest
+ruff check src tests
+ruff format --check src tests
 
 # unified CLI: one entry point, one command per tool
 python -m src                       # list the commands
@@ -815,6 +817,7 @@ python -m src.scraper --game-version 1.72
 
 ```text
 farm-production-recipe-dependency-graph/
+├── .github/workflows/ci.yml          # CI: pytest, ruff check, ruff format --check
 ├── docs/                              # project knowledge, see docs/README.md
 │   ├── README.md                      # index, where knowledge lives, fact table format
 │   ├── game-facts/                    # game rules by category (wiki + in-game)
@@ -944,11 +947,13 @@ farm-production-recipe-dependency-graph/
 │   ├── test_settings.py
 │   └── test_wizard.py
 ├── AGENTS.md                          # instructions for coding agents
+├── CHANGELOG.md                       # one entry per version
 ├── CLAUDE.md -> AGENTS.md             # symlink
 ├── LICENSE
 ├── README.md
+├── pyproject.toml                     # project metadata, version, ruff settings (not a package)
 ├── requirements.txt
-└── requirements-dev.txt               # ruff
+└── requirements-dev.txt               # pytest, ruff
 ```
 
 ---

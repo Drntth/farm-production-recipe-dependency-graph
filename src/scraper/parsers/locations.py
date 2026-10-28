@@ -63,7 +63,7 @@ def _parse_footprint(text: str) -> tuple[int, int] | None:
 def _rowspan(cell: Tag) -> int:
     try:
         return max(1, int(cell.get("rowspan", 1)))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return 1
 
 
