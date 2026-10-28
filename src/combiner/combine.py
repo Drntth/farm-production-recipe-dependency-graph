@@ -39,6 +39,7 @@ from src.settings import DEFAULT_COMBINER_STRATEGY as DEFAULT_STRATEGY
 from src.settings import (
     DEFAULT_ITEM_GAP,
     DEFAULT_LOOKAHEAD,
+    DEFAULT_MAIN_PATH_WIDTH,
     DEFAULT_MIN_EFFICIENCY,
     DEFAULT_PATH_STYLE,
     DEFAULT_PATH_TARGETS,
@@ -233,6 +234,8 @@ def combine(
     path_style: str = DEFAULT_PATH_STYLE,
     path_targets: str = DEFAULT_PATH_TARGETS,
     design_zones: bool = True,
+    main_path_style: str | None = None,
+    main_path_width: int = DEFAULT_MAIN_PATH_WIDTH,
 ) -> CombinedPlan:
     """
     Plan production, then the farm layout sized by it.
@@ -268,6 +271,8 @@ def combine(
         path_style=path_style,
         path_targets=path_targets,
         design_zones=design_zones,
+        main_path_style=main_path_style,
+        main_path_width=main_path_width,
     )
     result = CombinedPlan(
         level=level,

@@ -312,6 +312,8 @@ def test_layout_overlay_reads_the_layout_json(tmp_path: Path) -> None:
     assert design["paths"]
     assert tiles(plain["paths"]) == {tuple(t) for t in design["paths"]}
     assert tiles(plain["decorations"]) == {tuple(t) for t in design["decorations"]}
+    assert design["main_paths"]
+    assert tiles(plain["mainPaths"]) == {tuple(t) for t in design["main_paths"]}
 
     # same map size: no warning; another size or no farm map: a warning, never a shift
     assert out["fits"] is None and out["noMap"] is None

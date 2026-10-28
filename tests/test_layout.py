@@ -835,7 +835,8 @@ def test_design_reaches_cut_off_key_building_at_connection_point() -> None:
     fixed = {"farmhouse": Rect(1, 4, 2, 1), "riverboat": Rect(9, 2, 2, 2)}
     design = plan_design(allowed, blocks, fixed, decor_band=0)
 
-    assert design.connected == ["farmhouse", "a_block", "riverboat"]
+    # the main path reaches the key building before the side path the block
+    assert design.connected == ["farmhouse", "riverboat", "a_block"]
     assert not design.unreachable
     assert design.approached == {"riverboat": 3}  # x = 6, 7, 8 between
     assert any(x == 5 for x, _ in design.paths)  # the nearest reachable column
@@ -1054,6 +1055,136 @@ def test_design_terminal_of_several_rects_and_walk_only_tiles() -> None:
     assert design.connected == ["farmhouse", "fields"]
     assert not design.decorations & walk_only  # paths may cross, no band there
     assert (8, 4) not in design.paths | design.decorations  # reserved space
+
+
+# ---------------------------------------------------------------------------
+# v1.4 path network: main and side paths, main path width, stepped style
+# ---------------------------------------------------------------------------
+
+
+def test_main_path_reaches_key_buildings_first() -> None:
+    # the block is nearer to the hub, but the truck is on the main path
+    blocks = {"a_block": Rect(3, 0, 2, 2), "storage_block": Rect(14, 6, 2, 2)}
+    fixed = {"farmhouse": Rect(0, 6, 2, 2), "truck": Rect(8, 10, 2, 1)}
+    design = plan_design(_grid(18, 12), blocks, fixed, decor_band=0)
+
+    assert design.connected[:3] == ["farmhouse", "truck", "storage_block"]
+    assert design.connected[3] == "a_block"
+    assert design.main_paths and design.side_paths
+    assert design.main_paths | design.side_paths == design.paths
+    assert not design.main_paths & design.side_paths
+    assert _connected(design.paths)
+    assert _touches(design.main_paths, blocks["storage_block"])
+    assert _touches(design.main_paths, fixed["truck"])
+    assert not _touches(design.main_paths, blocks["a_block"])  # a side path
+
+
+def test_main_path_of_two_tiles_narrows_between_blocks() -> None:
+    fixed = {"farmhouse": Rect(0, 4, 2, 2), "truck": Rect(16, 4, 2, 2)}
+    open_design = plan_design(_grid(18, 10), {}, fixed, main_path_width=2)
+    assert open_design.main_path_width == 2 and open_design.narrowed == 0
+    assert len(open_design.main_paths) > len(open_design.lanes) > 0
+    assert open_design.corners == plan_design(_grid(18, 10), {}, fixed).corners
+    assert _connected(open_design.paths)
+
+    # two walls leave a 1-tile corridor between the hub and the truck
+    walls = {"w1": Rect(5, 0, 6, 5), "w2": Rect(5, 6, 6, 4)}
+    narrow = plan_design(_grid(18, 10), walls, fixed, main_path_width=2)
+    assert narrow.narrowed >= 5  # the corridor tiles
+    assert {(x, 5) for x in range(5, 11)} <= narrow.paths
+    with pytest.raises(ValueError, match="main_path_width"):
+        plan_design(_grid(3, 3), {}, {}, main_path_width=3)
+
+
+def test_second_lane_of_a_stepped_main_path_stays_joined() -> None:
+    # stepped main path past scattered posts: no lane piece only touches a corner
+    posts = {f"p{i}": Rect(3 + 2 * i, 2 + 2 * i, 1, 1) for i in range(5)}
+    fixed = {"farmhouse": Rect(0, 0, 2, 1), "truck": Rect(14, 12, 1, 1), **posts}
+    design = plan_design(
+        _grid(16, 14), {}, fixed, main_path_style="stepped", main_path_width=2
+    )
+    assert design.lanes
+    assert _connected(design.main_paths) and _connected(design.paths)
+
+
+def test_unreachable_key_building_does_not_stop_the_side_paths() -> None:
+    # the truck is far beyond non-buildable ground: no connection point
+    fixed = {"farmhouse": Rect(0, 0, 2, 2), "truck": Rect(20, 2, 2, 2)}
+    blocks = {"a_block": Rect(2, 7, 2, 2)}
+    design = plan_design(_grid(10, 10), blocks, fixed, decor_band=0)
+    assert design.unreachable == ["truck"]
+    assert design.connected == ["farmhouse", "a_block"]
+    assert not design.main_paths and design.side_paths
+    assert design.approached == {}
+
+
+def test_stepped_paths_follow_the_straight_line() -> None:
+    # one connection from (2, 1) to (13, 12): a staircase, no long legs
+    fixed = {"farmhouse": Rect(0, 0, 2, 1), "truck": Rect(14, 12, 1, 1)}
+    args = (_grid(16, 14), {}, fixed)
+    shortest = plan_design(*args, decor_band=0)
+    stepped = plan_design(*args, decor_band=0, path_style="stepped")
+    assert len(stepped.paths) == len(shortest.paths)  # still a shortest path
+    assert stepped.detour_ratio == pytest.approx(1.0)
+    assert stepped.corners > shortest.corners
+    assert _connected(stepped.paths)
+    rows = {}
+    for x, y in stepped.paths:
+        rows[y] = rows.get(y, 0) + 1
+    assert max(rows.values()) <= 3  # never more than a short leg per row
+
+
+def test_mixed_main_and_side_path_styles() -> None:
+    blocks = {"a_block": Rect(12, 10, 2, 2)}
+    fixed = {"farmhouse": Rect(0, 0, 2, 2), "truck": Rect(12, 0, 2, 1)}
+    design = plan_design(
+        _grid(16, 14),
+        blocks,
+        fixed,
+        path_style="stepped",
+        main_path_style="straight",
+    )
+    assert (design.main_path_style, design.path_style) == ("straight", "stepped")
+    assert design.connected == ["farmhouse", "truck", "a_block"]
+    # the straight main path is one leg along the top edge
+    assert len({y for _, y in design.main_paths}) == 1
+    defaults = plan_design(_grid(4, 4), {}, {}, path_style="stepped")
+    assert defaults.main_path_style == "stepped"
+    with pytest.raises(ValueError, match="path_style"):
+        plan_design(_grid(3, 3), {}, {}, main_path_style="curvy")
+
+
+def test_plan_layout_with_path_network(farm: DataSet) -> None:
+    farm_map = FarmMap(
+        width=40,
+        height=40,
+        fixed=[
+            FixedItem(id="farmhouse", x=17, y=17, width=6, height=6),
+            FixedItem(id="truck", x=2, y=30, width=4, height=3),
+        ],
+    )
+    layout = plan_layout(
+        farm,
+        level=5,
+        farm_map=farm_map,
+        design=True,
+        main_path_width=2,
+        main_path_style="straight",
+        path_style="stepped",
+    )
+    d = layout.design
+    assert d is not None and not d.unreachable
+    assert d.main_path_width == 2 and d.main_paths
+    figures = layout_to_dict(layout)["design"]["figures"]
+    assert figures["main_path_tiles"] == len(d.main_paths)
+    assert figures["side_path_tiles"] == len(d.side_paths)
+    assert figures["narrowed_tiles"] == d.narrowed
+    assert (figures["main_path_style"], figures["path_style"]) == (
+        "straight",
+        "stepped",
+    )
+    assert "Main path (straight, 2 tile(s) wide)" in layout_to_markdown(layout)
+    assert "<title>main path</title>" in render_svg(layout)
 
 
 def test_item_gap_spaces_the_buildings_of_a_block(farm: DataSet) -> None:

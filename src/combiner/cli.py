@@ -156,6 +156,8 @@ def main(argv: list[str] | None = None) -> int:
             path_style=design.path_style,
             path_targets=design.path_targets,
             design_zones=design.design_zones,
+            main_path_style=design.main_path_style,
+            main_path_width=design.main_path_width,
         )
     except (RuntimeError, ValueError) as exc:
         logger.error("%s", exc)

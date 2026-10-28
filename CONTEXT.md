@@ -89,12 +89,16 @@ _Not to be confused with_: goods flow (an amount per hour between two blocks)
 
 **Design layer**: optional additions to the functional layout: paths and decoration band.
 
-**Path**: one-tile-wide walkable tiles connecting blocks and key buildings into one network.
+**Path**: walkable tiles connecting blocks and key buildings into one network: the main path and the side paths.
 
-**Main path** (planned, v1.4): the path from the hub to the key buildings, built first; one or two tiles wide.
+**Main path**: the path from the hub to the key buildings and the Storage block, built first; one or two tiles wide (`main_path_width`).
 _Related_: side path
 
-**Side path** (planned, v1.4): a one-tile path joining a block to the nearest point of the network.
+**Side path**: a one-tile path joining a block to the nearest point of the network.
+
+**Second lane**: the extra tiles of a 2-tile main path (the path shifted one diagonal step); where it does not fit, the main path is **narrowed** to one tile.
+
+**Path style**: how a path runs between its ends: `shortest`, `straight` (few corners) or `stepped` (staircase along the straight line).
 
 **Key building**: a fixed building the player walks to often (farmhouse, barn, silo, truck, roadside shop, riverboat); paths connect it.
 

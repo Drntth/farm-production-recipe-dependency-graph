@@ -2,6 +2,13 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [1.4.0] - 2026-10-28
+
+- Path network: the main path reaches the key buildings and the Storage block first, side paths join every other block to the nearest point of the network.
+- `main_path_width` (1 or 2): a second lane on the main path, narrowed to 1 tile where it does not fit; the report counts the narrowed tiles.
+- New `path_style` `stepped` (staircase along the straight line) and `main_path_style` for mixed styles.
+- Design figures: main and side path tiles apart; the main path is drawn darker in the SVG; `layout.json` lists `main_paths`.
+
 ## [1.3.0] - 2026-10-28
 
 - Current farm: a `current` list in the farm map (placed copies of movable farm items, fields / trees / bushes as counts), measured in the new map editor step 8 with the ids and sizes of the loaded layout; the Layout Planner ignores it.

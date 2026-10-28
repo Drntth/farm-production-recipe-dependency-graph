@@ -134,13 +134,18 @@ def layout_to_markdown(layout: Layout) -> str:
             "## Design",
             "",
             (
-                f"- Paths ({d.path_style}): {len(d.paths)} tiles (1 tile wide), "
-                f"connecting {len(d.connected)} "
+                f"- Paths: {len(d.paths)} tiles, connecting {len(d.connected)} "
                 + (
                     "buildings and patches."
                     if d.path_targets == "buildings"
                     else "blocks and key buildings."
                 )
+            ),
+            (
+                f"- Main path ({d.main_path_style}, {d.main_path_width} tile(s) "
+                f"wide): {len(d.main_paths)} tiles from the hub to the key "
+                f"buildings; side paths ({d.path_style}, 1 tile wide): "
+                f"{len(d.side_paths)} tiles."
             ),
             (
                 f"- Corners: {d.corners}; detour ratio {d.detour_ratio:.2f} "
@@ -151,6 +156,11 @@ def layout_to_markdown(layout: Layout) -> str:
                 f"{d.decor_band} tile(s) of a path, for decorations and fences."
             ),
         ]
+        if d.narrowed:
+            lines.append(
+                f"- The main path narrows to 1 tile on {d.narrowed} tile(s) "
+                "where 2 do not fit between the blocks (a larger `gap` gives it room)."
+            )
         free = _free_per_block(layout)
         if free:
             lines.append(
@@ -265,6 +275,7 @@ def _design(layout: Layout) -> dict[str, Any] | None:
     return {
         "decor_band": d.decor_band,
         "paths": [list(t) for t in sorted(d.paths)],
+        "main_paths": [list(t) for t in sorted(d.main_paths)],
         "decorations": [list(t) for t in sorted(d.decorations)],
         "connected": d.connected,
         "unreachable": d.unreachable,
@@ -272,7 +283,12 @@ def _design(layout: Layout) -> dict[str, Any] | None:
         "figures": {
             "path_style": d.path_style,
             "path_targets": d.path_targets,
+            "main_path_style": d.main_path_style,
+            "main_path_width": d.main_path_width,
             "path_tiles": len(d.paths),
+            "main_path_tiles": len(d.main_paths),
+            "side_path_tiles": len(d.side_paths),
+            "narrowed_tiles": d.narrowed,
             "corners": d.corners,
             "detour_ratio": round(d.detour_ratio, 3),
             "unreachable": len(d.unreachable),

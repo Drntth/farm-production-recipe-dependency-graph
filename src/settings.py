@@ -34,12 +34,13 @@ DEFAULT_MIN_EFFICIENCY = 0.8
 DEFAULT_LOOKAHEAD = 5
 DEFAULT_COMBINER_STRATEGY = "flow"
 DEFAULT_PATH_STYLE = "shortest"
+DEFAULT_MAIN_PATH_WIDTH = 1
 DEFAULT_PATH_TARGETS = "blocks"
 DEFAULT_ITEM_GAP = 0
 
 Strategy = Literal["auto", "coupling", "size", "flow", "all"]
 CombinerStrategy = Literal["auto", "coupling", "size", "flow"]
-PathStyle = Literal["shortest", "straight"]
+PathStyle = Literal["shortest", "straight", "stepped"]
 PathTargets = Literal["blocks", "buildings"]
 
 
@@ -75,7 +76,17 @@ class DesignSettings(_Strict):
     )
     path_style: PathStyle = Field(
         DEFAULT_PATH_STYLE,
-        description="shortest, or straight (fewer corners and detours)",
+        description="shortest, straight (fewer corners and detours) or stepped "
+        "(staircase along the straight line)",
+    )
+    main_path_style: PathStyle | None = Field(
+        None, description="Style of the main path; null = path_style"
+    )
+    main_path_width: int = Field(
+        DEFAULT_MAIN_PATH_WIDTH,
+        ge=1,
+        le=2,
+        description="Main path width; narrows to 1 where 2 does not fit",
     )
     path_targets: PathTargets = Field(
         DEFAULT_PATH_TARGETS,

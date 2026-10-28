@@ -3,6 +3,8 @@
   "design_layer": false,
   "decor_band": 1,
   "path_style": "shortest",
+  "main_path_style": null,
+  "main_path_width": 1,
   "design_zones": true,
   "reserve": 0.2,
   "strategy": "auto",

@@ -2,7 +2,7 @@
 
 [project]
 name = "farm-production-recipe-dependency-graph"
-version = "1.3.0"
+version = "1.4.0"
 description = "Hay Day production chains as a weighted directed graph: farm layout and production planning"
 readme = "README.md"
 license = "MIT"

@@ -96,6 +96,8 @@ def _plan(data, level, player, farm_map, settings: DesignSettings, strategy: str
         path_style=settings.path_style,
         path_targets=settings.path_targets,
         design_zones=settings.design_zones,
+        main_path_style=settings.main_path_style,
+        main_path_width=settings.main_path_width,
     )
 
 

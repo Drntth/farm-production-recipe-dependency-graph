@@ -265,7 +265,7 @@
     <h2>7. Layout overlay (view only)</h2>
     <details class="help" open>
       <summary>How to</summary>
-      <div class="hint">Load <code>output/layout.json</code> or <code>output/combined.json</code> to see the planned layout on this map: block frames with names, items (dashed: reserved space), paths (sand) and the decoration band (green). It uses the tile coordinates of the farm map it was planned on and is never shifted: load that farm map JSON, and plan again after saving a cropped map (the editor warns when the size or a fixed building differs). Hover an item to see its id in the status bar; click a block in the list to highlight it. Switch it off with the <b>layout</b> layer; like every layer it is also in the exported PNGs while switched on. Nothing here is saved in the map JSON.</div>
+      <div class="hint">Load <code>output/layout.json</code> or <code>output/combined.json</code> to see the planned layout on this map: block frames with names, items (dashed: reserved space), paths (sand, the main path darker) and the decoration band (green). It uses the tile coordinates of the farm map it was planned on and is never shifted: load that farm map JSON, and plan again after saving a cropped map (the editor warns when the size or a fixed building differs). Hover an item to see its id in the status bar; click a block in the list to highlight it. Switch it off with the <b>layout</b> layer; like every layer it is also in the exported PNGs while switched on. Nothing here is saved in the map JSON.</div>
     </details>
     <div class="card">
       <span class="file-btn"><button tabindex="-1" style="width:100%">Load layout JSON…</button><input type="file" id="fileLayout" accept="application/json,.json"></span>
@@ -645,6 +645,7 @@ const Core = (() => {
       unplaced: l.blocks.filter(b => !b.frame).map(b => b.id),
       fixed: (l.fixed || []).filter(f => f.x != null).map(f => ({ id: f.id, rect: [f.x, f.y, f.width, f.height] })),
       paths: tiles(l.design && l.design.paths),
+      mainPaths: tiles(l.design && l.design.main_paths),  // empty before v1.4
       decorations: tiles(l.design && l.design.decorations),
     };
   }
@@ -749,7 +750,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   // layout overlay colours, as in src/layout/render_svg.py (block palette cycled)
   const BLOCK_PALETTE = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#8C6D1F', '#6A3D9A', '#B22222',
     '#2E8B57', '#4B5563', '#C71585', '#1F4E79', '#9A6324', '#469990', '#911EB4', '#808000', '#E6194B'];
-  const PATH_COLOUR = '#C8A165', DECOR_COLOUR = '#4ADE80';
+  const PATH_COLOUR = '#C8A165', MAIN_PATH_COLOUR = '#A47C45', DECOR_COLOUR = '#4ADE80';
   // layout overlay (Core.fromLayout result), kept in this browser only, never in the map JSON
   const LAYOUT_KEY = 'farm_map_editor_layout_v1';
   const lay = { data: null, file: '', sel: null };
@@ -983,6 +984,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     };
     fill(d.decorations, DECOR_COLOUR, 0.45);
     fill(d.paths, PATH_COLOUR, 0.8);
+    fill(d.mainPaths, MAIN_PATH_COLOUR, 0.8);
     d.blocks.forEach((b, i) => {
       const colour = BLOCK_PALETTE[i % BLOCK_PALETTE.length], selected = opts.selection && b.id === lay.sel;
       for (const it of b.items) {

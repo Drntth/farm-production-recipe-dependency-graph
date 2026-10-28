@@ -59,6 +59,7 @@ BUILDABLE_COLOUR = "#16A34A"
 BLOCKED_COLOUR = "#DC2626"
 DESIGN_ZONE_COLOUR = "#8B5CF6"
 PATH_COLOUR = "#C8A165"
+MAIN_PATH_COLOUR = "#A47C45"  # darker sand: the main path
 DECOR_COLOUR = "#4ADE80"
 
 
@@ -242,11 +243,15 @@ def render_svg(
                 f'<polygon points="{poly(Rect(x, y, 1, 1))}" fill="{DECOR_COLOUR}" '
                 'fill-opacity="0.35"><title>decoration band</title></polygon>'
             )
+        main = layout.design.main_paths
         for x, y in sorted(layout.design.paths):
+            on_main = (x, y) in main
+            c = MAIN_PATH_COLOUR if on_main else PATH_COLOUR
+            kind = "main path" if on_main else "path"
             out.append(
-                f'<polygon points="{poly(Rect(x, y, 1, 1))}" fill="{PATH_COLOUR}" '
-                f'fill-opacity="0.85" stroke="{_tint(PATH_COLOUR, 0.3)}" '
-                'stroke-width="0.5"><title>path</title></polygon>'
+                f'<polygon points="{poly(Rect(x, y, 1, 1))}" fill="{c}" '
+                f'fill-opacity="0.85" stroke="{_tint(c, 0.3)}" '
+                f'stroke-width="0.5"><title>{kind}</title></polygon>'
             )
 
     # labels last, so no block covers them: one per building, one per patch
@@ -289,7 +294,9 @@ def render_svg(
             _text(
                 MARGIN + 18,
                 y,
-                f"Path ({d.path_style}): {len(d.paths)} tiles, {d.corners} corners, "
+                f"Path: {len(d.paths)} tiles (darker: main path {len(d.main_paths)}, "
+                f"{d.main_path_style}, {d.main_path_width} wide; side "
+                f"{len(d.side_paths)}, {d.path_style}), {d.corners} corners, "
                 f"detour {d.detour_ratio:.2f} · light green = decoration band "
                 f"({len(d.decorations)} tiles)",
                 11,

@@ -46,6 +46,7 @@ from src.settings import (
     DEFAULT_FIELD_POOL,
     DEFAULT_GAP,
     DEFAULT_ITEM_GAP,
+    DEFAULT_MAIN_PATH_WIDTH,
     DEFAULT_PATH_STYLE,
     DEFAULT_PATH_TARGETS,
 )
@@ -170,6 +171,8 @@ def plan_layout(
     path_style: str = DEFAULT_PATH_STYLE,
     path_targets: str = DEFAULT_PATH_TARGETS,
     design_zones: bool = True,
+    main_path_style: str | None = None,
+    main_path_width: int = DEFAULT_MAIN_PATH_WIDTH,
 ) -> Layout:
     """
     Plan the farm layout for the level-filtered *dataset*.
@@ -439,7 +442,14 @@ def plan_layout(
         path_targets = "blocks"
     if design:
         layout.design = _design(
-            layout, fixed_rects, decor_band, path_style, path_targets, design_zones
+            layout,
+            fixed_rects,
+            decor_band,
+            path_style,
+            path_targets,
+            design_zones,
+            main_path_style,
+            main_path_width,
         )
     return layout
 
@@ -451,6 +461,8 @@ def _design(
     path_style: str = DEFAULT_PATH_STYLE,
     path_targets: str = DEFAULT_PATH_TARGETS,
     design_zones: bool = True,
+    main_path_style: str | None = None,
+    main_path_width: int = DEFAULT_MAIN_PATH_WIDTH,
 ) -> Design:
     """
     6. Paths and decoration band on the usable tiles of the map.
@@ -477,6 +489,8 @@ def _design(
             fixed,
             decor_band,
             path_style=path_style,
+            main_path_style=main_path_style,
+            main_path_width=main_path_width,
             walk_only=walk_only,
         )
     terminals: dict[str, list[Rect]] = {}
@@ -509,6 +523,8 @@ def _design(
         fixed,
         decor_band,
         path_style=path_style,
+        main_path_style=main_path_style,
+        main_path_width=main_path_width,
         obstacles=reserved,
         walk_only=set(walk_only) | in_frames,
     )

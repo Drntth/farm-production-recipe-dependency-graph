@@ -90,3 +90,23 @@ def test_design_options_of_v1() -> None:
     assert s.DesignSettings().block_images is True
     with pytest.raises(ValidationError):
         s.DesignSettings(path_style="curvy")
+
+
+def test_path_network_options_of_v1_4() -> None:
+    cfg = s.DesignSettings()
+    assert (cfg.main_path_width, cfg.main_path_style) == (1, None)
+    cfg = s.DesignSettings(
+        path_style="stepped", main_path_style="straight", main_path_width=2
+    )
+    assert (cfg.path_style, cfg.main_path_style, cfg.main_path_width) == (
+        "stepped",
+        "straight",
+        2,
+    )
+    for bad in (
+        {"main_path_width": 3},
+        {"main_path_width": 0},
+        {"main_path_style": "x"},
+    ):
+        with pytest.raises(ValidationError):
+            s.DesignSettings(**bad)

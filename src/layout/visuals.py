@@ -72,9 +72,13 @@ def block_layout(layout: Layout, pb: PlacedBlock) -> Layout:
 
         small.design = Design(
             paths=near(d.paths),
+            main_paths=near(d.main_paths),
+            lanes=near(d.lanes),
             decorations=near(d.decorations),
             decor_band=d.decor_band,
             path_style=d.path_style,
+            main_path_style=d.main_path_style,
+            main_path_width=d.main_path_width,
             path_targets=d.path_targets,
         )
     return small

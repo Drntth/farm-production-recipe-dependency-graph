@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.3 is done: a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
+**Status:** v1.4 is done: a path network of a main path (1 or 2 tiles wide) to the key buildings and side paths to the blocks, with a new `stepped` path style. v1.3 brought a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -58,15 +58,17 @@ Help the player design an efficient and expandable layout by discovering natural
 
 `design_layer: true` in [`config/design.json`](#settings) adds walkable paths and a decoration band on top of the functional layout (`src/layout/design.py`):
 
-- Paths (1 tile wide) connect every block and the key buildings into one network: on the farm the farmhouse, barn, silo, truck, roadside shop and riverboat (hub: the farmhouse, else the Storage block). The network grows from the hub, each time by the shortest path on free tiles to the nearest building not reached yet.
+- Paths connect every block and the key buildings into one network: on the farm the farmhouse, barn, silo, truck, roadside shop and riverboat (hub: the farmhouse, else the Storage block). The network grows from the hub, each time by the shortest path on free tiles to the nearest building not reached yet.
+- The **main path** is built first: from the hub to the key buildings and the Storage block (barn and silo). Then **side paths** (1 tile wide) join every other block to the nearest point of the network.
+- `main_path_width` (1 or 2, default 1): a 2-tile main path gets a second lane, the path shifted one diagonal step to its freer side. Where it does not fit between two blocks it narrows to 1 tile, and the report counts those tiles (on the measured farm 46 with `gap: 1`). A larger `gap` gives it room, but takes area: on the measured farm `gap: 2` leaves one block unplaced.
 - A key building with no reachable free tile next to it gets a path to its **connection point**, the reachable free tile nearest to it. On the farm the riverboat and the leaderboard stand behind a paved strip that is not buildable (mark it as a `blocked` zone): the path ends at the edge of the buildable land, and the notes give the tiles left in between. A building more than 5 tiles beyond the reachable land stays unreachable.
 - The decoration band is the free tiles within `decor_band` tiles of a path (default 1): room for decorations and fences, not for buildings.
 - With the design layer the blocks keep at least one free tile between them (`gap` ≥ 1), so a path always fits. Buildings no path can reach are listed in the notes.
-- `path_style`: `shortest` (default) takes any shortest path; `straight` adds a cost to every change of direction, so paths have fewer corners and detours (on the measured farm 12 corners instead of 17).
+- `path_style`: `shortest` (default) takes any shortest path; `straight` adds a cost to every change of direction, so paths have fewer corners and detours (on the measured farm 16 corners instead of 20); `stepped` takes the shortest path closest to the straight line between its ends, a staircase that looks diagonal and curved on the isometric grid. `main_path_style` (default: the same as `path_style`) styles the main path alone, e.g. a `straight` main path with `stepped` side paths.
 - `path_targets` (farm): `blocks` (default) connects the blocks and the key buildings; `buildings` connects every building and every field / tree / bush patch inside the blocks; the paths may cross the free part of a block frame, but the decoration band stays out of it (it is the reserve for later unlocks). With the design layer on it needs `item_gap` ≥ 1, so a path fits between the buildings.
 - `item_gap` (farm, default 0): free tiles between the buildings of a block, so blocks look less packed; patches stay whole. Placing every block comes first, looks second: when the blocks do not fit, the item gap is lowered step by step (at the requested reserve) before the reserve is; with no gap left, `path_targets: buildings` falls back to `blocks`. The report shows the gap used and the one asked for (on the measured farm `item_gap: 1` drops to 0).
 - Design zones (`design` zones of the farm map, `design_zones`, default on): existing decorations; no block is placed there, paths may cross them, and the decoration band leaves them alone.
-- Figures in `layout.md` / `layout.json` (`design.figures`) to compare settings: path tiles, corners (turns and junctions), detour ratio (tiles walked per tile of grid distance), free tiles per block, unreachable buildings, design zone tiles.
+- Figures in `layout.md` / `layout.json` (`design.figures`) to compare settings: path tiles (main and side paths apart, narrowed main path tiles), corners (turns and junctions of the centre lines), detour ratio (tiles walked per tile of grid distance), free tiles per block, unreachable buildings, design zone tiles.
 
 ### How it works (farm)
 
@@ -259,6 +261,8 @@ How the tools work is set in config files, never on the command line: the CLI on
   "design_layer": false,
   "decor_band": 1,
   "path_style": "shortest",
+  "main_path_style": null,
+  "main_path_width": 1,
   "design_zones": true,
   "reserve": 0.2,
   "strategy": "auto",
@@ -269,19 +273,21 @@ How the tools work is set in config files, never on the command line: the CLI on
 }
 ```
 
-| Key            | Meaning                                                                                           | Default  |
-| -------------- | ------------------------------------------------------------------------------------------------- | -------- |
-| `gap`          | free tiles between blocks                                                                         | 1        |
-| `design_layer` | paths and decoration band (gap is then at least 1)                                                | false    |
-| `decor_band`   | decoration band width next to the paths                                                           | 1        |
-| `reserve`      | extra free area per block for later unlocks                                                       | 0.2      |
-| `strategy`     | block order: `auto`, `coupling`, `size`, `flow`, or `all` (one output set per order)              | auto     |
-| `field_pool`   | share of the fields in a separate Shared fields block (without production sizing)                 | 0        |
-| `item_gap`     | free tiles between the buildings of a block; patches stay whole; lowered if the blocks do not fit | 0        |
-| `path_style`   | `shortest`, or `straight` (fewer corners and detours)                                             | shortest |
-| `path_targets` | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)         | blocks   |
-| `design_zones` | keep the map's `design` zones free of blocks (paths may cross them)                               | true     |
-| `block_images` | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                    | true     |
+| Key               | Meaning                                                                                             | Default  |
+| ----------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `gap`             | free tiles between blocks                                                                           | 1        |
+| `design_layer`    | paths and decoration band (gap is then at least 1)                                                  | false    |
+| `decor_band`      | decoration band width next to the paths                                                             | 1        |
+| `reserve`         | extra free area per block for later unlocks                                                         | 0.2      |
+| `strategy`        | block order: `auto`, `coupling`, `size`, `flow`, or `all` (one output set per order)                | auto     |
+| `field_pool`      | share of the fields in a separate Shared fields block (without production sizing)                   | 0        |
+| `item_gap`        | free tiles between the buildings of a block; patches stay whole; lowered if the blocks do not fit   | 0        |
+| `path_style`      | `shortest`, `straight` (fewer corners and detours) or `stepped` (staircase along the straight line) | shortest |
+| `main_path_style` | style of the main path; `null` = `path_style`                                                       | null     |
+| `main_path_width` | main path width, 1 or 2; narrows to 1 where 2 does not fit between the blocks                       | 1        |
+| `path_targets`    | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)           | blocks   |
+| `design_zones`    | keep the map's `design` zones free of blocks (paths may cross them)                                 | true     |
+| `block_images`    | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                      | true     |
 
 `config/planner.json`:
 
@@ -586,15 +592,15 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.3 (relocation plan) is done (251 tests passing, CI on every push). Next: v1.4 (path network).  
+**Current status:** v1.4 (path network) is done (259 tests passing, CI on every push). Next: v1.5 (design templates).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
-The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
+The design layer adds paths and a decoration band (126 path tiles on the measured farm: 86 main path, 40 side paths; the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
-Next step: v1.4. Changes per version: [CHANGELOG.md](CHANGELOG.md).
+Next step: v1.5. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -688,7 +694,7 @@ Next step: v1.4. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-The items of v1.4-v1.5 are plans; their details are updated when they are built.
+The items of v1.5 are plans; their details are updated when they are built.
 
 ### v1.1 - Release basics (done)
 
@@ -715,12 +721,12 @@ The items of v1.4-v1.5 are plans; their details are updated when they are built.
 - [x] Listed apart: reserved copies (space to keep free), current copies the layout has no place for, layout copies the player does not own yet; an unknown id is an error
 - [x] Report: `output/relocation.md` / `.json`
 
-### v1.4 - Path network
+### v1.4 - Path network (done)
 
-- [ ] Main path from the hub (farmhouse) to the key buildings, built first; side paths join every block to the nearest point of the network
-- [ ] `main_path_width` (1 or 2, default 1); where a 2-tile main path does not fit between blocks it narrows to 1 there, and the report counts those tiles (`gap: 2` gives it room)
-- [ ] New `path_style` `stepped`: the staircase closest to the straight line between two points (a diagonal, curved look on the isometric grid); `main_path_style` (default: same as `path_style`) gives mixed styles such as a straight main path with stepped side paths
-- [ ] Design figures: path tiles of main and side paths apart
+- [x] Main path from the hub (farmhouse) to the key buildings and the Storage block, built first; side paths join every block to the nearest point of the network
+- [x] `main_path_width` (1 or 2, default 1); where a 2-tile main path does not fit between blocks it narrows to 1 there, and the report counts those tiles (a larger `gap` gives it room)
+- [x] New `path_style` `stepped`: the staircase closest to the straight line between two points (a diagonal, curved look on the isometric grid); `main_path_style` (default: same as `path_style`) gives mixed styles such as a straight main path with stepped side paths
+- [x] Design figures: path tiles of main and side paths apart, narrowed main path tiles; the main path drawn darker in the SVG
 
 ### v1.5 - Design templates
 
@@ -917,7 +923,7 @@ farm-production-recipe-dependency-graph/
 │   │   ├── blocks.py                  # named blocks (anchor method), flow order
 │   │   ├── cli.py                     # python -m src.layout
 │   │   ├── describe.py                # layout.md / layout.json
-│   │   ├── design.py                  # design layer: paths, decoration band
+│   │   ├── design.py                  # design layer: main / side paths, decoration band
 │   │   ├── farm_map.py                # config/farm_map*.json model and loader
 │   │   ├── fields.py                  # dedicated fields per block (crop demand)
 │   │   ├── inventory.py               # copies per location (profile → level)

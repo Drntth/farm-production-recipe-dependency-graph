@@ -37,7 +37,7 @@ To rebuild your farm step by step later, also mark the **current farm** (step 8)
 
 Settings are files, not command-line options. Copy the examples and edit them; the tools tell you in their log which file they used, and every output records the settings it was made with.
 
-- `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`.
+- `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners, `stepped` for diagonal staircases), `main_path_width` (2 for a wider main path to the key buildings), `main_path_style` (another style for the main path), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`.
 - `config/planner.json`: `production.login_interval` (fix how often you log in; empty = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
 
 Every key with its default is in the README section "Settings". Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first and then the reserve, and the report says so.
