@@ -671,35 +671,43 @@ Next step: v1.1.
 
 ### v1.1 - Release basics (next)
 
-- [ ] Continuous integration (GitHub Actions): `pytest`, `ruff check` and `ruff format --check` on every push and pull request
-- [ ] `pyproject.toml` with the project metadata and version (the `requirements*.txt` files stay)
-- [ ] `CHANGELOG.md`: v0.3-v1.0 in short from this roadmap, then one entry per version
-- [ ] `v1.0.0` git tag on the v1.0 commit, a tag for every later version
+- [ ] Python 3.14: `requires-python = ">=3.14"`, the local `venv` and CI use it (the tests pass on 3.14)
+- [ ] Continuous integration (GitHub Actions): one job on Python 3.14 with Node (so the map editor tests run), `pytest`, `ruff check` and `ruff format --check` on every push and pull request
+- [ ] `pyproject.toml` with the project metadata, the version (kept only here) and the ruff settings; no packaging, the `requirements*.txt` files stay the way to install
+- [ ] `pytest` moves from `requirements.txt` to `requirements-dev.txt`; install docs updated
+- [ ] `CHANGELOG.md`: one `## [x.y.z] - date` heading per version with a few lines; v0.3-v0.9 in short from this roadmap (`?` where the date is not certain)
+- [ ] `v1.0.0` git tag on the v1.0 commit, a tag for every later version; older milestones get no tag
 
 ### v1.2 - Layout in the map editor
 
-- [ ] Load `output/layout.json` or `output/combined.json` into `tools/farm_map_editor.html` as an overlay: blocks, paths, decoration band, as a layer that can be switched on and off
-- [ ] The editor reads the layout JSON format of `src/layout` and stays in sync with it
+- [ ] Load `output/layout.json` or `output/combined.json` (its `layout` part) into `tools/farm_map_editor.html` as an overlay: block frames with names, items, paths, decoration band, as a layer that can be switched on and off
+- [ ] View only: blocks are not dragged or edited (that is the v2.0+ layout editor)
+- [ ] Same tile coordinates as the farm map; when the layout's map size differs from the loaded farm map, the editor warns and does not shift anything
 
 ### v1.3 - Relocation plan
 
-- [ ] Current farm: the current positions of the movable buildings, fields, trees and bushes in `config/farm_map.json`, measured in the map editor
-- [ ] Move list from the current farm to the suggested layout: what goes where and in which order, with as few moves as possible
-- [ ] Items the suggested layout does not keep or does not yet have, listed apart
+- [ ] Current farm: a `current` list in `config/farm_map.json` with the positions of the player's production buildings, shelters, barn and silo now (fields, trees and bushes only as counts), measured in a new editor tab; the Layout Planner ignores it
+- [ ] Farm map clean-up: `fixed` holds only buildings the game never moves; the barn and the silo leave it and the `movable` flag is removed (old farm maps fail with a clear error; re-save them in the editor)
+- [ ] The editor offers the item ids and sizes of the loaded layout (v1.2) for the current farm, free text without one; `relocate` checks every size against the data footprint, rotation included
+- [ ] `python -m src relocate [--layout PATH]`: compares the current farm with `output/combined.json` (else `output/layout.json`); not part of `all`
+- [ ] Relocation plan as keep / store / place lists: keep = same item at exactly the same place (greedy match per id), store = every other current item, place = target positions grouped by block; no move order is needed, because Layout Edit Mode can store everything (see [docs/game-facts/farm.md](docs/game-facts/farm.md)); a note when a new layout slot is simpler
+- [ ] Listed apart: reserved copies (space to keep free), current copies the layout has no place for, layout copies the player does not own yet; an unknown id is an error
 - [ ] Report: `output/relocation.md` / `.json`
 
 ### v1.4 - Path network
 
-- [ ] Path network from the farmhouse: main paths and side paths, with more styles (straight, curved with stepped corners, mixed)
+- [ ] Main path from the hub (farmhouse) to the key buildings, built first; side paths join every block to the nearest point of the network
+- [ ] `main_path_width` (1 or 2, default 1); where a 2-tile main path does not fit between blocks it narrows to 1 there, and the report counts those tiles (`gap: 2` gives it room)
+- [ ] New `path_style` `stepped`: the staircase closest to the straight line between two points (a diagonal, curved look on the isometric grid); `main_path_style` (default: same as `path_style`) gives mixed styles such as a straight main path with stepped side paths
+- [ ] Design figures: path tiles of main and side paths apart
 
 ### v1.5 - Design templates
 
-- [ ] Design templates per block: load an existing design (buildings and decorations on the grid, drawn or loaded in the map editor), pick the blocks it applies to, and let the layout either keep room for it or arrange the block around it
-
-### v1.6 - Template import from a screenshot
-
-- [ ] Semi-automatic import: on the calibrated grid the player marks a building on the screenshot, the editor snaps it to the measured footprint, the player corrects the result
-- [ ] Optional image recognition: the editor finds the grid and the buildings on an image of an existing design, the player corrects the result
+- [ ] Design template: a small grid pattern of buildings (`location_id` and rect) and decoration tiles (only "taken", no decoration kind), one file per template in `config/templates/<name>.json` (git-ignored, one committed example)
+- [ ] `templates` in `config/design.json` assigns templates to blocks, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "reserve"}}`
+- [ ] Mode `reserve` (default): the block frame grows by the template and keeps its area free; mode `arrange`: the template's buildings go to their template positions, its decoration tiles stay free and the rest of the block is packed around them
+- [ ] A template is a wish: when the blocks do not fit, `item_gap` is lowered first, then the template is dropped (with a warning), only then the reserve; a building that is not in the block is an error, template copies the player does not own become reserved space; no rotation or mirroring
+- [ ] Map editor "Templates" tab: cut a template out of the farm map (current items and design zone tiles inside a rectangle) or draw one; a screenshot of another design can be loaded and calibrated as its own background to mark it the same way
 
 ### v2.0+ - Full application (future)
 
@@ -708,6 +716,7 @@ Next step: v1.1.
 - Interactive drag-and-drop layout editor
 - Real-time visualisation
 - Optional live-order import (still secondary to the static capacity-driven core)
+- Image recognition in the map editor: find the grid and the buildings on a screenshot of a design, the player corrects the result
 
 ### In-game TODO
 
@@ -718,7 +727,7 @@ Nothing left: the values the wiki lacks are measured (field limit, barn footprin
 ## Usage
 
 ```bash
-# install
+# install (Python 3.14)
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

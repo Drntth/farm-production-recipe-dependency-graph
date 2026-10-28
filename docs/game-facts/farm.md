@@ -46,17 +46,20 @@ These buildings are not in `data/`. Their footprints and positions differ per fa
 
 ## Placing and measuring
 
-| Fact                                         | Value                                                               | Source         | Checked    |
-| -------------------------------------------- | ------------------------------------------------------------------- | -------------- | ---------- |
-| Layout Edit Mode shows no tile grid          | -                                                                   | in-game        | 2026-10-05 |
-| Layout Edit Mode unlock                      | level 37 (farm), level 34 (town)                                    | wiki:Edit_Mode | 2026-10-05 |
-| Layout slots                                 | 2 per area at start; extra slots 20 / 40 / 80 diamonds              | wiki:Edit_Mode | 2026-10-05 |
-| A new layout starts empty                    | every movable item is stored; only fixed buildings remain           | wiki:Edit_Mode | 2026-10-05 |
-| A layout can be set active only if complete  | all production buildings, fields, shelters, trees and bushes placed | wiki:Edit_Mode | 2026-10-05 |
-| Paintbrush tool                              | places fields, trees, bushes and decorations in rows                | wiki:Edit_Mode | 2026-10-05 |
-| The shop shows an item's size before placing | e.g. "3x3" for the chicken coop                                     | in-game        | 2026-10-05 |
-| Measuring trick                              | 1x1 fields as a ruler; calibrated with the 4x4 dairy                | in-game        | 2026-10-05 |
-| Width / height convention of this project    | width = ↘ edge, height = ↙ edge from the top corner                 | project        | 2026-10-05 |
+| Fact                                         | Value                                                                                                                                                              | Source                  | Checked    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- | ---------- |
+| Layout Edit Mode shows no tile grid          | -                                                                                                                                                                  | in-game                 | 2026-10-05 |
+| Layout Edit Mode unlock                      | level 37 (farm), level 34 (town)                                                                                                                                   | wiki:Edit_Mode          | 2026-10-05 |
+| Layout slots                                 | 2 per area at start; extra slots 20 / 40 / 80 diamonds                                                                                                             | wiki:Edit_Mode          | 2026-10-05 |
+| A new layout starts empty                    | every movable item is stored; only fixed buildings remain                                                                                                          | wiki:Edit_Mode          | 2026-10-05 |
+| A layout can be set active only if complete  | all production buildings, fields, shelters, trees and bushes placed                                                                                                | wiki:Edit_Mode          | 2026-10-05 |
+| Paintbrush tool                              | places fields, trees, bushes and decorations in rows                                                                                                               | wiki:Edit_Mode          | 2026-10-05 |
+| Storing in Layout Edit Mode                  | every item bought in the shop can be stored: one by one (erase mode) or by group (fields and shelters, machines, service buildings, trees and bushes, decorations) | wiki:Edit_Mode, in-game | 2026-10-28 |
+| Storing outside Layout Edit Mode             | movable items can be stored too, except the essential ones (production buildings, fields, shelters, trees and bushes)                                              | in-game                 | 2026-10-28 |
+| Placing on an occupied tile                  | not possible: the item turns red; an item goes only onto free tiles                                                                                                | in-game                 | 2026-10-28 |
+| The shop shows an item's size before placing | e.g. "3x3" for the chicken coop                                                                                                                                    | in-game                 | 2026-10-05 |
+| Measuring trick                              | 1x1 fields as a ruler; calibrated with the 4x4 dairy                                                                                                               | in-game                 | 2026-10-05 |
+| Width / height convention of this project    | width = ↘ edge, height = ↙ edge from the top corner                                                                                                                | project                 | 2026-10-05 |
 
 ## Expansion
 

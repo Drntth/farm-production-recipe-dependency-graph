@@ -4,6 +4,8 @@ How to get a production plan and a farm layout for your own Hay Day farm. Everyt
 
 ## 1. Install
 
+Needs Python 3.14.
+
 ```bash
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt

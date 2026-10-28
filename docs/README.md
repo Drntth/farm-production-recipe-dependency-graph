@@ -33,7 +33,7 @@ Rules are kept in Markdown, not in the data files, until code needs them. When a
 
 ## Fact table format
 
-Every file in `game-facts/` uses the same table, so that a future checker script can verify the rows automatically (see the roadmap):
+Every file in `game-facts/` uses the same table, so that the fact checker (`python -m src check-facts`) can verify the rows with a `wiki:` source automatically:
 
 ```text
 | Fact | Value | Source | Checked |

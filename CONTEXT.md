@@ -46,6 +46,11 @@ _Related_: `FarmMap` (one model for every area)
 
 **Zone**: hand-marked tiles of the farm map: `buildable` (land the layout may use), `blocked` (water, road, paved strip) or `design` (a design zone).
 
+**Current farm**: where the player's production buildings, shelters, barn and silo stand now, measured on the farm map; the start of a relocation plan.
+_Not to be confused with_: fixed building (never moves), layout (the suggested arrangement)
+
+**Relocation plan**: keep / store / place lists that turn the current farm into a layout, grouped by block.
+
 ## Layout
 
 **`Block`**: a production block: buildings that belong together (anchor, its suppliers, its fields), placed as one movable unit, named after its main building ("Dairy block").
@@ -78,7 +83,12 @@ _Not to be confused with_: goods flow (an amount per hour between two blocks)
 
 **Design layer**: optional additions to the functional layout: paths and decoration band.
 
-**Path**: one-tile-wide walkable tiles connecting blocks and key buildings into one network.
+**Path**: walkable tiles connecting blocks and key buildings into one network.
+
+**Main path**: the path from the hub to the key buildings, built first; one or two tiles wide.
+_Related_: side path
+
+**Side path**: a one-tile path joining a block to the nearest point of the network.
 
 **Key building**: a fixed building the player walks to often (farmhouse, barn, silo, truck, roadside shop, riverboat); paths connect it.
 
@@ -90,6 +100,9 @@ _Not to be confused with_: goods flow (an amount per hour between two blocks)
 
 **Design zone**: tiles of the farm map with existing decorations; no block goes there, paths may cross it.
 _Not to be confused with_: decoration band (free tiles the layout leaves along paths)
+
+**Design template**: a small grid pattern of buildings and decoration tiles for a block: kept free (`reserve`) or used as fixed positions the block is arranged around (`arrange`).
+_Not to be confused with_: design zone (existing decorations on the farm map)
 
 **Item gap**: free tiles between the buildings of one block; a wish, lowered when the blocks would not fit otherwise.
 _Not to be confused with_: gap (free tiles between blocks)
