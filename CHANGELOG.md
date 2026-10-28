@@ -2,6 +2,12 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [1.3.0] - 2026-10-28
+
+- Current farm: a `current` list in the farm map (placed copies of movable farm items, fields / trees / bushes as counts), measured in the new map editor step 8 with the ids and sizes of the loaded layout; the Layout Planner ignores it.
+- `fixed` holds only buildings the game never moves: barn and silo and the `movable` flag left it; old farm maps fail with a clear error (the editor moves a measured barn / silo into `current` on load).
+- `python -m src relocate [--layout PATH]`: keep / store / place lists from the current farm to `combined.json` (else `layout.json`), reserved space, surplus and missing copies, a note when a new layout slot is simpler; `output/relocation.md` / `.json`.
+
 ## [1.2.0] - 2026-10-28
 
 - Map editor step 7 "Layout overlay": loads `output/layout.json` or `output/combined.json` and draws block frames, items, paths and the decoration band as a switchable `layout` layer (view only).
