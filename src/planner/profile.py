@@ -9,7 +9,7 @@ defaults; everything else is derived from the level and the shared data
   1; trees and bushes stay unknown, the planner recommends them later;
 - ``slots``: base slots per copy x copies, for locations with ``base_slots``;
 - ``mastery_stars`` / ``workbench_level``: 0;
-- ``animals``: copies x ``animal_capacity`` (full shelters);
+- ``animals``: copies x ``animal_capacity`` (full shelters); squirrel house 2;
 - ``beehives``: 1.
 """
 
@@ -23,6 +23,8 @@ from src.models import LocationType
 
 BEEHIVE_TREE = "beehive_tree"
 DEFAULT_BEEHIVES = 1  # wiki: Beehive_Tree, one beehive at start
+SQUIRREL_HOUSE = "squirrel_house"
+DEFAULT_SQUIRRELS = 2  # wiki: Squirrel, room for two at first; the house grows
 
 # Fields are counted globally (fields_owned); storage is barn / silo capacity.
 _NOT_PROFILED = {LocationType.FIELD, LocationType.STORAGE}
@@ -108,6 +110,8 @@ def resolve_profile(player: PlayerConfig, dataset: DataSet) -> ResolvedProfile:
             if loc.animal_capacity is not None and owned is not None
             else None
         )
+        if loc.id == SQUIRREL_HOUSE and owned:
+            animals_default = DEFAULT_SQUIRRELS
         states[loc.id] = LocationState(
             location_id=loc.id,
             owned=owned,

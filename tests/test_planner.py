@@ -442,6 +442,70 @@ def test_beehives_make_honeycomb() -> None:
     )
 
 
+def _squirrel_farm(animals: int | None = None) -> tuple:
+    """Squirrel house, peanut bush and a candy machine using the peanuts."""
+    locations = [
+        _loc("field", "field"),
+        _loc("squirrel_house", "animal", animal_capacity=8),
+        _loc("peanut_bush", "bush"),
+        _loc("candy_machine", "production", base_slots=2),
+    ]
+    resources = [
+        _res("peanuts", "animal_product", "squirrel_house", growth=18000),
+        _res("honey_peanuts", "processed_material"),
+    ]
+    recipes = [
+        Recipe(
+            id="honey_peanuts",
+            name="Honey Peanuts",
+            location_id="candy_machine",
+            unlock_level=1,
+            inputs=[{"resource_id": "peanuts", "amount": 1}],
+            output={"resource_id": "honey_peanuts", "amount": 1},
+            production_time_seconds=3600,
+        )
+    ]
+    data = DataSet(locations, resources, recipes)
+    locs = {} if animals is None else {"squirrel_house": {"animals": animals}}
+    player = PlayerConfig(
+        level=10, barn_capacity=500, silo_capacity=500, locations=locs
+    )
+    profile = resolve_profile(player, data)
+    cap = build_capacity(profile, data, mastery_modifier(MasterySystem.STARS, data))
+    return cap, profile, data
+
+
+def test_squirrel_pairs_make_peanuts_into_the_silo() -> None:
+    cap, profile, data = _squirrel_farm()
+    house = cap.locations["squirrel_house"]
+    # default: two squirrels at first, one pair makes one peanut per cycle
+    assert (house.kind, house.parallel) == (LineKind.SQUIRREL, 1)
+    assert _squirrel_farm(animals=7)[0].hives["peanuts"].parallel == 3
+    # one squirrel is no pair: no peanuts
+    lone, lone_profile, _ = _squirrel_farm(animals=1)
+    assert lone.hives["peanuts"].parallel == 0
+    lone_plan = plan_production(lone, lone_profile, data, interval_hours=2)
+    assert lone_plan.hive_per_hour.get("peanuts", 0) == pytest.approx(0)
+
+    plan = plan_production(cap, profile, data, interval_hours=2)
+    peanuts = plan.hive_per_hour["peanuts"]
+    # 5 h cycle, collected every 2 h: one peanut per 6 h at most
+    assert 0 < peanuts <= 1 / 6 + 1e-6
+    # peanuts are stored in the silo, unlike other animal goods (wiki: Peanuts)
+    assert plan.silo_per_login == pytest.approx(peanuts * 2, abs=0.05)
+    assert plan.barn_per_login == pytest.approx(
+        plan.recipes["honey_peanuts"].per_hour * 2, abs=0.05
+    )
+    rec = build_schedule(plan, [plan], cap, profile, data)["recommendations"]
+    assert rec["peanut_bush"]["resource_id"] == "peanuts"
+    assert rec["peanut_bush"]["bushes_per_day"] == pytest.approx(
+        peanuts * 24 / (2000 / 300), abs=0.01
+    )
+    assert "Peanut_Bush: about" in schedule_to_markdown(
+        build_schedule(plan, [plan], cap, profile, data), data
+    )
+
+
 def test_plan_recommends_trees_or_uses_profile() -> None:
     cap, profile, data = _farm()
     recommended = plan_production(cap, profile, data, interval_hours=2)

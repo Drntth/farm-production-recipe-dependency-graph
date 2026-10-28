@@ -3047,5 +3047,5775 @@
     },
     "production_time_seconds": 3600,
     "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "lollipop",
+    "name": "Lollipop",
+    "location_id": "candy_machine",
+    "unlock_level": 57,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lollipop",
+      "amount": 1
+    },
+    "production_time_seconds": 43200,
+    "production_time_3star_seconds": 36720
+  },
+  {
+    "id": "bean_salad",
+    "name": "Bean salad",
+    "location_id": "salad_bar",
+    "unlock_level": 58,
+    "inputs": [
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bean_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "feta_salad",
+    "name": "Feta salad",
+    "location_id": "salad_bar",
+    "unlock_level": 58,
+    "inputs": [
+      {
+        "resource_id": "goat_cheese",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "olive",
+        "amount": 2
+      },
+      {
+        "resource_id": "roasted_tomatoes",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "feta_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "tower_doner_supreme",
+    "name": "Tower doner supreme",
+    "location_id": "doner_kebab_stand",
+    "unlock_level": 58,
+    "inputs": [
+      {
+        "resource_id": "lamb_chop",
+        "amount": 3
+      },
+      {
+        "resource_id": "corn_bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "tower_doner_supreme",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "blanket",
+    "name": "Blanket",
+    "location_id": "sewing_machine",
+    "unlock_level": 59,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 3
+      },
+      {
+        "resource_id": "duck_feather",
+        "amount": 5
+      },
+      {
+        "resource_id": "pumpkin",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "blanket",
+      "amount": 1
+    },
+    "production_time_seconds": 12600,
+    "production_time_3star_seconds": 10680
+  },
+  {
+    "id": "lobster_sushi",
+    "name": "Lobster sushi",
+    "location_id": "sushi_bar",
+    "unlock_level": 59,
+    "inputs": [
+      {
+        "resource_id": "lobster_tail",
+        "amount": 1
+      },
+      {
+        "resource_id": "rice",
+        "amount": 15
+      },
+      {
+        "resource_id": "soy_sauce",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lobster_sushi",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "garlic_bread",
+    "name": "Garlic bread",
+    "location_id": "bbq_grill",
+    "unlock_level": 60,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "garlic_bread",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "jelly_beans",
+    "name": "Jelly beans",
+    "location_id": "candy_machine",
+    "unlock_level": 60,
+    "inputs": [
+      {
+        "resource_id": "blackberry_jam",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry_jam",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "jelly_beans",
+      "amount": 1
+    },
+    "production_time_seconds": 86400,
+    "production_time_3star_seconds": 73440
+  },
+  {
+    "id": "olive_oil",
+    "name": "Olive oil",
+    "location_id": "sauce_maker",
+    "unlock_level": 60,
+    "inputs": [
+      {
+        "resource_id": "olive",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "olive_oil",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "veggie_bagel",
+    "name": "Veggie bagel",
+    "location_id": "sandwich_bar",
+    "unlock_level": 61,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "veggie_bagel",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "blt_salad",
+    "name": "BLT salad",
+    "location_id": "salad_bar",
+    "unlock_level": 62,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      },
+      {
+        "resource_id": "roasted_tomatoes",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "blt_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 6300,
+    "production_time_3star_seconds": 5340
+  },
+  {
+    "id": "caramel_latte",
+    "name": "Caramel latte",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 62,
+    "inputs": [
+      {
+        "resource_id": "coffee_bean",
+        "amount": 2
+      },
+      {
+        "resource_id": "toffee",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "caramel_latte",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "mayonnaise",
+    "name": "Mayonnaise",
+    "location_id": "sauce_maker",
+    "unlock_level": 62,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 4
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "mayonnaise",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "egg_sushi",
+    "name": "Egg sushi",
+    "location_id": "sushi_bar",
+    "unlock_level": 63,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 4
+      },
+      {
+        "resource_id": "rice",
+        "amount": 15
+      },
+      {
+        "resource_id": "soy_sauce",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "egg_sushi",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "honey_peanuts",
+    "name": "Honey peanuts",
+    "location_id": "candy_machine",
+    "unlock_level": 63,
+    "inputs": [
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "honey_peanuts",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "berry_smoothie",
+    "name": "Berry smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 64,
+    "inputs": [
+      {
+        "resource_id": "blackberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "berry_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "seafood_salad",
+    "name": "Seafood salad",
+    "location_id": "salad_bar",
+    "unlock_level": 64,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "lobster_tail",
+        "amount": 1
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "seafood_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "snack_mix",
+    "name": "Snack mix",
+    "location_id": "popcorn_pot",
+    "unlock_level": 64,
+    "inputs": [
+      {
+        "resource_id": "corn",
+        "amount": 2
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "snack_mix",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "bacon_toast",
+    "name": "Bacon toast",
+    "location_id": "sandwich_bar",
+    "unlock_level": 65,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_toast",
+      "amount": 1
+    },
+    "production_time_seconds": 6000,
+    "production_time_3star_seconds": 5100
+  },
+  {
+    "id": "bright_bouquet",
+    "name": "Bright bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 65,
+    "inputs": [
+      {
+        "resource_id": "sunflower",
+        "amount": 5
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 3
+      },
+      {
+        "resource_id": "cotton",
+        "amount": 1
+      },
+      {
+        "resource_id": "iron_ore",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "bright_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "cabbage_soup",
+    "name": "Cabbage soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 65,
+    "inputs": [
+      {
+        "resource_id": "cabbage",
+        "amount": 3
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cabbage_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "chocolate_pie",
+    "name": "Chocolate pie",
+    "location_id": "pie_oven",
+    "unlock_level": 65,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_pie",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "pineapple_cake",
+    "name": "Pineapple cake",
+    "location_id": "cake_oven",
+    "unlock_level": 65,
+    "inputs": [
+      {
+        "resource_id": "pineapple",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "cherry",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "pineapple_cake",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "egg_sandwich",
+    "name": "Egg sandwich",
+    "location_id": "sandwich_bar",
+    "unlock_level": 66,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "egg_sandwich",
+      "amount": 1
+    },
+    "production_time_seconds": 4800,
+    "production_time_3star_seconds": 4080
+  },
+  {
+    "id": "green_smoothie",
+    "name": "Green smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 66,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "green_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "lemon_curd",
+    "name": "Lemon curd",
+    "location_id": "sauce_maker",
+    "unlock_level": 66,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_curd",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "olive_dip",
+    "name": "Olive dip",
+    "location_id": "sauce_maker",
+    "unlock_level": 66,
+    "inputs": [
+      {
+        "resource_id": "olive",
+        "amount": 3
+      },
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "olive_dip",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "fresh_pasta",
+    "name": "Fresh pasta",
+    "location_id": "pasta_maker",
+    "unlock_level": 67,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "fresh_pasta",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "grilled_asparagus",
+    "name": "Grilled asparagus",
+    "location_id": "bbq_grill",
+    "unlock_level": 67,
+    "inputs": [
+      {
+        "resource_id": "asparagus",
+        "amount": 5
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "grilled_asparagus",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "lemon_pie",
+    "name": "Lemon pie",
+    "location_id": "pie_oven",
+    "unlock_level": 67,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon_curd",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_pie",
+      "amount": 1
+    },
+    "production_time_seconds": 8100,
+    "production_time_3star_seconds": 6840
+  },
+  {
+    "id": "pasta_salad",
+    "name": "Pasta salad",
+    "location_id": "salad_bar",
+    "unlock_level": 67,
+    "inputs": [
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 4
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 2
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "pasta_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "grilled_onion",
+    "name": "Grilled onion",
+    "location_id": "bbq_grill",
+    "unlock_level": 68,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "grilled_onion",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "lemon_cake",
+    "name": "Lemon cake",
+    "location_id": "cake_oven",
+    "unlock_level": 68,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon_curd",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_cake",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "lemon_essential_oil",
+    "name": "Lemon essential oil",
+    "location_id": "essential_oils_lab",
+    "unlock_level": 68,
+    "inputs": [
+      {
+        "resource_id": "lemon",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_essential_oil",
+      "amount": 1
+    },
+    "production_time_seconds": 600,
+    "production_time_3star_seconds": 480
+  },
+  {
+    "id": "peanut_butter_milkshake",
+    "name": "Peanut butter milkshake",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 68,
+    "inputs": [
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "peanut_butter_milkshake",
+      "amount": 1
+    },
+    "production_time_seconds": 6000,
+    "production_time_3star_seconds": 5100
+  },
+  {
+    "id": "fried_rice",
+    "name": "Fried rice",
+    "location_id": "wok_kitchen",
+    "unlock_level": 69,
+    "inputs": [
+      {
+        "resource_id": "rice",
+        "amount": 5
+      },
+      {
+        "resource_id": "egg",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "fried_rice",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "honey_toast",
+    "name": "Honey toast",
+    "location_id": "sandwich_bar",
+    "unlock_level": 69,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "honey_toast",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "lamb_stir_fry",
+    "name": "Lamb stir fry",
+    "location_id": "wok_kitchen",
+    "unlock_level": 69,
+    "inputs": [
+      {
+        "resource_id": "rice",
+        "amount": 3
+      },
+      {
+        "resource_id": "grilled_lamb_skewer",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lamb_stir_fry",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "tomato_sauce",
+    "name": "Tomato sauce",
+    "location_id": "sauce_maker",
+    "unlock_level": 69,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tomato_sauce",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "blueberry_chutney",
+    "name": "Blueberry chutney",
+    "location_id": "jam_maker",
+    "unlock_level": 70,
+    "inputs": [
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 1
+      },
+      {
+        "resource_id": "blueberries",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "blueberry_chutney",
+      "amount": 1
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
+  },
+  {
+    "id": "cloche_hat",
+    "name": "Cloche hat",
+    "location_id": "hat_maker",
+    "unlock_level": 70,
+    "inputs": [
+      {
+        "resource_id": "strawberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "wool",
+        "amount": 6
+      }
+    ],
+    "output": {
+      "resource_id": "cloche_hat",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "cucumber_smoothie",
+    "name": "Cucumber smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 70,
+    "inputs": [
+      {
+        "resource_id": "cucumber",
+        "amount": 3
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "pineapple",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "cucumber_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "yogurt_smoothie",
+    "name": "Yogurt smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 70,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "yogurt_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "flower_shawl",
+    "name": "Flower shawl",
+    "location_id": "loom",
+    "unlock_level": 71,
+    "inputs": [
+      {
+        "resource_id": "wool",
+        "amount": 2
+      },
+      {
+        "resource_id": "sunflower",
+        "amount": 3
+      },
+      {
+        "resource_id": "blackberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "flower_shawl",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "orange_juice",
+    "name": "Orange juice",
+    "location_id": "juice_press",
+    "unlock_level": 71,
+    "inputs": [
+      {
+        "resource_id": "orange",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "orange_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "peanut_butter_and_jelly_sandwich",
+    "name": "Peanut butter and jelly sandwich",
+    "location_id": "sandwich_bar",
+    "unlock_level": 71,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "raspberry_jam",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "peanut_butter_and_jelly_sandwich",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "gnocchi",
+    "name": "Gnocchi",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 72,
+    "inputs": [
+      {
+        "resource_id": "potato",
+        "amount": 4
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      },
+      {
+        "resource_id": "butter",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "gnocchi",
+      "amount": 1
+    },
+    "production_time_seconds": 4800,
+    "production_time_3star_seconds": 4080
+  },
+  {
+    "id": "lemon_candle",
+    "name": "Lemon candle",
+    "location_id": "candle_maker",
+    "unlock_level": 72,
+    "inputs": [
+      {
+        "resource_id": "beeswax",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_candle",
+      "amount": 1
+    },
+    "production_time_seconds": 8100,
+    "production_time_3star_seconds": 6840
+  },
+  {
+    "id": "onion_soup",
+    "name": "Onion soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 72,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "onion_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "top_hat",
+    "name": "Top hat",
+    "location_id": "hat_maker",
+    "unlock_level": 72,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 3
+      },
+      {
+        "resource_id": "duck_feather",
+        "amount": 1
+      },
+      {
+        "resource_id": "refined_coal",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "top_hat",
+      "amount": 1
+    },
+    "production_time_seconds": 12600,
+    "production_time_3star_seconds": 10680
+  },
+  {
+    "id": "winter_veggies",
+    "name": "Winter veggies",
+    "location_id": "bbq_grill",
+    "unlock_level": 72,
+    "inputs": [
+      {
+        "resource_id": "beetroot",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 3
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      },
+      {
+        "resource_id": "pumpkin",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "winter_veggies",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "gracious_bouquet",
+    "name": "Gracious bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 73,
+    "inputs": [
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 1
+      },
+      {
+        "resource_id": "lily",
+        "amount": 5
+      },
+      {
+        "resource_id": "gold_ore",
+        "amount": 1
+      },
+      {
+        "resource_id": "diamond",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "gracious_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "noodle_soup",
+    "name": "Noodle soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 73,
+    "inputs": [
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "rice_noodles",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "noodle_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "rice_noodles",
+    "name": "Rice noodles",
+    "location_id": "pasta_maker",
+    "unlock_level": 73,
+    "inputs": [
+      {
+        "resource_id": "rice",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "rice_noodles",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "chamomile_essential_oil",
+    "name": "Chamomile essential oil",
+    "location_id": "essential_oils_lab",
+    "unlock_level": 74,
+    "inputs": [
+      {
+        "resource_id": "chamomile",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "chamomile_essential_oil",
+      "amount": 1
+    },
+    "production_time_seconds": 600,
+    "production_time_3star_seconds": 480
+  },
+  {
+    "id": "marmalade",
+    "name": "Marmalade",
+    "location_id": "jam_maker",
+    "unlock_level": 74,
+    "inputs": [
+      {
+        "resource_id": "orange",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "marmalade",
+      "amount": 1
+    },
+    "production_time_seconds": 30600,
+    "production_time_3star_seconds": 25980
+  },
+  {
+    "id": "sun_hat",
+    "name": "Sun hat",
+    "location_id": "hat_maker",
+    "unlock_level": 74,
+    "inputs": [
+      {
+        "resource_id": "duck_feather",
+        "amount": 2
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      },
+      {
+        "resource_id": "wool",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "sun_hat",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "veggie_lasagna",
+    "name": "Veggie lasagna",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 74,
+    "inputs": [
+      {
+        "resource_id": "tomato_sauce",
+        "amount": 1
+      },
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 1
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "veggie_lasagna",
+      "amount": 1
+    },
+    "production_time_seconds": 6000,
+    "production_time_3star_seconds": 5100
+  },
+  {
+    "id": "veggie_platter",
+    "name": "Veggie platter",
+    "location_id": "salad_bar",
+    "unlock_level": 74,
+    "inputs": [
+      {
+        "resource_id": "bell_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "veggie_platter",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "coleslaw",
+    "name": "Coleslaw",
+    "location_id": "salad_bar",
+    "unlock_level": 75,
+    "inputs": [
+      {
+        "resource_id": "cabbage",
+        "amount": 3
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "coleslaw",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "cotton_candy",
+    "name": "Cotton candy",
+    "location_id": "candy_machine",
+    "unlock_level": 75,
+    "inputs": [
+      {
+        "resource_id": "white_sugar",
+        "amount": 3
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cotton_candy",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "hot_dog",
+    "name": "Hot dog",
+    "location_id": "hot_dog_stand",
+    "unlock_level": 75,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato_sauce",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "hot_dog",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "beetroot_salad",
+    "name": "Beetroot salad",
+    "location_id": "salad_bar",
+    "unlock_level": 76,
+    "inputs": [
+      {
+        "resource_id": "beetroot",
+        "amount": 3
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "beetroot_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "big_sushi_roll",
+    "name": "Big sushi roll",
+    "location_id": "sushi_bar",
+    "unlock_level": 76,
+    "inputs": [
+      {
+        "resource_id": "lettuce",
+        "amount": 5
+      },
+      {
+        "resource_id": "rice",
+        "amount": 20
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "big_sushi_roll",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "peach_tart",
+    "name": "Peach tart",
+    "location_id": "pie_oven",
+    "unlock_level": 76,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "peach",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "peach_tart",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "plain_donut",
+    "name": "Plain donut",
+    "location_id": "donut_maker",
+    "unlock_level": 76,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "plain_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "tofu_dog",
+    "name": "Tofu dog",
+    "location_id": "hot_dog_stand",
+    "unlock_level": 76,
+    "inputs": [
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "soybean",
+        "amount": 6
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "tofu_dog",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "colourful_omelet",
+    "name": "Colourful omelet",
+    "location_id": "omelet_station",
+    "unlock_level": 77,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "bell_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "cabbage",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "colourful_omelet",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "salsa",
+    "name": "Salsa",
+    "location_id": "sauce_maker",
+    "unlock_level": 77,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "salsa",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "spicy_bean_taco",
+    "name": "Spicy bean taco",
+    "location_id": "taco_kitchen",
+    "unlock_level": 77,
+    "inputs": [
+      {
+        "resource_id": "taco",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "spicy_bean_taco",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "spring_omelet",
+    "name": "Spring omelet",
+    "location_id": "omelet_station",
+    "unlock_level": 77,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "asparagus",
+        "amount": 2
+      },
+      {
+        "resource_id": "butter",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "spring_omelet",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "taco",
+    "name": "Taco",
+    "location_id": "taco_kitchen",
+    "unlock_level": 77,
+    "inputs": [
+      {
+        "resource_id": "corn_bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 1
+      },
+      {
+        "resource_id": "salsa",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "taco",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "affogato",
+    "name": "Affogato",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "vanilla_ice_cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "espresso",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "affogato",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "corn_dog",
+    "name": "Corn dog",
+    "location_id": "hot_dog_stand",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 4
+      },
+      {
+        "resource_id": "corn",
+        "amount": 4
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "corn_dog",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "orange_sorbet",
+    "name": "Orange sorbet",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "orange_sorbet",
+      "amount": 1
+    },
+    "production_time_seconds": 12600,
+    "production_time_3star_seconds": 10680
+  },
+  {
+    "id": "potato_soup",
+    "name": "Potato soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "potato_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "sesame_brittle",
+    "name": "Sesame brittle",
+    "location_id": "candy_machine",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "sesame",
+        "amount": 3
+      },
+      {
+        "resource_id": "ginger",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "sesame_brittle",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "summer_rolls",
+    "name": "Summer rolls",
+    "location_id": "salad_bar",
+    "unlock_level": 78,
+    "inputs": [
+      {
+        "resource_id": "rice_noodles",
+        "amount": 2
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "summer_rolls",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "cheese_omelet",
+    "name": "Cheese omelet",
+    "location_id": "omelet_station",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 2
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      },
+      {
+        "resource_id": "onion",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cheese_omelet",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "cucumber_sandwich",
+    "name": "Cucumber sandwich",
+    "location_id": "sandwich_bar",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "cucumber",
+        "amount": 2
+      },
+      {
+        "resource_id": "mayonnaise",
+        "amount": 1
+      },
+      {
+        "resource_id": "bread",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "cucumber_sandwich",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "fish_taco",
+    "name": "Fish taco",
+    "location_id": "taco_kitchen",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "corn_bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fish_taco",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "lobster_pasta",
+    "name": "Lobster pasta",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "lobster_tail",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      },
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "lobster_pasta",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "peach_jam",
+    "name": "Peach jam",
+    "location_id": "jam_maker",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "peach",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "peach_jam",
+      "amount": 1
+    },
+    "production_time_seconds": 28800,
+    "production_time_3star_seconds": 24480
+  },
+  {
+    "id": "spicy_fish",
+    "name": "Spicy fish",
+    "location_id": "wok_kitchen",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 5
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "spicy_fish",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "sprinkled_donut",
+    "name": "Sprinkled donut",
+    "location_id": "donut_maker",
+    "unlock_level": 79,
+    "inputs": [
+      {
+        "resource_id": "plain_donut",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "sprinkled_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "ginger_essential_oil",
+    "name": "Ginger essential oil",
+    "location_id": "essential_oils_lab",
+    "unlock_level": 80,
+    "inputs": [
+      {
+        "resource_id": "ginger",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "ginger_essential_oil",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "green_tea",
+    "name": "Green tea",
+    "location_id": "tea_stand",
+    "unlock_level": 80,
+    "inputs": [
+      {
+        "resource_id": "tea_leaf",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "green_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "onion_dog",
+    "name": "Onion dog",
+    "location_id": "hot_dog_stand",
+    "unlock_level": 80,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "onion_dog",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "stuffed_peppers",
+    "name": "Stuffed peppers",
+    "location_id": "bbq_grill",
+    "unlock_level": 80,
+    "inputs": [
+      {
+        "resource_id": "bell_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 1
+      },
+      {
+        "resource_id": "rice",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "stuffed_peppers",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "bell_pepper_soup",
+    "name": "Bell pepper soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 81,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "bell_pepper",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "bell_pepper_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "chocolate_fondue",
+    "name": "Chocolate fondue",
+    "location_id": "fondue_pot",
+    "unlock_level": 81,
+    "inputs": [
+      {
+        "resource_id": "chocolate",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_fondue",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "milk_tea",
+    "name": "Milk tea",
+    "location_id": "tea_stand",
+    "unlock_level": 81,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "milk_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "crunchy_donut",
+    "name": "Crunchy donut",
+    "location_id": "donut_maker",
+    "unlock_level": 82,
+    "inputs": [
+      {
+        "resource_id": "plain_donut",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "crunchy_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "fruit_salad",
+    "name": "Fruit salad",
+    "location_id": "salad_bar",
+    "unlock_level": 82,
+    "inputs": [
+      {
+        "resource_id": "blackberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fruit_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "quesadilla",
+    "name": "Quesadilla",
+    "location_id": "taco_kitchen",
+    "unlock_level": 82,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "quesadilla",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "broccoli_pasta",
+    "name": "Broccoli pasta",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 83,
+    "inputs": [
+      {
+        "resource_id": "broccoli",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "broccoli_pasta",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "honey_tea",
+    "name": "Honey tea",
+    "location_id": "tea_stand",
+    "unlock_level": 83,
+    "inputs": [
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "honey_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "pasta_carbonara",
+    "name": "Pasta carbonara",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 83,
+    "inputs": [
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "pasta_carbonara",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "peach_ice_cream",
+    "name": "Peach ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 83,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "peach",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "peach_ice_cream",
+      "amount": 1
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
+  },
+  {
+    "id": "rice_omelet",
+    "name": "Rice omelet",
+    "location_id": "omelet_station",
+    "unlock_level": 83,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 3
+      },
+      {
+        "resource_id": "tomato_sauce",
+        "amount": 2
+      },
+      {
+        "resource_id": "rice",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "rice_omelet",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "colorful_candles",
+    "name": "Colorful candles",
+    "location_id": "candle_maker",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "beeswax",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      },
+      {
+        "resource_id": "carrot",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "colorful_candles",
+      "amount": 1
+    },
+    "production_time_seconds": 6600,
+    "production_time_3star_seconds": 5580
+  },
+  {
+    "id": "grape_juice",
+    "name": "Grape juice",
+    "location_id": "juice_press",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "grapes",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "grape_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "honey_soap",
+    "name": "Honey soap",
+    "location_id": "bath_kiosk",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "goat_milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "honeycomb",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "honey_soap",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "lemon_lotion",
+    "name": "Lemon lotion",
+    "location_id": "bath_kiosk",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_lotion",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "onion_melt",
+    "name": "Onion melt",
+    "location_id": "sandwich_bar",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "corn_bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "onion",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "onion_melt",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "summer_salad",
+    "name": "Summer salad",
+    "location_id": "salad_bar",
+    "unlock_level": 84,
+    "inputs": [
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 3
+      },
+      {
+        "resource_id": "peach",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "summer_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
+  },
+  {
+    "id": "grape_jam",
+    "name": "Grape jam",
+    "location_id": "jam_maker",
+    "unlock_level": 85,
+    "inputs": [
+      {
+        "resource_id": "grapes",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "grape_jam",
+      "amount": 1
+    },
+    "production_time_seconds": 23400,
+    "production_time_3star_seconds": 19860
+  },
+  {
+    "id": "mint_essential_oil",
+    "name": "Mint essential oil",
+    "location_id": "essential_oils_lab",
+    "unlock_level": 85,
+    "inputs": [
+      {
+        "resource_id": "mint",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "mint_essential_oil",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "mint_ice_cream",
+    "name": "Mint ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 85,
+    "inputs": [
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "mint",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "mint_ice_cream",
+      "amount": 1
+    },
+    "production_time_seconds": 8100,
+    "production_time_3star_seconds": 6840
+  },
+  {
+    "id": "bacon_fondue",
+    "name": "Bacon fondue",
+    "location_id": "fondue_pot",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "broccoli",
+        "amount": 1
+      },
+      {
+        "resource_id": "bell_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_fondue",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "cream_donut",
+    "name": "Cream donut",
+    "location_id": "donut_maker",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "plain_donut",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "brown_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cream_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "flower_crown",
+    "name": "Flower crown",
+    "location_id": "hat_maker",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "peony",
+        "amount": 5
+      },
+      {
+        "resource_id": "cotton",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "flower_crown",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "gingerbread_cookie",
+    "name": "Gingerbread cookie",
+    "location_id": "bakery",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      },
+      {
+        "resource_id": "butter",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      },
+      {
+        "resource_id": "ginger",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "gingerbread_cookie",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "lemon_tea",
+    "name": "Lemon tea",
+    "location_id": "tea_stand",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "peanut_noodles",
+    "name": "Peanut noodles",
+    "location_id": "wok_kitchen",
+    "unlock_level": 86,
+    "inputs": [
+      {
+        "resource_id": "ginger",
+        "amount": 1
+      },
+      {
+        "resource_id": "rice_noodles",
+        "amount": 1
+      },
+      {
+        "resource_id": "soy_sauce",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "peanut_noodles",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "bacon_fries",
+    "name": "Bacon fries",
+    "location_id": "deep_fryer",
+    "unlock_level": 87,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "potato",
+        "amount": 4
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_fries",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "broccoli_soup",
+    "name": "Broccoli soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 87,
+    "inputs": [
+      {
+        "resource_id": "broccoli",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "broccoli_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "nachos",
+    "name": "Nachos",
+    "location_id": "taco_kitchen",
+    "unlock_level": 87,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "corn",
+        "amount": 4
+      },
+      {
+        "resource_id": "salsa",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "nachos",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "potato_omelet",
+    "name": "Potato omelet",
+    "location_id": "omelet_station",
+    "unlock_level": 87,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 3
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "potato",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "potato_omelet",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "spicy_pasta",
+    "name": "Spicy pasta",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 87,
+    "inputs": [
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      },
+      {
+        "resource_id": "tomato_sauce",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "spicy_pasta",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "apple_ginger_tea",
+    "name": "Apple ginger tea",
+    "location_id": "tea_stand",
+    "unlock_level": 88,
+    "inputs": [
+      {
+        "resource_id": "ginger",
+        "amount": 1
+      },
+      {
+        "resource_id": "apple",
+        "amount": 2
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "apple_ginger_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "bacon_donut",
+    "name": "Bacon donut",
+    "location_id": "donut_maker",
+    "unlock_level": 88,
+    "inputs": [
+      {
+        "resource_id": "plain_donut",
+        "amount": 1
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "bacon_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "iced_banana_latte",
+    "name": "Iced banana latte",
+    "location_id": "coffee_kiosk",
+    "unlock_level": 88,
+    "inputs": [
+      {
+        "resource_id": "banana",
+        "amount": 1
+      },
+      {
+        "resource_id": "coffee_bean",
+        "amount": 2
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "iced_banana_latte",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "mixed_smoothie",
+    "name": "Mixed smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 88,
+    "inputs": [
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 2
+      },
+      {
+        "resource_id": "peach",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "mixed_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "passion_fruit_juice",
+    "name": "Passion fruit juice",
+    "location_id": "juice_press",
+    "unlock_level": 88,
+    "inputs": [
+      {
+        "resource_id": "passion_fruit",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "passion_fruit_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "fruit_cake",
+    "name": "Fruit cake",
+    "location_id": "cake_oven",
+    "unlock_level": 89,
+    "inputs": [
+      {
+        "resource_id": "cherry",
+        "amount": 2
+      },
+      {
+        "resource_id": "grapes",
+        "amount": 2
+      },
+      {
+        "resource_id": "orange",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fruit_cake",
+      "amount": 1
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
+  },
+  {
+    "id": "mushroom_salad",
+    "name": "Mushroom salad",
+    "location_id": "salad_bar",
+    "unlock_level": 89,
+    "inputs": [
+      {
+        "resource_id": "mushroom",
+        "amount": 3
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 2
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "mushroom_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "orange_tea",
+    "name": "Orange tea",
+    "location_id": "tea_stand",
+    "unlock_level": 89,
+    "inputs": [
+      {
+        "resource_id": "orange",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "orange_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "tofu_stir_fry",
+    "name": "Tofu stir fry",
+    "location_id": "wok_kitchen",
+    "unlock_level": 89,
+    "inputs": [
+      {
+        "resource_id": "soybean",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 3
+      },
+      {
+        "resource_id": "broccoli",
+        "amount": 3
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "tofu_stir_fry",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "candy_bouquet",
+    "name": "Candy bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 90,
+    "inputs": [
+      {
+        "resource_id": "peony",
+        "amount": 3
+      },
+      {
+        "resource_id": "toffee",
+        "amount": 1
+      },
+      {
+        "resource_id": "caramel_apple",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "candy_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "grilled_eggplant",
+    "name": "Grilled eggplant",
+    "location_id": "bbq_grill",
+    "unlock_level": 90,
+    "inputs": [
+      {
+        "resource_id": "eggplant",
+        "amount": 3
+      },
+      {
+        "resource_id": "salsa",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "grilled_eggplant",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "banana_bread",
+    "name": "Banana bread",
+    "location_id": "bakery",
+    "unlock_level": 91,
+    "inputs": [
+      {
+        "resource_id": "banana",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "grapes",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "banana_bread",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "cheese_fondue",
+    "name": "Cheese fondue",
+    "location_id": "fondue_pot",
+    "unlock_level": 91,
+    "inputs": [
+      {
+        "resource_id": "potato_bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "mushroom",
+        "amount": 2
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cheese_fondue",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "hand_pies",
+    "name": "Hand pies",
+    "location_id": "deep_fryer",
+    "unlock_level": 91,
+    "inputs": [
+      {
+        "resource_id": "apple_jam",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "hand_pies",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "pickles",
+    "name": "Pickles",
+    "location_id": "preservation_station",
+    "unlock_level": 91,
+    "inputs": [
+      {
+        "resource_id": "cucumber",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "pickles",
+      "amount": 1
+    },
+    "production_time_seconds": 14400,
+    "production_time_3star_seconds": 12240
+  },
+  {
+    "id": "birthday_bouquet",
+    "name": "Birthday bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 92,
+    "inputs": [
+      {
+        "resource_id": "cherry_juice",
+        "amount": 1
+      },
+      {
+        "resource_id": "peony",
+        "amount": 3
+      },
+      {
+        "resource_id": "lily",
+        "amount": 1
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "birthday_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "goat_cheese_toast",
+    "name": "Goat cheese toast",
+    "location_id": "sandwich_bar",
+    "unlock_level": 92,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 1
+      },
+      {
+        "resource_id": "goat_cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "grapes",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "goat_cheese_toast",
+      "amount": 1
+    },
+    "production_time_seconds": 3000,
+    "production_time_3star_seconds": 2520
+  },
+  {
+    "id": "iced_tea",
+    "name": "Iced tea",
+    "location_id": "tea_stand",
+    "unlock_level": 92,
+    "inputs": [
+      {
+        "resource_id": "peach",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "iced_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "passion_fruit_pie",
+    "name": "Passion fruit pie",
+    "location_id": "pie_oven",
+    "unlock_level": 92,
+    "inputs": [
+      {
+        "resource_id": "passion_fruit",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "passion_fruit_pie",
+      "amount": 1
+    },
+    "production_time_seconds": 3000,
+    "production_time_3star_seconds": 2520
+  },
+  {
+    "id": "watermelon_juice",
+    "name": "Watermelon juice",
+    "location_id": "juice_press",
+    "unlock_level": 92,
+    "inputs": [
+      {
+        "resource_id": "watermelon",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "watermelon_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "black_sesame_smoothie",
+    "name": "Black sesame smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 93,
+    "inputs": [
+      {
+        "resource_id": "sesame",
+        "amount": 3
+      },
+      {
+        "resource_id": "banana",
+        "amount": 1
+      },
+      {
+        "resource_id": "goat_milk",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "black_sesame_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "exfoliating_soap",
+    "name": "Exfoliating soap",
+    "location_id": "bath_kiosk",
+    "unlock_level": 93,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "coffee_bean",
+        "amount": 2
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "exfoliating_soap",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "filled_donut",
+    "name": "Filled donut",
+    "location_id": "donut_maker",
+    "unlock_level": 93,
+    "inputs": [
+      {
+        "resource_id": "plain_donut",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry_jam",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "filled_donut",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "soft_bouquet",
+    "name": "Soft bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 93,
+    "inputs": [
+      {
+        "resource_id": "peony",
+        "amount": 4
+      },
+      {
+        "resource_id": "cotton",
+        "amount": 1
+      },
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "soft_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "banana_pancakes",
+    "name": "Banana pancakes",
+    "location_id": "bbq_grill",
+    "unlock_level": 94,
+    "inputs": [
+      {
+        "resource_id": "banana",
+        "amount": 1
+      },
+      {
+        "resource_id": "blackberry",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "banana_pancakes",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "plum_jam",
+    "name": "Plum jam",
+    "location_id": "jam_maker",
+    "unlock_level": 94,
+    "inputs": [
+      {
+        "resource_id": "plum",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "plum_jam",
+      "amount": 1
+    },
+    "production_time_seconds": 18000,
+    "production_time_3star_seconds": 15300
+  },
+  {
+    "id": "tea_pot",
+    "name": "Tea pot",
+    "location_id": "pottery_studio",
+    "unlock_level": 94,
+    "inputs": [
+      {
+        "resource_id": "clay",
+        "amount": 3
+      },
+      {
+        "resource_id": "coffee_bean",
+        "amount": 1
+      },
+      {
+        "resource_id": "gold_ore",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "tea_pot",
+      "amount": 1
+    },
+    "production_time_seconds": 13200,
+    "production_time_3star_seconds": 11220
+  },
+  {
+    "id": "canned_fish",
+    "name": "Canned fish",
+    "location_id": "preservation_station",
+    "unlock_level": 95,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 2
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "olive_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "canned_fish",
+      "amount": 1
+    },
+    "production_time_seconds": 13200,
+    "production_time_3star_seconds": 11220
+  },
+  {
+    "id": "chocolate_roll",
+    "name": "Chocolate roll",
+    "location_id": "cake_oven",
+    "unlock_level": 95,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 5
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      },
+      {
+        "resource_id": "mint",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_roll",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "floral_candle",
+    "name": "Floral candle",
+    "location_id": "candle_maker",
+    "unlock_level": 95,
+    "inputs": [
+      {
+        "resource_id": "beeswax",
+        "amount": 1
+      },
+      {
+        "resource_id": "peony",
+        "amount": 2
+      },
+      {
+        "resource_id": "sunflower",
+        "amount": 2
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "floral_candle",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "hummus",
+    "name": "Hummus",
+    "location_id": "sauce_maker",
+    "unlock_level": 95,
+    "inputs": [
+      {
+        "resource_id": "chickpea",
+        "amount": 3
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 2
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "hummus",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "banana_split",
+    "name": "Banana split",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 96,
+    "inputs": [
+      {
+        "resource_id": "banana",
+        "amount": 1
+      },
+      {
+        "resource_id": "cherry",
+        "amount": 3
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "banana_split",
+      "amount": 1
+    },
+    "production_time_seconds": 12600,
+    "production_time_3star_seconds": 10680
+  },
+  {
+    "id": "fish_skewer",
+    "name": "Fish skewer",
+    "location_id": "bbq_grill",
+    "unlock_level": 96,
+    "inputs": [
+      {
+        "resource_id": "fish_fillet",
+        "amount": 1
+      },
+      {
+        "resource_id": "mushroom",
+        "amount": 3
+      },
+      {
+        "resource_id": "ginger",
+        "amount": 1
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "fish_skewer",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "passion_fruit_jam",
+    "name": "Passion fruit jam",
+    "location_id": "jam_maker",
+    "unlock_level": 96,
+    "inputs": [
+      {
+        "resource_id": "passion_fruit",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "passion_fruit_jam",
+      "amount": 1
+    },
+    "production_time_seconds": 19200,
+    "production_time_3star_seconds": 16320
+  },
+  {
+    "id": "potted_plant",
+    "name": "Potted plant",
+    "location_id": "pottery_studio",
+    "unlock_level": 96,
+    "inputs": [
+      {
+        "resource_id": "clay",
+        "amount": 3
+      },
+      {
+        "resource_id": "sunflower",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "potted_plant",
+      "amount": 1
+    },
+    "production_time_seconds": 13200,
+    "production_time_3star_seconds": 11220
+  },
+  {
+    "id": "mango_juice",
+    "name": "Mango juice",
+    "location_id": "juice_press",
+    "unlock_level": 97,
+    "inputs": [
+      {
+        "resource_id": "mango",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "mango_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 3000,
+    "production_time_3star_seconds": 2520
+  },
+  {
+    "id": "mint_tea",
+    "name": "Mint tea",
+    "location_id": "tea_stand",
+    "unlock_level": 97,
+    "inputs": [
+      {
+        "resource_id": "tea_leaf",
+        "amount": 3
+      },
+      {
+        "resource_id": "mint",
+        "amount": 1
+      },
+      {
+        "resource_id": "watermelon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "mint_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "mushroom_pot_pie",
+    "name": "Mushroom pot pie",
+    "location_id": "pie_oven",
+    "unlock_level": 97,
+    "inputs": [
+      {
+        "resource_id": "mushroom",
+        "amount": 3
+      },
+      {
+        "resource_id": "cabbage",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "mushroom_pot_pie",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "chili_poppers",
+    "name": "Chili poppers",
+    "location_id": "deep_fryer",
+    "unlock_level": 98,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 1
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chili_poppers",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "falafel",
+    "name": "Falafel",
+    "location_id": "deep_fryer",
+    "unlock_level": 98,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "chickpea",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "falafel",
+      "amount": 1
+    },
+    "production_time_seconds": 3300,
+    "production_time_3star_seconds": 2760
+  },
+  {
+    "id": "flower_pendant",
+    "name": "Flower pendant",
+    "location_id": "jeweler",
+    "unlock_level": 98,
+    "inputs": [
+      {
+        "resource_id": "peony",
+        "amount": 3
+      },
+      {
+        "resource_id": "platinum_bar",
+        "amount": 1
+      },
+      {
+        "resource_id": "gold_bar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "flower_pendant",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "kimchi",
+    "name": "Kimchi",
+    "location_id": "preservation_station",
+    "unlock_level": 98,
+    "inputs": [
+      {
+        "resource_id": "cabbage",
+        "amount": 5
+      },
+      {
+        "resource_id": "ginger",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "garlic",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "kimchi",
+      "amount": 1
+    },
+    "production_time_seconds": 18000,
+    "production_time_3star_seconds": 15300
+  },
+  {
+    "id": "clay_mug",
+    "name": "Clay mug",
+    "location_id": "pottery_studio",
+    "unlock_level": 99,
+    "inputs": [
+      {
+        "resource_id": "clay",
+        "amount": 3
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 2
+      },
+      {
+        "resource_id": "peony",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "clay_mug",
+      "amount": 1
+    },
+    "production_time_seconds": 12000,
+    "production_time_3star_seconds": 10200
+  },
+  {
+    "id": "eggplant_parmesan",
+    "name": "Eggplant parmesan",
+    "location_id": "pie_oven",
+    "unlock_level": 99,
+    "inputs": [
+      {
+        "resource_id": "eggplant",
+        "amount": 3
+      },
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato_sauce",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "eggplant_parmesan",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "honey_face_mask",
+    "name": "Honey face mask",
+    "location_id": "bath_kiosk",
+    "unlock_level": 99,
+    "inputs": [
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "honey_face_mask",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "rich_fudge",
+    "name": "Rich fudge",
+    "location_id": "fudge_shop",
+    "unlock_level": 99,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      },
+      {
+        "resource_id": "butter",
+        "amount": 3
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "rich_fudge",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "chamomile_tea",
+    "name": "Chamomile tea",
+    "location_id": "tea_stand",
+    "unlock_level": 100,
+    "inputs": [
+      {
+        "resource_id": "chamomile",
+        "amount": 5
+      },
+      {
+        "resource_id": "honeycomb",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chamomile_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "cocoa_smoothie",
+    "name": "Cocoa smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 100,
+    "inputs": [
+      {
+        "resource_id": "banana",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cocoa_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "fried_candy_bar",
+    "name": "Fried candy bar",
+    "location_id": "deep_fryer",
+    "unlock_level": 100,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 3
+      },
+      {
+        "resource_id": "cookie",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fried_candy_bar",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "tart_dressing",
+    "name": "Tart dressing",
+    "location_id": "sauce_maker",
+    "unlock_level": 100,
+    "inputs": [
+      {
+        "resource_id": "passion_fruit",
+        "amount": 2
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 2
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "tart_dressing",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "tropical_fondue",
+    "name": "Tropical fondue",
+    "location_id": "fondue_pot",
+    "unlock_level": 100,
+    "inputs": [
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      },
+      {
+        "resource_id": "pineapple",
+        "amount": 3
+      },
+      {
+        "resource_id": "mango",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tropical_fondue",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "macaroon",
+    "name": "Macaroon",
+    "location_id": "bakery",
+    "unlock_level": 101,
+    "inputs": [
+      {
+        "resource_id": "cacao",
+        "amount": 1
+      },
+      {
+        "resource_id": "coconut",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "macaroon",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "mushroom_pasta",
+    "name": "Mushroom pasta",
+    "location_id": "pasta_kitchen",
+    "unlock_level": 101,
+    "inputs": [
+      {
+        "resource_id": "mushroom",
+        "amount": 5
+      },
+      {
+        "resource_id": "fresh_pasta",
+        "amount": 3
+      },
+      {
+        "resource_id": "goat_milk",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "mushroom_pasta",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "coconut_ice_cream",
+    "name": "Coconut ice cream",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 102,
+    "inputs": [
+      {
+        "resource_id": "coconut",
+        "amount": 2
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "coconut_ice_cream",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "dried_fruit",
+    "name": "Dried fruit",
+    "location_id": "preservation_station",
+    "unlock_level": 102,
+    "inputs": [
+      {
+        "resource_id": "grapes",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "dried_fruit",
+      "amount": 1
+    },
+    "production_time_seconds": 10800,
+    "production_time_3star_seconds": 9180
+  },
+  {
+    "id": "mint_fudge",
+    "name": "Mint fudge",
+    "location_id": "fudge_shop",
+    "unlock_level": 102,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "mint",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "mint_fudge",
+      "amount": 1
+    },
+    "production_time_seconds": 9000,
+    "production_time_3star_seconds": 7620
+  },
+  {
+    "id": "plum_smoothie",
+    "name": "Plum smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 102,
+    "inputs": [
+      {
+        "resource_id": "plum",
+        "amount": 3
+      },
+      {
+        "resource_id": "grapes",
+        "amount": 1
+      },
+      {
+        "resource_id": "mint",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "plum_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "plain_yogurt",
+    "name": "Plain yogurt",
+    "location_id": "yogurt_maker",
+    "unlock_level": 103,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 3
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "plain_yogurt",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "samosa",
+    "name": "Samosa",
+    "location_id": "deep_fryer",
+    "unlock_level": 103,
+    "inputs": [
+      {
+        "resource_id": "chickpea",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 4
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "samosa",
+      "amount": 1
+    },
+    "production_time_seconds": 4500,
+    "production_time_3star_seconds": 3780
+  },
+  {
+    "id": "chili_fudge",
+    "name": "Chili fudge",
+    "location_id": "fudge_shop",
+    "unlock_level": 104,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "chili_fudge",
+      "amount": 1
+    },
+    "production_time_seconds": 10200,
+    "production_time_3star_seconds": 8700
+  },
+  {
+    "id": "guava_compote",
+    "name": "Guava compote",
+    "location_id": "preservation_station",
+    "unlock_level": 104,
+    "inputs": [
+      {
+        "resource_id": "guava",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "guava_compote",
+      "amount": 1
+    },
+    "production_time_seconds": 15600,
+    "production_time_3star_seconds": 13260
+  },
+  {
+    "id": "guava_juice",
+    "name": "Guava juice",
+    "location_id": "juice_press",
+    "unlock_level": 104,
+    "inputs": [
+      {
+        "resource_id": "guava",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "guava_juice",
+      "amount": 1
+    },
+    "production_time_seconds": 3300,
+    "production_time_3star_seconds": 2760
+  },
+  {
+    "id": "mushroom_soup",
+    "name": "Mushroom soup",
+    "location_id": "soup_kitchen",
+    "unlock_level": 104,
+    "inputs": [
+      {
+        "resource_id": "mushroom",
+        "amount": 3
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "mushroom_soup",
+      "amount": 1
+    },
+    "production_time_seconds": 4800,
+    "production_time_3star_seconds": 4080
+  },
+  {
+    "id": "tropical_smoothie",
+    "name": "Tropical smoothie",
+    "location_id": "smoothie_mixer",
+    "unlock_level": 104,
+    "inputs": [
+      {
+        "resource_id": "coconut",
+        "amount": 1
+      },
+      {
+        "resource_id": "banana",
+        "amount": 1
+      },
+      {
+        "resource_id": "passion_fruit",
+        "amount": 2
+      },
+      {
+        "resource_id": "mango",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tropical_smoothie",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "strawberry_yogurt",
+    "name": "Strawberry yogurt",
+    "location_id": "yogurt_maker",
+    "unlock_level": 105,
+    "inputs": [
+      {
+        "resource_id": "plain_yogurt",
+        "amount": 1
+      },
+      {
+        "resource_id": "strawberry_jam",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "strawberry_yogurt",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "chickpea_stew",
+    "name": "Chickpea stew",
+    "location_id": "stew_pot",
+    "unlock_level": 106,
+    "inputs": [
+      {
+        "resource_id": "coconut",
+        "amount": 1
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 2
+      },
+      {
+        "resource_id": "chickpea",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "chickpea_stew",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "fruit_sorbet",
+    "name": "Fruit sorbet",
+    "location_id": "ice_cream_maker",
+    "unlock_level": 106,
+    "inputs": [
+      {
+        "resource_id": "guava",
+        "amount": 1
+      },
+      {
+        "resource_id": "passion_fruit",
+        "amount": 1
+      },
+      {
+        "resource_id": "mango",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fruit_sorbet",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "veggie_bouquet",
+    "name": "Veggie bouquet",
+    "location_id": "flower_shop",
+    "unlock_level": 106,
+    "inputs": [
+      {
+        "resource_id": "broccoli",
+        "amount": 3
+      },
+      {
+        "resource_id": "tomato",
+        "amount": 3
+      },
+      {
+        "resource_id": "mushroom",
+        "amount": 3
+      },
+      {
+        "resource_id": "cotton_fabric",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "veggie_bouquet",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "pomegranate_tea",
+    "name": "Pomegranate tea",
+    "location_id": "tea_stand",
+    "unlock_level": 107,
+    "inputs": [
+      {
+        "resource_id": "pomegranate",
+        "amount": 1
+      },
+      {
+        "resource_id": "tea_leaf",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "pomegranate_tea",
+      "amount": 1
+    },
+    "production_time_seconds": 2040,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "lemon_fudge",
+    "name": "Lemon fudge",
+    "location_id": "fudge_shop",
+    "unlock_level": 108,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 2
+      },
+      {
+        "resource_id": "milk",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "lemon_fudge",
+      "amount": 1
+    },
+    "production_time_seconds": 6600,
+    "production_time_3star_seconds": 5580
+  },
+  {
+    "id": "pomegranate_cake",
+    "name": "Pomegranate cake",
+    "location_id": "cake_oven",
+    "unlock_level": 108,
+    "inputs": [
+      {
+        "resource_id": "pomegranate",
+        "amount": 1
+      },
+      {
+        "resource_id": "egg",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 6
+      }
+    ],
+    "output": {
+      "resource_id": "pomegranate_cake",
+      "amount": 1
+    },
+    "production_time_seconds": 9600,
+    "production_time_3star_seconds": 8160
+  },
+  {
+    "id": "chili_stew",
+    "name": "Chili stew",
+    "location_id": "stew_pot",
+    "unlock_level": 109,
+    "inputs": [
+      {
+        "resource_id": "chili_pepper",
+        "amount": 3
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chili_stew",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "guava_cupcake",
+    "name": "Guava cupcake",
+    "location_id": "cupcake_maker",
+    "unlock_level": 109,
+    "inputs": [
+      {
+        "resource_id": "plain_cupcake",
+        "amount": 1
+      },
+      {
+        "resource_id": "guava",
+        "amount": 2
+      },
+      {
+        "resource_id": "cream",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "guava_cupcake",
+      "amount": 1
+    },
+    "production_time_seconds": 4200,
+    "production_time_3star_seconds": 3540
+  },
+  {
+    "id": "hummus_wrap",
+    "name": "Hummus wrap",
+    "location_id": "sandwich_bar",
+    "unlock_level": 109,
+    "inputs": [
+      {
+        "resource_id": "bread",
+        "amount": 2
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 1
+      },
+      {
+        "resource_id": "hummus",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "hummus_wrap",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "plain_cupcake",
+    "name": "Plain cupcake",
+    "location_id": "cupcake_maker",
+    "unlock_level": 109,
+    "inputs": [
+      {
+        "resource_id": "milk",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 3
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "plain_cupcake",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "tropical_yogurt",
+    "name": "Tropical yogurt",
+    "location_id": "yogurt_maker",
+    "unlock_level": 109,
+    "inputs": [
+      {
+        "resource_id": "plain_yogurt",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 4
+      },
+      {
+        "resource_id": "passion_fruit",
+        "amount": 1
+      },
+      {
+        "resource_id": "mango",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tropical_yogurt",
+      "amount": 1
+    },
+    "production_time_seconds": 3600,
+    "production_time_3star_seconds": 3060
+  },
+  {
+    "id": "fresh_diffuser",
+    "name": "Fresh diffuser",
+    "location_id": "perfumerie",
+    "unlock_level": 110,
+    "inputs": [
+      {
+        "resource_id": "ginger_essential_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "mint_essential_oil",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fresh_diffuser",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "rice_ball",
+    "name": "Rice ball",
+    "location_id": "sushi_bar",
+    "unlock_level": 110,
+    "inputs": [
+      {
+        "resource_id": "rice",
+        "amount": 20
+      },
+      {
+        "resource_id": "sesame",
+        "amount": 1
+      },
+      {
+        "resource_id": "plum",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "rice_ball",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "peanut_fudge",
+    "name": "Peanut fudge",
+    "location_id": "fudge_shop",
+    "unlock_level": 111,
+    "inputs": [
+      {
+        "resource_id": "butter",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 1
+      },
+      {
+        "resource_id": "peanuts",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "peanut_fudge",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "tropical_cupcake",
+    "name": "Tropical cupcake",
+    "location_id": "cupcake_maker",
+    "unlock_level": 112,
+    "inputs": [
+      {
+        "resource_id": "plain_cupcake",
+        "amount": 1
+      },
+      {
+        "resource_id": "pineapple",
+        "amount": 3
+      },
+      {
+        "resource_id": "coconut",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "tropical_cupcake",
+      "amount": 1
+    },
+    "production_time_seconds": 5400,
+    "production_time_3star_seconds": 4560
+  },
+  {
+    "id": "winter_stew",
+    "name": "Winter stew",
+    "location_id": "stew_pot",
+    "unlock_level": 112,
+    "inputs": [
+      {
+        "resource_id": "bacon",
+        "amount": 1
+      },
+      {
+        "resource_id": "potato",
+        "amount": 3
+      },
+      {
+        "resource_id": "onion",
+        "amount": 2
+      },
+      {
+        "resource_id": "mushroom",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "winter_stew",
+      "amount": 1
+    },
+    "production_time_seconds": 8400,
+    "production_time_3star_seconds": 7140
+  },
+  {
+    "id": "zesty_perfume",
+    "name": "Zesty perfume",
+    "location_id": "perfumerie",
+    "unlock_level": 113,
+    "inputs": [
+      {
+        "resource_id": "lemon_essential_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "ginger",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "zesty_perfume",
+      "amount": 1
+    },
+    "production_time_seconds": 900,
+    "production_time_3star_seconds": 720
+  },
+  {
+    "id": "berry_waffles",
+    "name": "Berry waffles",
+    "location_id": "waffle_maker",
+    "unlock_level": 114,
+    "inputs": [
+      {
+        "resource_id": "plain_waffles",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      },
+      {
+        "resource_id": "raspberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "blackberry",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "berry_waffles",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "cookie_cupcake",
+    "name": "Cookie cupcake",
+    "location_id": "cupcake_maker",
+    "unlock_level": 114,
+    "inputs": [
+      {
+        "resource_id": "plain_cupcake",
+        "amount": 1
+      },
+      {
+        "resource_id": "cream",
+        "amount": 2
+      },
+      {
+        "resource_id": "cookie",
+        "amount": 2
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "cookie_cupcake",
+      "amount": 1
+    },
+    "production_time_seconds": 7200,
+    "production_time_3star_seconds": 6120
+  },
+  {
+    "id": "plain_waffles",
+    "name": "Plain waffles",
+    "location_id": "waffle_maker",
+    "unlock_level": 114,
+    "inputs": [
+      {
+        "resource_id": "white_sugar",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 3
+      },
+      {
+        "resource_id": "wheat",
+        "amount": 5
+      }
+    ],
+    "output": {
+      "resource_id": "plain_waffles",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "calming_diffuser",
+    "name": "Calming diffuser",
+    "location_id": "perfumerie",
+    "unlock_level": 116,
+    "inputs": [
+      {
+        "resource_id": "chamomile_essential_oil",
+        "amount": 1
+      },
+      {
+        "resource_id": "indigo",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "calming_diffuser",
+      "amount": 1
+    },
+    "production_time_seconds": 1500,
+    "production_time_3star_seconds": 1260
+  },
+  {
+    "id": "chocolate_waffles",
+    "name": "Chocolate waffles",
+    "location_id": "waffle_maker",
+    "unlock_level": 117,
+    "inputs": [
+      {
+        "resource_id": "plain_waffles",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "strawberry",
+        "amount": 3
+      },
+      {
+        "resource_id": "banana",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "chocolate_waffles",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "orange_salad",
+    "name": "Orange salad",
+    "location_id": "salad_bar",
+    "unlock_level": 117,
+    "inputs": [
+      {
+        "resource_id": "cheese",
+        "amount": 1
+      },
+      {
+        "resource_id": "lettuce",
+        "amount": 3
+      },
+      {
+        "resource_id": "pomegranate",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "orange_salad",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "blueberry_waffles",
+    "name": "Blueberry waffles",
+    "location_id": "waffle_maker",
+    "unlock_level": 118,
+    "inputs": [
+      {
+        "resource_id": "plain_waffles",
+        "amount": 1
+      },
+      {
+        "resource_id": "milk",
+        "amount": 1
+      },
+      {
+        "resource_id": "cacao",
+        "amount": 2
+      },
+      {
+        "resource_id": "blueberries",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "blueberry_waffles",
+      "amount": 1
+    },
+    "production_time_seconds": 2520,
+    "production_time_3star_seconds": 2100
+  },
+  {
+    "id": "apple_porridge",
+    "name": "Apple porridge",
+    "location_id": "porridge_bar",
+    "unlock_level": 119,
+    "inputs": [
+      {
+        "resource_id": "apple",
+        "amount": 1
+      },
+      {
+        "resource_id": "apple_jam",
+        "amount": 2
+      },
+      {
+        "resource_id": "oats",
+        "amount": 4
+      }
+    ],
+    "output": {
+      "resource_id": "apple_porridge",
+      "amount": 1
+    },
+    "production_time_seconds": 1200,
+    "production_time_3star_seconds": 1020
+  },
+  {
+    "id": "breakfast_bowl",
+    "name": "Breakfast bowl",
+    "location_id": "yogurt_maker",
+    "unlock_level": 119,
+    "inputs": [
+      {
+        "resource_id": "plain_yogurt",
+        "amount": 1
+      },
+      {
+        "resource_id": "oats",
+        "amount": 4
+      },
+      {
+        "resource_id": "honey",
+        "amount": 1
+      },
+      {
+        "resource_id": "blackberry",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "breakfast_bowl",
+      "amount": 1
+    },
+    "production_time_seconds": 3000,
+    "production_time_3star_seconds": 2520
+  },
+  {
+    "id": "breakfast_waffles",
+    "name": "Breakfast waffles",
+    "location_id": "waffle_maker",
+    "unlock_level": 119,
+    "inputs": [
+      {
+        "resource_id": "plain_waffles",
+        "amount": 1
+      },
+      {
+        "resource_id": "bacon",
+        "amount": 2
+      },
+      {
+        "resource_id": "egg",
+        "amount": 1
+      },
+      {
+        "resource_id": "asparagus",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "breakfast_waffles",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "pineapple_coconut_bars",
+    "name": "Pineapple coconut bars",
+    "location_id": "bakery",
+    "unlock_level": 120,
+    "inputs": [
+      {
+        "resource_id": "coconut",
+        "amount": 1
+      },
+      {
+        "resource_id": "white_sugar",
+        "amount": 2
+      },
+      {
+        "resource_id": "oats",
+        "amount": 3
+      },
+      {
+        "resource_id": "pineapple",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "pineapple_coconut_bars",
+      "amount": 1
+    },
+    "production_time_seconds": 2400,
+    "production_time_3star_seconds": 2040
+  },
+  {
+    "id": "sweet_porridge",
+    "name": "Sweet porridge",
+    "location_id": "porridge_bar",
+    "unlock_level": 120,
+    "inputs": [
+      {
+        "resource_id": "peach",
+        "amount": 1
+      },
+      {
+        "resource_id": "honey",
+        "amount": 2
+      },
+      {
+        "resource_id": "oats",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "sweet_porridge",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "rich_soap",
+    "name": "Rich soap",
+    "location_id": "bath_kiosk",
+    "unlock_level": 121,
+    "inputs": [
+      {
+        "resource_id": "oats",
+        "amount": 2
+      },
+      {
+        "resource_id": "pomegranate",
+        "amount": 1
+      },
+      {
+        "resource_id": "coconut",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "rich_soap",
+      "amount": 1
+    },
+    "production_time_seconds": 4200,
+    "production_time_3star_seconds": 3540
+  },
+  {
+    "id": "fresh_porridge",
+    "name": "Fresh porridge",
+    "location_id": "porridge_bar",
+    "unlock_level": 122,
+    "inputs": [
+      {
+        "resource_id": "pomegranate",
+        "amount": 1
+      },
+      {
+        "resource_id": "mint",
+        "amount": 2
+      },
+      {
+        "resource_id": "coconut",
+        "amount": 2
+      },
+      {
+        "resource_id": "oats",
+        "amount": 3
+      }
+    ],
+    "output": {
+      "resource_id": "fresh_porridge",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
+  },
+  {
+    "id": "vanilla_milkshake",
+    "name": "Vanilla milkshake",
+    "location_id": "milkshake_bar",
+    "unlock_level": 124,
+    "inputs": [
+      {
+        "resource_id": "vanilla_ice_cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "cookie",
+        "amount": 2
+      },
+      {
+        "resource_id": "toffee",
+        "amount": 1
+      },
+      {
+        "resource_id": "syrup",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "vanilla_milkshake",
+      "amount": 1
+    },
+    "production_time_seconds": 2700,
+    "production_time_3star_seconds": 2280
+  },
+  {
+    "id": "mocha_milkshake",
+    "name": "Mocha milkshake",
+    "location_id": "milkshake_bar",
+    "unlock_level": 125,
+    "inputs": [
+      {
+        "resource_id": "chocolate_ice_cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "espresso",
+        "amount": 2
+      }
+    ],
+    "output": {
+      "resource_id": "mocha_milkshake",
+      "amount": 1
+    },
+    "production_time_seconds": 1800,
+    "production_time_3star_seconds": 1500
+  },
+  {
+    "id": "fruity_milkshake",
+    "name": "Fruity milkshake",
+    "location_id": "milkshake_bar",
+    "unlock_level": 126,
+    "inputs": [
+      {
+        "resource_id": "peach_ice_cream",
+        "amount": 1
+      },
+      {
+        "resource_id": "orange",
+        "amount": 2
+      },
+      {
+        "resource_id": "lemon",
+        "amount": 1
+      }
+    ],
+    "output": {
+      "resource_id": "fruity_milkshake",
+      "amount": 1
+    },
+    "production_time_seconds": 2100,
+    "production_time_3star_seconds": 1740
   }
 ]

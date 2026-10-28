@@ -5,6 +5,7 @@ A support relation pulls a *source* location toward a *target* location even
 though no resource flows between them. The nectar bush is the first case: it
 produces no goods, but bees fly to it from the beehive tree, and the farther
 the bush, the slower the bees (wiki: Nectar_Bush, docs/game-facts/animals.md).
+The peanut bush works the same way for the squirrels (wiki: Peanut_Bush).
 """
 
 from __future__ import annotations
@@ -25,6 +26,11 @@ SUPPORT_RELATIONS: tuple[SupportRelation, ...] = (
         source="nectar_bush",
         target="beehive_tree",
         reason="bees fly slower to distant nectar bushes (wiki: Nectar_Bush)",
+    ),
+    SupportRelation(
+        source="peanut_bush",
+        target="squirrel_house",
+        reason="squirrels take longer from distant peanut bushes (wiki: Peanut_Bush)",
     ),
 )
 

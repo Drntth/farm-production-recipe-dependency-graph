@@ -8,7 +8,7 @@ Usage
     python -m src plan                   # production plan (python -m src.planner)
     python -m src combine                # combined plan (python -m src.combiner)
     python -m src relocate               # relocation plan (python -m src.relocation)
-    python -m src scrape --game-version 1.72
+    python -m src scrape --game-version 1.73
     python -m src examples               # config/examples/player_level_<N>.json
     python -m src wizard                 # interactive profile → config/player.json
     python -m src check-facts            # game fact tables vs. the wiki

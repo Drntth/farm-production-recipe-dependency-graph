@@ -14,7 +14,8 @@ Built from the resolved profile, so it needs no layout. Game rules used
   harvests, one harvest per growth time (the average of the estimate in
   docs/wiki-gaps.md);
 - every beehive makes one honeycomb per growth time of honeycomb (estimate
-  in docs/wiki-gaps.md).
+  in docs/wiki-gaps.md); every pair of squirrels makes one peanut per growth
+  time of peanuts (wiki: Squirrel).
 
 Rates are upper bounds: items per hour if the location made only that
 recipe, with someone always online. ``src.planner.quantities`` shares the
@@ -30,10 +31,18 @@ from src.loaders.json_loader import DataSet
 from src.models import Location, LocationType, ResourceType
 
 from .mastery import MasteryModifier
-from .profile import BEEHIVE_TREE, ResolvedProfile
+from .profile import BEEHIVE_TREE, SQUIRREL_HOUSE, ResolvedProfile
 
 CROP_YIELD = 2  # harvested crops per planted crop (wiki: Crops)
+SQUIRRELS_PER_LINE = 2  # a pair of squirrels makes one peanut (wiki: Squirrel)
 SECONDS_PER_HOUR = 3600
+# goods of shelters without a recipe (hives): the silo ones, and the bush the
+# animals live on: good → (bush, goods per bush)
+SILO_HIVE_GOODS = frozenset({"peanuts"})  # wiki: Peanuts, unlike other animal goods
+FEEDER_BUSHES = {
+    "honeycomb": ("nectar_bush", 5),  # 500 drops per bush, 100 per honeycomb (wiki)
+    "peanuts": ("peanut_bush", 2000 / 300),  # pods per bush / per peanut (wiki)
+}
 
 
 class LineKind(str, Enum):
@@ -41,6 +50,7 @@ class LineKind(str, Enum):
     ANIMAL = "animal"  # animals in parallel
     SLOT_ANIMAL = "slot_animal"  # lobster pool, duck salon: one animal per slot
     BEEHIVE = "beehive"  # beehives on the beehive tree
+    SQUIRREL = "squirrel"  # pairs of squirrels in the squirrel house
     TREE = "tree"
     BUSH = "bush"
     OTHER = "other"  # mine, fishing lake
@@ -82,12 +92,12 @@ class FruitRate:
 
 @dataclass(frozen=True)
 class HiveRate:
-    """Goods the beehives make without a recipe (honeycomb)."""
+    """Goods shelters make without a recipe (honeycomb, peanuts)."""
 
     resource_id: str
     location_id: str
     cycle_seconds: int
-    parallel: int | None  # beehives
+    parallel: int | None  # beehives, pairs of squirrels
 
 
 @dataclass(frozen=True)
@@ -110,9 +120,14 @@ class CapacityModel:
         return data
 
 
+_HIVE_KINDS = {LineKind.BEEHIVE, LineKind.SQUIRREL}
+
+
 def _kind(loc: Location) -> LineKind:
     if loc.id == BEEHIVE_TREE:
         return LineKind.BEEHIVE
+    if loc.id == SQUIRREL_HOUSE:
+        return LineKind.SQUIRREL
     if loc.type == LocationType.PRODUCTION:
         return LineKind.MACHINE
     if loc.type == LocationType.ANIMAL:
@@ -136,6 +151,11 @@ def build_capacity(
             LineKind.ANIMAL: state.animals,
             LineKind.SLOT_ANIMAL: state.slots,
             LineKind.BEEHIVE: state.beehives,
+            LineKind.SQUIRREL: (
+                state.animals // SQUIRRELS_PER_LINE
+                if state.animals is not None
+                else None
+            ),
         }.get(kind, state.owned)
         queue = state.slots if kind == LineKind.MACHINE else None
         locations[loc_id] = LocationCapacity(loc_id, kind, parallel, queue)
@@ -174,7 +194,7 @@ def build_capacity(
     hives: dict[str, HiveRate] = {}
     for res in sorted(dataset.resource_list, key=lambda r: r.id):
         cap = locations.get(res.source_location_id or "")
-        if cap is not None and cap.kind == LineKind.BEEHIVE and res.growth_time_seconds:
+        if cap is not None and cap.kind in _HIVE_KINDS and res.growth_time_seconds:
             hives[res.id] = HiveRate(
                 res.id, cap.location_id, res.growth_time_seconds, cap.parallel
             )

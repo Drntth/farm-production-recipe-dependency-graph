@@ -16,7 +16,7 @@ Hay Day changes regularly. This file records what is known about recent versions
 | Game change                                 | What to update                                                                                        |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | New building, good, crop, tree or animal    | scraper parsers, normalizer, re-scrape, quality tests, footprint in overrides, player example config  |
-| Changed unlock levels or new level cap      | re-scrape, player config                                                                              |
+| Changed unlock levels or new level cap      | re-scrape (every level by default), player config                                                     |
 | Mastery system (3 stars ↔ Workbench)        | planner mastery modifier, `mastery_system` in the player config, `game-facts/production-buildings.md` |
 | Production / growth times, machine slots    | timing fields, `game-facts/production-buildings.md`, Production Planner                               |
 | Fields per level, building / shelter copies | `level_limits.json` (scraper: Experience Levels, building lists)                                      |
@@ -29,13 +29,14 @@ Hay Day changes regularly. This file records what is known about recent versions
 
 ## Known versions
 
-| Version | Date       | Changes relevant to the project                                                                                            | Source                                   |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| 1.72    | 2026-08-10 | Building Mastery / Workbench (gradual rollout, replaces the 3-star mastery); Boat Destinations; queue several truck orders | wiki:Update                              |
-| 1.71    | 2026-06    | 14th anniversary; beach area by the sanctuary for decorations; Birthday Balloon Maker delivered again (2026-06-19)         | wiki:Update, wiki:Birthday_Balloon_Maker |
-| Spring  | 2026       | quality-of-life changes; crops, axes and saws can be bought with coins                                                     | web:vortexgaming.io                      |
+| Version | Date       | Changes relevant to the project                                                                                                                                    | Source                                   |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| 1.73    | 2026-10-05 | Halloween with the temporary Enchanted Workshop (not in the data); Angus fishing helper; mussel beds on the fishing lake; Pearls currency; quality-of-life changes | wiki:Update                              |
+| 1.72    | 2026-08-10 | Building Mastery / Workbench (gradual rollout, replaces the 3-star mastery); Boat Destinations; queue several truck orders                                         | wiki:Update                              |
+| 1.71    | 2026-06    | 14th anniversary; beach area by the sanctuary for decorations; Birthday Balloon Maker delivered again (2026-06-19)                                                 | wiki:Update, wiki:Birthday_Balloon_Maker |
+| Spring  | 2026       | quality-of-life changes; crops, axes and saws can be bought with coins                                                                                             | web:vortexgaming.io                      |
 
-Data in the repository was scraped for game version 1.72 at level 56 (see `data/meta.json`).
+Data in the repository was scraped for game version 1.73 with every wiki level (up to 126, see `data/meta.json`).
 
 ## Known wiki gaps
 

@@ -2,7 +2,7 @@
 Command-line interface for the scraper.
 
 Usage:
-    python -m src.scraper                       # level from config/player.json
+    python -m src.scraper                       # every level on the wiki
     python -m src.scraper --level 56 --output-dir data
     python -m src.scraper --game-version 1.72
 """
@@ -11,8 +11,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-
-from src.config import load_player_config
+from typing import Any
 
 from .normalizer import build_level_limits, build_mastery_bonuses, normalize
 from .parsers.level_limits import parse_field_grants
@@ -28,6 +27,15 @@ from .writer import (
     write_meta_file,
 )
 
+_NO_LEVEL_CAP = 10_000
+
+
+def _highest_level(*entity_lists: list[dict[str, Any]]) -> int:
+    """Highest unlock level in the scraped data (``meta.json`` ``max_level``)."""
+    return max(
+        (e["unlock_level"] for entities in entity_lists for e in entities), default=0
+    )
+
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
@@ -39,14 +47,7 @@ def main(argv: list[str] | None = None) -> None:
         dest="level",
         type=int,
         default=None,
-        help="Maximum unlock level to include (default: level from the player config)",
-    )
-    parser.add_argument(
-        "--player-config",
-        type=Path,
-        default=None,
-        help="Player config file (default: config/player.json, "
-        "falling back to config/player.example.json)",
+        help="Maximum unlock level to include (default: every level on the wiki)",
     )
     parser.add_argument(
         "--output-dir",
@@ -67,11 +68,12 @@ def main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
 
-    level = args.level
-    if level is None:
-        level = load_player_config(args.player_config).level
-
-    print(f"Scraping Hay Day data up to level {level} …")
+    # the tools filter by the player level; the data covers every level
+    level = args.level if args.level is not None else _NO_LEVEL_CAP
+    print(
+        "Scraping Hay Day data "
+        + (f"up to level {level} …" if args.level is not None else "for every level …")
+    )
     client = WikiClient(delay=args.delay)
 
     print("  → locations")
@@ -109,7 +111,7 @@ def main(argv: list[str] | None = None) -> None:
     write_mastery_bonuses_file(args.output_dir, mastery_bonuses)
     write_meta_file(
         args.output_dir,
-        max_level=level,
+        max_level=_highest_level(locations, resources, recipes),
         wiki_revisions=client.get_revision_timestamps(client.fetched_pages),
         known_game_version=args.game_version,
     )

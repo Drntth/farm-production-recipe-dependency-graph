@@ -6,14 +6,14 @@ A linear program (scipy / HiGHS) over rates per hour:
 - ``x_r``: crafts of recipe *r* (machines, animal feeding, lobster / duck);
 - ``p_c``: plantings of field crop *c*;
 - ``n_k``: plants of tree / bush kind *k* whose count the profile leaves open;
-- ``h_g``: goods *g* the beehives make (honeycomb);
+- ``h_g``: goods *g* the beehives and squirrels make (honeycomb, peanuts);
 - ``balance``: the surplus every produced good gets at least, per hour.
 
 Constraints: no good is used faster than it is made; machine time (copies)
 and queue (slots per login); animals, slots, fields and trees are served only
 at a login, so one cycle takes the growth time rounded up to whole login
 intervals; the goods made between two logins fit into the given share of the
-barn and silo.
+barn and silo (peanuts go to the silo).
 
 Four solves, each keeping the previous optimum (lexicographic):
 
@@ -41,7 +41,7 @@ from src.loaders.json_loader import DataSet
 from src.models import LocationType, ResourceType
 from src.settings import DEFAULT_STORAGE_SHARE  # rest of barn / silo: stock
 
-from .capacity import SECONDS_PER_HOUR, CapacityModel, LineKind
+from .capacity import SECONDS_PER_HOUR, SILO_HIVE_GOODS, CapacityModel, LineKind
 from .profile import ResolvedProfile
 
 CROP_HARVEST = 2  # crops harvested per planting (wiki: Crops)
@@ -283,7 +283,7 @@ def plan_production(
                 cap.parallel,
             )
 
-    # beehives: one good per cycle each, collected at a login
+    # beehives / squirrel pairs: one good per cycle each, collected at a login
     for g, i in hs.items():
         hive = capacity.hives[g]
         lp.add({i: login_cycle_hours(hive.cycle_seconds, t)}, hive.parallel)
@@ -301,6 +301,7 @@ def plan_production(
     if capacity.silo_capacity is not None:
         silo_row = {i: CROP_HARVEST * t for i in ps.values()}
         silo_row.update({i: fruit_rate(k) * t for k, i in ns.items()})
+        silo_row.update({i: t for g, i in hs.items() if g in SILO_HIVE_GOODS})
         room = storage_share * capacity.silo_capacity
         fixed = sum(constant[k] for k in fruit_fixed) * t
         if fixed > room:
@@ -311,7 +312,7 @@ def plan_production(
         lp.add(silo_row, max(room - fixed, 0.0))
     if capacity.barn_capacity is not None and (xs or hs):
         barn_row = {xs[r.id]: r.output.amount * t for r in planned}
-        barn_row.update(dict.fromkeys(hs.values(), t))
+        barn_row.update({i: t for g, i in hs.items() if g not in SILO_HIVE_GOODS})
         lp.add(barn_row, storage_share * capacity.barn_capacity)
 
     busy = {xs[r.id]: times[r.id] / SECONDS_PER_HOUR for r in planned}
@@ -404,7 +405,7 @@ def plan_production(
         barn_per_login=clean(
             (
                 sum(recipes[r.id].per_hour * r.output.amount for r in planned)
-                + sum(hive.values())
+                + sum(v for g, v in hive.items() if g not in SILO_HIVE_GOODS)
             )
             * t
         ),
@@ -412,6 +413,7 @@ def plan_production(
             (
                 sum(c.plantings_per_hour * CROP_HARVEST for c in crops.values())
                 + sum(f.per_hour for f in fruits.values())
+                + sum(v for g, v in hive.items() if g in SILO_HIVE_GOODS)
             )
             * t
         ),

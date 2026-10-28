@@ -5,6 +5,11 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "bath_kiosk",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "bbq_grill",
     "stars": 3,
     "time_reduction_percent": 15
@@ -30,12 +35,32 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "cupcake_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "dairy",
     "stars": 3,
     "time_reduction_percent": 15
   },
   {
+    "location_id": "deep_fryer",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "doner_kebab_stand",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "donut_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "essential_oils_lab",
     "stars": 3,
     "time_reduction_percent": 15
   },
@@ -60,7 +85,27 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "fondue_pot",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "fudge_shop",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "hat_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "honey_extractor",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "hot_dog_stand",
     "stars": 3,
     "time_reduction_percent": 15
   },
@@ -105,6 +150,11 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "milkshake_bar",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "net_maker",
     "stars": 1,
     "time_reduction_percent": 5
@@ -120,12 +170,57 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "omelet_station",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "pasta_kitchen",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "pasta_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "perfumerie",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "pie_oven",
     "stars": 3,
     "time_reduction_percent": 15
   },
   {
     "location_id": "popcorn_pot",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "porridge_bar",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "pottery_studio",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "preservation_station",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "salad_bar",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "sandwich_bar",
     "stars": 3,
     "time_reduction_percent": 15
   },
@@ -145,7 +240,17 @@
     "time_reduction_percent": 15
   },
   {
+    "location_id": "smoothie_mixer",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
     "location_id": "soup_kitchen",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "stew_pot",
     "stars": 3,
     "time_reduction_percent": 15
   },
@@ -156,6 +261,31 @@
   },
   {
     "location_id": "sushi_bar",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "taco_kitchen",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "tea_stand",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "waffle_maker",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "wok_kitchen",
+    "stars": 3,
+    "time_reduction_percent": 15
+  },
+  {
+    "location_id": "yogurt_maker",
     "stars": 3,
     "time_reduction_percent": 15
   }

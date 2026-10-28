@@ -10,7 +10,7 @@ from src.scraper.wiki_client import WikiClient
 LEVEL_PAGES_PREFIX = "Experience_Levels/"
 _RANGE_RE = re.compile(r"Levels?\s+(\d+)\s*-\s*(\d+)")
 _LEVEL_RE = re.compile(r"Level\s+(\d+)")
-_FIELDS_RE = re.compile(r"(\d+)\s+fields\b", re.IGNORECASE)
+_FIELDS_RE = re.compile(r"(\d+)\s+fields?\b", re.IGNORECASE)
 
 
 def _level_pages(client: WikiClient, max_level: int) -> list[str]:
@@ -28,7 +28,7 @@ def parse_field_grants(client: WikiClient, max_level: int) -> list[dict[str, Any
     Return ``[{"level": 1, "count": 6}, {"level": 3, "count": 3}, …]``.
 
     Source: the "Items" column of the Experience Levels sub-pages, which
-    lists e.g. "3 fields" for every level that grants new fields.
+    lists e.g. "3 fields" (above level 100: "1 field") for every level that grants new fields.
     """
     grants: dict[int, int] = {}
     for page in _level_pages(client, max_level):

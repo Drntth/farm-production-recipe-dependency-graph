@@ -400,5 +400,349 @@
     "footprint_width": 2,
     "footprint_height": 2,
     "base_slots": 2
+  },
+  {
+    "id": "olive_tree",
+    "name": "Olive tree",
+    "type": "tree",
+    "unlock_level": 57,
+    "area": "farm"
+  },
+  {
+    "id": "salad_bar",
+    "name": "Salad bar",
+    "type": "production",
+    "unlock_level": 58,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3,
+    "base_slots": 2
+  },
+  {
+    "id": "sandwich_bar",
+    "name": "Sandwich bar",
+    "type": "production",
+    "unlock_level": 61,
+    "area": "farm",
+    "footprint_width": 3,
+    "footprint_height": 3,
+    "base_slots": 2
+  },
+  {
+    "id": "peanut_bush",
+    "name": "Peanut Bush",
+    "type": "bush",
+    "unlock_level": 62,
+    "area": "farm"
+  },
+  {
+    "id": "squirrel_house",
+    "name": "Squirrel House",
+    "type": "animal",
+    "unlock_level": 62,
+    "area": "farm"
+  },
+  {
+    "id": "smoothie_mixer",
+    "name": "Smoothie mixer",
+    "type": "production",
+    "unlock_level": 64,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "lemon_tree",
+    "name": "Lemon tree",
+    "type": "tree",
+    "unlock_level": 66,
+    "area": "farm"
+  },
+  {
+    "id": "pasta_maker",
+    "name": "Pasta maker",
+    "type": "production",
+    "unlock_level": 67,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "essential_oils_lab",
+    "name": "Essential Oils Lab",
+    "type": "production",
+    "unlock_level": 68,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "wok_kitchen",
+    "name": "Wok kitchen",
+    "type": "production",
+    "unlock_level": 69,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "hat_maker",
+    "name": "Hat maker",
+    "type": "production",
+    "unlock_level": 70,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "orange_tree",
+    "name": "Orange tree",
+    "type": "tree",
+    "unlock_level": 71,
+    "area": "farm"
+  },
+  {
+    "id": "pasta_kitchen",
+    "name": "Pasta kitchen",
+    "type": "production",
+    "unlock_level": 72,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "hot_dog_stand",
+    "name": "Hot dog stand",
+    "type": "production",
+    "unlock_level": 75,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "donut_maker",
+    "name": "Donut maker",
+    "type": "production",
+    "unlock_level": 76,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "peach_tree",
+    "name": "Peach tree",
+    "type": "tree",
+    "unlock_level": 76,
+    "area": "farm"
+  },
+  {
+    "id": "omelet_station",
+    "name": "Omelet station",
+    "type": "production",
+    "unlock_level": 77,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "taco_kitchen",
+    "name": "Taco kitchen",
+    "type": "production",
+    "unlock_level": 77,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "tea_stand",
+    "name": "Tea stand",
+    "type": "production",
+    "unlock_level": 80,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "fondue_pot",
+    "name": "Fondue pot",
+    "type": "production",
+    "unlock_level": 81,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "bath_kiosk",
+    "name": "Bath kiosk",
+    "type": "production",
+    "unlock_level": 84,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "deep_fryer",
+    "name": "Deep fryer",
+    "type": "production",
+    "unlock_level": 87,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "banana_tree",
+    "name": "Banana tree",
+    "type": "tree",
+    "unlock_level": 88,
+    "area": "farm"
+  },
+  {
+    "id": "preservation_station",
+    "name": "Preservation station",
+    "type": "production",
+    "unlock_level": 91,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "plum_tree",
+    "name": "Plum tree",
+    "type": "tree",
+    "unlock_level": 94,
+    "area": "farm"
+  },
+  {
+    "id": "pottery_studio",
+    "name": "Pottery studio",
+    "type": "production",
+    "unlock_level": 94,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "mango_tree",
+    "name": "Mango tree",
+    "type": "tree",
+    "unlock_level": 97,
+    "area": "farm"
+  },
+  {
+    "id": "fudge_shop",
+    "name": "Fudge shop",
+    "type": "production",
+    "unlock_level": 99,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "coconut_tree",
+    "name": "Coconut tree",
+    "type": "tree",
+    "unlock_level": 101,
+    "area": "farm"
+  },
+  {
+    "id": "yogurt_maker",
+    "name": "Yogurt Maker",
+    "type": "production",
+    "unlock_level": 103,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "guava_tree",
+    "name": "Guava tree",
+    "type": "tree",
+    "unlock_level": 104,
+    "area": "farm"
+  },
+  {
+    "id": "stew_pot",
+    "name": "Stew Pot",
+    "type": "production",
+    "unlock_level": 106,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "pomegranate_tree",
+    "name": "Pomegranate tree",
+    "type": "tree",
+    "unlock_level": 107,
+    "area": "farm"
+  },
+  {
+    "id": "cupcake_maker",
+    "name": "Cupcake Maker",
+    "type": "production",
+    "unlock_level": 109,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "perfumerie",
+    "name": "Perfumerie",
+    "type": "production",
+    "unlock_level": 110,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "waffle_maker",
+    "name": "Waffle Maker",
+    "type": "production",
+    "unlock_level": 114,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "porridge_bar",
+    "name": "Porridge Bar",
+    "type": "production",
+    "unlock_level": 119,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
+  },
+  {
+    "id": "milkshake_bar",
+    "name": "Milkshake Bar",
+    "type": "production",
+    "unlock_level": 124,
+    "area": "farm",
+    "footprint_width": 2,
+    "footprint_height": 2,
+    "base_slots": 2
   }
 ]

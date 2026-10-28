@@ -1,3 +1,4 @@
 [
-  {"id": "honeycomb", "growth_time_seconds": 2100}
+  {"id": "honeycomb", "growth_time_seconds": 2100},
+  {"id": "peanuts", "growth_time_seconds": 18000}
 ]

@@ -43,6 +43,7 @@ Out of scope: helpers (Tom, Rose, Ernest), boosters and events. They are tempora
 | Shelter capacity, e.g. a chicken coop holds up to 6 chickens                                                   | Chicken Coop, Animal Shelters            |
 | Beehive tree: one per player, grows from 1 to 4 beehives (3 bees each) with collected nectar                   | Beehive Tree                             |
 | Nectar bush: level 39, feeds the beehives; the further from the beehive tree, the slower the bees              | Nectar Bush                              |
+| Squirrel house: one per player, room for 2 squirrels at first, up to 8 in pairs; a pair makes the peanuts      | Squirrel House, Squirrel                 |
 | 15 fishing spots in total                                                                                      | Fishing Lake                             |
 
 Not on the wiki or any official page: the player's own counts (owned copies, bought slots, animals, mastery progress). They are account data and need the profile.
@@ -93,7 +94,7 @@ Per-location fields, all optional:
 | `slots`           | slots unlocked, summed over all copies            | base slots × copies                                |
 | `mastery_stars`   | 0-3 per building type (`mastery_system: "stars"`) | 0                                                  |
 | `workbench_level` | per building type (`mastery_system: "workbench"`) | 0                                                  |
-| `animals`         | animals in all shelters of the type               | copies × `animal_capacity`                         |
+| `animals`         | animals in all shelters of the type               | copies × `animal_capacity`; squirrel house 2       |
 | `beehives`        | beehives on the beehive tree, 1-4                 | 1                                                  |
 
 Validation rules (`validate_player_config`, logged as warnings by `python -m src.main`):

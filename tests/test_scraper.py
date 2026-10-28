@@ -364,6 +364,13 @@ def test_field_grants(client: FakeWikiClient) -> None:
     assert "Experience_Levels/Levels_51-75" not in client.requested
 
 
+def test_field_grants_read_a_single_field(client: FakeWikiClient) -> None:
+    grants = parse_field_grants(client, max_level=50)
+
+    # high levels grant "1 field", not "N fields"
+    assert {"level": 33, "count": 1} in grants
+
+
 def test_full_pipeline_builds_valid_level_limits(client: FakeWikiClient) -> None:
     from src.models import LevelLimits
 

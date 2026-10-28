@@ -51,6 +51,22 @@ The values are stored in `data/overrides/locations.json`.
 
 Layout consequence: nectar bushes belong next to the beehive tree (support relation in `src/layout/support.py`).
 
+## Squirrel house and peanut bush
+
+| Fact                                     | Value                                                                                         | Source                             | Checked    |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------- | ---------- |
+| One squirrel house per player            | level 62, costs 45,000 coins; room for 8 squirrels at most                                    | wiki:Squirrel_House                | 2026-10-28 |
+| Squirrels in the house                   | room for 2 at first; a pair of doors and 2 more squirrels after 5,500 / 80,000 / 270,000 pods | wiki:Squirrel                      | 2026-10-28 |
+| Squirrel price                           | 4,000 / 5,000 / 6,000 / 7,000 coins, first to fourth pair                                     | wiki:Squirrel                      | 2026-10-28 |
+| Peanuts are produced                     | one per 300 pods per pair of squirrels, about 5 h if bushes are close                         | wiki:Squirrel, wiki:Squirrel_House | 2026-10-28 |
+| Peanuts storage                          | silo, unlike other animal goods                                                               | wiki:Peanuts                       | 2026-10-28 |
+| Peanut bush unlock and price             | level 62, 1,200 coins                                                                         | wiki:Peanut_Bush                   | 2026-10-28 |
+| Pods per peanut bush                     | 2,000 in 2 harvests of 1,000 (the second after a revive); no growth cycle                     | wiki:Peanut_Bush                   | 2026-10-28 |
+| Pods are not stored by the player        | squirrels bring them straight into the squirrel house                                         | wiki:Peanut_Bush                   | 2026-10-28 |
+| Distance between bush and squirrel house | farther = slower squirrels while online; no effect offline                                    | wiki:Peanut_Bush                   | 2026-10-28 |
+
+Layout consequence: peanut bushes belong next to the squirrel house (support relation in `src/layout/support.py`). Footprints of both are estimates, see [../wiki-gaps.md](../wiki-gaps.md).
+
 ## Lobster pool and duck salon (fishing lake)
 
 | Fact                                 | Value                                                               | Source                               | Checked    |

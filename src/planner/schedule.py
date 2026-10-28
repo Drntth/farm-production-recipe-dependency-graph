@@ -6,7 +6,8 @@ Login interval suggestion, recommendations and the ordered action list.
   time (fewer logins, little lost output).
 - Recommendations: fields (all granted fields if the profile has no count,
   plus how many the plan uses), trees and bushes the profile leaves open, and
-  nectar bushes for the honeycomb the plan makes (5 per bush, wiki).
+  nectar bushes for the honeycomb (5 per bush) and peanut bushes for the
+  peanuts (2,000 pods / 300 per peanut) the plan makes (wiki).
 - Actions per login, in order: collect, feed animals, plant fields, fill the
   machine queues upstream first (a machine whose goods feed another comes
   earlier), then sell or deliver the surplus.
@@ -21,14 +22,11 @@ import networkx as nx
 from src.loaders.json_loader import DataSet
 from src.settings import DEFAULT_MIN_EFFICIENCY
 
-from .capacity import CapacityModel, LineKind
+from .capacity import FEEDER_BUSHES, CapacityModel, LineKind
 from .profile import ResolvedProfile
 from .quantities import DEFAULT_STORAGE_SHARE, ProductionPlan, plan_production
 
 INTERVAL_CANDIDATES = (0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0)
-HONEYCOMB = "honeycomb"
-NECTAR_BUSH = "nectar_bush"
-HONEYCOMB_PER_NECTAR_BUSH = 5  # 500 drops per bush, 100 per honeycomb (wiki)
 HOURS_PER_DAY = 24
 _TOP_SURPLUS = 15
 
@@ -121,24 +119,25 @@ def recommendations(
     result = {"fields": fields, "trees_and_bushes": plants}
     if no_data:
         result["no_yield_data"] = no_data
-    honey = plan.hive_per_hour.get(HONEYCOMB) or plan.external_per_hour.get(HONEYCOMB)
-    if honey:
-        result[NECTAR_BUSH] = {
-            "honeycomb_per_day": round(honey * HOURS_PER_DAY, 2),
-            "bushes_per_day": round(
-                honey * HOURS_PER_DAY / HONEYCOMB_PER_NECTAR_BUSH, 2
-            ),
-        }
+    for good, (bush, per_bush) in FEEDER_BUSHES.items():
+        rate = plan.hive_per_hour.get(good) or plan.external_per_hour.get(good)
+        if rate:
+            result[bush] = {
+                "resource_id": good,
+                f"{good}_per_day": round(rate * HOURS_PER_DAY, 2),
+                "bushes_per_day": round(rate * HOURS_PER_DAY / per_bush, 2),
+            }
     return result
 
 
 def actions(plan: ProductionPlan, dataset: DataSet, capacity: CapacityModel) -> list:
     t = plan.interval_hours
+    goods = ["animal goods", *(g for g in FEEDER_BUSHES if g in capacity.hives)]
     steps: list[dict] = [
         {
             "action": "collect",
-            "what": "harvest ready fields, trees and bushes; collect animal goods, "
-            "honeycomb and finished machine goods",
+            "what": "harvest ready fields, trees and bushes; collect "
+            f"{', '.join(goods)} and finished machine goods",
         }
     ]
     animal_kinds = {LineKind.ANIMAL, LineKind.SLOT_ANIMAL}
@@ -239,7 +238,9 @@ def schedule_to_markdown(schedule: dict, dataset: DataSet) -> str:
             return dataset.recipes[res_or_recipe].name
         if res_or_recipe in dataset.resources:
             return dataset.resources[res_or_recipe].name
-        return dataset.locations[res_or_recipe].name
+        loc = dataset.locations.get(res_or_recipe)
+        # a feeder bush may be missing from a trimmed data set
+        return loc.name if loc is not None else res_or_recipe.replace("_", " ")
 
     def fmt(item: dict) -> str:
         key = item.get("recipe_id") or item["resource_id"]
@@ -294,12 +295,13 @@ def schedule_to_markdown(schedule: dict, dataset: DataSet) -> str:
             + ", ".join(name(i) for i in rec["no_yield_data"])
             + "."
         )
-    if NECTAR_BUSH in rec:
-        nb = rec[NECTAR_BUSH]
-        lines.append(
-            f"- Nectar bushes: about {nb['bushes_per_day']:g} per day "
-            f"for {nb['honeycomb_per_day']:g} honeycomb."
-        )
+    for good, (bush, _) in FEEDER_BUSHES.items():
+        if bush in rec:
+            fb = rec[bush]
+            lines.append(
+                f"- {name(bush)}: about {fb['bushes_per_day']:g} new per day "
+                f"for {fb[f'{good}_per_day']:g} {name(good).lower()}."
+            )
     lines += ["", "## Every login", ""]
     for step in schedule["actions_per_login"]:
         where = f" {name(step['location_id'])}" if "location_id" in step else ""

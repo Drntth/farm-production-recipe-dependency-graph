@@ -8,7 +8,7 @@ Hand-maintained values that the wiki does not provide. The loader merges these f
 
 Only **shared game facts** belong here, values that are the same for every player. Anything a player can upgrade or buy (machine slots, mastery, animals, beehives, lobster / duck slots, barn / silo) belongs in the player profile instead. See [docs/player-profile.md](../../docs/player-profile.md).
 
-`recipes.json` is empty, because the wiki currently provides all of its values. `resources.json` holds the honeycomb estimate.
+`recipes.json` is empty, because the wiki currently provides all of its values. `resources.json` holds the honeycomb and peanuts rates.
 
 ## Fields in `locations.json`
 
@@ -22,16 +22,17 @@ Only **shared game facts** belong here, values that are the same for every playe
 | `max_slots`        | maximum slots per copy, where it differs from the default 9    |
 | `lifetime_yield`   | goods a tree / bush gives in its life (both or neither)        |
 | `lifetime_harvests`| harvests of a tree / bush, including the revive                |
+| `animal_capacity`  | animals per shelter, where the scraped table has none          |
 
 `footprint_width` and `footprint_height` must be filled in together. One without the other fails validation.  
 Fixed buildings (`movable: false`) need no footprint. The layout planner leaves them where they are.  
 `rotatable` only matters for non-square items. A 1×2 item that can be turned may also be placed as 2×1.  
 The lobster pool and duck salon have no `slots` in their wiki infobox; their text says 1 slot at start and 6 at most, so both fields are set here.  
-`lifetime_yield` / `lifetime_harvests` and the honeycomb `growth_time_seconds` are accepted estimates (not measured in the game); their basis and status are in [docs/wiki-gaps.md](../../docs/wiki-gaps.md).
+`lifetime_yield` / `lifetime_harvests` and the honeycomb and peanuts `growth_time_seconds` are accepted estimates (not measured in the game); their basis and status are in [docs/wiki-gaps.md](../../docs/wiki-gaps.md).
 
 ### Status
 
-Complete for level 56: every movable location has a footprint, and every non-square item (`raspberry_bush`, `blackberry_bush`, `ice_cream_maker`) has `rotatable`. After raising the player level and re-scraping, run `python -m pytest`; new locations without a footprint must be added here.
+Complete for every level of the data: every movable location has a footprint, and every non-square item (`raspberry_bush`, `blackberry_bush`, `ice_cream_maker`) has `rotatable`. Measured up to level 56; the trees, the peanut bush and the squirrel house above it are estimates (see [docs/wiki-gaps.md](../../docs/wiki-gaps.md)). After a re-scrape, run `python -m pytest`; new locations without a footprint must be added here.
 
 ### Orientation
 

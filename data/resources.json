@@ -1208,5 +1208,1794 @@
     "type": "processed_material",
     "unlock_level": 56,
     "source_location_id": "sushi_bar"
+  },
+  {
+    "id": "lollipop",
+    "name": "Lollipop",
+    "type": "processed_material",
+    "unlock_level": 57,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "olive",
+    "name": "Olive",
+    "type": "crop",
+    "unlock_level": 57,
+    "source_location_id": "olive_tree",
+    "growth_time_seconds": 86400
+  },
+  {
+    "id": "bean_salad",
+    "name": "Bean salad",
+    "type": "processed_material",
+    "unlock_level": 58,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "feta_salad",
+    "name": "Feta salad",
+    "type": "processed_material",
+    "unlock_level": 58,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "lettuce",
+    "name": "Lettuce",
+    "type": "crop",
+    "unlock_level": 58,
+    "source_location_id": "field",
+    "growth_time_seconds": 12600
+  },
+  {
+    "id": "tower_doner_supreme",
+    "name": "Tower doner supreme",
+    "type": "processed_material",
+    "unlock_level": 58,
+    "source_location_id": "doner_kebab_stand"
+  },
+  {
+    "id": "blanket",
+    "name": "Blanket",
+    "type": "processed_material",
+    "unlock_level": 59,
+    "source_location_id": "sewing_machine"
+  },
+  {
+    "id": "lobster_sushi",
+    "name": "Lobster sushi",
+    "type": "processed_material",
+    "unlock_level": 59,
+    "source_location_id": "sushi_bar"
+  },
+  {
+    "id": "garlic",
+    "name": "Garlic",
+    "type": "crop",
+    "unlock_level": 60,
+    "source_location_id": "field",
+    "growth_time_seconds": 1800
+  },
+  {
+    "id": "garlic_bread",
+    "name": "Garlic bread",
+    "type": "processed_material",
+    "unlock_level": 60,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "jelly_beans",
+    "name": "Jelly beans",
+    "type": "processed_material",
+    "unlock_level": 60,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "olive_oil",
+    "name": "Olive oil",
+    "type": "processed_material",
+    "unlock_level": 60,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "veggie_bagel",
+    "name": "Veggie bagel",
+    "type": "processed_material",
+    "unlock_level": 61,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "blt_salad",
+    "name": "BLT salad",
+    "type": "processed_material",
+    "unlock_level": 62,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "caramel_latte",
+    "name": "Caramel latte",
+    "type": "processed_material",
+    "unlock_level": 62,
+    "source_location_id": "coffee_kiosk"
+  },
+  {
+    "id": "mayonnaise",
+    "name": "Mayonnaise",
+    "type": "processed_material",
+    "unlock_level": 62,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "peanuts",
+    "name": "Peanuts",
+    "type": "animal_product",
+    "unlock_level": 62,
+    "source_location_id": "squirrel_house",
+    "growth_time_seconds": 0
+  },
+  {
+    "id": "egg_sushi",
+    "name": "Egg sushi",
+    "type": "processed_material",
+    "unlock_level": 63,
+    "source_location_id": "sushi_bar"
+  },
+  {
+    "id": "honey_peanuts",
+    "name": "Honey peanuts",
+    "type": "processed_material",
+    "unlock_level": 63,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "sunflower",
+    "name": "Sunflower",
+    "type": "crop",
+    "unlock_level": 63,
+    "source_location_id": "field",
+    "growth_time_seconds": 5400
+  },
+  {
+    "id": "berry_smoothie",
+    "name": "Berry smoothie",
+    "type": "processed_material",
+    "unlock_level": 64,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "seafood_salad",
+    "name": "Seafood salad",
+    "type": "processed_material",
+    "unlock_level": 64,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "snack_mix",
+    "name": "Snack mix",
+    "type": "processed_material",
+    "unlock_level": 64,
+    "source_location_id": "popcorn_pot"
+  },
+  {
+    "id": "bacon_toast",
+    "name": "Bacon toast",
+    "type": "processed_material",
+    "unlock_level": 65,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "bright_bouquet",
+    "name": "Bright bouquet",
+    "type": "processed_material",
+    "unlock_level": 65,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "cabbage",
+    "name": "Cabbage",
+    "type": "crop",
+    "unlock_level": 65,
+    "source_location_id": "field",
+    "growth_time_seconds": 2700
+  },
+  {
+    "id": "cabbage_soup",
+    "name": "Cabbage soup",
+    "type": "processed_material",
+    "unlock_level": 65,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "chocolate_pie",
+    "name": "Chocolate pie",
+    "type": "processed_material",
+    "unlock_level": 65,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "pineapple_cake",
+    "name": "Pineapple cake",
+    "type": "processed_material",
+    "unlock_level": 65,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "egg_sandwich",
+    "name": "Egg sandwich",
+    "type": "processed_material",
+    "unlock_level": 66,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "green_smoothie",
+    "name": "Green smoothie",
+    "type": "processed_material",
+    "unlock_level": 66,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "lemon",
+    "name": "Lemon",
+    "type": "crop",
+    "unlock_level": 66,
+    "source_location_id": "lemon_tree",
+    "growth_time_seconds": 104400
+  },
+  {
+    "id": "lemon_curd",
+    "name": "Lemon curd",
+    "type": "processed_material",
+    "unlock_level": 66,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "olive_dip",
+    "name": "Olive dip",
+    "type": "processed_material",
+    "unlock_level": 66,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "fresh_pasta",
+    "name": "Fresh pasta",
+    "type": "processed_material",
+    "unlock_level": 67,
+    "source_location_id": "pasta_maker"
+  },
+  {
+    "id": "grilled_asparagus",
+    "name": "Grilled asparagus",
+    "type": "processed_material",
+    "unlock_level": 67,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "lemon_pie",
+    "name": "Lemon pie",
+    "type": "processed_material",
+    "unlock_level": 67,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "pasta_salad",
+    "name": "Pasta salad",
+    "type": "processed_material",
+    "unlock_level": 67,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "grilled_onion",
+    "name": "Grilled onion",
+    "type": "processed_material",
+    "unlock_level": 68,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "lemon_cake",
+    "name": "Lemon cake",
+    "type": "processed_material",
+    "unlock_level": 68,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "lemon_essential_oil",
+    "name": "Lemon essential oil",
+    "type": "processed_material",
+    "unlock_level": 68,
+    "source_location_id": "essential_oils_lab"
+  },
+  {
+    "id": "onion",
+    "name": "Onion",
+    "type": "crop",
+    "unlock_level": 68,
+    "source_location_id": "field",
+    "growth_time_seconds": 18000
+  },
+  {
+    "id": "peanut_butter_milkshake",
+    "name": "Peanut butter milkshake",
+    "type": "processed_material",
+    "unlock_level": 68,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "fried_rice",
+    "name": "Fried rice",
+    "type": "processed_material",
+    "unlock_level": 69,
+    "source_location_id": "wok_kitchen"
+  },
+  {
+    "id": "honey_toast",
+    "name": "Honey toast",
+    "type": "processed_material",
+    "unlock_level": 69,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "lamb_stir_fry",
+    "name": "Lamb stir fry",
+    "type": "processed_material",
+    "unlock_level": 69,
+    "source_location_id": "wok_kitchen"
+  },
+  {
+    "id": "tomato_sauce",
+    "name": "Tomato sauce",
+    "type": "processed_material",
+    "unlock_level": 69,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "blueberry_chutney",
+    "name": "Blueberry chutney",
+    "type": "processed_material",
+    "unlock_level": 70,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "cloche_hat",
+    "name": "Cloche hat",
+    "type": "processed_material",
+    "unlock_level": 70,
+    "source_location_id": "hat_maker"
+  },
+  {
+    "id": "cucumber",
+    "name": "Cucumber",
+    "type": "crop",
+    "unlock_level": 70,
+    "source_location_id": "field",
+    "growth_time_seconds": 2100
+  },
+  {
+    "id": "cucumber_smoothie",
+    "name": "Cucumber smoothie",
+    "type": "processed_material",
+    "unlock_level": 70,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "yogurt_smoothie",
+    "name": "Yogurt smoothie",
+    "type": "processed_material",
+    "unlock_level": 70,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "flower_shawl",
+    "name": "Flower shawl",
+    "type": "processed_material",
+    "unlock_level": 71,
+    "source_location_id": "loom"
+  },
+  {
+    "id": "orange",
+    "name": "Orange",
+    "type": "crop",
+    "unlock_level": 71,
+    "source_location_id": "orange_tree",
+    "growth_time_seconds": 111600
+  },
+  {
+    "id": "orange_juice",
+    "name": "Orange juice",
+    "type": "processed_material",
+    "unlock_level": 71,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "peanut_butter_and_jelly_sandwich",
+    "name": "Peanut butter and jelly sandwich",
+    "type": "processed_material",
+    "unlock_level": 71,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "beetroot",
+    "name": "Beetroot",
+    "type": "crop",
+    "unlock_level": 72,
+    "source_location_id": "field",
+    "growth_time_seconds": 2400
+  },
+  {
+    "id": "gnocchi",
+    "name": "Gnocchi",
+    "type": "processed_material",
+    "unlock_level": 72,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "lemon_candle",
+    "name": "Lemon candle",
+    "type": "processed_material",
+    "unlock_level": 72,
+    "source_location_id": "candle_maker"
+  },
+  {
+    "id": "onion_soup",
+    "name": "Onion soup",
+    "type": "processed_material",
+    "unlock_level": 72,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "top_hat",
+    "name": "Top hat",
+    "type": "processed_material",
+    "unlock_level": 72,
+    "source_location_id": "hat_maker"
+  },
+  {
+    "id": "winter_veggies",
+    "name": "Winter veggies",
+    "type": "processed_material",
+    "unlock_level": 72,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "gracious_bouquet",
+    "name": "Gracious bouquet",
+    "type": "processed_material",
+    "unlock_level": 73,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "noodle_soup",
+    "name": "Noodle soup",
+    "type": "processed_material",
+    "unlock_level": 73,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "rice_noodles",
+    "name": "Rice noodles",
+    "type": "processed_material",
+    "unlock_level": 73,
+    "source_location_id": "pasta_maker"
+  },
+  {
+    "id": "bell_pepper",
+    "name": "Bell pepper",
+    "type": "crop",
+    "unlock_level": 74,
+    "source_location_id": "field",
+    "growth_time_seconds": 16200
+  },
+  {
+    "id": "chamomile_essential_oil",
+    "name": "Chamomile essential oil",
+    "type": "processed_material",
+    "unlock_level": 74,
+    "source_location_id": "essential_oils_lab"
+  },
+  {
+    "id": "marmalade",
+    "name": "Marmalade",
+    "type": "processed_material",
+    "unlock_level": 74,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "sun_hat",
+    "name": "Sun hat",
+    "type": "processed_material",
+    "unlock_level": 74,
+    "source_location_id": "hat_maker"
+  },
+  {
+    "id": "veggie_lasagna",
+    "name": "Veggie lasagna",
+    "type": "processed_material",
+    "unlock_level": 74,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "veggie_platter",
+    "name": "Veggie platter",
+    "type": "processed_material",
+    "unlock_level": 74,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "coleslaw",
+    "name": "Coleslaw",
+    "type": "processed_material",
+    "unlock_level": 75,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "cotton_candy",
+    "name": "Cotton candy",
+    "type": "processed_material",
+    "unlock_level": 75,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "hot_dog",
+    "name": "Hot dog",
+    "type": "processed_material",
+    "unlock_level": 75,
+    "source_location_id": "hot_dog_stand"
+  },
+  {
+    "id": "beetroot_salad",
+    "name": "Beetroot salad",
+    "type": "processed_material",
+    "unlock_level": 76,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "big_sushi_roll",
+    "name": "Big sushi roll",
+    "type": "processed_material",
+    "unlock_level": 76,
+    "source_location_id": "sushi_bar"
+  },
+  {
+    "id": "peach",
+    "name": "Peach",
+    "type": "crop",
+    "unlock_level": 76,
+    "source_location_id": "peach_tree",
+    "growth_time_seconds": 108000
+  },
+  {
+    "id": "peach_tart",
+    "name": "Peach tart",
+    "type": "processed_material",
+    "unlock_level": 76,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "plain_donut",
+    "name": "Plain donut",
+    "type": "processed_material",
+    "unlock_level": 76,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "tofu_dog",
+    "name": "Tofu dog",
+    "type": "processed_material",
+    "unlock_level": 76,
+    "source_location_id": "hot_dog_stand"
+  },
+  {
+    "id": "colourful_omelet",
+    "name": "Colourful omelet",
+    "type": "processed_material",
+    "unlock_level": 77,
+    "source_location_id": "omelet_station"
+  },
+  {
+    "id": "salsa",
+    "name": "Salsa",
+    "type": "processed_material",
+    "unlock_level": 77,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "spicy_bean_taco",
+    "name": "Spicy bean taco",
+    "type": "processed_material",
+    "unlock_level": 77,
+    "source_location_id": "taco_kitchen"
+  },
+  {
+    "id": "spring_omelet",
+    "name": "Spring omelet",
+    "type": "processed_material",
+    "unlock_level": 77,
+    "source_location_id": "omelet_station"
+  },
+  {
+    "id": "taco",
+    "name": "Taco",
+    "type": "processed_material",
+    "unlock_level": 77,
+    "source_location_id": "taco_kitchen"
+  },
+  {
+    "id": "affogato",
+    "name": "Affogato",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "corn_dog",
+    "name": "Corn dog",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "hot_dog_stand"
+  },
+  {
+    "id": "ginger",
+    "name": "Ginger",
+    "type": "crop",
+    "unlock_level": 78,
+    "source_location_id": "field",
+    "growth_time_seconds": 9000
+  },
+  {
+    "id": "orange_sorbet",
+    "name": "Orange sorbet",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "potato_soup",
+    "name": "Potato soup",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "sesame_brittle",
+    "name": "Sesame brittle",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "candy_machine"
+  },
+  {
+    "id": "summer_rolls",
+    "name": "Summer rolls",
+    "type": "processed_material",
+    "unlock_level": 78,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "cheese_omelet",
+    "name": "Cheese omelet",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "omelet_station"
+  },
+  {
+    "id": "cucumber_sandwich",
+    "name": "Cucumber sandwich",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "fish_taco",
+    "name": "Fish taco",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "taco_kitchen"
+  },
+  {
+    "id": "lobster_pasta",
+    "name": "Lobster pasta",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "peach_jam",
+    "name": "Peach jam",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "spicy_fish",
+    "name": "Spicy fish",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "wok_kitchen"
+  },
+  {
+    "id": "sprinkled_donut",
+    "name": "Sprinkled donut",
+    "type": "processed_material",
+    "unlock_level": 79,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "ginger_essential_oil",
+    "name": "Ginger essential oil",
+    "type": "processed_material",
+    "unlock_level": 80,
+    "source_location_id": "essential_oils_lab"
+  },
+  {
+    "id": "green_tea",
+    "name": "Green tea",
+    "type": "processed_material",
+    "unlock_level": 80,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "onion_dog",
+    "name": "Onion dog",
+    "type": "processed_material",
+    "unlock_level": 80,
+    "source_location_id": "hot_dog_stand"
+  },
+  {
+    "id": "stuffed_peppers",
+    "name": "Stuffed peppers",
+    "type": "processed_material",
+    "unlock_level": 80,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "tea_leaf",
+    "name": "Tea leaf",
+    "type": "crop",
+    "unlock_level": 80,
+    "source_location_id": "field",
+    "growth_time_seconds": 23400
+  },
+  {
+    "id": "bell_pepper_soup",
+    "name": "Bell pepper soup",
+    "type": "processed_material",
+    "unlock_level": 81,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "chocolate_fondue",
+    "name": "Chocolate fondue",
+    "type": "processed_material",
+    "unlock_level": 81,
+    "source_location_id": "fondue_pot"
+  },
+  {
+    "id": "milk_tea",
+    "name": "Milk tea",
+    "type": "processed_material",
+    "unlock_level": 81,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "crunchy_donut",
+    "name": "Crunchy donut",
+    "type": "processed_material",
+    "unlock_level": 82,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "fruit_salad",
+    "name": "Fruit salad",
+    "type": "processed_material",
+    "unlock_level": 82,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "peony",
+    "name": "Peony",
+    "type": "crop",
+    "unlock_level": 82,
+    "source_location_id": "field",
+    "growth_time_seconds": 14400
+  },
+  {
+    "id": "quesadilla",
+    "name": "Quesadilla",
+    "type": "processed_material",
+    "unlock_level": 82,
+    "source_location_id": "taco_kitchen"
+  },
+  {
+    "id": "broccoli",
+    "name": "Broccoli",
+    "type": "crop",
+    "unlock_level": 83,
+    "source_location_id": "field",
+    "growth_time_seconds": 5400
+  },
+  {
+    "id": "broccoli_pasta",
+    "name": "Broccoli pasta",
+    "type": "processed_material",
+    "unlock_level": 83,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "honey_tea",
+    "name": "Honey tea",
+    "type": "processed_material",
+    "unlock_level": 83,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "pasta_carbonara",
+    "name": "Pasta carbonara",
+    "type": "processed_material",
+    "unlock_level": 83,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "peach_ice_cream",
+    "name": "Peach ice cream",
+    "type": "processed_material",
+    "unlock_level": 83,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "rice_omelet",
+    "name": "Rice omelet",
+    "type": "processed_material",
+    "unlock_level": 83,
+    "source_location_id": "omelet_station"
+  },
+  {
+    "id": "colorful_candles",
+    "name": "Colorful candles",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "candle_maker"
+  },
+  {
+    "id": "grape_juice",
+    "name": "Grape juice",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "grapes",
+    "name": "Grapes",
+    "type": "crop",
+    "unlock_level": 84,
+    "source_location_id": "field",
+    "growth_time_seconds": 10800
+  },
+  {
+    "id": "honey_soap",
+    "name": "Honey soap",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "bath_kiosk"
+  },
+  {
+    "id": "lemon_lotion",
+    "name": "Lemon lotion",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "bath_kiosk"
+  },
+  {
+    "id": "onion_melt",
+    "name": "Onion melt",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "summer_salad",
+    "name": "Summer salad",
+    "type": "processed_material",
+    "unlock_level": 84,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "grape_jam",
+    "name": "Grape jam",
+    "type": "processed_material",
+    "unlock_level": 85,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "mint",
+    "name": "Mint",
+    "type": "crop",
+    "unlock_level": 85,
+    "source_location_id": "field",
+    "growth_time_seconds": 10800
+  },
+  {
+    "id": "mint_essential_oil",
+    "name": "Mint essential oil",
+    "type": "processed_material",
+    "unlock_level": 85,
+    "source_location_id": "essential_oils_lab"
+  },
+  {
+    "id": "mint_ice_cream",
+    "name": "Mint ice cream",
+    "type": "processed_material",
+    "unlock_level": 85,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "bacon_fondue",
+    "name": "Bacon fondue",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "fondue_pot"
+  },
+  {
+    "id": "cream_donut",
+    "name": "Cream donut",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "flower_crown",
+    "name": "Flower crown",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "hat_maker"
+  },
+  {
+    "id": "gingerbread_cookie",
+    "name": "Gingerbread cookie",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "bakery"
+  },
+  {
+    "id": "lemon_tea",
+    "name": "Lemon tea",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "peanut_noodles",
+    "name": "Peanut noodles",
+    "type": "processed_material",
+    "unlock_level": 86,
+    "source_location_id": "wok_kitchen"
+  },
+  {
+    "id": "bacon_fries",
+    "name": "Bacon fries",
+    "type": "processed_material",
+    "unlock_level": 87,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "broccoli_soup",
+    "name": "Broccoli soup",
+    "type": "processed_material",
+    "unlock_level": 87,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "nachos",
+    "name": "Nachos",
+    "type": "processed_material",
+    "unlock_level": 87,
+    "source_location_id": "taco_kitchen"
+  },
+  {
+    "id": "potato_omelet",
+    "name": "Potato omelet",
+    "type": "processed_material",
+    "unlock_level": 87,
+    "source_location_id": "omelet_station"
+  },
+  {
+    "id": "spicy_pasta",
+    "name": "Spicy pasta",
+    "type": "processed_material",
+    "unlock_level": 87,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "apple_ginger_tea",
+    "name": "Apple ginger tea",
+    "type": "processed_material",
+    "unlock_level": 88,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "bacon_donut",
+    "name": "Bacon donut",
+    "type": "processed_material",
+    "unlock_level": 88,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "banana",
+    "name": "Banana",
+    "type": "crop",
+    "unlock_level": 88,
+    "source_location_id": "banana_tree",
+    "growth_time_seconds": 97200
+  },
+  {
+    "id": "iced_banana_latte",
+    "name": "Iced banana latte",
+    "type": "processed_material",
+    "unlock_level": 88,
+    "source_location_id": "coffee_kiosk"
+  },
+  {
+    "id": "mixed_smoothie",
+    "name": "Mixed smoothie",
+    "type": "processed_material",
+    "unlock_level": 88,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "passion_fruit",
+    "name": "Passion fruit",
+    "type": "crop",
+    "unlock_level": 88,
+    "source_location_id": "field",
+    "growth_time_seconds": 3600
+  },
+  {
+    "id": "passion_fruit_juice",
+    "name": "Passion fruit juice",
+    "type": "processed_material",
+    "unlock_level": 88,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "fruit_cake",
+    "name": "Fruit cake",
+    "type": "processed_material",
+    "unlock_level": 89,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "mushroom",
+    "name": "Mushroom",
+    "type": "crop",
+    "unlock_level": 89,
+    "source_location_id": "field",
+    "growth_time_seconds": 1200
+  },
+  {
+    "id": "mushroom_salad",
+    "name": "Mushroom salad",
+    "type": "processed_material",
+    "unlock_level": 89,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "orange_tea",
+    "name": "Orange tea",
+    "type": "processed_material",
+    "unlock_level": 89,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "tofu_stir_fry",
+    "name": "Tofu stir fry",
+    "type": "processed_material",
+    "unlock_level": 89,
+    "source_location_id": "wok_kitchen"
+  },
+  {
+    "id": "candy_bouquet",
+    "name": "Candy bouquet",
+    "type": "processed_material",
+    "unlock_level": 90,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "eggplant",
+    "name": "Eggplant",
+    "type": "crop",
+    "unlock_level": 90,
+    "source_location_id": "field",
+    "growth_time_seconds": 2400
+  },
+  {
+    "id": "grilled_eggplant",
+    "name": "Grilled eggplant",
+    "type": "processed_material",
+    "unlock_level": 90,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "banana_bread",
+    "name": "Banana bread",
+    "type": "processed_material",
+    "unlock_level": 91,
+    "source_location_id": "bakery"
+  },
+  {
+    "id": "cheese_fondue",
+    "name": "Cheese fondue",
+    "type": "processed_material",
+    "unlock_level": 91,
+    "source_location_id": "fondue_pot"
+  },
+  {
+    "id": "hand_pies",
+    "name": "Hand pies",
+    "type": "processed_material",
+    "unlock_level": 91,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "pickles",
+    "name": "Pickles",
+    "type": "processed_material",
+    "unlock_level": 91,
+    "source_location_id": "preservation_station"
+  },
+  {
+    "id": "birthday_bouquet",
+    "name": "Birthday bouquet",
+    "type": "processed_material",
+    "unlock_level": 92,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "goat_cheese_toast",
+    "name": "Goat cheese toast",
+    "type": "processed_material",
+    "unlock_level": 92,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "iced_tea",
+    "name": "Iced tea",
+    "type": "processed_material",
+    "unlock_level": 92,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "passion_fruit_pie",
+    "name": "Passion fruit pie",
+    "type": "processed_material",
+    "unlock_level": 92,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "watermelon",
+    "name": "Watermelon",
+    "type": "crop",
+    "unlock_level": 92,
+    "source_location_id": "field",
+    "growth_time_seconds": 18000
+  },
+  {
+    "id": "watermelon_juice",
+    "name": "Watermelon juice",
+    "type": "processed_material",
+    "unlock_level": 92,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "black_sesame_smoothie",
+    "name": "Black sesame smoothie",
+    "type": "processed_material",
+    "unlock_level": 93,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "exfoliating_soap",
+    "name": "Exfoliating soap",
+    "type": "processed_material",
+    "unlock_level": 93,
+    "source_location_id": "bath_kiosk"
+  },
+  {
+    "id": "filled_donut",
+    "name": "Filled donut",
+    "type": "processed_material",
+    "unlock_level": 93,
+    "source_location_id": "donut_maker"
+  },
+  {
+    "id": "soft_bouquet",
+    "name": "Soft bouquet",
+    "type": "processed_material",
+    "unlock_level": 93,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "banana_pancakes",
+    "name": "Banana pancakes",
+    "type": "processed_material",
+    "unlock_level": 94,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "clay",
+    "name": "Clay",
+    "type": "crop",
+    "unlock_level": 94,
+    "source_location_id": "field",
+    "growth_time_seconds": 6600
+  },
+  {
+    "id": "plum",
+    "name": "Plum",
+    "type": "crop",
+    "unlock_level": 94,
+    "source_location_id": "plum_tree",
+    "growth_time_seconds": 86400
+  },
+  {
+    "id": "plum_jam",
+    "name": "Plum jam",
+    "type": "processed_material",
+    "unlock_level": 94,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "tea_pot",
+    "name": "Tea pot",
+    "type": "processed_material",
+    "unlock_level": 94,
+    "source_location_id": "pottery_studio"
+  },
+  {
+    "id": "canned_fish",
+    "name": "Canned fish",
+    "type": "processed_material",
+    "unlock_level": 95,
+    "source_location_id": "preservation_station"
+  },
+  {
+    "id": "chickpea",
+    "name": "Chickpea",
+    "type": "crop",
+    "unlock_level": 95,
+    "source_location_id": "field",
+    "growth_time_seconds": 3600
+  },
+  {
+    "id": "chocolate_roll",
+    "name": "Chocolate roll",
+    "type": "processed_material",
+    "unlock_level": 95,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "floral_candle",
+    "name": "Floral candle",
+    "type": "processed_material",
+    "unlock_level": 95,
+    "source_location_id": "candle_maker"
+  },
+  {
+    "id": "hummus",
+    "name": "Hummus",
+    "type": "processed_material",
+    "unlock_level": 95,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "banana_split",
+    "name": "Banana split",
+    "type": "processed_material",
+    "unlock_level": 96,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "fish_skewer",
+    "name": "Fish skewer",
+    "type": "processed_material",
+    "unlock_level": 96,
+    "source_location_id": "bbq_grill"
+  },
+  {
+    "id": "passion_fruit_jam",
+    "name": "Passion fruit jam",
+    "type": "processed_material",
+    "unlock_level": 96,
+    "source_location_id": "jam_maker"
+  },
+  {
+    "id": "potted_plant",
+    "name": "Potted plant",
+    "type": "processed_material",
+    "unlock_level": 96,
+    "source_location_id": "pottery_studio"
+  },
+  {
+    "id": "mango",
+    "name": "Mango",
+    "type": "crop",
+    "unlock_level": 97,
+    "source_location_id": "mango_tree",
+    "growth_time_seconds": 115200
+  },
+  {
+    "id": "mango_juice",
+    "name": "Mango juice",
+    "type": "processed_material",
+    "unlock_level": 97,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "mint_tea",
+    "name": "Mint tea",
+    "type": "processed_material",
+    "unlock_level": 97,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "mushroom_pot_pie",
+    "name": "Mushroom pot pie",
+    "type": "processed_material",
+    "unlock_level": 97,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "chili_poppers",
+    "name": "Chili poppers",
+    "type": "processed_material",
+    "unlock_level": 98,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "falafel",
+    "name": "Falafel",
+    "type": "processed_material",
+    "unlock_level": 98,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "flower_pendant",
+    "name": "Flower pendant",
+    "type": "processed_material",
+    "unlock_level": 98,
+    "source_location_id": "jeweler"
+  },
+  {
+    "id": "kimchi",
+    "name": "Kimchi",
+    "type": "processed_material",
+    "unlock_level": 98,
+    "source_location_id": "preservation_station"
+  },
+  {
+    "id": "clay_mug",
+    "name": "Clay mug",
+    "type": "processed_material",
+    "unlock_level": 99,
+    "source_location_id": "pottery_studio"
+  },
+  {
+    "id": "eggplant_parmesan",
+    "name": "Eggplant parmesan",
+    "type": "processed_material",
+    "unlock_level": 99,
+    "source_location_id": "pie_oven"
+  },
+  {
+    "id": "honey_face_mask",
+    "name": "Honey face mask",
+    "type": "processed_material",
+    "unlock_level": 99,
+    "source_location_id": "bath_kiosk"
+  },
+  {
+    "id": "rich_fudge",
+    "name": "Rich fudge",
+    "type": "processed_material",
+    "unlock_level": 99,
+    "source_location_id": "fudge_shop"
+  },
+  {
+    "id": "chamomile_tea",
+    "name": "Chamomile tea",
+    "type": "processed_material",
+    "unlock_level": 100,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "cocoa_smoothie",
+    "name": "Cocoa smoothie",
+    "type": "processed_material",
+    "unlock_level": 100,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "fried_candy_bar",
+    "name": "Fried candy bar",
+    "type": "processed_material",
+    "unlock_level": 100,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "tart_dressing",
+    "name": "Tart dressing",
+    "type": "processed_material",
+    "unlock_level": 100,
+    "source_location_id": "sauce_maker"
+  },
+  {
+    "id": "tropical_fondue",
+    "name": "Tropical fondue",
+    "type": "processed_material",
+    "unlock_level": 100,
+    "source_location_id": "fondue_pot"
+  },
+  {
+    "id": "coconut",
+    "name": "Coconut",
+    "type": "crop",
+    "unlock_level": 101,
+    "source_location_id": "coconut_tree",
+    "growth_time_seconds": 129600
+  },
+  {
+    "id": "macaroon",
+    "name": "Macaroon",
+    "type": "processed_material",
+    "unlock_level": 101,
+    "source_location_id": "bakery"
+  },
+  {
+    "id": "mushroom_pasta",
+    "name": "Mushroom pasta",
+    "type": "processed_material",
+    "unlock_level": 101,
+    "source_location_id": "pasta_kitchen"
+  },
+  {
+    "id": "coconut_ice_cream",
+    "name": "Coconut ice cream",
+    "type": "processed_material",
+    "unlock_level": 102,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "dried_fruit",
+    "name": "Dried fruit",
+    "type": "processed_material",
+    "unlock_level": 102,
+    "source_location_id": "preservation_station"
+  },
+  {
+    "id": "mint_fudge",
+    "name": "Mint fudge",
+    "type": "processed_material",
+    "unlock_level": 102,
+    "source_location_id": "fudge_shop"
+  },
+  {
+    "id": "plum_smoothie",
+    "name": "Plum smoothie",
+    "type": "processed_material",
+    "unlock_level": 102,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "plain_yogurt",
+    "name": "Plain yogurt",
+    "type": "processed_material",
+    "unlock_level": 103,
+    "source_location_id": "yogurt_maker"
+  },
+  {
+    "id": "samosa",
+    "name": "Samosa",
+    "type": "processed_material",
+    "unlock_level": 103,
+    "source_location_id": "deep_fryer"
+  },
+  {
+    "id": "chili_fudge",
+    "name": "Chili fudge",
+    "type": "processed_material",
+    "unlock_level": 104,
+    "source_location_id": "fudge_shop"
+  },
+  {
+    "id": "guava",
+    "name": "Guava",
+    "type": "crop",
+    "unlock_level": 104,
+    "source_location_id": "guava_tree",
+    "growth_time_seconds": 122400
+  },
+  {
+    "id": "guava_compote",
+    "name": "Guava compote",
+    "type": "processed_material",
+    "unlock_level": 104,
+    "source_location_id": "preservation_station"
+  },
+  {
+    "id": "guava_juice",
+    "name": "Guava juice",
+    "type": "processed_material",
+    "unlock_level": 104,
+    "source_location_id": "juice_press"
+  },
+  {
+    "id": "mushroom_soup",
+    "name": "Mushroom soup",
+    "type": "processed_material",
+    "unlock_level": 104,
+    "source_location_id": "soup_kitchen"
+  },
+  {
+    "id": "tropical_smoothie",
+    "name": "Tropical smoothie",
+    "type": "processed_material",
+    "unlock_level": 104,
+    "source_location_id": "smoothie_mixer"
+  },
+  {
+    "id": "strawberry_yogurt",
+    "name": "Strawberry yogurt",
+    "type": "processed_material",
+    "unlock_level": 105,
+    "source_location_id": "yogurt_maker"
+  },
+  {
+    "id": "chickpea_stew",
+    "name": "Chickpea stew",
+    "type": "processed_material",
+    "unlock_level": 106,
+    "source_location_id": "stew_pot"
+  },
+  {
+    "id": "fruit_sorbet",
+    "name": "Fruit sorbet",
+    "type": "processed_material",
+    "unlock_level": 106,
+    "source_location_id": "ice_cream_maker"
+  },
+  {
+    "id": "veggie_bouquet",
+    "name": "Veggie bouquet",
+    "type": "processed_material",
+    "unlock_level": 106,
+    "source_location_id": "flower_shop"
+  },
+  {
+    "id": "pomegranate",
+    "name": "Pomegranate",
+    "type": "crop",
+    "unlock_level": 107,
+    "source_location_id": "pomegranate_tree",
+    "growth_time_seconds": 97200
+  },
+  {
+    "id": "pomegranate_tea",
+    "name": "Pomegranate tea",
+    "type": "processed_material",
+    "unlock_level": 107,
+    "source_location_id": "tea_stand"
+  },
+  {
+    "id": "lemon_fudge",
+    "name": "Lemon fudge",
+    "type": "processed_material",
+    "unlock_level": 108,
+    "source_location_id": "fudge_shop"
+  },
+  {
+    "id": "pomegranate_cake",
+    "name": "Pomegranate cake",
+    "type": "processed_material",
+    "unlock_level": 108,
+    "source_location_id": "cake_oven"
+  },
+  {
+    "id": "chili_stew",
+    "name": "Chili stew",
+    "type": "processed_material",
+    "unlock_level": 109,
+    "source_location_id": "stew_pot"
+  },
+  {
+    "id": "guava_cupcake",
+    "name": "Guava cupcake",
+    "type": "processed_material",
+    "unlock_level": 109,
+    "source_location_id": "cupcake_maker"
+  },
+  {
+    "id": "hummus_wrap",
+    "name": "Hummus wrap",
+    "type": "processed_material",
+    "unlock_level": 109,
+    "source_location_id": "sandwich_bar"
+  },
+  {
+    "id": "plain_cupcake",
+    "name": "Plain cupcake",
+    "type": "processed_material",
+    "unlock_level": 109,
+    "source_location_id": "cupcake_maker"
+  },
+  {
+    "id": "tropical_yogurt",
+    "name": "Tropical yogurt",
+    "type": "processed_material",
+    "unlock_level": 109,
+    "source_location_id": "yogurt_maker"
+  },
+  {
+    "id": "fresh_diffuser",
+    "name": "Fresh diffuser",
+    "type": "processed_material",
+    "unlock_level": 110,
+    "source_location_id": "perfumerie"
+  },
+  {
+    "id": "rice_ball",
+    "name": "Rice ball",
+    "type": "processed_material",
+    "unlock_level": 110,
+    "source_location_id": "sushi_bar"
+  },
+  {
+    "id": "peanut_fudge",
+    "name": "Peanut fudge",
+    "type": "processed_material",
+    "unlock_level": 111,
+    "source_location_id": "fudge_shop"
+  },
+  {
+    "id": "tropical_cupcake",
+    "name": "Tropical cupcake",
+    "type": "processed_material",
+    "unlock_level": 112,
+    "source_location_id": "cupcake_maker"
+  },
+  {
+    "id": "winter_stew",
+    "name": "Winter stew",
+    "type": "processed_material",
+    "unlock_level": 112,
+    "source_location_id": "stew_pot"
+  },
+  {
+    "id": "zesty_perfume",
+    "name": "Zesty perfume",
+    "type": "processed_material",
+    "unlock_level": 113,
+    "source_location_id": "perfumerie"
+  },
+  {
+    "id": "berry_waffles",
+    "name": "Berry waffles",
+    "type": "processed_material",
+    "unlock_level": 114,
+    "source_location_id": "waffle_maker"
+  },
+  {
+    "id": "cookie_cupcake",
+    "name": "Cookie cupcake",
+    "type": "processed_material",
+    "unlock_level": 114,
+    "source_location_id": "cupcake_maker"
+  },
+  {
+    "id": "plain_waffles",
+    "name": "Plain waffles",
+    "type": "processed_material",
+    "unlock_level": 114,
+    "source_location_id": "waffle_maker"
+  },
+  {
+    "id": "calming_diffuser",
+    "name": "Calming diffuser",
+    "type": "processed_material",
+    "unlock_level": 116,
+    "source_location_id": "perfumerie"
+  },
+  {
+    "id": "chocolate_waffles",
+    "name": "Chocolate waffles",
+    "type": "processed_material",
+    "unlock_level": 117,
+    "source_location_id": "waffle_maker"
+  },
+  {
+    "id": "orange_salad",
+    "name": "Orange salad",
+    "type": "processed_material",
+    "unlock_level": 117,
+    "source_location_id": "salad_bar"
+  },
+  {
+    "id": "blueberry_waffles",
+    "name": "Blueberry waffles",
+    "type": "processed_material",
+    "unlock_level": 118,
+    "source_location_id": "waffle_maker"
+  },
+  {
+    "id": "apple_porridge",
+    "name": "Apple porridge",
+    "type": "processed_material",
+    "unlock_level": 119,
+    "source_location_id": "porridge_bar"
+  },
+  {
+    "id": "breakfast_bowl",
+    "name": "Breakfast bowl",
+    "type": "processed_material",
+    "unlock_level": 119,
+    "source_location_id": "yogurt_maker"
+  },
+  {
+    "id": "breakfast_waffles",
+    "name": "Breakfast waffles",
+    "type": "processed_material",
+    "unlock_level": 119,
+    "source_location_id": "waffle_maker"
+  },
+  {
+    "id": "oats",
+    "name": "Oats",
+    "type": "crop",
+    "unlock_level": 119,
+    "source_location_id": "field",
+    "growth_time_seconds": 420
+  },
+  {
+    "id": "pineapple_coconut_bars",
+    "name": "Pineapple coconut bars",
+    "type": "processed_material",
+    "unlock_level": 120,
+    "source_location_id": "bakery"
+  },
+  {
+    "id": "sweet_porridge",
+    "name": "Sweet porridge",
+    "type": "processed_material",
+    "unlock_level": 120,
+    "source_location_id": "porridge_bar"
+  },
+  {
+    "id": "rich_soap",
+    "name": "Rich soap",
+    "type": "processed_material",
+    "unlock_level": 121,
+    "source_location_id": "bath_kiosk"
+  },
+  {
+    "id": "fresh_porridge",
+    "name": "Fresh porridge",
+    "type": "processed_material",
+    "unlock_level": 122,
+    "source_location_id": "porridge_bar"
+  },
+  {
+    "id": "vanilla_milkshake",
+    "name": "Vanilla milkshake",
+    "type": "processed_material",
+    "unlock_level": 124,
+    "source_location_id": "milkshake_bar"
+  },
+  {
+    "id": "mocha_milkshake",
+    "name": "Mocha milkshake",
+    "type": "processed_material",
+    "unlock_level": 125,
+    "source_location_id": "milkshake_bar"
+  },
+  {
+    "id": "fruity_milkshake",
+    "name": "Fruity milkshake",
+    "type": "processed_material",
+    "unlock_level": 126,
+    "source_location_id": "milkshake_bar"
   }
 ]

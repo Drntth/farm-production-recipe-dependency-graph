@@ -4,7 +4,7 @@ Where the project's data comes from, and which part is scraped, hand-maintained 
 
 ## Hay Day Fandom wiki (scraped)
 
-The scraper uses the MediaWiki API (`https://hayday.fandom.com/api.php`), not the HTML pages, which avoids Cloudflare challenges. Requests are throttled (`--delay`, default 0.5 s). Every page used is recorded with its revision timestamp in `data/meta.json`.
+The scraper uses the MediaWiki API (`https://hayday.fandom.com/api.php`), not the HTML pages, which avoids Cloudflare challenges. Requests are throttled (`--delay`, default 0.5 s). Every page used is recorded with its revision timestamp in `data/meta.json`. By default every level on the wiki is scraped (`--level N` cuts it off); the tools filter the data by the player level.
 
 | Wiki source                                | API call                   | Parser                                                               | Produces                                                                                   |
 | ------------------------------------------ | -------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
