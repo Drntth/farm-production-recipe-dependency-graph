@@ -7,6 +7,7 @@ Usage
     python -m src layout --level 30      # layout (python -m src.layout)
     python -m src plan                   # production plan (python -m src.planner)
     python -m src combine                # combined plan (python -m src.combiner)
+    python -m src relocate               # relocation plan (python -m src.relocation)
     python -m src scrape --game-version 1.72
     python -m src examples               # config/examples/player_level_<N>.json
     python -m src wizard                 # interactive profile → config/player.json
@@ -33,6 +34,10 @@ COMMANDS: dict[str, tuple[str, str]] = {
     "layout": ("src.layout.cli", "farm layout"),
     "plan": ("src.planner.cli", "production plan and login schedule (farm)"),
     "combine": ("src.combiner.cli", "farm layout sized by the production plan"),
+    "relocate": (
+        "src.relocation.cli",
+        "keep / store / place lists to reach the layout",
+    ),
     "scrape": ("src.scraper.cli", "refresh data/ from the Hay Day wiki"),
     "examples": ("src.planner.examples", "write level-default player profiles"),
     "wizard": ("src.planner.wizard", "answer questions, get a player profile"),

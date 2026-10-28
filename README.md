@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.1 is done (Python 3.14, CI, `pyproject.toml`, [changelog](CHANGELOG.md)). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
+**Status:** v1.3 is done: a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -107,7 +107,7 @@ A production block is a movable logical unit, for example:
 
 ### Farm map (player data)
 
-Every farm has its own expansions and its own spot for the farmhouse, barn, silo, mine, …, so the usable area is player data: `config/farm_map.json` (git-ignored; the committed `config/farm_map.example.json` lists the fixed farm buildings with empty positions).
+Every farm has its own expansions and its own spot for the farmhouse, mine, truck, …, so the usable area is player data: `config/farm_map.json` (git-ignored; the committed `config/farm_map.example.json` lists the fixed farm buildings with empty positions).
 
 ```json
 {
@@ -115,19 +115,22 @@ Every farm has its own expansions and its own spot for the farmhouse, barn, silo
   "height": 55,
   "fixed": [
     { "id": "farmhouse", "x": 20, "y": 18, "width": 6, "height": 6 },
-    { "id": "mine", "x": 52, "y": 2, "width": 4, "height": 4 },
-    { "id": "silo", "x": null, "y": null, "width": null, "height": null }
+    { "id": "mine", "x": 52, "y": 2, "width": 4, "height": 4 }
+  ],
+  "current": [
+    { "id": "bakery", "x": 30, "y": 12, "width": 3, "height": 3 },
+    { "id": "field", "count": 24 }
   ]
 }
 ```
 
 The values above are only an illustration. Coordinates are tiles from the farm's top corner, with `x` along the ↘ edge and `y` along the ↙ edge. `null` means not measured yet: without `width` / `height` the layout is unbounded, and a fixed item without a position is listed in the notes but not drawn. A fixed item whose id is a location (`mine`) also pulls the coupled block (smelter) toward it.
 
-The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored. Plots of section `base` (the starting land) always count as unlocked. The barn and silo are movable: without a position in `fixed` the planner places them as the Storage block. An item with `"movable": true` is measured but not an obstacle: the planner places it itself (like an item without a position, but only for locations the planner places, such as the barn and silo; any other movable item stays fixed and is reported). `zones` are hand-marked tile rectangles: blocks stay inside the `buildable` zones (if any) and never touch `blocked` ones (water, road, forest, …).
+The file can also hold a calibrated screenshot (`background`) and the farm plots (`expansions`, numbered like the wiki page Expansion/Farm, each a list of tile rectangles with an `unlocked` flag). With a background, `layout.svg` draws the screenshot under the grid. When at least one drawn plot is `unlocked` (draw the starting land as section `base`), blocks are placed only on unlocked plots; plots without rectangles are ignored. Plots of section `base` (the starting land) always count as unlocked. `fixed` holds only buildings the game never moves; the planner places the barn and silo as the Storage block, and a movable location listed in `fixed` is an error. `current` is the current farm: where the player's production buildings, shelters, barn and silo stand now (one entry with a position per copy), fields, trees and bushes only as counts (`count`). The Layout Planner ignores it; `python -m src relocate` reads it (see "Relocation plan"). Farm maps from before v1.3 (barn and silo in `fixed`, a `movable` flag) fail with a clear error: open them in the map editor and save them again. `zones` are hand-marked tile rectangles: blocks stay inside the `buildable` zones (if any) and never touch `blocked` ones (water, road, forest, …).
 
 #### Measuring with the map editor
 
-`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`7` steps, `Ctrl+S` save, `Ctrl+Z` undo).
+`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`8` steps, `Ctrl+S` save, `Ctrl+Z` undo).
 
 1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
 2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored). Keep the GIMP file (`.xcf`) and the raw screenshots in `config/screenshots/`, and the wiki plot maps used on the Reference tab in `config/reference/`; both folders are git-ignored (player data, wiki licence, file size). Manual stitching in GIMP:
@@ -136,14 +139,28 @@ The file can also hold a calibrated screenshot (`background`) and the farm plots
    - Small black gaps where no screenshot covers the farm are acceptable, as long as the ruler fields and the fixed buildings are visible.
    - Tile accuracy is enough: an error of a few pixels does not matter for the calibration.
 3. **Calibrate**: load the PNG, click A (top corner of the corner field), B (right corner of the last ↘ field), C (left corner of the last ↙ field), enter the two row lengths and apply. The grid must follow the field edges everywhere. A placed point can be dragged to a better spot; apply again afterwards.
-4. **Fixed**: pick an id (farmhouse, barn, silo, mine, …) and drag over its tiles.
+4. **Fixed**: pick an id (farmhouse, mine, truck, …) and drag over its tiles. Only buildings the game never moves; the barn and silo go to step 8.
 5. **Reference** (optional): overlay the wiki plot map (Expansion/Farm) to trace plot borders that unlocked plots no longer show. Zoom to the part of the farm the overlay shows, then load it: it starts fitted into the visible area. Click 3 point pairs far apart, each first on the overlay and then on the same spot of the farm (r1, m1, r2, m2, r3, m3). After each pair the overlay snaps closer (1 pair: moved, 2 pairs: scaled and rotated, 3 pairs: fully fitted), so the later points need less zoom. Placed points can be dragged; where an r and an m point overlap, the drag takes the m point (Shift: the r point). The overlay is not saved in the JSON.
 6. **Expansions**: add a plot (section + wiki number, unlocked or not) and drag one or more rectangles over its tiles; touching rectangles of one plot merge into one shape, Alt + drag erases tiles.
 7. **Zones**: mark the farm sections as **buildable** (green), water, roads, forest, paved strips (e.g. in front of the riverboat), … as **blocked** (red), and existing decorations the layout should keep as **design** (violet), each as tile rectangles.
 8. **Export**: `farm_map.json` (save it as `config/farm_map.json`; by default the map is cropped to the farm with a 5-tile margin, so the outline follows the real farm), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
 9. **Layout overlay** (step 7 in the editor, view only): load `output/layout.json` or `output/combined.json` to check the planned layout on the screenshot: block frames with names, items (reserved space dashed), paths and the decoration band, as the `layout` layer. Hovering an item shows its block and id in the status bar. The overlay uses the tile coordinates of the farm map it was planned on and is never shifted; when its map size or a fixed building's position differs from the loaded map (e.g. planned before the map was cropped on save, or without a farm map), the editor warns: plan again after every re-save of `farm_map.json`. It is kept in the browser, not in the map JSON.
+10. **Current farm** (step 8 in the editor): where the production buildings, shelters, barn and silo stand now. Pick an id and drag over the item; every drag adds one copy. With a layout loaded in step 7 its ids are offered with their sizes, a click places the item at that size, and a rectangle of another size (rotation allowed) is flagged; without a layout any id can be typed. Fields, trees and bushes are counted only (**Set count**). A farm map from before v1.3 loads with its measured barn and silo moved here. Saved as `current` in `farm_map.json`.
 
 The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
+
+### Relocation plan
+
+`python -m src relocate [--layout PATH]` (package `src/relocation/`; not part of `all`) turns the current farm (`current` in the farm map) into the planned layout: `output/combined.json` by default, else `output/layout.json`.
+
+1. **Checks** (each an error): the layout was planned on this farm map (same size, fixed buildings at the same tiles); every current id is a known, movable farm location; every measured size matches the data footprint (the swapped size only for `rotatable` items).
+2. **Keep**: a current item at exactly the tile and size of a layout item of the same id stays (greedy, each layout item once).
+3. **Store**: every other current item, including counted fields, trees and bushes. Layout Edit Mode can store every movable item, so no move order is needed.
+4. **Place**: the remaining layout items, grouped by block, with their tile and rotation.
+5. **Listed apart**: reserved space (copies for later levels, keep free), current copies the layout has no place for, layout copies the farm does not have yet.
+6. A note when fewer items stay than have to be stored: a new layout slot (empty except the fixed buildings) is simpler then.
+
+Writes `output/relocation.json` and `output/relocation.md`.
 
 ### Evolution
 
@@ -569,14 +586,15 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.2 (layout in the map editor) is done (236 tests passing, CI on every push). Next: v1.3 (relocation plan).  
+**Current status:** v1.3 (relocation plan) is done (251 tests passing, CI on every push). Next: v1.4 (path network).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (123 path tiles on the measured farm, the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
-Next step: v1.3. Changes per version: [CHANGELOG.md](CHANGELOG.md).
+The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
+Next step: v1.4. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -670,7 +688,7 @@ Next step: v1.3. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-The items of v1.3-v1.5 are plans; their details are updated when they are built.
+The items of v1.4-v1.5 are plans; their details are updated when they are built.
 
 ### v1.1 - Release basics (done)
 
@@ -687,15 +705,15 @@ The items of v1.3-v1.5 are plans; their details are updated when they are built.
 - [x] View only: blocks are not dragged or edited (that is the v2.0+ layout editor); the block list highlights a block, the status bar names the item under the mouse
 - [x] Same tile coordinates as the farm map; when the layout's map size differs from the loaded farm map (or it was planned without one), the editor warns and does not shift anything
 
-### v1.3 - Relocation plan (next)
+### v1.3 - Relocation plan (done)
 
-- [ ] Current farm: a `current` list in `config/farm_map.json` with the positions of the player's production buildings, shelters, barn and silo now (fields, trees and bushes only as counts), measured in a new editor tab; the Layout Planner ignores it
-- [ ] Farm map clean-up: `fixed` holds only buildings the game never moves; the barn and the silo leave it and the `movable` flag is removed (old farm maps fail with a clear error; re-save them in the editor)
-- [ ] The editor offers the item ids and sizes of the loaded layout (v1.2) for the current farm, free text without one; `relocate` checks every size against the data footprint, rotation included
-- [ ] `python -m src relocate [--layout PATH]`: compares the current farm with `output/combined.json` (else `output/layout.json`); not part of `all`
-- [ ] Relocation plan as keep / store / place lists: keep = same item at exactly the same place (greedy match per id), store = every other current item, place = target positions grouped by block; no move order is needed, because Layout Edit Mode can store everything (see [docs/game-facts/farm.md](docs/game-facts/farm.md)); a note when a new layout slot is simpler
-- [ ] Listed apart: reserved copies (space to keep free), current copies the layout has no place for, layout copies the player does not own yet; an unknown id is an error
-- [ ] Report: `output/relocation.md` / `.json`
+- [x] Current farm: a `current` list in `config/farm_map.json` with the positions of the player's production buildings, shelters, barn and silo now (fields, trees and bushes only as counts), measured in a new editor tab; the Layout Planner ignores it
+- [x] Farm map clean-up: `fixed` holds only buildings the game never moves; the barn and the silo leave it and the `movable` flag is removed (old farm maps fail with a clear error; re-save them in the editor)
+- [x] The editor offers the item ids and sizes of the loaded layout (v1.2) for the current farm, free text without one; `relocate` checks every size against the data footprint, rotation included
+- [x] `python -m src relocate [--layout PATH]`: compares the current farm with `output/combined.json` (else `output/layout.json`); not part of `all`
+- [x] Relocation plan as keep / store / place lists: keep = same item at exactly the same place (greedy match per id), store = every other current item, place = target positions grouped by block; no move order is needed, because Layout Edit Mode can store everything (see [docs/game-facts/farm.md](docs/game-facts/farm.md)); a note when a new layout slot is simpler
+- [x] Listed apart: reserved copies (space to keep free), current copies the layout has no place for, layout copies the player does not own yet; an unknown id is an error
+- [x] Report: `output/relocation.md` / `.json`
 
 ### v1.4 - Path network
 
@@ -751,6 +769,8 @@ python -m src layout --level 30     # any tool: python -m src <graph|layout|plan
 python -m src wizard                # questions → config/player.json (sparse profile)
 python -m src examples              # regenerate config/examples/player_level_<N>.json
 python -m src check-facts           # docs/game-facts vs. the wiki → output/fact_check.md (network)
+python -m src relocate              # current farm → combined.json (else layout.json): output/relocation.*
+python -m src relocate --layout output/layout.json
 
 # build graph + analysis for the configured player level
 python -m src.main
@@ -803,7 +823,9 @@ output/
 ├── combined.md
 ├── combined.svg
 ├── blocks/                            # one SVG per block + collage.svg (block_images)
-└── combined_blocks/                   # the same for the combined layout
+├── combined_blocks/                   # the same for the combined layout
+├── relocation.json                    # python -m src relocate
+└── relocation.md
 ```
 
 Update data from the wiki (level from the player config):
@@ -865,8 +887,12 @@ farm-production-recipe-dependency-graph/
 │   │   ├── cli.py                     # python -m src.combiner
 │   │   ├── combine.py                 # sizing from the plan, lookahead, flows between blocks
 │   │   └── report.py                  # combined.json / combined.md
+│   ├── relocation/                    # relocation plan: current farm → layout (imports no planner)
+│   │   ├── cli.py                     # python -m src relocate
+│   │   ├── relocate.py                # checks, keep / store / place matching
+│   │   └── report.py                  # relocation.json / relocation.md
 │   ├── __main__.py                    # python -m src <command>
-│   ├── cli.py                         # unified CLI: graph, layout, plan, combine, scrape, all
+│   ├── cli.py                         # unified CLI: graph, layout, plan, combine, relocate, scrape, all
 │   ├── config.py                      # player profile: model, loader, validation
 │   ├── settings.py                    # design / planner settings: models, defaults, loader
 │   ├── exporters/

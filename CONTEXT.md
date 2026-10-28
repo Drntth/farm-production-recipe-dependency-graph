@@ -19,8 +19,8 @@ _Related_: feeding recipe
 
 **Footprint**: size of a location in tiles, `width` along the ↘ edge and `height` along the ↙ edge, seen from the top corner.
 
-**Fixed building**: a location or map item the player cannot move (`movable: false`), e.g. the mine, the farmhouse.
-_Not to be confused with_: movable map item (`movable: true`): measured, but placed by the planner
+**Fixed building**: a location or map item the player cannot move (`movable: false` in the data), e.g. the mine, the farmhouse; the only kind of item in the farm map's `fixed` list.
+_Not to be confused with_: current item (a movable item where it stands now)
 
 **Rotatable**: a non-square footprint may be turned (width and height swapped).
 
@@ -49,10 +49,13 @@ _Related_: `FarmMap` (one model for every area)
 **Layout overlay**: a planned layout (`layout.json` or the `layout` part of `combined.json`) drawn over the farm map in the map editor, view only, at its own tile coordinates; never shifted, only a warning when it was planned on another map.
 _Not to be confused with_: reference overlay (another image aligned to the screenshot to trace plots)
 
-**Current farm** (planned, v1.3): where the player's production buildings, shelters, barn and silo stand now, measured on the farm map; the start of a relocation plan.
+**Current farm**: where the player's production buildings, shelters, barn and silo stand now (`current` in the farm map, one **current item** per placed copy; fields, trees and bushes only counted); the start of a relocation plan. The Layout Planner ignores it.
 _Not to be confused with_: fixed building (never moves), layout (the suggested arrangement)
 
-**Relocation plan** (planned, v1.3): keep / store / place lists that turn the current farm into a layout, grouped by block.
+**Current item**: one entry of the current farm (`CurrentItem`): a placed copy of a movable farm location (tile, size as measured, rotation allowed for `rotatable` items) or, without a position, a count of copies (fields, trees, bushes).
+_Not to be confused with_: layout item (where a copy should stand), fixed item (an entry of `fixed`)
+
+**Relocation plan**: keep / store / place lists that turn the current farm into a layout (`python -m src relocate`). Keep: a current item exactly at a layout item of its id. Store: every other current item. Place: the remaining layout items, grouped by block.
 
 ## Layout
 

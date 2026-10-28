@@ -31,6 +31,8 @@ Without a map the layout is drawn on an unbounded grid: useful to see the blocks
 - `blocked` (red): water, roads, paved strips; nothing is built there.
 - `design` (violet): decorations you want to keep; no block goes there, paths may cross.
 
+To rebuild your farm step by step later, also mark the **current farm** (step 8): where your buildings, shelters, barn and silo stand now, and how many fields, trees and bushes you have.
+
 ## 4. Choose how it should look: settings
 
 Settings are files, not command-line options. Copy the examples and edit them; the tools tell you in their log which file they used, and every output records the settings it was made with.
@@ -46,6 +48,7 @@ Every key with its default is in the README section "Settings". Placing every bl
 python -m src all                        # graph, farm layout, production plan, combined plan
 python -m src combine                    # only the combined plan (layout sized by production)
 python -m src plan --level 30            # try another level for one run
+python -m src relocate                   # from the current farm to the combined plan (after combine)
 ```
 
 Every command takes the files it uses (`--player-config`, `--map`, `--design-config`, `--planner-config`, `--output-dir`) to use other files than the defaults; `python -m src <command> -h` lists them.
@@ -58,12 +61,14 @@ Every command takes the files it uses (`--player-config`, `--map`, `--design-con
 | `combined.svg`, `combined_blocks/*.svg`  | the farm with every block; one image per block to rebuild it in the game, plus `collage.svg` |
 | `schedule.md`                            | how often to log in and what to do at every login, recommended fields, trees and bushes      |
 | `layout.md`, `layout.svg`, `blocks/`     | the layout without production sizing (graph and profile only)                                |
+| `relocation.md`                          | what stays, what to store, where to place every item, block by block (`relocate`)            |
 
 The SVG files open in any browser. To see the layout on your own screenshot, load `layout.json` or `combined.json` in the map editor (step 7, Layout overlay). Coordinates are tiles from the top corner of the map: x along the ↘ edge, y along the ↙ edge. The game's Layout Edit Mode shows no grid, so count tiles from a fixed building.
 
 ## 7. Typical situations
 
 - **You reached a new level:** change `level` in `config/player.json` (or run the wizard again) and run `python -m src all`. Copies unlocked within the lookahead already have space in their blocks.
+- **Rebuilding the farm:** measure the current farm in the map editor (step 8; load the combined plan in step 7 first, so the ids and sizes are offered), save `config/farm_map.json`, run `python -m src combine` and then `python -m src relocate`. In Layout Edit Mode, store everything in the Store list, then place the items of the Place list block by block. Fields, trees and bushes are counted, not measured, so they always appear under Store and Place. When the report says a new layout slot is simpler, place every item (Keep and Place) in an empty slot instead. Plan again after every re-save of the farm map, otherwise `relocate` reports that the layout belongs to another map.
 - **A block "does not fit":** unlock or mark more land, lower `reserve` or `item_gap`, or try `strategy: size` in the farm section of `design.json`.
 - **"barn_capacity is not set":** add your barn and silo capacity to the profile.
 - **A building "not reachable by a path":** check that the zones around it are right; a building behind a paved strip gets a path to the edge of the buildable land.
