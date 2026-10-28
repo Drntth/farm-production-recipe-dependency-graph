@@ -181,6 +181,10 @@ def test_support_relation_needs_both_ends() -> None:
         "nectar_bush"
     ]
     assert active_relations({"nectar_bush"}) == []
+    # squirrels fetch peanut pods like bees fetch nectar
+    assert [r.target for r in active_relations({"peanut_bush", "squirrel_house"})] == [
+        "squirrel_house"
+    ]
 
 
 def test_farm_map_validation() -> None:
@@ -719,6 +723,32 @@ def test_cli_writes_outputs(tmp_path: Path) -> None:
     for name in ("layout.json", "layout.md", "layout.svg"):
         assert (tmp_path / name).exists()
     assert json.loads((tmp_path / "layout.json").read_text())["level"] == 20
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_removes_stale_layout_files(tmp_path: Path) -> None:
+    names = (
+        "layout_town.svg",
+        "layout_size.json",
+        "layout_notes.txt",
+        "layout_notes.md",
+    )
+    for name in names:
+        (tmp_path / name).write_text("old", encoding="utf-8")
+    # a failed run keeps the earlier outputs
+    config = _design_config(
+        tmp_path, design_layer=True, path_targets="buildings", item_gap=0
+    )
+    args = ["--level", "20", "--output-dir", str(tmp_path)]
+    assert cli.main([*args, "--design-config", config]) == 1
+    assert all((tmp_path / name).exists() for name in names)
+
+    assert cli.main(args) == 0
+    assert not (tmp_path / "layout_town.svg").exists()
+    assert not (tmp_path / "layout_size.json").exists()
+    assert (tmp_path / "layout_notes.txt").exists()  # not a layout file set
+    assert (tmp_path / "layout_notes.md").exists()  # not a known layout stem
+    assert (tmp_path / "layout.json").exists()
 
 
 def _design_config(tmp_path: Path, **keys) -> str:

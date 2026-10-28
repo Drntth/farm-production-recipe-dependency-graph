@@ -85,6 +85,10 @@ class CombinedPlan:
     def new_building_tiles(self) -> int:
         return sum(u.tiles for u in self.upcoming if u.kind == "new")
 
+    @property
+    def flow_distance(self) -> float:
+        return flow_distance(self.flow_links)
+
 
 def sizing_from_plan(plan: ProductionPlan, dataset: DataSet) -> Sizing:
     """Copies, fields per crop and goods flows of *plan*."""
@@ -201,6 +205,13 @@ def flow_links(layout: Layout, flows: dict[tuple[str, str], float]) -> list[Flow
         for (a, b), amount in by_pair.items()
     ]
     return sorted(links, key=lambda link: (-link.per_hour, link.source, link.target))
+
+
+def flow_distance(links: list[FlowLink]) -> float:
+    """Sum of goods per hour x tiles apart over the placed block pairs (lower is better)."""
+    return sum(
+        link.per_hour * link.distance for link in links if link.distance is not None
+    )
 
 
 def free_tiles(layout: Layout) -> int | None:

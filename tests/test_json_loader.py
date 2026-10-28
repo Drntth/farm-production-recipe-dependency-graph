@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.loaders.json_loader import load_data
+from src.loaders.json_loader import apply_overrides, load_data
 from src.models import Area
 
 
@@ -199,3 +199,15 @@ def test_external_inputs_logged_once(
     lines = [r for r in caplog.records if "External recipe inputs" in r.getMessage()]
     assert len(lines) == 1 and "voucher (1)" in lines[0].getMessage()
     assert not [r for r in caplog.records if r.levelname == "WARNING"]
+
+
+def test_overrides_logged_as_one_line(caplog: pytest.LogCaptureFixture) -> None:
+    raw = [{"id": "a", "x": 1}, {"id": "b", "x": 1}]
+    overrides = [{"id": "a", "x": 2}, {"id": "b", "x": None}, {"id": "c", "x": 3}]
+
+    with caplog.at_level("INFO", logger="src.loaders.json_loader"):
+        merged = apply_overrides(raw, overrides, "things")
+
+    assert [m["x"] for m in merged] == [2, 1, 3]
+    lines = [r.getMessage() for r in caplog.records]
+    assert lines == ["Overrides for things: 1 patched, 1 added (c)"]

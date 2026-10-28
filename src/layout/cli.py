@@ -81,6 +81,18 @@ def _write(layout, out: Path, stem: str, settings: DesignSettings) -> None:
     render_svg(layout, out / f"{stem}.svg")
 
 
+# file sets an earlier run may have written: strategy "all", or the town /
+# fishing lake layouts of old versions
+_KNOWN_STEMS = {f"layout_{s}" for s in (*STRATEGIES, "town", "fishing_lake")}
+
+
+def _remove_stale(out: Path, stems: list[str]) -> None:
+    """Remove the known ``layout_*`` file sets this run did not write."""
+    for stem in sorted(_KNOWN_STEMS - set(stems)):
+        for suffix in (".json", ".md", ".svg"):
+            (out / f"{stem}{suffix}").unlink(missing_ok=True)
+
+
 def _plan(
     data, level, player, farm_map, settings: DesignSettings, strategy: str, templates
 ):
@@ -213,6 +225,7 @@ def main(argv: list[str] | None = None) -> int:
             layout.reserve_ratio * 100,
             len(layout.unplaced_blocks),
         )
+    _remove_stale(out, [stem for stem, _ in runs])  # only after a full run
 
     if settings.block_images:  # of the main layout
         images = write_block_images(main_layout, out / "blocks")

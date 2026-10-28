@@ -11,8 +11,13 @@ from pathlib import Path
 import pytest
 
 from src.combiner import cli, combine, sizing_from_plan, upcoming_unlocks
-from src.combiner.combine import FlowLink, _distance, flow_links
-from src.combiner.report import _demote, combined_to_dict, combined_to_markdown
+from src.combiner.combine import FlowLink, _distance, flow_distance, flow_links
+from src.combiner.report import (
+    _crop_list,
+    _demote,
+    combined_to_dict,
+    combined_to_markdown,
+)
 from src.config import PlayerConfig
 from src.layout.farm_map import FarmMap, FixedItem
 from src.layout.packing import Rect
@@ -123,6 +128,8 @@ def test_combine(full: DataSet, player: PlayerConfig) -> None:
     assert md.startswith(f"# Combined farm plan - level {LEVEL}")
     assert md.count("\n# ") == 0  # the layout and schedule headings are demoted
     assert "## Goods flows between blocks" in md
+    assert payload["weighted_flow_distance"] == round(combined.flow_distance, 2)
+    assert "Weighted flow distance" in md
 
     with_design = combine(full, player, farm_map, lookahead=0, design=True)
     assert with_design.layout.design is not None
@@ -137,6 +144,16 @@ def test_flow_links_and_distance() -> None:
     assert _distance(Rect(0, 0, 1, 1), None) is None
 
 
+def test_flow_distance_weights_tiles_by_goods() -> None:
+    links = [
+        FlowLink("a", "b", 2.0, 3),
+        FlowLink("b", "c", 0.5, 0),  # touching: no cost
+        FlowLink("a", "c", 1.0, None),  # not placed: left out
+    ]
+    assert flow_distance(links) == 6.0
+    assert flow_distance([]) == 0.0
+
+
 def test_flow_links_merge_locations_into_blocks(
     full: DataSet, player: PlayerConfig
 ) -> None:
@@ -146,6 +163,13 @@ def test_flow_links_merge_locations_into_blocks(
     heaviest = combined.flow_links[0]
     assert isinstance(heaviest, FlowLink) and heaviest.source != heaviest.target
     assert heaviest.per_hour == max(link.per_hour for link in combined.flow_links)
+
+
+def test_crop_list_uses_names_and_counts_the_rest() -> None:
+    names = {"wheat": "Wheat", "chili_pepper": "Chili pepper"}
+    assert _crop_list(["wheat", "chili_pepper"], names) == "Wheat, Chili pepper"
+    crops = ["wheat", "corn", "carrot", "soybean", "chili_pepper"]
+    assert _crop_list(crops, names, top=2) == "Wheat, corn +3 more"
 
 
 def test_demote_skips_code_fences() -> None:

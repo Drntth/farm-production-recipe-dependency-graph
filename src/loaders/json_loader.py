@@ -192,6 +192,8 @@ def apply_overrides(raw: list[dict], overrides: list[dict], label: str) -> list[
     Order of *raw* is kept.
     """
     by_id = {item["id"]: dict(item) for item in raw}
+    patched: list[str] = []
+    added: list[str] = []
     for idx, entry in enumerate(overrides):
         oid = entry.get("id")
         if not oid:
@@ -201,10 +203,21 @@ def apply_overrides(raw: list[dict], overrides: list[dict], label: str) -> list[
             continue
         if oid in by_id:
             by_id[oid].update(override)
-            logger.info("Override patched %s '%s'", label, oid)
+            patched.append(oid)
+            logger.debug("Override patched %s '%s'", label, oid)
         else:
             by_id[oid] = dict(override)
-            logger.info("Override added %s '%s'", label, oid)
+            added.append(oid)
+            logger.debug("Override added %s '%s'", label, oid)
+    if patched or added:
+        # one line per file; the ids are in the debug log
+        logger.info(
+            "Overrides for %s: %d patched, %d added%s",
+            label,
+            len(patched),
+            len(added),
+            f" ({', '.join(added)})" if added else "",
+        )
     return list(by_id.values())
 
 

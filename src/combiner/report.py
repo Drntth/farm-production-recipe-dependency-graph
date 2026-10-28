@@ -12,7 +12,14 @@ from src.planner.schedule import schedule_to_markdown
 from .combine import CombinedPlan
 
 _TOP_LINKS = 15
+_TOP_CROPS = 4
 _KIND_TEXT = {"new": "new unlock", "copies": "more copies", "fields": "more fields"}
+
+
+def _crop_list(crops: list[str], names: dict[str, str], top: int = _TOP_CROPS) -> str:
+    """Crop names for a table cell: the first *top*, then how many more."""
+    shown = ", ".join(names.get(c, c) for c in crops[:top])
+    return shown + (f" +{len(crops) - top} more" if len(crops) > top else "")
 
 
 def block_rows(combined: CombinedPlan, dataset: DataSet) -> list[dict[str, Any]]:
@@ -90,6 +97,7 @@ def combined_to_dict(combined: CombinedPlan, dataset: DataSet) -> dict[str, Any]
             }
             for link in combined.flow_links
         ],
+        "weighted_flow_distance": round(combined.flow_distance, 2),
         "expansion": {
             "lookahead_levels": combined.lookahead,
             "upcoming": [
@@ -157,7 +165,7 @@ def combined_to_markdown(combined: CombinedPlan, dataset: DataSet) -> str:
         fields = (
             f"{f['count']}"
             + (f" (+{f['reserved']} reserved)" if f["reserved"] else "")
-            + (f": {', '.join(f['crops'][:4])}" if f["crops"] else "")
+            + (f": {_crop_list(f['crops'], layout.crop_names)}" if f["crops"] else "")
             if f
             else "-"
         )
@@ -184,6 +192,14 @@ def combined_to_markdown(combined: CombinedPlan, dataset: DataSet) -> str:
                 f"| {names[link.source]} | {names[link.target]} | "
                 f"{link.per_hour:.2f} | {apart} |"
             )
+        lines += [
+            "",
+            (
+                f"Weighted flow distance: {combined.flow_distance:.2f} (goods / h "
+                "x tiles apart over every flow; lower means the blocks that trade "
+                "most sit closer)."
+            ),
+        ]
 
     lines += ["", "## Expansion", ""]
     reserved = sorted((s.location.name, s.reserved) for s in layout.stock if s.reserved)
