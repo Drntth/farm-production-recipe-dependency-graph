@@ -77,6 +77,8 @@ _Not to be confused with_: goods flow (an amount per hour between two blocks)
 
 **Goods flow**: goods per hour one block's buildings make for another block's buildings, from the production plan.
 
+**Weighted flow distance**: the sum of goods per hour x tiles apart over every goods flow of a combined plan; one number to compare layouts (lower is better).
+
 **Reserve**: extra free area inside a block frame for later unlocks; lowered step by step when blocks do not fit.
 
 **Reserved copy**: a copy unlocked (or unlocked within the lookahead) but not owned yet; its space is kept free.
@@ -134,7 +136,7 @@ _Not to be confused with_: player profile (progress), planner settings (producti
 
 **External good**: a good the plan uses but cannot make (ores from the mine, fish); its use is capped, never planned.
 
-**Recommendation**: a count the plan proposes where the profile is open: fields, trees and bushes, nectar bushes per day.
+**Recommendation**: a count the plan proposes where the profile is open: fields, trees and bushes, nectar and peanut bushes per day.
 
 ## Combiner
 

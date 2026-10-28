@@ -2,6 +2,15 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [1.6.0] - 2026-10-28
+
+- Data for every wiki level (game 1.73): the scraper has no level cap by default, field grants of "1 field" are read, new tree, peanut bush and squirrel house footprints are estimates in `data/overrides/`.
+- The scraper no longer reads the player profile: `--player-config` is removed, use `--level N` to cut off.
+- Squirrel house and peanut bush: peanuts per pair of squirrels into the silo, peanut bush recommendations, a support relation in the layout.
+- Fact checker: number words count, derived steps are skipped; the game fact rows were re-checked.
+- Combined report: weighted flow distance; the `item_gap: 1` fallback on the measured farm is explained (not enough land).
+- Polish: one override log line per file, crop names in the combined block table, stale layout outputs removed.
+
 ## [1.5.0] - 2026-10-28
 
 - Design templates: `config/templates/<name>.json` (buildings and decoration tiles, one committed example), assigned to blocks in `templates` of `config/design.json`.

@@ -18,6 +18,7 @@ The project analyses Hay Day production chains. It turns locations, resources an
 - **v1.3** done (relocation plan: `current` in the farm map, editor step 8, `python -m src relocate`; barn / silo and the `movable` flag left `fixed`).
 - **v1.4** done (path network: main path to the key buildings first, side paths to the blocks, `main_path_width`, `stepped` / `main_path_style`).
 - **v1.5** done (design templates: `config/templates/<name>.json`, `templates` in `config/design.json`, modes `reserve` / `arrange`, editor step 9).
+- **v1.6** done (pre-2.0 hardening: data for every wiki level, squirrel house / peanuts, fact checker fixes, weighted flow distance, log and report polish).
 - Next: **v2.0+** (full application) in the README roadmap. The other values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
@@ -66,7 +67,7 @@ python -m src.layout                      # farm layout: output/layout.svg, layo
 python -m src.planner                     # production plan: output/capacity.json, schedule.json, schedule.md
 python -m src.combiner                    # layout sized by the plan: output/combined.json, combined.md, combined.svg
 # tools/farm_map_editor.html: open in a browser to measure config/farm_map.json from a screenshot
-python -m src.scraper --game-version 1.72 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki
+python -m src.scraper --game-version 1.73 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki (every level)
 python -m src check-facts                 # docs/game-facts rows vs. the wiki → output/fact_check.md (network)
 python -m src relocate [--layout PATH]    # current farm → combined.json (else layout.json): output/relocation.json / .md; not in `all`
 ```

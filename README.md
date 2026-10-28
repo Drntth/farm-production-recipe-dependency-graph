@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.5 is done: design templates, small patterns of buildings and decoration tiles that a block keeps free or is arranged around, cut out of the farm map or marked on another design's screenshot in the map editor. v1.4 brought a path network of a main path (1 or 2 tiles wide) to the key buildings and side paths to the blocks, with a new `stepped` path style; v1.3 brought a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
+**Status:** v1.6 is done: hardening before v2.0, with data for every wiki level (game 1.73, so the Combiner lookahead sees the next unlocks), the squirrel house and peanut bush, a fact checker without false alarms, the weighted flow distance in the combined report and quieter logs. v1.5 brought design templates, small patterns of buildings and decoration tiles that a block keeps free or is arranged around, cut out of the farm map or marked on another design's screenshot in the map editor. v1.4 brought a path network of a main path (1 or 2 tiles wide) to the key buildings and side paths to the blocks, with a new `stepped` path style; v1.3 brought a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -66,7 +66,7 @@ Help the player design an efficient and expandable layout by discovering natural
 - With the design layer the blocks keep at least one free tile between them (`gap` ≥ 1), so a path always fits. Buildings no path can reach are listed in the notes.
 - `path_style`: `shortest` (default) takes any shortest path; `straight` adds a cost to every change of direction, so paths have fewer corners and detours (on the measured farm 16 corners instead of 20); `stepped` takes the shortest path closest to the straight line between its ends, a staircase that looks diagonal and curved on the isometric grid. `main_path_style` (default: the same as `path_style`) styles the main path alone, e.g. a `straight` main path with `stepped` side paths.
 - `path_targets` (farm): `blocks` (default) connects the blocks and the key buildings; `buildings` connects every building and every field / tree / bush patch inside the blocks; the paths may cross the free part of a block frame, but the decoration band stays out of it (it is the reserve for later unlocks). With the design layer on it needs `item_gap` ≥ 1, so a path fits between the buildings.
-- `item_gap` (farm, default 0): free tiles between the buildings of a block, so blocks look less packed; patches stay whole. Placing every block comes first, looks second: when the blocks do not fit, the item gap is lowered step by step (at the requested reserve) before the reserve is; with no gap left, `path_targets: buildings` falls back to `blocks`. The report shows the gap used and the one asked for (on the measured farm `item_gap: 1` drops to 0).
+- `item_gap` (farm, default 0): free tiles between the buildings of a block, so blocks look less packed; patches stay whole. Placing every block comes first, looks second: when the blocks do not fit, the item gap is lowered step by step (at the requested reserve) before the reserve is; with no gap left, `path_targets: buildings` falls back to `blocks`. The report shows the gap used and the one asked for (on the measured farm `item_gap: 1` drops to 0: at a 0 % reserve its block frames take about 1,260 tiles, about 1,545 with the gaps between the blocks, and the unlocked plots have 1,546 usable tiles; with gap 0 the frames take about 880).
 - Design zones (`design` zones of the farm map, `design_zones`, default on): existing decorations; no block is placed there, paths may cross them, and the decoration band leaves them alone.
 - Figures in `layout.md` / `layout.json` (`design.figures`) to compare settings: path tiles (main and side paths apart, narrowed main path tiles), corners (turns and junctions of the centre lines), detour ratio (tiles walked per tile of grid distance), free tiles per block, unreachable buildings, design zone tiles.
 
@@ -268,7 +268,7 @@ Merge the results of the Layout Planner and the Production Planner into one coor
 3. **Expansion-friendly** (`combiner.lookahead`, default 5 levels): more copies of placed buildings and more fields unlocked within the lookahead get reserved space in their blocks; new buildings are listed with the tiles they will need, and the report warns when the free land is too small for them.
 4. **A→B processing order**: the blocks are placed upstream first (`combiner.strategy: flow`, default; it overrides the farm `strategy` of `design.json`), each pulled toward the blocks it exchanges goods with. When a block does not fit, the reserve is lowered first; only if a block does not fit even without reserve, the size order takes over.
 5. **Functional plan always, design on request**: `design_layer: true` (farm section of `design.json`) adds the paths and the decoration band of the Layout Planner. Gap and reserve also come from the farm section.
-6. Writes `output/combined.json` (settings used, summary, blocks with copies, fields, busy share and output per hour, goods flows between blocks with the tiles between them, expansion, the full layout and schedule), `output/combined.md` (one report: blocks upstream → downstream, the heaviest flows, expansion, then the layout and the schedule sections) and `output/combined.svg`.
+6. Writes `output/combined.json` (settings used, summary, blocks with copies, fields, busy share and output per hour, goods flows between blocks with the tiles between them and the weighted flow distance Σ goods / h × tiles apart (lower is better), expansion, the full layout and schedule), `output/combined.md` (one report: blocks upstream → downstream, the heaviest flows and the weighted flow distance, expansion, then the layout and the schedule sections) and `output/combined.svg`.
 
 The sizes inherit the estimates of the Production Planner (tree / bush yield, honeycomb rate; see [docs/wiki-gaps.md](docs/wiki-gaps.md)): measuring them changes the counts, not the method. Nectar bushes are not sized: the plan gives the bushes to plant per day, but how long a bush stands is unknown, so their count stays the profile's.
 
@@ -476,8 +476,8 @@ Written by the scraper. It records where and when the data came from, and is use
 ```json
 {
   "scraped_at": "2026-10-14T08:54:12+00:00",
-  "max_level": 56,
-  "known_game_version": "1.72",
+  "max_level": 126,
+  "known_game_version": "1.73",
   "wiki_revisions": { "Goods_List": "2026-07-29T14:20:27Z" }
 }
 ```
@@ -514,7 +514,7 @@ Level-gated limits, as two 3NF tables:
 
 Use them for data the wiki does not have, for example shelter and field footprints, or for content the wiki has not listed yet. They survive re-scraping. `load_data(..., apply_data_overrides=False)` loads the raw scraped data only.
 
-`data/overrides/locations.json` holds the measured footprints, `movable` and `rotatable` values; it is complete for level 56. [data/overrides/README.md](data/overrides/README.md) explains how to measure footprints in the game and which edge is width and which is height.
+`data/overrides/locations.json` holds the measured footprints, `movable` and `rotatable` values; it covers every location of the data (above level 56 partly estimates, see [docs/wiki-gaps.md](docs/wiki-gaps.md)). [data/overrides/README.md](data/overrides/README.md) explains how to measure footprints in the game and which edge is width and which is height.
 
 ### Timing and capacity fields
 
@@ -613,19 +613,19 @@ Hay Day changes regularly. After each game update, follow [docs/game-updates.md]
 
 In short: read the update notes → compare with `data/meta.json` → update the affected parts → `python -m src.scraper --game-version <version>` → `python -m pytest`.
 
-Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.72 Building Mastery / Workbench is not on the wiki yet, so the data holds 3-star times only.
+Data in the repository: game version 1.73, every wiki level (up to 126), scraped 2026-10-28; the tools filter it by the player level. The 1.72 Building Mastery / Workbench is not on the wiki yet, so the data holds 3-star times only.
 
 ---
 
 ## Roadmap
 
-**Current status:** v1.5 (design templates) is done (279 tests passing, CI on every push). Next: v2.0+ (full application).  
-Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
+**Current status:** v1.6 (pre-2.0 hardening) is done (287 tests passing, CI on every push). Next: v2.0+ (full application).  
+Current data set (every wiki level, up to 126): 86 locations (19 tree / bush kinds incl. the nectar and peanut bush, the squirrel house), 418 resources, 354 recipes, 228 fields over 150 levels, 80 building / shelter copies. At level 56: 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (126 path tiles on the measured farm: 86 main path, 40 side paths; the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
-Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
+Values the wiki lacks (tree / bush yield per harvest, honeycomb and peanut rates, footprints above level 56, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
 Next step: v2.0+. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
@@ -761,6 +761,16 @@ Next step: v2.0+. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 - [x] A template is a wish: when the blocks do not fit, `item_gap` is lowered first, then the template is dropped (with a warning), only then the reserve; a building that is not in the block is an error, template copies the player does not own become reserved space; no rotation or mirroring
 - [x] Map editor "Templates" tab: cut a template out of the farm map (current items and design zone tiles inside a rectangle) or draw one; a screenshot of another design can be loaded and calibrated as its own background to mark it the same way
 
+### v1.6 - Pre-2.0 hardening (done)
+
+- [x] Data for every wiki level: the scraper reads every level by default (`--level N` cuts off), game version 1.73; `meta.json` `max_level` is the highest level read; the tools still filter by the player level, so the level-56 results stay the same and the Combiner lookahead lists the next unlocks
+- [x] Field grants above level 100 ("1 field") are read; footprints of the new trees, the peanut bush and the squirrel house are estimates in `data/overrides/` (see [docs/wiki-gaps.md](docs/wiki-gaps.md))
+- [x] Squirrel house: each pair of squirrels makes peanuts every 5 h (into the silo), the plan recommends peanut bushes per day, the layout keeps peanut bushes next to the squirrel house
+- [x] Fact checker: number words (`one to three`) count as numbers, derived steps (`(+N each)`) are not checked; every game fact row re-checked
+- [x] Combined report: the weighted flow distance (goods / h × tiles apart over every goods flow) to compare layouts
+- [x] Placement measured: on the measured farm `item_gap: 1` needs about as many tiles as the unlocked plots have, so it drops to 0 (area, not the packer); a re-placement / swap pass after the greedy packing gained only 6 % flow distance and was left out
+- [x] Polish: one log line of overrides per data file, crop names with `+N more` in the combined report, old layout outputs (`layout_town.*`, `layout_<strategy>.*`) removed before writing
+
 ### v2.0+ - Full application (future)
 
 - Web UI
@@ -859,10 +869,10 @@ output/
 └── relocation.md
 ```
 
-Update data from the wiki (level from the player config):
+Update data from the wiki (every level; `--level N` cuts it off):
 
 ```bash
-python -m src.scraper --game-version 1.72
+python -m src.scraper --game-version 1.73
 ```
 
 ---

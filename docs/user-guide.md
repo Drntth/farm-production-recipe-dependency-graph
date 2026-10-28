@@ -83,6 +83,6 @@ The SVG files open in any browser. To see the layout on your own screenshot, loa
 
 ## Limits
 
-- The data covers levels up to the scraped level (see `data/meta.json`); unlocks above it are not known.
-- Some values the wiki lacks are estimates (tree and bush yield, honeycomb rate); see [wiki-gaps.md](wiki-gaps.md). They change the numbers, not the method.
+- The data covers every level on the wiki (`max_level` in `data/meta.json`); unlocks above it are not known. Above level 56 some footprints are estimates.
+- Some values the wiki lacks are estimates (tree and bush yield, honeycomb and peanuts rate); see [wiki-gaps.md](wiki-gaps.md). They change the numbers, not the method.
 - Live orders (truck, boat, town visitors, events) are not planned: the plan is a steady state for your farm's capacity.
