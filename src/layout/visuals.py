@@ -39,6 +39,7 @@ def _moved(pb: PlacedBlock, dx: int, dy: int) -> PlacedBlock:
             for i in pb.items
         ],
         pb.fields,
+        pb.template.moved(dx, dy) if pb.template is not None else None,
     )
 
 

@@ -42,10 +42,22 @@ Strategy = Literal["auto", "coupling", "size", "flow", "all"]
 CombinerStrategy = Literal["auto", "coupling", "size", "flow"]
 PathStyle = Literal["shortest", "straight", "stepped"]
 PathTargets = Literal["blocks", "buildings"]
+TemplateMode = Literal["reserve", "arrange"]
 
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class TemplateAssignment(_Strict):
+    """One block's design template (``templates`` in config/design.json)."""
+
+    template: str = Field(..., description="config/templates/<template>.json")
+    mode: TemplateMode = Field(
+        "reserve",
+        description="reserve: keep the template area free; arrange: its "
+        "buildings at their template positions",
+    )
 
 
 class DesignSettings(_Strict):
@@ -98,6 +110,9 @@ class DesignSettings(_Strict):
     )
     block_images: bool = Field(
         True, description="One SVG per block and a collage of every block"
+    )
+    templates: dict[str, TemplateAssignment] = Field(
+        default_factory=dict, description="Block id -> design template"
     )
 
     @model_validator(mode="before")

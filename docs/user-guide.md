@@ -33,14 +33,16 @@ Without a map the layout is drawn on an unbounded grid: useful to see the blocks
 
 To rebuild your farm step by step later, also mark the **current farm** (step 8): where your buildings, shelters, barn and silo stand now, and how many fields, trees and bushes you have.
 
+To keep a design you like, make a **design template** (step 9): cut it out of your farm map, or load a screenshot of another design, calibrate it and mark its buildings and decoration tiles. Save the downloaded file in `config/templates/` and assign it to a block in `config/design.json` (next section).
+
 ## 4. Choose how it should look: settings
 
 Settings are files, not command-line options. Copy the examples and edit them; the tools tell you in their log which file they used, and every output records the settings it was made with.
 
-- `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners, `stepped` for diagonal staircases), `main_path_width` (2 for a wider main path to the key buildings), `main_path_style` (another style for the main path), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`.
+- `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners, `stepped` for diagonal staircases), `main_path_width` (2 for a wider main path to the key buildings), `main_path_style` (another style for the main path), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`, `templates` (a design template per block, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "arrange"}}`: `reserve` keeps its area free, `arrange` puts its buildings at their template positions).
 - `config/planner.json`: `production.login_interval` (fix how often you log in; empty = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
 
-Every key with its default is in the README section "Settings". Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first and then the reserve, and the report says so.
+Every key with its default is in the README section "Settings". Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first, then drop the design templates and only then lower the reserve, and the report says so.
 
 ## 5. Run
 

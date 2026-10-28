@@ -21,6 +21,9 @@ Steps:
    the ``item_gap`` between the buildings of a block is lowered first (at the
    requested reserve), then steps 4-5 are repeated with a smaller reserve
    (``RESERVE_STEP``) down to 0.
+   A design template of a block (``templates.py``) is a wish too: when the
+   blocks do not fit even with no item gap, the templates are dropped before
+   the reserve is lowered.
 6. Optional design layer (``design=True``, ``design.py``): paths between the
    blocks and the key fixed buildings, and a decoration band along them.
 
@@ -33,7 +36,7 @@ from __future__ import annotations
 
 import logging
 import math
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field, replace
 
 import networkx as nx
@@ -71,6 +74,7 @@ from .inventory import CountSource, Stock, farm_stock
 from .packing import Box, Rect, bounding_rect, oriented_units, pack, patch
 from .sizing import Sizing
 from .support import SupportRelation, active_relations
+from .templates import BlockTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +82,7 @@ RESERVE_STEP = 0.01
 STRATEGIES = ("auto", "coupling", "size", "flow")
 _ORDERS = {"auto": ("coupling", "size"), "flow": ("flow", "size")}
 COPY_WEIGHT = 1.0  # keeps copies of the same building together
+_TEMPLATE_KEY = "template"  # box / obstacle key of a block's design template
 
 _PATCH_TYPES = {LocationType.FIELD, LocationType.TREE, LocationType.BUSH}
 
@@ -94,11 +99,37 @@ class PlacedItem:
 
 
 @dataclass
+class PlacedTemplate:
+    """The design template of a block: its area and (arrange) its taken tiles."""
+
+    name: str
+    mode: str  # reserve: the whole area is kept free; arrange: buildings placed
+    rect: Rect
+    decorations: list[Rect] = field(default_factory=list)  # arrange mode only
+
+    def moved(self, dx: int, dy: int) -> PlacedTemplate:
+        def mv(r: Rect) -> Rect:
+            return Rect(r.x + dx, r.y + dy, r.w, r.h)
+
+        return replace(
+            self, rect=mv(self.rect), decorations=[mv(d) for d in self.decorations]
+        )
+
+    @property
+    def kept_tiles(self) -> int:
+        """Tiles the template keeps free of buildings."""
+        if self.mode == "reserve":
+            return self.rect.w * self.rect.h
+        return sum(r.w * r.h for r in self.decorations)
+
+
+@dataclass
 class PlacedBlock:
     block: Block
     frame: Rect | None  # None if the block did not fit on the map
     items: list[PlacedItem] = field(default_factory=list)  # empty if frame is None
     fields: FieldShare | None = None  # the block's dedicated fields
+    template: PlacedTemplate | None = None
 
     @property
     def used_tiles(self) -> int:
@@ -139,6 +170,8 @@ class Layout:
     item_gap: int = 0  # free tiles between the buildings of a block (used)
     item_gap_requested: int = 0  # lowered when the blocks did not fit otherwise
     design_zones: bool = False  # the map's design zones were kept free
+    templates: dict[str, str] = field(default_factory=dict)  # block -> template
+    templates_dropped: list[str] = field(default_factory=list)  # blocks
 
     @property
     def unplaced_blocks(self) -> list[str]:
@@ -173,12 +206,14 @@ def plan_layout(
     design_zones: bool = True,
     main_path_style: str | None = None,
     main_path_width: int = DEFAULT_MAIN_PATH_WIDTH,
+    templates: dict[str, BlockTemplate] | None = None,
 ) -> Layout:
     """
     Plan the farm layout for the level-filtered *dataset*.
 
     *sizing* (from the Combiner) replaces the profile / level estimates of
     copies and fields with production quantities; *field_pool* is then unused.
+    *templates* maps block ids to design templates (``templates.py``).
     """
     if strategy not in STRATEGIES:
         raise ValueError(
@@ -273,18 +308,29 @@ def plan_layout(
             "No footprint for %s; add it to data/overrides/locations.json", loc_id
         )
 
+    fits = _fit_templates(templates or {}, blocks, shares, field_stock, dataset)
+
     # 3. blocks with their items, relative to the block origin
-    def pack_blocks(g: int) -> dict[str, list[PlacedItem]]:
-        packed = {}
+    def pack_blocks(g: int, with_templates: bool = True):
+        packed, areas = {}, {}
         for b in blocks:
-            items = _pack_block(
-                b, stock, P, shares.get(b.id), field_stock, crop_names, g
+            fit = fits.get(b.id) if with_templates else None
+            items, area = _pack_block(
+                b, stock, P, shares.get(b.id), field_stock, crop_names, g, fit
             )
             if items:
                 packed[b.id] = items
-        return packed
+                if area is not None:
+                    areas[b.id] = area
+        return packed, areas
 
-    block_items = pack_blocks(item_gap)
+    block_items, block_areas = pack_blocks(item_gap)
+    # a block without items is not placed: its template is neither used nor dropped
+    for block_id in [b for b in fits if b not in block_items]:
+        logger.warning(
+            "Block %s has no items; its design template is skipped", block_id
+        )
+        del fits[block_id]
 
     def frames(ratio: float) -> list[Box]:
         """4. Block frames grown by *ratio* free area."""
@@ -293,17 +339,17 @@ def plan_layout(
             items = block_items.get(b.id)
             if not items:
                 continue
-            inner = bounding_rect([i.rect for i in items])
+            t = block_areas.get(b.id)
+            extra = [t.rect, *t.decorations] if t is not None else []
+            inner = bounding_rect([i.rect for i in items] + extra[:1])
             frame = Rect(0, 0, *_grow(inner.w, inner.h, ratio))
-            rotatable = all(
+            # a template is never rotated or mirrored
+            rotatable = t is None and all(
                 i.rect.w == i.rect.h or stock[i.location_id].location.rotatable
                 for i in items
             )
-            boxes.append(
-                Box(
-                    b.id, frame.w, frame.h, rotatable, [frame] + [i.rect for i in items]
-                )
-            )
+            units = [frame] + [i.rect for i in items] + extra
+            boxes.append(Box(b.id, frame.w, frame.h, rotatable, units))
         return boxes
 
     # 5. blocks on the farm map
@@ -353,19 +399,32 @@ def plan_layout(
         return placed, boxes, order, ratio
 
     # placing every block comes first, looks second: the item gap shrinks
-    # (at the requested reserve) before the reserve does
-    for g in range(requested_gap, 0, -1):
-        if g != requested_gap:
-            block_items = pack_blocks(g)
+    # (at the requested reserve), then the templates are dropped, and only
+    # then the reserve shrinks
+    attempts = [(g, True) for g in range(requested_gap, 0, -1)]
+    if fits:
+        attempts.append((0, True))
+    packed_for = (requested_gap, True)
+    for g, with_templates in attempts:
+        if (g, with_templates) != packed_for:
+            block_items, block_areas = pack_blocks(g, with_templates)
+            packed_for = (g, with_templates)
         placements, block_boxes, order, reserve_ratio = place([requested])
         if len(placements) == len(block_boxes):
             item_gap = g
             break
     else:
-        if requested_gap > 0:
-            item_gap = 0
-            block_items = pack_blocks(0)
+        item_gap = 0
+        if packed_for != (0, False) and (requested_gap > 0 or fits):
+            block_items, block_areas = pack_blocks(0, False)
+            packed_for = (0, False)
         placements, block_boxes, order, reserve_ratio = place(sweep)
+    dropped = sorted(fits) if fits and not packed_for[1] else []
+    if dropped:
+        logger.warning(
+            "Design templates dropped so that every block fits: %s",
+            ", ".join(f"{fits[b].name} ({b})" for b in dropped),
+        )
     if item_gap < requested_gap:
         logger.warning(
             "Item gap lowered from %d to %d so that every block fits",
@@ -389,6 +448,11 @@ def plan_layout(
             placed_blocks.append(PlacedBlock(b, None, [], shares.get(b.id)))
             continue
         frame, *units = oriented_units(box, p)
+        template = None
+        t = block_areas.get(b.id)
+        if t is not None:
+            rest = units[len(block_items[b.id]) :]
+            template = PlacedTemplate(t.name, t.mode, rest[0], rest[1:])
         items = [
             PlacedItem(
                 i.location_id,
@@ -401,7 +465,7 @@ def plan_layout(
             )
             for i, u in zip(block_items[b.id], units)
         ]
-        placed_blocks.append(PlacedBlock(b, frame, items, shares.get(b.id)))
+        placed_blocks.append(PlacedBlock(b, frame, items, shares.get(b.id), template))
 
     if not farm_map.bounded and not fixed_rects:
         _shift_to_origin(placed_blocks)
@@ -434,6 +498,8 @@ def plan_layout(
         item_gap=item_gap,
         item_gap_requested=requested_gap,
         design_zones=design_zones and bool(farm_map.design_tiles()),
+        templates={b: f.name for b, f in sorted(fits.items())},
+        templates_dropped=dropped,
     )
     if design and path_targets == "buildings" and item_gap < 1:
         logger.warning(
@@ -505,6 +571,9 @@ def _design(
         for j in range(pb.frame.h)
     }
     for pb in layout.blocks:
+        t = pb.template
+        if t is not None:  # the template's free tiles stay free
+            reserved += [t.rect] if t.mode == "reserve" else t.decorations
         counts: dict[str, int] = defaultdict(int)
         for item in pb.items:
             if item.reserved:
@@ -588,6 +657,76 @@ def _grow(w: int, h: int, ratio: float) -> tuple[int, int]:
     return best[2], best[3]
 
 
+@dataclass(frozen=True)
+class _TemplateFit:
+    """A checked template of one block: buildings with their relative rects."""
+
+    name: str
+    mode: str
+    width: int
+    height: int
+    buildings: list[tuple[str, Rect, bool]]  # location id, rect, rotated
+    decorations: list[Rect]
+
+
+def _fit_templates(
+    templates: dict[str, BlockTemplate],
+    blocks: list[Block],
+    shares: dict[str, FieldShare],
+    field_stock: Stock | None,
+    dataset: DataSet,
+) -> dict[str, _TemplateFit]:
+    """Check each template against its block; a building not in the block is an error."""
+    by_id = {b.id: b for b in blocks}
+    fits: dict[str, _TemplateFit] = {}
+    for block_id, bt in sorted(templates.items()):
+        block = by_id.get(block_id)
+        if block is None:
+            logger.warning(
+                "Design template %s: no block %s at this level; skipped",
+                bt.name,
+                block_id,
+            )
+            continue
+        allowed = set(block.locations)
+        if block_id in shares and field_stock is not None:
+            allowed.add(field_stock.location.id)
+        buildings = []
+        for tb in bt.template.buildings:
+            if tb.location_id not in allowed:
+                raise ValueError(
+                    f"Design template {bt.name}: {tb.location_id} is not in block "
+                    f"{block_id} ({', '.join(sorted(allowed))})"
+                )
+            loc = dataset.locations[tb.location_id]
+            size = (loc.footprint_width, loc.footprint_height)
+            if loc.footprint_width is None:
+                raise ValueError(
+                    f"Design template {bt.name}: {tb.location_id} has no footprint"
+                )
+            if (tb.width, tb.height) == size:
+                rotated = False
+            elif loc.rotatable and (tb.height, tb.width) == size:
+                rotated = True
+            else:
+                raise ValueError(
+                    f"Design template {bt.name}: {tb.location_id} is "
+                    f"{tb.width}x{tb.height}, its footprint is {size[0]}x{size[1]}"
+                )
+            buildings.append(
+                (tb.location_id, Rect(tb.x, tb.y, tb.width, tb.height), rotated)
+            )
+        fits[block_id] = _TemplateFit(
+            bt.name,
+            bt.mode,
+            bt.template.width,
+            bt.template.height,
+            buildings,
+            [Rect(*cell) for cell in bt.template.decorations],
+        )
+    return fits
+
+
 def _pack_block(
     block: Block,
     stock: dict[str, Stock],
@@ -596,27 +735,38 @@ def _pack_block(
     field_stock: Stock | None,
     crop_names: dict[str, str],
     item_gap: int = 0,
-) -> list[PlacedItem]:
-    """Pack the items of one block; returns items relative to the block origin."""
+    fit: _TemplateFit | None = None,
+) -> tuple[list[PlacedItem], PlacedTemplate | None]:
+    """
+    Pack the items of one block; returns items relative to the block origin.
+
+    With a template (*fit*) the template area is returned too, relative to the
+    same origin: ``reserve`` packs it as one free box with the items, ``arrange``
+    puts its buildings at their template positions and packs the rest around.
+    """
+    arrange = fit is not None and fit.mode == "arrange"
+    in_template = Counter(loc for loc, _, _ in fit.buildings) if arrange else Counter()
+
+    def copies(loc_id: str, owned: int, total: int) -> tuple[int, int]:
+        """(owned, total) copies left after the template buildings."""
+        n = in_template[loc_id]
+        return max(0, owned - n), max(0, total - n)
+
     boxes: list[Box] = []
     meta: dict[str, tuple[str, bool]] = {}  # box key -> (location id, reserved)
     reserved_units: dict[str, int] = {}
     names: dict[str, str] = {}
     if share is not None and field_stock.location.footprint_width is not None:
         f = field_stock.location
-        boxes.append(
-            patch(
-                f.id,
-                f.footprint_width,
-                f.footprint_height,
-                share.count + share.reserved,
-                False,
-            )
-        )
-        meta[f.id] = (f.id, False)
-        reserved_units[f.id] = share.reserved
         crops = ", ".join(crop_names[c] for c in share.crops[:2]) or "shared"
         names[f.id] = f"{f.name} ({crops})"
+        owned, total = copies(f.id, share.count, share.count + share.reserved)
+        if total:
+            boxes.append(
+                patch(f.id, f.footprint_width, f.footprint_height, total, False)
+            )
+            meta[f.id] = (f.id, False)
+            reserved_units[f.id] = total - owned
     for loc_id in block.locations:
         s = stock.get(loc_id)
         if s is None or s.location.footprint_width is None:
@@ -625,15 +775,16 @@ def _pack_block(
             continue
         loc = s.location
         w, h = loc.footprint_width, loc.footprint_height
-        if loc.type in _PATCH_TYPES and s.count + s.reserved > 1:
-            boxes.append(patch(loc_id, w, h, s.count + s.reserved, loc.rotatable))
+        owned, total = copies(loc_id, s.count, s.count + s.reserved)
+        if loc.type in _PATCH_TYPES and total > 1:
+            boxes.append(patch(loc_id, w, h, total, loc.rotatable))
             meta[loc_id] = (loc_id, False)
-            reserved_units[loc_id] = s.reserved
+            reserved_units[loc_id] = total - owned
             continue
-        for i in range(s.count + s.reserved):
+        for i in range(total):
             key = f"{loc_id}#{i + 1}"
             boxes.append(Box(key, w, h, loc.rotatable))
-            meta[key] = (loc_id, i >= s.count)
+            meta[key] = (loc_id, i >= owned)
 
     weights: dict[tuple[str, str], float] = defaultdict(float)
     for a in boxes:
@@ -645,10 +796,59 @@ def _pack_block(
                 weights[(a.key, b.key)] += COPY_WEIGHT
             elif P.has_edge(la, lb):
                 weights[(a.key, b.key)] += P[la][lb]["weight"]
+
+    # the template is the box (reserve) or the obstacle (arrange) "template";
+    # it pulls the boxes of its buildings and their neighbours
+    obstacles: dict[str, Rect] = {}
+    if fit is not None:
+        template_rect = Rect(0, 0, fit.width, fit.height)
+        own = {loc for loc, _, _ in fit.buildings}
+        for b in boxes:
+            la = meta[b.key][0]
+            wt = COPY_WEIGHT if la in own else 0.0
+            wt += sum(P[la][lb]["weight"] for lb in own if P.has_edge(la, lb))
+            if wt:
+                weights[tuple(sorted((b.key, _TEMPLATE_KEY)))] += wt
+        if arrange:
+            obstacles[_TEMPLATE_KEY] = template_rect
+        else:
+            boxes.append(Box(_TEMPLATE_KEY, fit.width, fit.height, False))
     # item_gap: free tiles between the boxes; a patch is one box, so it stays whole
-    placements, _ = pack(boxes, weights, gap=item_gap)
+    placements, _ = pack(boxes, weights, gap=item_gap, obstacles=obstacles)
 
     items: list[PlacedItem] = []
+    template: PlacedTemplate | None = None
+    if fit is not None:
+        if arrange:
+            template = PlacedTemplate(
+                fit.name, fit.mode, template_rect, fit.decorations
+            )
+            seen: Counter[str] = Counter()
+            for loc_id, rect, rotated in fit.buildings:
+                owned = (
+                    share.count
+                    if field_stock is not None and loc_id == field_stock.location.id
+                    else (stock[loc_id].count if loc_id in stock else 0)
+                )
+                name = names.get(loc_id) or (
+                    stock[loc_id].location.name if loc_id in stock else loc_id
+                )
+                items.append(
+                    PlacedItem(
+                        loc_id,
+                        name,
+                        block.id,
+                        rect,
+                        rotated,
+                        seen[loc_id] >= owned,
+                        False,
+                    )
+                )
+                seen[loc_id] += 1
+        elif _TEMPLATE_KEY in placements:
+            template = PlacedTemplate(
+                fit.name, fit.mode, placements.pop(_TEMPLATE_KEY).rect
+            )
     by_key = {b.key: b for b in boxes}
     for key, p in placements.items():
         loc_id, reserved = meta[key]
@@ -669,10 +869,25 @@ def _pack_block(
                 )
             )
     if items:
-        origin = bounding_rect([i.rect for i in items])
+        rects = [i.rect for i in items] + ([template.rect] if template else [])
+        origin = bounding_rect(rects)
+
+        def shift(r: Rect) -> Rect:
+            return Rect(r.x - origin.x, r.y - origin.y, r.w, r.h)
+
         for i in items:
-            i.rect = Rect(i.rect.x - origin.x, i.rect.y - origin.y, i.rect.w, i.rect.h)
-    return items
+            i.rect = shift(i.rect)
+        if template is not None:
+            template = PlacedTemplate(
+                template.name,
+                template.mode,
+                shift(template.rect),
+                [
+                    shift(Rect(template.rect.x + d.x, template.rect.y + d.y, d.w, d.h))
+                    for d in template.decorations
+                ],
+            )
+    return items, template
 
 
 def _shift_to_origin(blocks: list[PlacedBlock]) -> None:
@@ -685,6 +900,8 @@ def _shift_to_origin(blocks: list[PlacedBlock]) -> None:
             b.frame = Rect(b.frame.x - o.x, b.frame.y - o.y, b.frame.w, b.frame.h)
         for i in b.items:
             i.rect = Rect(i.rect.x - o.x, i.rect.y - o.y, i.rect.w, i.rect.h)
+        if b.template is not None:
+            b.template = b.template.moved(-o.x, -o.y)
 
 
 def _neighbourhoods(

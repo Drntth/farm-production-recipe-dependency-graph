@@ -32,6 +32,7 @@ from src.layout.fields import apportion
 from src.layout.packing import Rect
 from src.layout.planner import DEFAULT_GAP, DEFAULT_RESERVE_RATIO
 from src.layout.sizing import Sizing
+from src.layout.templates import BlockTemplate
 from src.loaders.json_loader import DataSet
 from src.models import Area, LocationType
 from src.planner import PlanRun, ProductionPlan, run_planner
@@ -236,6 +237,7 @@ def combine(
     design_zones: bool = True,
     main_path_style: str | None = None,
     main_path_width: int = DEFAULT_MAIN_PATH_WIDTH,
+    templates: dict[str, BlockTemplate] | None = None,
 ) -> CombinedPlan:
     """
     Plan production, then the farm layout sized by it.
@@ -273,6 +275,7 @@ def combine(
         design_zones=design_zones,
         main_path_style=main_path_style,
         main_path_width=main_path_width,
+        templates=templates,
     )
     result = CombinedPlan(
         level=level,
@@ -289,6 +292,11 @@ def combine(
     if layout.unplaced_blocks:
         result.warnings.append(
             "Blocks that do not fit on the map: " + ", ".join(layout.unplaced_blocks)
+        )
+    if layout.templates_dropped:
+        result.warnings.append(
+            "Design templates dropped so that every block fits: "
+            + ", ".join(layout.templates_dropped)
         )
     need = result.new_building_tiles
     if result.free_tiles is not None and need > result.free_tiles:

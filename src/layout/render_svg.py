@@ -61,6 +61,7 @@ DESIGN_ZONE_COLOUR = "#8B5CF6"
 PATH_COLOUR = "#C8A165"
 MAIN_PATH_COLOUR = "#A47C45"  # darker sand: the main path
 DECOR_COLOUR = "#4ADE80"
+TEMPLATE_COLOUR = "#DB2777"  # design template area and its decoration tiles
 
 
 def render_svg(
@@ -236,6 +237,19 @@ def render_svg(
                 f'<polygon points="{poly(it.rect)}" {style} stroke="{c}" stroke-width="1">'
                 f"<title>{escape(tip)}</title></polygon>"
             )
+        t = pb.template
+        if t is not None:
+            for d in t.decorations:
+                out.append(
+                    f'<polygon points="{poly(d)}" fill="{TEMPLATE_COLOUR}" '
+                    'fill-opacity="0.3"><title>template decoration</title></polygon>'
+                )
+            dash = ' stroke-dasharray="6,3"' if t.mode == "reserve" else ""
+            out.append(
+                f'<polygon points="{poly(t.rect)}" fill="none" '
+                f'stroke="{TEMPLATE_COLOUR}" stroke-width="1.5"{dash}>'
+                f"<title>{escape(f'template {t.name} ({t.mode})')}</title></polygon>"
+            )
     # design layer: paths and decoration band (between the frames)
     if layout.design is not None:
         for x, y in sorted(layout.design.decorations):
@@ -278,7 +292,12 @@ def render_svg(
             MARGIN,
             y,
             f"Level {layout.level} · 1 diamond = 1 tile · x ↘ (width), y ↙ (height)"
-            " · dashed = reserved copy",
+            " · dashed = reserved copy"
+            + (
+                " · pink = design template"
+                if any(pb.template is not None for pb in layout.blocks)
+                else ""
+            ),
             11,
             "#374151",
         )
@@ -315,6 +334,8 @@ def render_svg(
         out.append(
             f'<rect x="{MARGIN}" y="{y - 10}" width="12" height="12" fill="{c}"/>'
         )
+        if pb.template is not None:
+            where += f" · template {pb.template.name} ({pb.template.mode})"
         out.append(_text(MARGIN + 18, y, f"{pb.block.name}: {where}", 11, "#111827"))
     if fixed_lines:
         y += LEGEND_ROW

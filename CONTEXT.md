@@ -111,7 +111,7 @@ _Related_: side path
 **Design zone**: tiles of the farm map with existing decorations; no block goes there, paths may cross it.
 _Not to be confused with_: decoration band (free tiles the layout leaves along paths)
 
-**Design template** (planned, v1.5): a small grid pattern of buildings and decoration tiles for a block: kept free (`reserve`) or used as fixed positions the block is arranged around (`arrange`).
+**Design template**: a small grid pattern of buildings and decoration tiles (`config/templates/<name>.json`) assigned to a block: its area is kept free in the block frame (`reserve`), or its buildings are fixed positions the rest of the block is packed around (`arrange`). A wish: dropped before the reserve when the blocks do not fit.
 _Not to be confused with_: design zone (existing decorations on the farm map)
 
 **Item gap**: free tiles between the buildings of one block; a wish, lowered when the blocks would not fit otherwise.

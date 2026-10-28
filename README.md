@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.4 is done: a path network of a main path (1 or 2 tiles wide) to the key buildings and side paths to the blocks, with a new `stepped` path style. v1.3 brought a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
+**Status:** v1.5 is done: design templates, small patterns of buildings and decoration tiles that a block keeps free or is arranged around, cut out of the farm map or marked on another design's screenshot in the map editor. v1.4 brought a path network of a main path (1 or 2 tiles wide) to the key buildings and side paths to the blocks, with a new `stepped` path style; v1.3 brought a relocation plan (`python -m src relocate`) from the current farm, measured in the map editor, to the planned layout; v1.2 shows the layout in the map editor, v1.1 added Python 3.14, CI and a [changelog](CHANGELOG.md). v1.0 brought one command line (`python -m src`) for the layout, the production plan and the Combiner, settings in config files, design options, block images, a profile wizard, example profiles and a game fact checker. **New here? Start with the [user guide](docs/user-guide.md).** See the [Roadmap](#roadmap).
 
 **Game knowledge** (rules, limits, measured sizes, game versions, data sources, wiki gaps) is collected in [docs/](docs/README.md). Check there before researching the game again.
 
@@ -69,6 +69,30 @@ Help the player design an efficient and expandable layout by discovering natural
 - `item_gap` (farm, default 0): free tiles between the buildings of a block, so blocks look less packed; patches stay whole. Placing every block comes first, looks second: when the blocks do not fit, the item gap is lowered step by step (at the requested reserve) before the reserve is; with no gap left, `path_targets: buildings` falls back to `blocks`. The report shows the gap used and the one asked for (on the measured farm `item_gap: 1` drops to 0).
 - Design zones (`design` zones of the farm map, `design_zones`, default on): existing decorations; no block is placed there, paths may cross them, and the decoration band leaves them alone.
 - Figures in `layout.md` / `layout.json` (`design.figures`) to compare settings: path tiles (main and side paths apart, narrowed main path tiles), corners (turns and junctions of the centre lines), detour ratio (tiles walked per tile of grid distance), free tiles per block, unreachable buildings, design zone tiles.
+
+### Design templates (optional)
+
+A design template is a small grid pattern of buildings and decoration tiles, one file per template in `config/templates/<name>.json` (git-ignored; `dairy_garden.example.json` is the committed example and the fallback for that name). Coordinates are tiles from the template's top corner, with the axes of the farm map; decorations are tile rectangles that are only "taken":
+
+```json
+{
+  "width": 9, "height": 5,
+  "buildings": [
+    {"location_id": "dairy", "x": 0, "y": 0, "width": 4, "height": 4},
+    {"location_id": "cow_pasture", "x": 5, "y": 0, "width": 4, "height": 4}
+  ],
+  "decorations": [[4, 0, 1, 4], [0, 4, 9, 1]]
+}
+```
+
+`templates` in [`config/design.json`](#settings) assigns templates to blocks (`src/layout/templates.py`, used by the Layout Planner and the Combiner):
+
+- `reserve` (default): the block frame grows by the template, and its whole area stays free of buildings and paths.
+- `arrange`: the template's buildings stand at their template positions and count as copies of the block, its decoration tiles stay free, and the rest of the block is packed around them. Its other tiles stay empty (paths may cross them; the figures count them as free tiles of the block). A template copy the player does not own is reserved space.
+- A template is a wish: when the blocks do not fit, `item_gap` is lowered first, then the templates are dropped (with a warning in the log and the report), and only then the reserve.
+- Errors: a template building that is not in the block, or whose size is not its footprint (the swapped size is accepted for a `rotatable` location). A block that does not exist at the player's level only gets a log line. Templates are never rotated or mirrored.
+- `layout.json` / `combined.json` give the template of every block (`template`: name, mode, rect, decoration cells) and `templates_dropped`; the SVG draws it pink (dashed outline in `reserve` mode), and the map editor overlay shows it too.
+- The map editor makes templates in step 9 (see "Measuring with the map editor").
 
 ### How it works (farm)
 
@@ -132,7 +156,7 @@ The file can also hold a calibrated screenshot (`background`) and the farm plots
 
 #### Measuring with the map editor
 
-`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`8` steps, `Ctrl+S` save, `Ctrl+Z` undo).
+`tools/farm_map_editor.html` is a self-contained page (open it in a browser, no server, nothing is uploaded). It is kept in the browser and saved as `farm_map.json` (save it as `config/farm_map.json`). The toolbar holds opening files, saving and zoom; the side panel lists the steps with their progress, can be resized by dragging its edge and hidden with `\`; the buildings and plots lists can be filtered; `?` shows every shortcut (`1`-`9` steps, `Ctrl+S` save, `Ctrl+Z` undo).
 
 1. In the game, open a **new layout slot** in Layout Edit Mode (level 37+): it starts empty, so only the fixed buildings remain. With the paintbrush, lay two rows of fields in an L shape from one corner field (one row ↘, one row ↙, 10+ fields each) as a ruler.
 2. Zoom out fully, take screenshots at the same zoom, and stitch them without scaling or rotating; remove UI elements. Save the result as **PNG** in `config/farm_background.png` (git-ignored). Keep the GIMP file (`.xcf`) and the raw screenshots in `config/screenshots/`, and the wiki plot maps used on the Reference tab in `config/reference/`; both folders are git-ignored (player data, wiki licence, file size). Manual stitching in GIMP:
@@ -148,6 +172,7 @@ The file can also hold a calibrated screenshot (`background`) and the farm plots
 8. **Export**: `farm_map.json` (save it as `config/farm_map.json`; by default the map is cropped to the farm with a 5-tile margin, so the outline follows the real farm), the full map PNG with grid, fixed buildings and plots, or a ZIP with one cropped PNG per plot plus `index.json` (crop in pixels, tile bounds). The visible layers decide what the PNGs show; the editor keeps its state in the browser, and an exported JSON can be loaded again to continue.
 9. **Layout overlay** (step 7 in the editor, view only): load `output/layout.json` or `output/combined.json` to check the planned layout on the screenshot: block frames with names, items (reserved space dashed), paths and the decoration band, as the `layout` layer. Hovering an item shows its block and id in the status bar. The overlay uses the tile coordinates of the farm map it was planned on and is never shifted; when its map size or a fixed building's position differs from the loaded map (e.g. planned before the map was cropped on save, or without a farm map), the editor warns: plan again after every re-save of `farm_map.json`. It is kept in the browser, not in the map JSON.
 10. **Current farm** (step 8 in the editor): where the production buildings, shelters, barn and silo stand now. Pick an id and drag over the item; every drag adds one copy. With a layout loaded in step 7 its ids are offered with their sizes, a click places the item at that size, and a rectangle of another size (rotation allowed) is flagged; without a layout any id can be typed. Fields, trees and bushes are counted only (**Set count**). A farm map from before v1.3 loads with its measured barn and silo moved here. Saved as `current` in `farm_map.json`.
+11. **Templates** (step 9 in the editor): make a design template. On the **farm map**, the **cut** tool takes the current items (step 8) fully inside the dragged rectangle and its design-zone tiles (step 5). Another design can be loaded as a **design screenshot** and calibrated as its own background (A, B, C as in step 3, tool **calibrate**). On either surface, **frame** drags the template rectangle, **building** adds one copy of an id (a click uses its layout size from step 7), **decoration** marks taken tiles (Alt + drag erases). **Download template** writes `<name>.json` relative to the frame (save it in `config/templates/`); only buildings fully inside the frame are kept, overlapping buildings stop the download, and a building wins over a decoration tile. **Open template** loads a template file to edit it. The template is kept in the browser, never in the map JSON.
 
 The game's Layout Edit Mode shows no tile grid, so the graphical output always draws the grid and every footprint.
 
@@ -269,7 +294,8 @@ How the tools work is set in config files, never on the command line: the CLI on
   "field_pool": 0.0,
   "item_gap": 0,
   "path_targets": "blocks",
-  "block_images": true
+  "block_images": true,
+  "templates": {}
 }
 ```
 
@@ -288,6 +314,7 @@ How the tools work is set in config files, never on the command line: the CLI on
 | `path_targets`    | `blocks` (blocks and key buildings) or `buildings` (every building; needs `item_gap` ≥ 1)           | blocks   |
 | `design_zones`    | keep the map's `design` zones free of blocks (paths may cross them)                                 | true     |
 | `block_images`    | one SVG per block (`blocks/`, `combined_blocks/`) and a collage of every block                      | true     |
+| `templates`       | block id → `{"template": name, "mode": "reserve" or "arrange"}` (see "Design templates")            | {}       |
 
 `config/planner.json`:
 
@@ -592,7 +619,7 @@ Data in the repository: game version 1.72, level 56, scraped 2026-10-14. The 1.7
 
 ## Roadmap
 
-**Current status:** v1.4 (path network) is done (259 tests passing, CI on every push). Next: v1.5 (design templates).  
+**Current status:** v1.5 (design templates) is done (279 tests passing, CI on every push). Next: v2.0+ (full application).  
 Current data set (level 56): 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
@@ -600,7 +627,7 @@ The design layer adds paths and a decoration band (126 path tiles on the measure
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb rate, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](docs/wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
-Next step: v1.5. Changes per version: [CHANGELOG.md](CHANGELOG.md).
+Next step: v2.0+. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 
 ### v0.3 - Graph and block analysis (done)
 
@@ -694,8 +721,6 @@ Next step: v1.5. Changes per version: [CHANGELOG.md](CHANGELOG.md).
 - [x] Reserved design zones (option): a `design` zone kind in the map editor for existing decorations; no block is placed there, paths may cross it, it is not part of the decoration band (`design_zones`, default on; no effect without such zones)
 - [x] Design figures in the report whenever the design layer is on: path tiles, corners, detour ratio, free tiles per block, unreachable buildings, to compare settings
 
-The items of v1.5 are plans; their details are updated when they are built.
-
 ### v1.1 - Release basics (done)
 
 - [x] Python 3.14: `requires-python = ">=3.14"`, the local `venv` and CI use it (the tests pass on 3.14)
@@ -728,13 +753,13 @@ The items of v1.5 are plans; their details are updated when they are built.
 - [x] New `path_style` `stepped`: the staircase closest to the straight line between two points (a diagonal, curved look on the isometric grid); `main_path_style` (default: same as `path_style`) gives mixed styles such as a straight main path with stepped side paths
 - [x] Design figures: path tiles of main and side paths apart, narrowed main path tiles; the main path drawn darker in the SVG
 
-### v1.5 - Design templates
+### v1.5 - Design templates (done)
 
-- [ ] Design template: a small grid pattern of buildings (`location_id` and rect) and decoration tiles (only "taken", no decoration kind), one file per template in `config/templates/<name>.json` (git-ignored, one committed example)
-- [ ] `templates` in `config/design.json` assigns templates to blocks, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "reserve"}}`
-- [ ] Mode `reserve` (default): the block frame grows by the template and keeps its area free; mode `arrange`: the template's buildings go to their template positions, its decoration tiles stay free and the rest of the block is packed around them
-- [ ] A template is a wish: when the blocks do not fit, `item_gap` is lowered first, then the template is dropped (with a warning), only then the reserve; a building that is not in the block is an error, template copies the player does not own become reserved space; no rotation or mirroring
-- [ ] Map editor "Templates" tab: cut a template out of the farm map (current items and design zone tiles inside a rectangle) or draw one; a screenshot of another design can be loaded and calibrated as its own background to mark it the same way
+- [x] Design template: a small grid pattern of buildings (`location_id` and rect) and decoration tiles (only "taken", no decoration kind), one file per template in `config/templates/<name>.json` (git-ignored, one committed example)
+- [x] `templates` in `config/design.json` assigns templates to blocks, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "reserve"}}`
+- [x] Mode `reserve` (default): the block frame grows by the template and keeps its area free; mode `arrange`: the template's buildings go to their template positions, its decoration tiles stay free and the rest of the block is packed around them
+- [x] A template is a wish: when the blocks do not fit, `item_gap` is lowered first, then the template is dropped (with a warning), only then the reserve; a building that is not in the block is an error, template copies the player does not own become reserved space; no rotation or mirroring
+- [x] Map editor "Templates" tab: cut a template out of the farm map (current items and design zone tiles inside a rectangle) or draw one; a screenshot of another design can be loaded and calibrated as its own background to mark it the same way
 
 ### v2.0+ - Full application (future)
 

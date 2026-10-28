@@ -323,3 +323,109 @@ def test_layout_overlay_reads_the_layout_json(tmp_path: Path) -> None:
     assert out["sameFixed"] is None and "farmhouse" in out["shifted"]
     # a stored overlay is restored only in the current shape
     assert out["stored"] is True and out["oldStored"] is False
+
+
+TEMPLATE_SCRIPT = r"""
+const Core = require(process.argv[2]);
+const state = {
+  current: [
+    { id: 'dairy', rect: [10, 10, 4, 4] },
+    { id: 'cow_pasture', rect: [15, 10, 4, 4] },
+    { id: 'bakery', rect: [18, 18, 3, 3] },   // sticks out of the cut
+    { id: 'apple_tree', count: 3 },           // count only, no rect
+  ],
+  zones: [
+    { kind: 'design', cells: [[14, 8, 1, 8], [10, 14, 20, 1]] },
+    { kind: 'blocked', cells: [[10, 10, 2, 2]] },
+  ],
+};
+const cut = Core.cutTemplate(state, [10, 10, 9, 5]);
+const tpl = Core.toTemplate(cut);
+let error = null;
+try { Core.toTemplate({ frame: null, buildings: [], decorations: [] }); } catch (e) { error = e.message; }
+const overlap = { frame: [0, 0, 6, 6], decorations: [],
+  buildings: [{ id: 'dairy', rect: [0, 0, 3, 3] }, { id: 'bakery', rect: [2, 2, 3, 3] }, { id: 'mill', rect: [5, 5, 2, 2] }] };
+console.log(JSON.stringify({
+  cut, tpl, error,
+  // a building over a decoration tile wins the tile
+  covered: Core.toTemplate({ frame: [0, 0, 4, 4], buildings: [{ id: 'dairy', rect: [0, 0, 2, 2] }], decorations: [[0, 0, 4, 1]] }),
+  back: Core.toTemplate(Core.fromTemplate(tpl, [3, 7])),
+  placed: Core.fromTemplate(tpl, [3, 7]),
+  warnings: Core.templateWarnings(overlap),
+  overlapError: (() => { try { Core.toTemplate(overlap); } catch (e) { return e.message; } })(),
+  clean: Core.templateWarnings(cut),
+  bad: (() => { try { Core.fromTemplate({ width: 3 }); } catch (e) { return e.message; } })(),
+}));
+"""
+
+
+def test_template_cut_export_and_load(tmp_path: Path) -> None:
+    from src.layout.templates import DesignTemplate
+
+    out = _run_core(tmp_path, TEMPLATE_SCRIPT)
+    # only current items fully inside the cut, only design-zone tiles, clipped
+    assert [b["id"] for b in out["cut"]["buildings"]] == ["dairy", "cow_pasture"]
+    tpl = DesignTemplate.model_validate(out["tpl"])
+    assert (tpl.width, tpl.height) == (9, 5)
+    assert [(b.location_id, b.x, b.y) for b in tpl.buildings] == [
+        ("dairy", 0, 0),
+        ("cow_pasture", 5, 0),
+    ]
+    assert tpl.decoration_tiles() == {(4, y) for y in range(5)} | {
+        (x, 4) for x in range(9)
+    }
+    assert out["error"] == "Draw the template frame first."
+    covered = DesignTemplate.model_validate(out["covered"])
+    assert covered.decoration_tiles() == {(2, 0), (3, 0)}
+    # placing a template elsewhere and exporting it again gives the same file
+    assert out["back"] == out["tpl"]
+    assert out["placed"]["frame"] == [3, 7, 9, 5]
+    assert out["placed"]["buildings"][0] == {"id": "dairy", "rect": [3, 7, 4, 4]}
+    assert out["warnings"] == [
+        "bakery overlaps another building.",
+        "mill lies outside the frame (left out).",
+    ]
+    assert out["overlapError"] == "bakery overlaps another building."
+    assert out["clean"] == []
+    assert out["bad"] == "Not a design template file"
+
+
+TEMPLATE_LAYOUT_SCRIPT = r"""
+const Core = require(process.argv[2]);
+const payload = JSON.parse(require('fs').readFileSync(process.argv[3], 'utf8'));
+console.log(JSON.stringify(Core.fromLayout(payload).blocks.map(b => ({ id: b.id, template: b.template }))));
+"""
+
+
+@pytest.mark.skipif(
+    not Path("data/locations.json").exists(), reason="data/locations.json not found"
+)
+def test_layout_overlay_carries_block_templates(tmp_path: Path) -> None:
+    from src.layout.describe import layout_to_dict
+    from src.layout.planner import plan_layout
+    from src.layout.templates import BlockTemplate, load_template
+    from src.loaders.json_loader import load_data
+
+    garden = BlockTemplate("dairy_garden", load_template("dairy_garden"), "arrange")
+    layout = plan_layout(
+        load_data("data", 15),
+        level=15,
+        farm_map=FarmMap(width=80, height=80),
+        templates={"dairy_block": garden},
+    )
+    payload = layout_to_dict(layout)
+    (tmp_path / "layout.json").write_text(json.dumps(payload), encoding="utf-8")
+    blocks = {
+        b["id"]: b["template"]
+        for b in _run_core(
+            tmp_path, TEMPLATE_LAYOUT_SCRIPT, str(tmp_path / "layout.json")
+        )
+    }
+    src = next(b for b in payload["blocks"] if b["id"] == "dairy_block")["template"]
+    assert blocks["dairy_block"] == {
+        "name": "dairy_garden",
+        "mode": "arrange",
+        "rect": [src["x"], src["y"], src["width"], src["height"]],
+        "decorations": src["decorations"],
+    }
+    assert all(t is None for k, t in blocks.items() if k != "dairy_block")

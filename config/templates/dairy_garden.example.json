@@ -1,0 +1,9 @@
+{
+  "width": 9,
+  "height": 5,
+  "buildings": [
+    {"location_id": "dairy", "x": 0, "y": 0, "width": 4, "height": 4},
+    {"location_id": "cow_pasture", "x": 5, "y": 0, "width": 4, "height": 4}
+  ],
+  "decorations": [[4, 0, 1, 4], [0, 4, 9, 1]]
+}

@@ -240,6 +240,10 @@ config/*.zip
 config/reference/
 config/screenshots/
 
+# Local design templates (one committed example)
+config/templates/*
+!config/templates/*.example.json
+
 # Local agent instructions (not versioned)
 CLAUDE.local.md
 .claude/settings.local.json

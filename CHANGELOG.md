@@ -2,6 +2,13 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [1.5.0] - 2026-10-28
+
+- Design templates: `config/templates/<name>.json` (buildings and decoration tiles, one committed example), assigned to blocks in `templates` of `config/design.json`.
+- Mode `reserve` keeps the template area free in the block frame; mode `arrange` places its buildings at their template positions and packs the rest of the block around them (copies not owned become reserved space).
+- Templates are dropped with a warning when the blocks do not fit (after `item_gap`, before the reserve); `layout.json` / `combined.json` list each block's template and `templates_dropped`; the SVG and the editor overlay draw them.
+- Map editor step 9 "Templates": cut a template out of the farm map or mark one on another design's calibrated screenshot, then download or reopen it.
+
 ## [1.4.0] - 2026-10-28
 
 - Path network: the main path reaches the key buildings and the Storage block first, side paths join every other block to the nearest point of the network.

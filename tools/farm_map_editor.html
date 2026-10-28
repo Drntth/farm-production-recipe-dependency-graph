@@ -152,6 +152,7 @@
     <button data-tab="export"><span class="num">6</span><span class="label">Export</span><span class="badge" id="badge-export"></span></button>
     <button data-tab="layout"><span class="num">7</span><span class="label">Layout overlay</span><span class="badge" id="badge-layout"></span></button>
     <button data-tab="current"><span class="num">8</span><span class="label">Current farm</span><span class="badge" id="badge-current"></span></button>
+    <button data-tab="templates"><span class="num">9</span><span class="label">Templates</span><span class="badge" id="badge-templates"></span></button>
   </nav>
 
   <div class="panes">
@@ -290,6 +291,37 @@
     <div class="row"><input type="search" id="curFilter" placeholder="Filter ids…"><span class="hint" id="curTotal" style="flex:0 0 auto"></span></div>
     <ul class="list" id="curList"></ul>
   </section>
+
+  <section class="pane" id="pane-templates">
+    <h2>9. Design templates</h2>
+    <details class="help" open>
+      <summary>How to</summary>
+      <div class="hint">A template is a small pattern of buildings and decoration tiles for one block: save it as <code>config/templates/&lt;name&gt;.json</code> and assign it in <code>templates</code> of <code>config/design.json</code>. <b>Farm map</b>: the <b>cut</b> tool takes the current items (step 8) fully inside the dragged rectangle and its design-zone tiles (step 5). <b>Design screenshot</b>: load a screenshot of another design, calibrate it with A, B and C as in step 1 (tool <b>calibrate</b>), then mark it. <b>frame</b> drags the template rectangle, <b>building</b> adds one copy of the id (a click uses its size from the layout of step 7), <b>decoration</b> marks taken tiles (<kbd>Alt</kbd> + drag erases). Only buildings fully inside the frame are saved; a building wins over a decoration tile. No rotation or mirroring. Nothing here is saved in the map JSON.</div>
+    </details>
+    <div class="card">
+      <div class="row"><label class="grow">Draw on</label>
+        <select id="tplSource" style="max-width:170px"><option value="farm">farm map</option><option value="design">design screenshot</option></select></div>
+      <div id="tplDesign">
+        <span class="file-btn"><button tabindex="-1" style="width:100%">Load design screenshot…</button><input type="file" id="tplImage" accept="image/*"></span>
+        <div class="row"><label class="grow">Fields in ↘ / ↙ row</label><input type="number" id="tplCalN" min="1" value="5" style="max-width:60px"><input type="number" id="tplCalM" min="1" value="5" style="max-width:60px"></div>
+        <div class="row"><label class="grow">Next click sets</label>
+          <select id="tplCalNext" style="max-width:80px"><option>A</option><option>B</option><option>C</option></select></div>
+        <div class="row"><button id="tplCalApply">Apply calibration</button><button id="tplCalReset">Reset points</button></div>
+      </div>
+      <div class="row"><label class="grow">Tool</label>
+        <select id="tplTool" style="max-width:170px"><option value="cut">cut (farm map)</option><option value="frame">frame</option>
+          <option value="building">building</option><option value="decoration">decoration</option><option value="calibrate">calibrate (screenshot)</option></select></div>
+      <div class="row"><label>Id</label><input type="text" id="tplId" list="curIds" placeholder="dairy"></div>
+    </div>
+    <div class="card">
+      <div class="row"><label>Name</label><input type="text" id="tplName" placeholder="dairy_garden"></div>
+      <div class="row"><button id="tplSave" class="primary">Download template</button>
+        <span class="file-btn"><button tabindex="-1">Open template…</button><input type="file" id="tplFile" accept="application/json,.json"></span></div>
+      <div class="row"><button id="tplClear">Clear template</button></div>
+    </div>
+    <div class="hint" id="tplInfo">No template.</div>
+    <ul class="list" id="tplList"></ul>
+  </section>
   </div>
 </aside>
 <div id="handle" title="Drag to resize the panel, double-click to reset"><button id="collapseBtn" title="Hide the panel (\)">◀</button></div>
@@ -321,12 +353,12 @@
 <dialog id="help">
   <h3 style="margin-top:0">Shortcuts</h3>
   <table>
-    <tr><td><kbd>1</kbd> … <kbd>8</kbd></td><td>switch step</td></tr>
+    <tr><td><kbd>1</kbd> … <kbd>9</kbd></td><td>switch step</td></tr>
     <tr><td>wheel, pinch, <kbd>+</kbd> / <kbd>-</kbd></td><td>zoom</td></tr>
     <tr><td><kbd>0</kbd></td><td>fit the image</td></tr>
     <tr><td>right / middle drag, <kbd>Space</kbd> + drag, arrows</td><td>pan (<kbd>Shift</kbd>: bigger steps); in Calibrate, Reference and Layout overlay a left drag pans too</td></tr>
     <tr><td>drag</td><td>draw a building, plot, zone or current item rectangle; on a ruler / overlay point: move it (<kbd>Shift</kbd>: the r point where r and m overlap)</td></tr>
-    <tr><td><kbd>Alt</kbd> + drag</td><td>erase tiles of the selected plot / zone</td></tr>
+    <tr><td><kbd>Alt</kbd> + drag</td><td>erase tiles of the selected plot / zone, or template decoration tiles</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>undo the last edit of the selected plot / zone</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>save the map JSON</td></tr>
     <tr><td><kbd>\</kbd></td><td>show / hide the side panel (drag its edge to resize)</td></tr>
@@ -641,6 +673,8 @@ const Core = (() => {
       blocks: l.blocks.filter(b => b.frame).map(b => ({
         id: b.id, name: b.name || b.id, frame: rect(b.frame),
         items: (b.items || []).map(i => ({ id: i.location_id, rect: rect(i), rotated: !!i.rotated, reserved: !!i.reserved })),
+        template: b.template ? { name: b.template.name, mode: b.template.mode, rect: rect(b.template),  // null before v1.5
+                                 decorations: (b.template.decorations || []).map(c => c.slice()) } : null,
       })),
       unplaced: l.blocks.filter(b => !b.frame).map(b => b.id),
       fixed: (l.fixed || []).filter(f => f.x != null).map(f => ({ id: f.id, rect: [f.x, f.y, f.width, f.height] })),
@@ -725,10 +759,68 @@ const Core = (() => {
     };
   }
 
+  // ---- design templates (schema: src/layout/templates.py); tpl = {frame, buildings: [{id, rect}], decorations}
+  // in the tiles of the surface they are drawn on (farm map or a design screenshot)
+  const inside = (r, f) => r[0] >= f[0] && r[1] >= f[1] && r[0] + r[2] <= f[0] + f[2] && r[1] + r[3] <= f[1] + f[3];
+
+  // Template cut out of the farm map: current items fully inside `rect` and the design-zone tiles in it.
+  function cutTemplate(state, rect) {
+    const design = (state.zones || []).filter(z => z.kind === 'design').flatMap(z => z.cells)
+      .map(c => clipRect([c[0] - rect[0], c[1] - rect[1], c[2], c[3]], rect[2], rect[3]))
+      .filter(Boolean).map(c => [c[0] + rect[0], c[1] + rect[1], c[2], c[3]]);
+    return {
+      frame: rect.slice(),
+      buildings: (state.current || []).filter(c => c.rect && inside(c.rect, rect)).map(c => ({ id: c.id, rect: c.rect.slice() })),
+      decorations: mergeCells(design),
+    };
+  }
+
+  // Problems that would make the template invalid in Python, as text; empty when it can be saved.
+  function templateWarnings(tpl) {
+    if (!tpl.frame) return ['Draw the template frame first.'];
+    const out = [], taken = new Set();
+    for (const b of tpl.buildings) {
+      if (!inside(b.rect, tpl.frame)) { out.push(`${b.id} lies outside the frame (left out).`); continue; }
+      const tiles = cellsToTiles([b.rect]);
+      if ([...tiles].some(k => taken.has(k))) out.push(`${b.id} overlaps another building.`);
+      for (const k of tiles) taken.add(k);
+    }
+    return out;
+  }
+
+  // Template JSON, relative to the frame: buildings outside it are left out, decoration
+  // tiles are clipped to it and never cover a building; overlapping buildings throw
+  // (src/layout/templates.py would reject the file).
+  function toTemplate(tpl) {
+    if (!tpl.frame) throw new Error('Draw the template frame first.');
+    const overlap = templateWarnings(tpl).find(w => w.endsWith('overlaps another building.'));
+    if (overlap) throw new Error(overlap);
+    const [fx, fy, fw, fh] = tpl.frame;
+    const buildings = tpl.buildings.filter(b => inside(b.rect, tpl.frame));
+    const tiles = cellsToTiles(tpl.decorations.map(c => clipRect([c[0] - fx, c[1] - fy, c[2], c[3]], fw, fh)).filter(Boolean));
+    for (const k of cellsToTiles(buildings.map(b => [b.rect[0] - fx, b.rect[1] - fy, b.rect[2], b.rect[3]]))) tiles.delete(k);
+    return {
+      width: fw, height: fh,
+      buildings: buildings.map(b => ({ location_id: b.id, x: b.rect[0] - fx, y: b.rect[1] - fy, width: b.rect[2], height: b.rect[3] })),
+      decorations: tilesToCells(tiles),
+    };
+  }
+
+  // A template JSON placed with its top corner at tile `at`.
+  function fromTemplate(json, at = [0, 0]) {
+    if (!json || !(json.width >= 1) || !(json.height >= 1) || !Array.isArray(json.buildings)) throw new Error('Not a design template file');
+    const [x, y] = at;
+    return {
+      frame: [x, y, json.width, json.height],
+      buildings: json.buildings.map(b => ({ id: b.location_id, rect: [b.x + x, b.y + y, b.width, b.height] })),
+      decorations: (json.decorations || []).map(c => [c[0] + x, c[1] + y, c[2], c[3]]),
+    };
+  }
+
   return { SNAKE, toSnake, tileToPx, pxToTile, calibrate, moveRect, rectFromTiles, rectCorners,
            cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip, affine3, applyAffine, invertAffine,
            mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay, fromLayout, layoutMismatch, isLayoutOverlay,
-           layoutSizes, sizeWarning };
+           layoutSizes, sizeWarning, cutTemplate, templateWarnings, toTemplate, fromTemplate };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 // CORE-END
@@ -750,7 +842,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   // layout overlay colours, as in src/layout/render_svg.py (block palette cycled)
   const BLOCK_PALETTE = ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#D55E00', '#56B4E9', '#8C6D1F', '#6A3D9A', '#B22222',
     '#2E8B57', '#4B5563', '#C71585', '#1F4E79', '#9A6324', '#469990', '#911EB4', '#808000', '#E6194B'];
-  const PATH_COLOUR = '#C8A165', MAIN_PATH_COLOUR = '#A47C45', DECOR_COLOUR = '#4ADE80';
+  const PATH_COLOUR = '#C8A165', MAIN_PATH_COLOUR = '#A47C45', DECOR_COLOUR = '#4ADE80', TEMPLATE_COLOUR = '#DB2777';
   // layout overlay (Core.fromLayout result), kept in this browser only, never in the map JSON
   const LAYOUT_KEY = 'farm_map_editor_layout_v1';
   const lay = { data: null, file: '', sel: null };
@@ -806,6 +898,41 @@ if (typeof module !== 'undefined') module.exports = Core;
       if (data.opacity != null) $('refOpacity').value = data.opacity;
     } catch (e) { /* ignore broken storage */ }
   }
+  // design template (step 9): drawn on the farm map or on its own calibrated screenshot
+  // (img, imgW, imgH, bg as in state, so both work as a drawing surface); kept in this
+  // browser only, without the image, never in the map JSON
+  const TPL_KEY = 'farm_map_editor_template_v1';
+  const emptyTemplate = () => ({ frame: null, buildings: [], decorations: [] });
+  const tpl = { source: 'farm', data: emptyTemplate(), img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null } };
+  const surf = () => state.tab === 'templates' && tpl.source === 'design' ? tpl : state;
+  function saveTpl() {
+    try {
+      localStorage.setItem(TPL_KEY, JSON.stringify({ source: tpl.source, data: tpl.data, bg: tpl.bg, cal: tpl.cal,
+        size: [tpl.imgW, tpl.imgH], name: $('tplName').value }));
+    } catch (e) { /* storage unavailable */ }
+  }
+  function restoreTpl() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TPL_KEY) || 'null');
+      if (!saved || !saved.data) return;
+      tpl.source = saved.source === 'design' ? 'design' : 'farm';
+      tpl.data = saved.data; tpl.bg = saved.bg || null; tpl.cal = saved.cal || tpl.cal;
+      [tpl.imgW, tpl.imgH] = saved.size || [0, 0];
+      $('tplSource').value = tpl.source; $('tplName').value = saved.name || '';
+    } catch (e) { /* ignore broken storage */ }
+  }
+  function tplInfo() {
+    const d = tpl.data;
+    let text = d.frame ? `Frame ${d.frame[2]}x${d.frame[3]} at (${d.frame[0]}, ${d.frame[1]}), ${d.buildings.length} buildings, `
+      + `${d.decorations.length} decoration rects.` : 'No frame yet.';
+    if (tpl.source === 'design') {
+      if (!tpl.img) text = 'Load the design screenshot. ' + text;
+      else if (!tpl.bg) text = 'Calibrate the screenshot (tool calibrate, A, B, C). ' + text;
+    }
+    const warn = d.frame ? Core.templateWarnings(d) : [];
+    return warn.length ? `${text} ⚠ ${warn.join(' ')}` : text;
+  }
+
   function refInfo() {
     if (!ref.img) return ref.m ? 'Alignment kept; load the overlay image again.' : 'No overlay.';
     const done = REF_ORDER.filter(k => ref.pts[k]).length;
@@ -876,15 +1003,16 @@ if (typeof module !== 'undefined') module.exports = Core;
     draw();
   }
   function fit() {
-    if (!state.img) return;
-    const s = Math.min(canvas.width / state.imgW, canvas.height / state.imgH) * 0.95;
+    const S = surf();
+    if (!S.img) return;
+    const s = Math.min(canvas.width / S.imgW, canvas.height / S.imgH) * 0.95;
     view.s = s;
-    view.tx = (canvas.width - state.imgW * s) / 2;
-    view.ty = (canvas.height - state.imgH * s) / 2;
+    view.tx = (canvas.width - S.imgW * s) / 2;
+    view.ty = (canvas.height - S.imgH * s) / 2;
   }
   // Zoom by factor k around the canvas point (sx, sy), in device pixels.
   function zoomAt(k, sx, sy) {
-    const fitS = Math.min(canvas.width / state.imgW, canvas.height / state.imgH);
+    const fitS = Math.min(canvas.width / surf().imgW, canvas.height / surf().imgH);
     const s = Math.min(Math.max(view.s * k, fitS * 0.5), 16);
     k = s / view.s;
     view.tx = sx - (sx - view.tx) * k; view.ty = sy - (sy - view.ty) * k; view.s = s;
@@ -907,22 +1035,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   function drawLayers(g, px, opts) {
     const bg = state.bg;
     const font = Math.max(10 * px, bg ? Math.hypot(...bg.ex) * 0.45 : 0);
-    if (bg && opts.grid) {
-      g.save();
-      g.beginPath(); g.rect(0, 0, state.imgW, state.imgH); g.clip();
-      g.strokeStyle = COLORS.grid; g.lineWidth = px;
-      g.beginPath();
-      for (let i = 0; i <= bg.width; i++) {
-        const a = Core.tileToPx(bg, i, 0), b = Core.tileToPx(bg, i, bg.height);
-        g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]);
-      }
-      for (let j = 0; j <= bg.height; j++) {
-        const a = Core.tileToPx(bg, 0, j), b = Core.tileToPx(bg, bg.width, j);
-        g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]);
-      }
-      g.stroke();
-      g.restore();
-    }
+    if (bg && opts.grid) drawGrid(g, state, px);
     if (bg && opts.zones) {
       for (const z of state.zones) {
         const filled = z.kind !== 'buildable', selected = opts.selection && z === state.selZone;
@@ -974,6 +1087,43 @@ if (typeof module !== 'undefined') module.exports = Core;
       }
     }
   }
+  // tile grid of a surface (the farm map or the design screenshot), clipped to its image
+  function drawGrid(g, S, px) {
+    const bg = S.bg;
+    g.save();
+    g.beginPath(); g.rect(0, 0, S.imgW, S.imgH); g.clip();
+    g.strokeStyle = COLORS.grid; g.lineWidth = px;
+    g.beginPath();
+    for (let i = 0; i <= bg.width; i++) {
+      const a = Core.tileToPx(bg, i, 0), b = Core.tileToPx(bg, i, bg.height);
+      g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]);
+    }
+    for (let j = 0; j <= bg.height; j++) {
+      const a = Core.tileToPx(bg, 0, j), b = Core.tileToPx(bg, bg.width, j);
+      g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]);
+    }
+    g.stroke();
+    g.restore();
+  }
+  // design template of step 9: frame, decoration tiles, buildings
+  function drawTemplate(g, bg, px) {
+    const d = tpl.data, font = Math.max(10 * px, Math.hypot(...bg.ex) * 0.4);
+    g.save(); g.globalAlpha = 0.3; g.fillStyle = TEMPLATE_COLOUR;
+    for (const c of d.decorations) { poly(g, Core.rectCorners(bg, c)); g.fill(); }
+    g.restore();
+    for (const b of d.buildings) {
+      poly(g, Core.rectCorners(bg, b.rect));
+      g.fillStyle = COLORS.currentFill; g.fill();
+      g.strokeStyle = COLORS.current; g.lineWidth = 2 * px; g.stroke();
+      label(g, bg, b.rect, b.id, font, COLORS.current);
+    }
+    if (d.frame) {
+      poly(g, Core.rectCorners(bg, d.frame));
+      g.setLineDash([8 * px, 5 * px]);
+      g.strokeStyle = TEMPLATE_COLOUR; g.lineWidth = 3 * px; g.stroke();
+      g.setLineDash([]);
+    }
+  }
   // planned layout at its own tile coordinates: decoration band, paths, items, block frames
   function drawLayout(g, bg, px, font, opts) {
     const d = lay.data;
@@ -992,6 +1142,16 @@ if (typeof module !== 'undefined') module.exports = Core;
         g.save(); g.globalAlpha = it.reserved ? 0.12 : 0.4; g.fillStyle = colour; g.fill(); g.restore();
         if (it.reserved) g.setLineDash([4 * px, 3 * px]);
         g.strokeStyle = colour; g.lineWidth = px; g.stroke();
+        g.setLineDash([]);
+      }
+      if (b.template) {
+        // as in render_svg.py: decoration tiles pink, the outline dashed in reserve mode
+        g.save(); g.globalAlpha = 0.3; g.fillStyle = TEMPLATE_COLOUR;
+        for (const c of b.template.decorations) { poly(g, Core.rectCorners(bg, c)); g.fill(); }
+        g.restore();
+        poly(g, Core.rectCorners(bg, b.template.rect));
+        if (b.template.mode === 'reserve') g.setLineDash([6 * px, 4 * px]);
+        g.strokeStyle = TEMPLATE_COLOUR; g.lineWidth = 2 * px; g.stroke();
         g.setLineDash([]);
       }
       poly(g, Core.rectCorners(bg, b.frame));
@@ -1041,28 +1201,32 @@ if (typeof module !== 'undefined') module.exports = Core;
   function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#e5e7eb'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    $('empty').style.display = state.img ? 'none' : 'flex';
-    if (!state.img) return;
+    const S = surf();
+    $('empty').style.display = S.img ? 'none' : 'flex';
+    if (!S.img) return;
     ctx.setTransform(view.s, 0, 0, view.s, view.tx, view.ty);
     ctx.imageSmoothingEnabled = view.s < 2;
-    ctx.drawImage(state.img, 0, 0);
+    ctx.drawImage(S.img, 0, 0);
     const px = 1 / view.s;
-    if (ref.img && ref.m && $('lyRef').checked) {
+    if (S === tpl) {
+      if (tpl.bg && $('lyGrid').checked) drawGrid(ctx, tpl, px);
+    } else if (ref.img && ref.m && $('lyRef').checked) {
       ctx.save();
       ctx.transform(...ref.m);
       ctx.globalAlpha = +$('refOpacity').value;
       ctx.drawImage(ref.img, 0, 0);
       ctx.restore();
     }
-    drawLayers(ctx, px, layerOpts(true));
+    if (S === state) drawLayers(ctx, px, layerOpts(true));
+    if (state.tab === 'templates' && S.bg) drawTemplate(ctx, S.bg, px);
     // ruler and overlay points; a dragged point is drawn where the mouse is
     for (const mk of markers()) {
       const p = drag && drag.kind === 'marker' && drag.key === mk.key ? drag.pos : mk.p;
       drawMarker(ctx, p, mk.key, mk.color, px, drag && drag.key === mk.key);
     }
     // drag preview
-    if (drag && drag.kind === 'rect' && state.bg) {
-      poly(ctx, Core.rectCorners(state.bg, Core.rectFromTiles(drag.t0, drag.t1)));
+    if (drag && drag.kind === 'rect' && S.bg) {
+      poly(ctx, Core.rectCorners(S.bg, Core.rectFromTiles(drag.t0, drag.t1)));
       ctx.fillStyle = drag.erase ? 'rgba(220,38,38,0.3)' : 'rgba(37,99,235,0.25)'; ctx.fill();
       ctx.strokeStyle = drag.erase ? COLORS.blocked : COLORS.sel; ctx.lineWidth = 2 * px; ctx.stroke();
     }
@@ -1081,6 +1245,9 @@ if (typeof module !== 'undefined') module.exports = Core;
     }
     if (state.tab === 'calibrate' || state.tab === 'reference') {
       for (const k of ['A', 'B', 'C']) if (state.cal[k]) out.push({ set: 'cal', key: k, color: COLORS.ruler, p: state.cal[k] });
+    }
+    if (surf() === tpl && tplTool() === 'calibrate') {
+      for (const k of ['A', 'B', 'C']) if (tpl.cal[k]) out.push({ set: 'tpl', key: k, color: COLORS.ruler, p: tpl.cal[k] });
     }
     return out;
   }
@@ -1112,11 +1279,12 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
 
   function updateStatus() {
-    let text = state.img ? `${state.imgW}x${state.imgH}px · zoom ${(view.s * 100).toFixed(0)}%` : '-';
-    if (mouseImg && state.bg) {
-      const t = Core.pxToTile(state.bg, mouseImg[0], mouseImg[1]);
+    const S = surf();
+    let text = S.img ? `${S.imgW}x${S.imgH}px · zoom ${(view.s * 100).toFixed(0)}%` : '-';
+    if (mouseImg && S.bg) {
+      const t = Core.pxToTile(S.bg, mouseImg[0], mouseImg[1]);
       text += ` · tile (${Math.floor(t[0])}, ${Math.floor(t[1])})`;
-      const hit = $('lyLayout').checked ? layoutAt([Math.floor(t[0]), Math.floor(t[1])]) : null;
+      const hit = S === state && $('lyLayout').checked ? layoutAt([Math.floor(t[0]), Math.floor(t[1])]) : null;
       if (hit) text += ` · ${hit}`;
     }
     if (drag && drag.kind === 'rect') {
@@ -1130,7 +1298,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
-    if (!state.img) return;
+    if (!surf().img) return;
     const r = canvas.getBoundingClientRect();
     const sx = (e.clientX - r.left) * devicePixelRatio, sy = (e.clientY - r.top) * devicePixelRatio;
     // touchpad pinch arrives as ctrl + wheel with small deltas
@@ -1138,14 +1306,15 @@ if (typeof module !== 'undefined') module.exports = Core;
   }, { passive: false });
 
   canvas.addEventListener('mousedown', e => {
-    if (!state.img) return;
+    const S = surf();
+    if (!S.img) return;
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     const p = screenToImg(e);
     // a placed ruler / overlay point under the mouse is moved by dragging it
     const hit = e.button === 0 && !spaceDown ? hitMarker(p, e.shiftKey) : null;
     if (hit) { drag = { kind: 'marker', set: hit.set, key: hit.key, pos: hit.p }; return; }
     // Calibrate: a left drag pans, a click without movement sets the point (on mouseup).
-    const calClick = e.button === 0 && !spaceDown && (state.tab === 'calibrate' || state.tab === 'reference');
+    const calClick = e.button === 0 && !spaceDown && (state.tab === 'calibrate' || state.tab === 'reference' || tplCalibrating());
     // Layout overlay is view only: a left drag pans there too
     const viewDrag = e.button === 0 && state.tab === 'layout';
     if (e.button === 1 || e.button === 2 || spaceDown || calClick || viewDrag) {
@@ -1155,18 +1324,18 @@ if (typeof module !== 'undefined') module.exports = Core;
     }
     if (e.button !== 0) return;
     if (state.tab === 'calibrate' || state.tab === 'reference') return;
-    if (!state.bg) { notify('Calibrate the grid first.'); return; }
-    const t = Core.pxToTile(state.bg, p[0], p[1]);
-    const erase = e.altKey && (state.tab === 'expansions' || state.tab === 'zones');
-    if (['fixed', 'expansions', 'zones', 'current'].includes(state.tab)) drag = { kind: 'rect', t0: t, t1: t, erase };
+    if (!S.bg) { notify(S === tpl ? 'Calibrate the screenshot first (tool calibrate).' : 'Calibrate the grid first.'); return; }
+    const t = Core.pxToTile(S.bg, p[0], p[1]);
+    const erase = e.altKey && (state.tab === 'expansions' || state.tab === 'zones' || state.tab === 'templates');
+    if (['fixed', 'expansions', 'zones', 'current', 'templates'].includes(state.tab)) drag = { kind: 'rect', t0: t, t1: t, erase };
   });
 
   window.addEventListener('mousemove', e => {
-    if (state.img && e.target === canvas) mouseImg = screenToImg(e);
+    if (surf().img && e.target === canvas) mouseImg = screenToImg(e);
     if (!drag) {
       if (e.target === canvas) {
         updateStatus();
-        if (state.tab === 'calibrate' || state.tab === 'reference') canvas.style.cursor = mouseImg && hitMarker(mouseImg) ? 'move' : 'crosshair';
+        if (state.tab === 'calibrate' || state.tab === 'reference' || tplCalibrating()) canvas.style.cursor = mouseImg && hitMarker(mouseImg) ? 'move' : 'crosshair';
       }
       return;
     }
@@ -1178,7 +1347,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       view.ty = drag.ty + (e.clientY - drag.y) * devicePixelRatio;
     } else if (drag.kind === 'rect') {
       const p = screenToImg(e);
-      drag.t1 = Core.pxToTile(state.bg, p[0], p[1]);
+      drag.t1 = Core.pxToTile(surf().bg, p[0], p[1]);
     }
     requestDraw();
   });
@@ -1187,6 +1356,12 @@ if (typeof module !== 'undefined') module.exports = Core;
     if (drag && drag.kind === 'marker') dropMarker(drag);
     if (drag && drag.kind === 'rect') finishRect(Core.rectFromTiles(drag.t0, drag.t1), drag.erase);
     if (drag && drag.kind === 'pan' && drag.point && !drag.moved && state.tab === 'reference') setRefPoint(drag.point);
+    else if (drag && drag.kind === 'pan' && drag.point && !drag.moved && state.tab === 'templates') {
+      const k = $('tplCalNext').value;
+      tpl.cal[k] = drag.point;
+      $('tplCalNext').value = { A: 'B', B: 'C', C: 'A' }[k];
+      saveTpl();
+    }
     else if (drag && drag.kind === 'pan' && drag.point && !drag.moved) {
       const k = $('calNext').value;
       state.cal[k] = drag.point;
@@ -1201,6 +1376,10 @@ if (typeof module !== 'undefined') module.exports = Core;
       state.cal[d.key] = d.pos;
       save();
       if (state.bg) notify(`Point ${d.key} moved: press Apply calibration to use it.`, 'info');
+    } else if (d.set === 'tpl') {
+      tpl.cal[d.key] = d.pos;
+      saveTpl();
+      if (tpl.bg) notify(`Point ${d.key} moved: press Apply calibration to use it.`, 'info');
     } else {
       // overlay points are stored in overlay pixels: convert with the current matrix
       ref.pts[d.key] = d.key[0] === 'r' ? Core.applyAffine(Core.invertAffine(ref.m), d.pos) : d.pos;
@@ -1221,7 +1400,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       else notify('Select a plot or zone to undo its last edit.', 'info');
       return;
     }
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-8]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[1-9]$/.test(e.key)) { setTab(TABS[+e.key - 1]); return; }
     if (e.key === '\\') { toggleSide(); return; }
     if (e.key === '?') { if (!$('help').open) $('help').showModal(); return; }
     if (e.code === 'Space') {
@@ -1229,7 +1408,7 @@ if (typeof module !== 'undefined') module.exports = Core;
       if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
       spaceDown = true; e.preventDefault(); return;
     }
-    if (!state.img) return;
+    if (!surf().img) return;
     const cx = canvas.width / 2, cy = canvas.height / 2;
     if (PAN_KEYS[e.key]) pan(e.key, e.shiftKey);
     else if (e.key === '+' || e.key === '=') zoomAt(1.25, cx, cy);
@@ -1239,7 +1418,7 @@ if (typeof module !== 'undefined') module.exports = Core;
     e.preventDefault();
   });
   function pan(key, big) {
-    if (!state.img) return;
+    if (!surf().img) return;
     const step = (big ? 0.5 : 0.15) * Math.min(canvas.width, canvas.height);
     view.tx += PAN_KEYS[key][0] * step; view.ty += PAN_KEYS[key][1] * step;
     requestDraw();
@@ -1259,12 +1438,12 @@ if (typeof module !== 'undefined') module.exports = Core;
   // Enter in a text field releases the focus, so the arrow keys pan the map again.
   window.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text') e.target.blur(); });
   window.addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
-  $('zoomIn').onclick = () => state.img && zoomAt(1.5, canvas.width / 2, canvas.height / 2);
-  $('zoomOut').onclick = () => state.img && zoomAt(1 / 1.5, canvas.width / 2, canvas.height / 2);
+  $('zoomIn').onclick = () => surf().img && zoomAt(1.5, canvas.width / 2, canvas.height / 2);
+  $('zoomOut').onclick = () => surf().img && zoomAt(1 / 1.5, canvas.width / 2, canvas.height / 2);
   $('zoomFit').onclick = () => { fit(); requestDraw(); };
 
-  function inMap(r) {
-    return r[0] >= 0 && r[1] >= 0 && r[0] + r[2] <= state.bg.width && r[1] + r[3] <= state.bg.height;
+  function inMap(r, bg = state.bg) {
+    return r[0] >= 0 && r[1] >= 0 && r[0] + r[2] <= bg.width && r[1] + r[3] <= bg.height;
   }
 
   // undo history of cell edits (owner, previous cells); not saved
@@ -1285,6 +1464,7 @@ if (typeof module !== 'undefined') module.exports = Core;
 
   function finishRect(r, erase = false) {
     if (state.tab === 'current') { addCurrent(r); return; }
+    if (state.tab === 'templates') { templateRect(r, erase); return; }
     if (!inMap(r)) { notify('The rectangle is outside the calibrated grid.'); return; }
     if (state.tab === 'fixed') {
       const id = Core.toSnake($('fixedId').value);
@@ -1319,6 +1499,41 @@ if (typeof module !== 'undefined') module.exports = Core;
     state.selCur = c;
     refreshAll();
   }
+  const tplTool = () => $('tplTool').value;
+  const tplCalibrating = () => state.tab === 'templates' && tpl.source === 'design' && tplTool() === 'calibrate';
+  // step 9: one dragged rectangle with the chosen tool, on the current surface
+  function templateRect(r, erase) {
+    const d = tpl.data, S = surf(), tool = tplTool();
+    if (tool === 'cut') {
+      if (S !== state) { notify('Cut works on the farm map; on a screenshot draw the frame and the buildings.'); return; }
+      tpl.data = Core.cutTemplate(state, r);
+    } else if (tool === 'frame') {
+      d.frame = r;
+    } else if (tool === 'building') {
+      const id = Core.toSnake($('tplId').value);
+      if (!id) { notify('Enter a building id first.'); return; }
+      const size = Core.layoutSizes(lay.data)[id];
+      if (size && r[2] === 1 && r[3] === 1) r = [r[0], r[1], size[0], size[1]];
+      const warn = Core.sizeWarning(id, r, size);
+      if (warn) notify(warn, 'info');
+      d.buildings.push({ id, rect: r });
+    } else if (tool === 'decoration') {
+      d.decorations = erase ? Core.mergeCells(d.decorations, [], [r]) : Core.mergeCells(d.decorations, [r]);
+    } else return;
+    if (!inMap(r, S.bg)) notify('The rectangle is outside the calibrated grid.', 'info');
+    refreshAll();
+  }
+  function setTplSource(source) {
+    const d = tpl.data;
+    if (source !== tpl.source && (d.frame || d.buildings.length || d.decorations.length)
+        && !confirm('The template uses the tiles of the other image. Clear it?')) { $('tplSource').value = tpl.source; return; }
+    if (source !== tpl.source) tpl.data = emptyTemplate();
+    tpl.source = source;
+    $('tplSource').value = source;
+    $('tplTool').value = source === 'farm' ? 'cut' : (tpl.bg ? 'frame' : 'calibrate');
+    fit(); refreshAll();
+  }
+
   function curSizeInfo() {
     if (!lay.data) return 'No layout loaded: free ids, no size check.';
     const id = Core.toSnake($('curId').value), size = Core.layoutSizes(lay.data)[id];
@@ -1433,6 +1648,16 @@ if (typeof module !== 'undefined') module.exports = Core;
       }));
       $('curList').append(li);
     }
+    $('tplDesign').style.display = tpl.source === 'design' ? '' : 'none';
+    $('tplInfo').textContent = tplInfo();
+    $('tplList').innerHTML = '';
+    tpl.data.buildings.forEach((b, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${esc(b.id)} (${b.rect.join(', ')})</span>`;
+      li.append(btn('×', () => { tpl.data.buildings.splice(i, 1); refreshAll(); }));
+      $('tplList').append(li);
+    });
+    saveTpl();
     $('layoutInfo').textContent = layoutInfo();
     $('layoutList').innerHTML = '';
     (lay.data ? lay.data.blocks : []).forEach((b, i) => {
@@ -1464,6 +1689,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     const warn = lay.data && Core.layoutMismatch(lay.data, state.bg, state.fixed);
     set('layout', lay.data ? (warn ? '⚠ size' : `${lay.data.blocks.length} blocks`) : '', lay.data && !warn);
     set('current', state.current.length ? `${state.current.reduce((n, c) => n + c.count, 0)}` : '');
+    const f = tpl.data.frame;
+    set('templates', f ? `${f[2]}x${f[3]}` : '', f && !Core.templateWarnings(tpl.data).length);
   }
 
   $('expAdd').onclick = () => {
@@ -1506,9 +1733,11 @@ if (typeof module !== 'undefined') module.exports = Core;
   $('expUndo').onclick = () => { if (state.selExp) undo(state.selExp); };
 
   // ---------------------------------------------------------------- tabs, layers, files
-  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export', 'layout', 'current'];
+  const TABS = ['calibrate', 'fixed', 'reference', 'expansions', 'zones', 'export', 'layout', 'current', 'templates'];
   function setTab(tab) {
+    const before = surf();
     state.tab = tab;
+    if (surf() !== before) fit();  // the design screenshot has its own size
     document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + tab));
     canvas.style.cursor = { export: 'default', layout: 'grab' }[tab] || 'crosshair';
@@ -1553,6 +1782,66 @@ if (typeof module !== 'undefined') module.exports = Core;
     ref.pts = {}; ref.m = fitRef();
     $('refNext').value = 'r1';
     saveRef(); updateBadges(); $('refInfo').textContent = refInfo(); draw();
+  };
+
+  $('tplSource').onchange = () => setTplSource($('tplSource').value);
+  $('tplTool').onchange = () => draw();
+  $('tplName').oninput = () => saveTpl();
+  $('tplImage').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      // another image size: the old calibration does not fit it
+      if (img.naturalWidth !== tpl.imgW || img.naturalHeight !== tpl.imgH) {
+        tpl.bg = null; tpl.cal = { A: null, B: null, C: null }; $('tplCalNext').value = 'A';
+      }
+      tpl.img = img; tpl.imgW = img.naturalWidth; tpl.imgH = img.naturalHeight;
+      if (!tpl.bg) $('tplTool').value = 'calibrate';
+      fit(); refreshAll();
+    };
+    img.src = URL.createObjectURL(file);
+  };
+  $('tplCalApply').onclick = () => {
+    const { A, B, C } = tpl.cal;
+    if (!tpl.img || !A || !B || !C) { notify('Load the screenshot and click A, B and C first.'); return; }
+    let bg;
+    try { bg = Core.calibrate(A, B, C, +$('tplCalN').value, +$('tplCalM').value, tpl.imgW, tpl.imgH); }
+    catch (err) { notify(err.message); return; }
+    if (tpl.bg) {
+      const d = tpl.data, move = r => Core.moveRect(tpl.bg, bg, r);
+      if (d.frame) d.frame = move(d.frame);
+      for (const b of d.buildings) b.rect = move(b.rect);
+      d.decorations = d.decorations.map(move);
+    }
+    tpl.bg = bg;
+    $('tplTool').value = 'frame';
+    refreshAll();
+  };
+  $('tplCalReset').onclick = () => { tpl.cal = { A: null, B: null, C: null }; $('tplCalNext').value = 'A'; saveTpl(); draw(); };
+  $('tplSave').onclick = () => {
+    const name = Core.toSnake($('tplName').value);
+    if (!name) { notify('Enter a template name first (snake_case).'); return; }
+    let json;
+    try { json = Core.toTemplate(tpl.data); }
+    catch (err) { notify(err.message); return; }
+    for (const w of Core.templateWarnings(tpl.data)) notify(w, 'info');
+    download(new Blob([JSON.stringify(json, null, 2) + '\n'], { type: 'application/json' }), `${name}.json`);
+  };
+  $('tplFile').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    // placed at the old frame's corner, else at the top corner of the grid
+    const at = tpl.data.frame ? tpl.data.frame.slice(0, 2) : [0, 0];
+    try { tpl.data = Core.fromTemplate(JSON.parse(await file.text()), at); }
+    catch (err) { notify('Cannot read the template: ' + err.message); return; }
+    $('tplName').value = file.name.replace(/(\.example)?\.json$/, '');
+    refreshAll();
+  };
+  $('tplClear').onclick = () => {
+    if (!confirm('Clear the template?')) return;
+    tpl.data = emptyTemplate(); refreshAll();
   };
 
   $('fileImage').onchange = e => {
@@ -1684,6 +1973,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   restore();
   restoreRef();
   restoreLayout();
+  restoreTpl();
   $('refInfo').textContent = refInfo();
   refreshAll();
   resize();

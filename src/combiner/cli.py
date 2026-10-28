@@ -22,6 +22,7 @@ from pathlib import Path
 from src.config import PlayerConfig, load_player_config, validate_player_config
 from src.layout.farm_map import load_farm_map
 from src.layout.render_svg import render_svg
+from src.layout.templates import load_templates
 from src.layout.visuals import write_block_images
 from src.loaders.json_loader import load_data
 from src.settings import load_design_settings, load_planner_settings
@@ -125,6 +126,12 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
+        templates = load_templates(design.templates)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid design template: %s", exc)
+        return 1
+
+    try:
         full = load_data(args.data_dir)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Failed to load data: %s", exc)
@@ -158,6 +165,7 @@ def main(argv: list[str] | None = None) -> int:
             design_zones=design.design_zones,
             main_path_style=design.main_path_style,
             main_path_width=design.main_path_width,
+            templates=templates,
         )
     except (RuntimeError, ValueError) as exc:
         logger.error("%s", exc)

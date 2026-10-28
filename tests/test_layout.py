@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from src.config import LocationProgress, PlayerConfig
 from src.graph import build_graph
 from src.layout import cli, visuals
+from src.layout import planner as planner_module
 from src.layout.blocks import Block, block_flow_order, detect_named_blocks
 from src.layout.describe import layout_to_dict, layout_to_markdown
 from src.layout.design import plan_design
@@ -39,6 +40,7 @@ from src.layout.planner import PlacedBlock, _grow, plan_layout
 from src.layout.render_svg import render_svg
 from src.layout.sizing import Sizing
 from src.layout.support import active_relations
+from src.layout.templates import BlockTemplate, DesignTemplate
 from src.loaders.json_loader import DataSet, load_data
 from src.models import (
     FieldGrant,
@@ -1393,3 +1395,153 @@ def test_cli_block_images_setting(tmp_path: Path) -> None:
         == 0
     )
     assert not (off / "blocks").exists()
+
+
+def _garden(mode: str, **change) -> dict[str, BlockTemplate]:
+    """Dairy and two cow pastures (one more than owned) with decoration tiles."""
+    t = {
+        "width": 9,
+        "height": 9,
+        "buildings": [
+            {"location_id": "dairy", "x": 0, "y": 0, "width": 4, "height": 4},
+            {"location_id": "cow_pasture", "x": 5, "y": 0, "width": 4, "height": 4},
+            {"location_id": "cow_pasture", "x": 5, "y": 5, "width": 4, "height": 4},
+        ],
+        "decorations": [[4, 0, 1, 9], [0, 4, 4, 1]],
+    } | change
+    return {
+        "dairy_block": BlockTemplate("garden", DesignTemplate.model_validate(t), mode)
+    }
+
+
+def _inside(r: Rect, frame: Rect) -> bool:
+    return (
+        frame.x <= r.x
+        and r.x + r.w <= frame.x + frame.w
+        and frame.y <= r.y
+        and r.y + r.h <= frame.y + frame.h
+    )
+
+
+def test_template_reserve_keeps_its_area_free(farm: DataSet) -> None:
+    plain = plan_layout(farm, level=5)
+    layout = plan_layout(farm, level=5, templates=_garden("reserve"))
+    pb = next(b for b in layout.blocks if b.block.id == "dairy_block")
+    t = pb.template
+    assert t is not None and t.mode == "reserve" and (t.rect.w, t.rect.h) == (9, 9)
+    assert _inside(t.rect, pb.frame)
+    every = [i.rect for b in layout.blocks for i in b.items]
+    assert not any(r.overlaps(t.rect) for r in every)
+    # the block keeps its own copies and grows by the template
+    before = next(b for b in plain.blocks if b.block.id == "dairy_block")
+    assert len(pb.items) == len(before.items)
+    assert pb.frame.w * pb.frame.h > before.frame.w * before.frame.h
+    assert layout.templates == {"dairy_block": "garden"}
+    data = layout_to_dict(layout)
+    block = next(b for b in data["blocks"] if b["id"] == "dairy_block")
+    assert block["template"]["name"] == "garden" and block["template"]["width"] == 9
+    assert "## Design templates" in layout_to_markdown(layout)
+    assert "design template" in render_svg(layout)
+
+
+def test_template_arrange_places_its_buildings(farm: DataSet) -> None:
+    layout = plan_layout(farm, level=5, templates=_garden("arrange"))
+    pb = next(b for b in layout.blocks if b.block.id == "dairy_block")
+    t = pb.template
+    assert t is not None and t.mode == "arrange"
+    ox, oy = t.rect.x, t.rect.y
+    at = {(i.location_id, i.rect.x - ox, i.rect.y - oy): i for i in pb.items}
+    assert ("dairy", 0, 0) in at and ("cow_pasture", 5, 0) in at
+    # one cow pasture is owned at level 5: the template's second one is reserved
+    assert not at[("cow_pasture", 5, 0)].reserved
+    assert at[("cow_pasture", 5, 5)].reserved
+    assert sum(i.location_id == "cow_pasture" for i in pb.items) == 2
+    assert {d.x - ox for d in t.decorations} == {4, 0}
+    every = [i.rect for b in layout.blocks for i in b.items]
+    assert not any(r.overlaps(d) for r in every for d in t.decorations)
+    # the rest of the block is packed outside the template frame
+    ice = next(i for i in pb.items if i.location_id == "ice_cream_maker")
+    assert not ice.rect.overlaps(t.rect)
+    assert all(_inside(i.rect, pb.frame) for i in pb.items)
+
+
+def test_template_building_must_belong_to_the_block(farm: DataSet) -> None:
+    bad = [{"location_id": "bakery", "x": 0, "y": 0, "width": 3, "height": 3}]
+    with pytest.raises(ValueError, match="bakery is not in block dairy_block"):
+        plan_layout(farm, level=5, templates=_garden("arrange", buildings=bad))
+    wrong = [{"location_id": "dairy", "x": 0, "y": 0, "width": 3, "height": 3}]
+    with pytest.raises(ValueError, match="footprint is 4x4"):
+        plan_layout(farm, level=5, templates=_garden("reserve", buildings=wrong))
+    # a rotatable building may stand transposed
+    turned = [
+        {"location_id": "ice_cream_maker", "x": 0, "y": 0, "width": 2, "height": 3}
+    ]
+    layout = plan_layout(
+        farm, level=5, templates=_garden("arrange", buildings=turned, decorations=[])
+    )
+    pb = next(b for b in layout.blocks if b.block.id == "dairy_block")
+    ice = next(i for i in pb.items if i.location_id == "ice_cream_maker")
+    assert ice.rotated and (ice.rect.w, ice.rect.h) == (2, 3)
+
+
+def test_template_of_an_unknown_block_is_skipped(
+    farm: DataSet, caplog: pytest.LogCaptureFixture
+) -> None:
+    tpl = _garden("reserve")
+    with caplog.at_level("WARNING"):
+        layout = plan_layout(
+            farm, level=5, templates={"loom_block": tpl["dairy_block"]}
+        )
+    assert "no block loom_block" in caplog.text
+    assert all(pb.template is None for pb in layout.blocks)
+
+
+def test_templates_are_dropped_before_the_reserve(
+    farm: DataSet, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A template is a wish: the item gap goes first, then the template."""
+    big = _garden("reserve", width=20, height=20)
+    tight = FarmMap(width=25, height=25)
+    with caplog.at_level("WARNING"):
+        layout = plan_layout(farm, level=5, farm_map=tight, item_gap=1, templates=big)
+    assert not layout.unplaced_blocks
+    assert layout.templates_dropped == ["dairy_block"]
+    assert all(pb.template is None for pb in layout.blocks)
+    assert layout.item_gap == 0
+    assert "Design templates dropped" in caplog.text
+    assert "Dropped so that every block fits" in layout_to_markdown(layout)
+    assert layout_to_dict(layout)["templates_dropped"] == ["dairy_block"]
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_uses_the_example_template(tmp_path: Path) -> None:
+    """config/templates/dairy_garden.example.json on the dairy block."""
+    config = _design_config(
+        tmp_path, templates={"dairy_block": {"template": "dairy_garden"}}
+    )
+    args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    data = json.loads((tmp_path / "layout.json").read_text())
+    block = next(b for b in data["blocks"] if b["id"] == "dairy_block")
+    assert block["template"]["name"] == "dairy_garden" or data["templates_dropped"]
+
+    missing = _design_config(tmp_path, templates={"dairy_block": {"template": "nope"}})
+    args[3] = missing
+    assert cli.main(args) == 1
+
+
+def test_template_of_a_block_without_items_is_skipped(
+    farm: DataSet, caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No items, no frame: the template is neither listed nor reported as dropped."""
+    real = planner_module._pack_block
+
+    def empty_dairy(b, *args):
+        return ([], None) if b.id == "dairy_block" else real(b, *args)
+
+    monkeypatch.setattr(planner_module, "_pack_block", empty_dairy)
+    with caplog.at_level("WARNING"):
+        layout = plan_layout(farm, level=5, templates=_garden("reserve"))
+    assert layout.templates == {}
+    assert layout.templates_dropped == []
+    assert "dairy_block has no items" in caplog.text

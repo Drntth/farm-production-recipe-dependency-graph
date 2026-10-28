@@ -28,6 +28,7 @@ from .describe import layout_to_dict, layout_to_markdown
 from .farm_map import load_farm_map
 from .planner import STRATEGIES, plan_layout
 from .render_svg import render_svg
+from .templates import load_templates
 from .visuals import write_block_images
 
 logger = logging.getLogger("src.layout")
@@ -80,7 +81,9 @@ def _write(layout, out: Path, stem: str, settings: DesignSettings) -> None:
     render_svg(layout, out / f"{stem}.svg")
 
 
-def _plan(data, level, player, farm_map, settings: DesignSettings, strategy: str):
+def _plan(
+    data, level, player, farm_map, settings: DesignSettings, strategy: str, templates
+):
     return plan_layout(
         data,
         level=level,
@@ -98,6 +101,7 @@ def _plan(data, level, player, farm_map, settings: DesignSettings, strategy: str
         design_zones=settings.design_zones,
         main_path_style=settings.main_path_style,
         main_path_width=settings.main_path_width,
+        templates=templates,
     )
 
 
@@ -162,6 +166,12 @@ def main(argv: list[str] | None = None) -> int:
             "Map background not found: %s (the SVG shows a broken image)", bg_path
         )
 
+    try:
+        templates = load_templates(settings.templates)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid design template: %s", exc)
+        return 1
+
     level = args.level if args.level is not None else player.level
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
@@ -188,7 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     data = full.filter_by_max_level(level)
     for stem, strategy in runs:
         try:
-            layout = _plan(data, level, player, farm_map, settings, strategy)
+            layout = _plan(data, level, player, farm_map, settings, strategy, templates)
         except ValueError as exc:
             logger.error("%s", exc)
             return 1

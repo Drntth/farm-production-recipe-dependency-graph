@@ -27,6 +27,7 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
         "item_gap": layout.item_gap,
         "item_gap_requested": layout.item_gap_requested,
         "flow_order": layout.flow_order,
+        "templates_dropped": layout.templates_dropped,
         "design": _design(layout),
         "blocks": [
             {
@@ -44,6 +45,7 @@ def layout_to_dict(layout: Layout) -> dict[str, Any]:
                     if pb.fields
                     else None
                 ),
+                "template": _template(pb),
                 "used_tiles": pb.used_tiles,
                 "reserved_tiles": pb.reserved_tiles,
                 "items": [
@@ -125,6 +127,29 @@ def layout_to_markdown(layout: Layout) -> str:
                 else "- | not placed"
             )
             + f" | {pb.used_tiles} / {pb.reserved_tiles} |"
+        )
+
+    with_template = [pb for pb in layout.blocks if pb.template is not None]
+    if with_template or layout.templates_dropped:
+        lines += ["", "## Design templates", ""]
+    for pb in with_template:
+        t = pb.template
+        how = (
+            "area kept free"
+            if t.mode == "reserve"
+            else "buildings at their template positions, decoration tiles kept free"
+        )
+        lines.append(
+            f"- {pb.block.name}: `{t.name}` ({t.mode}: {how}), {t.rect.w} x "
+            f"{t.rect.h} at ({t.rect.x}, {t.rect.y})"
+        )
+    if layout.templates_dropped:
+        lines.append(
+            "- Dropped so that every block fits: "
+            + ", ".join(
+                f"`{layout.templates[b]}` ({names.get(b, b)})"
+                for b in layout.templates_dropped
+            )
         )
 
     d = layout.design
@@ -315,10 +340,25 @@ def _item_gap_text(layout: Layout) -> str:
     )
 
 
-def _free_per_block(layout: Layout) -> dict[str, int]:
-    """Free tiles in every placed block frame."""
+def _template(pb: PlacedBlock) -> dict[str, Any] | None:
+    t = pb.template
+    if t is None:
+        return None
     return {
-        pb.block.id: pb.frame.w * pb.frame.h - pb.used_tiles - pb.reserved_tiles
+        "name": t.name,
+        "mode": t.mode,
+        **_rect(t.rect),
+        "decorations": [[d.x, d.y, d.w, d.h] for d in t.decorations],
+    }
+
+
+def _free_per_block(layout: Layout) -> dict[str, int]:
+    """Free tiles in every placed block frame; template tiles are not free."""
+    return {
+        pb.block.id: pb.frame.w * pb.frame.h
+        - pb.used_tiles
+        - pb.reserved_tiles
+        - (pb.template.kept_tiles if pb.template is not None else 0)
         for pb in layout.blocks
         if pb.frame is not None and pb.items
     }

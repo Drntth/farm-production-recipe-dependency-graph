@@ -11,5 +11,6 @@
   "field_pool": 0.0,
   "item_gap": 0,
   "path_targets": "blocks",
-  "block_images": true
+  "block_images": true,
+  "templates": {}
 }
