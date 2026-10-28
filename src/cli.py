@@ -4,7 +4,7 @@ Unified CLI: one entry point for every tool.
 Usage
 -----
     python -m src graph                  # graph + analysis (python -m src.main)
-    python -m src layout --area town     # layout (python -m src.layout)
+    python -m src layout --level 30      # layout (python -m src.layout)
     python -m src plan                   # production plan (python -m src.planner)
     python -m src combine                # combined plan (python -m src.combiner)
     python -m src scrape --game-version 1.72
@@ -30,7 +30,7 @@ from pathlib import Path
 # command -> (module with main(argv), one-line description)
 COMMANDS: dict[str, tuple[str, str]] = {
     "graph": ("src.main", "dependency graph and block analysis"),
-    "layout": ("src.layout.cli", "layout of the farm, town or fishing lake"),
+    "layout": ("src.layout.cli", "farm layout"),
     "plan": ("src.planner.cli", "production plan and login schedule (farm)"),
     "combine": ("src.combiner.cli", "farm layout sized by the production plan"),
     "scrape": ("src.scraper.cli", "refresh data/ from the Hay Day wiki"),

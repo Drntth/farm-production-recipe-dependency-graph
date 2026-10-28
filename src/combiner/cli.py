@@ -24,7 +24,6 @@ from src.layout.farm_map import load_farm_map
 from src.layout.render_svg import render_svg
 from src.layout.visuals import write_block_images
 from src.loaders.json_loader import load_data
-from src.models import Area
 from src.settings import load_design_settings, load_planner_settings
 
 from .combine import combine
@@ -94,12 +93,11 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("--level must be at least 1")
         return 1
     try:
-        design_settings, design_source = load_design_settings(args.design_config)
+        design, design_source = load_design_settings(args.design_config)
         planner_settings, planner_source = load_planner_settings(args.planner_config)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid settings: %s", exc)
         return 1
-    design = design_settings.for_area(Area.FARM)
     production, combiner = planner_settings.production, planner_settings.combiner
     logger.info(
         "Settings: design %s, planner %s",
@@ -121,12 +119,9 @@ def main(argv: list[str] | None = None) -> int:
         player = player.model_copy(update={"level": args.level})
 
     try:
-        farm_map = load_farm_map(args.farm_map, Area.FARM)
+        farm_map = load_farm_map(args.farm_map)
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid farm map: %s", exc)
-        return 1
-    if farm_map.area != Area.FARM:
-        logger.error("The map is for area %s, not farm", farm_map.area.value)
         return 1
 
     try:
@@ -178,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
             combined_to_dict(combined, data)
             | {
                 "settings": {
-                    "design": design.used(Area.FARM),
+                    "design": design.model_dump(),
                     "production": production.model_dump(),
                     "combiner": combiner.model_dump(),
                 }

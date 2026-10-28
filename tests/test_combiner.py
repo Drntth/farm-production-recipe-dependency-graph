@@ -159,7 +159,7 @@ def test_cli_writes_combined_outputs(tmp_path: Path) -> None:
     player.write_text(json.dumps({"level": LEVEL}))
     args = ["--player-config", str(player), "--output-dir", str(tmp_path)]
     design = tmp_path / "design.json"
-    design.write_text(json.dumps({"default": {"design_layer": True}}))
+    design.write_text(json.dumps({"design_layer": True}))
     planner = tmp_path / "planner.json"
     planner.write_text(json.dumps({"combiner": {"lookahead": 2}}))
     configs = ["--design-config", str(design), "--planner-config", str(planner)]

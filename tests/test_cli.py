@@ -36,9 +36,9 @@ def test_command_forwards_its_arguments(monkeypatch: pytest.MonkeyPatch) -> None
 
     monkeypatch.setattr(cli, "_tool", tool)
     before = sys.argv[0]
-    assert cli.main(["layout", "--area", "town"]) == 0
+    assert cli.main(["layout", "--level", "30"]) == 0
     # the tool sees the unified program name; it is restored afterwards
-    assert seen == [("python -m src layout", ["--area", "town"])]
+    assert seen == [("python -m src layout", ["--level", "30"])]
     assert sys.argv[0] == before
 
 
