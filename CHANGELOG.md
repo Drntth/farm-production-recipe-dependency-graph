@@ -2,6 +2,10 @@
 
 One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
 
+## [Unreleased]
+
+- `docs/architecture.md`: Mermaid diagrams of the package dependencies and the data flow; `tests/test_architecture.py` checks the package diagram against the real imports.
+
 ## [1.6.0] - 2026-10-28
 
 - Data for every wiki level (game 1.73): the scraper has no level cap by default, field grants of "1 field" are read, new tree, peanut bush and squirrel house footprints are estimates in `data/overrides/`.

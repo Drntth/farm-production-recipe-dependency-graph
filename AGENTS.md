@@ -48,6 +48,7 @@ When you learn a new game fact (from the wiki, the web or the user), add a row t
 - The **Layout Planner** (`src/layout/`) and the **Production Planner** (`src/planner/`) are independent. Neither may import the other. Layout must work without production data.
 - The **Combiner** (`src/combiner/`) is the only place that joins the two. It passes production quantities to the layout as a plain `Sizing` (`src/layout/sizing.py`); `tests/test_combiner.py` checks that layout and planner never import each other.
 - Only the farm is laid out. Town and fishing lake get no layout; lake locations stay in the data for the Production Planner.
+- `docs/architecture.md` holds the package diagram (Mermaid). A new import between top-level `src/` packages needs a new arrow there; `tests/test_architecture.py` fails until the diagram matches.
 
 ## Commands
 

@@ -46,6 +46,8 @@ Design decisions:
 - **Production without layout.** The Production Planner never needs a layout.
 - **Separate UX.** Each tool has its own CLI command and its own output files. The Combiner is a third, optional step.
 
+Package dependencies and the data flow from the wiki to the output files: [docs/architecture.md](docs/architecture.md).
+
 ---
 
 ## 1. Layout Planner
