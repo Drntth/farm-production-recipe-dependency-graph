@@ -2,6 +2,53 @@
 
 Status: the schema (option B) is implemented in `src/config.py` (`PlayerConfig`, `LocationProgress`, `validate_player_config`). `config/player.example.json` lists every configurable location. The Production Planner resolves the defaults in `src/planner/profile.py` (`resolve_profile`) and recommends fields, trees and bushes left open (`src/planner/schedule.py`).
 
+## Using the profile
+
+Player-specific, static settings live in `config/`:
+
+- `config/player.example.json`: committed example.
+- `config/player.json`: your own copy. It is git-ignored and takes precedence when present.
+- `python -m src wizard`: answers a few questions and writes `config/player.json` with only the values that differ from the level defaults (Enter keeps a default; per location e.g. `slots=5 stars=3`; asks before overwriting).
+- `config/examples/player_level_<N>.json` (levels 10, 20, 30, 40, 50): a player who bought nothing beyond the level, every value written out as its level default (all fields and copies, base slots, 0 mastery, full shelters, one beehive; trees / bushes left to the planner; barn, silo and fishing spots `null`, because supplies upgrade them, not the level). Copy one to `config/player.json` and edit what differs, or pass it with `--player-config`. `python -m src examples` regenerates them after a re-scrape.
+
+The config is the **player profile**: everything the player buys, upgrades or earns rather than unlocks by level. `null` means unknown; the planners then use a default derived from the level and the shared data.
+
+```json
+{
+  "level": 56,
+  "mastery_system": "stars",
+  "barn_capacity": 675,
+  "silo_capacity": 750,
+  "fields_owned": 84,
+  "fishing_spots_unlocked": 8,
+  "locations": {
+    "chicken_coop": { "owned": 3, "animals": 18 },
+    "feed_mill": { "owned": 2, "slots": 12, "mastery_stars": 1 },
+    "dairy": { "slots": 8, "mastery_stars": 3 },
+    "apple_tree": { "owned": 9 },
+    "beehive_tree": { "beehives": 2 },
+    "lobster_pool": { "slots": 3 }
+  }
+}
+```
+
+The example file lists every configurable location unlocked at its level. Per-location fields, all optional:
+
+| Field             | Applies to                                     | Meaning                                                     | If missing / `null`                                                               |
+| ----------------- | ---------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `owned`           | multi-copy buildings, shelters, trees, bushes  | copies placed                                               | all copies unlocked at the level; trees / bushes: the planner recommends a number |
+| `slots`           | production buildings, lobster pool, duck salon | slots unlocked, **summed over all copies**                  | base slots per copy                                                               |
+| `mastery_stars`   | production buildings                           | 0-3 per building **type** (copies share production hours)   | 0                                                                                 |
+| `workbench_level` | production buildings                           | with `mastery_system: "workbench"`                          | 0                                                                                 |
+| `animals`         | animal shelters                                | animals in **all** shelters of the type (3 full coops = 18) | full shelters                                                                     |
+| `beehives`        | beehive tree                                   | 1-4 beehives (3 bees each)                                  | 1                                                                                 |
+
+`fields_owned` and the tree / bush counts are optional on purpose: they are tedious to count, and the planners will recommend a sensible number when they are missing.
+
+Every CLI reads the level from this file. `--level` overrides it for a single run.  
+`python -m src.main` checks the profile against the data and logs a warning for unknown ids, locations above the player level, more copies than the level allows, or more animals than `copies × animal_capacity`.  
+The analysis behind the schema, including the input options (manual, defaults, presets, wizard, account sync), follows below, from [Problem](#problem) on. The Production Planner resolves it with level defaults (`python -m src.planner`); it also checks that `slots` stay within 9 per copy (6 for the lobster pool and duck salon).
+
 ## Problem
 
 Many values that the planners need are not tied to the player level. The player buys or upgrades them with coins or diamonds, or earns them through mastery. Two players at level 56 can have very different farms. The shared data (`data/*.json`, `level_limits.json`) can only give the level maximum or the base value. The actual state belongs to the player profile (`config/player.json`).

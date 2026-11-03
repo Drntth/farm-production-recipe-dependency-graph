@@ -32,6 +32,19 @@ _Not to be confused with_: current item (a movable item where it stands now)
 
 **Game fact**: a game rule with value, source and check date, kept in the game fact tables.
 
+**Override**: a hand-maintained shared value in `data/overrides/` that the loader merges over the scraped data at every load; a known `id` patches only the listed fields, a new `id` adds a whole entity.
+_Not to be confused with_: player profile (values one player bought or upgraded)
+
+**Level limits**: copies of every building and the field count unlocked per level (`level_limits.json`).
+
+**Mastery bonus**: the speed-up of one building per star below three (`mastery_bonuses.json`).
+
+## Graph
+
+**Edge type**: `produces` (source location → raw good), `consumes` (input good → location), `outputs` (location → recipe output); parallel edges are merged into one.
+
+**Proximity graph**: undirected graph of locations only; an edge joins a producer and a consumer of the same good, weights diffused over a few hops. Its one-hop weights are the coupling the blocks use.
+
 ## Player
 
 **Player profile**: what the player bought, upgraded or earned (level, barn / silo, copies, slots, mastery, animals); `null` means level default.
@@ -43,6 +56,12 @@ _Not to be confused with_: farm map (positions), design settings (taste)
 _Related_: `FarmMap` (one model for every area)
 
 **Plot**: one farm expansion, numbered like the wiki, unlocked or not; the starting land is section `base`.
+
+**Usable tiles**: tiles the layout may use: unlocked plots, then only `buildable` zones (if any), minus `blocked` zones (and `design` zones when they are kept free).
+
+**Calibration**: the origin and the two tile axes measured on the background screenshot, mapping tile corners to pixels.
+
+**Reference overlay**: another image (the wiki plot map) aligned to the screenshot in the map editor to trace plot borders; not saved in the JSON.
 
 **Zone**: hand-marked tiles of the farm map: `buildable` (land the layout may use), `blocked` (water, road, paved strip) or `design` (a design zone).
 
@@ -59,14 +78,26 @@ _Not to be confused with_: layout item (where a copy should stand), fixed item (
 
 ## Layout
 
-**`Block`**: a production block: buildings that belong together (anchor, its suppliers, its fields), placed as one movable unit, named after its main building ("Dairy block").
+**`Block`**: locations placed as one movable unit: a production block, the Storage block or the Shared fields block.
+
+**Production block**: buildings that belong together (anchor, its suppliers, its fields), named after its main building ("Dairy block").
 
 **Anchor**: the production building a block is built around.
 
 **Storage block**: the barn and the silo, placed as one block unless measured on the map.
 
 **Dedicated fields**: the fields a block owns for the crops its buildings use.
-_Related_: Shared fields block (fields for crops no block uses, and spare fields)
+
+**Shared fields block**: fields for crops no block uses, rarely used crops and owned fields the plan leaves empty (`shared_fields_block`).
+
+**Frame**: the rectangle a placed block takes on the map, its items plus reserve; `None` when the block did not fit (an **unplaced block**).
+
+**Patch**: a near-square group of equal units (fields, bushes) packed as one box inside a frame.
+
+**Gap**: free tiles between blocks (`gap`).
+_Not to be confused with_: item gap (free tiles inside a block)
+
+**Free tiles**: usable tiles outside every frame and fixed item after the layout.
 
 **Support relation**: a non-production neighbour rule, e.g. nectar bushes next to the beehive tree.
 
@@ -102,7 +133,9 @@ _Related_: side path
 
 **Path style**: how a path runs between its ends: `shortest`, `straight` (few corners) or `stepped` (staircase along the straight line).
 
-**Key building**: a fixed building the player walks to often (farmhouse, barn, silo, truck, roadside shop, riverboat); paths connect it.
+**Key building**: a building the player walks to often (farmhouse, barn, silo, truck, roadside shop, riverboat); the main path connects it. All are fixed except the barn and silo, which are placed in the Storage block.
+
+**Terminal**: a target the path network must reach (a key building, a block, a patch of fields); reached at any free tile next to it.
 
 **Hub**: where the path network starts: farmhouse (else the Storage block).
 
@@ -115,6 +148,8 @@ _Not to be confused with_: decoration band (free tiles the layout leaves along p
 
 **Design template**: a small grid pattern of buildings and decoration tiles (`config/templates/<name>.json`) assigned to a block: its area is kept free in the block frame (`reserve`), or its buildings are fixed positions the rest of the block is packed around (`arrange`). A wish: dropped before the reserve when the blocks do not fit.
 _Not to be confused with_: design zone (existing decorations on the farm map)
+
+**Dropped template**: a design template removed so that every block fits (`templates_dropped`).
 
 **Item gap**: free tiles between the buildings of one block; a wish, lowered when the blocks would not fit otherwise.
 _Not to be confused with_: gap (free tiles between blocks)
@@ -135,13 +170,28 @@ _Not to be confused with_: player profile (progress), planner settings (producti
 **Line**: what produces in parallel at a location: a machine copy (one item at a time, slots only queue) or an animal.
 
 **External good**: a good the plan uses but cannot make (ores from the mine, fish); its use is capped, never planned.
+_Not to be confused with_: external input (voucher, diamond, lure, fishing spot: no good at all)
 
-**Recommendation**: a count the plan proposes where the profile is open: fields, trees and bushes, nectar and peanut bushes per day.
+**Skipped recipe**: a recipe with an external input; not planned, listed in `plan.skipped_recipes`.
+
+**Balance**: the same spare amount per hour of every good, maximized first by the linear program.
+
+**Storage share**: the part of barn and silo that the goods made between two logins may fill (`storage_share`, default 0.5).
+
+**Min efficiency**: the share of the best production time the suggested login interval must keep (`min_efficiency`, default 0.8).
+
+**Recommendation**: a count the plan proposes where the profile is open: fields, trees and bushes, feeder bushes per day.
+
+**Feeder bush**: a bush planted to feed a producer: nectar bush for beehive trees, peanut bush for squirrel houses (`FEEDER_BUSHES`).
+
+**Login action**: one step of the fixed order at every login: collect, feed, plant, fill machine queues, sell the surplus.
 
 ## Combiner
 
 **Sizing**: production quantities handed to the layout: copies, fields per crop, goods flows, extra reserves.
 
 **Lookahead**: how many levels ahead the Combiner keeps space for unlocks.
+
+**Upcoming unlock**: a new building, more copies or more fields within the lookahead (`upcoming_unlocks`).
 
 **Combined plan**: the layout sized by the production plan, with one report.

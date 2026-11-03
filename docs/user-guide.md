@@ -1,6 +1,6 @@
 # User guide
 
-How to get a production plan and a farm layout for your own Hay Day farm. Everything runs locally from the command line; nothing is uploaded. The [README](../README.md) explains how the tools work inside; this guide is about using them.
+How to get a production plan and a farm layout for your own Hay Day farm. Everything runs locally from the command line; nothing is uploaded. The tool pages in [docs/tools/](tools/) explain how the tools work inside; this guide is about using them.
 
 ## 1. Install
 
@@ -26,7 +26,7 @@ Only the level is required. Every missing value gets its level default: all unlo
 
 ## 3. Measure your map (optional, for a real layout)
 
-Without a map the layout is drawn on an unbounded grid: useful to see the blocks, not to rebuild the farm. For a layout on your own land, measure `config/farm_map.json` with `tools/farm_map_editor.html` (open it in a browser). The steps are in the README section "Measuring with the map editor": stitch a screenshot, calibrate it with two rows of fields, mark the fixed buildings, the unlocked plots and the zones:
+Without a map the layout is drawn on an unbounded grid: useful to see the blocks, not to rebuild the farm. For a layout on your own land, measure `config/farm_map.json` with `tools/farm_map_editor.html` (open it in a browser). The steps are in [Measuring with the map editor](tools/map-editor.md#measuring-with-the-map-editor): stitch a screenshot, calibrate it with two rows of fields, mark the fixed buildings, the unlocked plots and the zones:
 
 - `blocked` (red): water, roads, paved strips; nothing is built there.
 - `design` (violet): decorations you want to keep; no block goes there, paths may cross.
@@ -42,7 +42,7 @@ Settings are files, not command-line options. Copy the examples and edit them; t
 - `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners, `stepped` for diagonal staircases), `main_path_width` (2 for a wider main path to the key buildings), `main_path_style` (another style for the main path), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`, `templates` (a design template per block, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "arrange"}}`: `reserve` keeps its area free, `arrange` puts its buildings at their template positions).
 - `config/planner.json`: `production.login_interval` (fix how often you log in; empty = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
 
-Every key with its default is in the README section "Settings". Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first, then drop the design templates and only then lower the reserve, and the report says so.
+Every key with its default is in [settings.md](settings.md). Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first, then drop the design templates and only then lower the reserve, and the report says so.
 
 ## 5. Run
 
@@ -71,7 +71,7 @@ The SVG files open in any browser. To see the layout on your own screenshot, loa
 
 - **You reached a new level:** change `level` in `config/player.json` (or run the wizard again) and run `python -m src all`. Copies unlocked within the lookahead already have space in their blocks.
 - **Rebuilding the farm:** measure the current farm in the map editor (step 8; load the combined plan in step 7 first, so the ids and sizes are offered), save `config/farm_map.json`, run `python -m src combine` and then `python -m src relocate`. In Layout Edit Mode, store everything in the Store list, then place the items of the Place list block by block. Fields, trees and bushes are counted, not measured, so they always appear under Store and Place. When the report says a new layout slot is simpler, place every item (Keep and Place) in an empty slot instead. Plan again after every re-save of the farm map, otherwise `relocate` reports that the layout belongs to another map.
-- **A block "does not fit":** unlock or mark more land, lower `reserve` or `item_gap`, or try `strategy: size` in the farm section of `design.json`.
+- **A block "does not fit":** unlock or mark more land, lower `reserve` or `item_gap`, or try `strategy: size` in `design.json`.
 - **"barn_capacity is not set":** add your barn and silo capacity to the profile.
 - **A building "not reachable by a path":** check that the zones around it are right; a building behind a paved strip gets a path to the edge of the buildable land.
 - **After a game update:** follow [game-updates.md](game-updates.md). `python -m src check-facts` compares the game fact tables with the wiki and lists the rows to look at (`output/fact_check.md`):

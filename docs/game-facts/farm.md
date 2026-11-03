@@ -42,7 +42,7 @@
 | Riverboat and leaderboard    | stand behind a paved strip that is not buildable, between them and the green buildable land; a path can only reach the strip's edge (mark the strip as a `blocked` zone)                                                                                                   | in-game           | 2026-10-14 |
 | Barn and silo                | can be moved in Layout Edit Mode (not fixed)                                                                                                                                                                                                                               | in-game           | 2026-10-09 |
 
-These buildings are not in `data/`. Their footprints and positions differ per farm, so the player measures them into `config/farm_map.json` (the example lists their ids with empty positions); the layout planner treats them as fixed obstacles. The barn and silo can be moved: they are storage locations in `data/overrides/locations.json`, and the planner places them as the Storage block. Marking them in `config/farm_map.json` is optional and keeps them where they are. Mark every tile an item blocks (e.g. the truck together with its order board).
+These buildings are not in `data/`. Their footprints and positions differ per farm, so the player measures them into `config/farm_map.json` (the example lists their ids with empty positions); the layout planner treats them as fixed obstacles. The barn and silo can be moved: they are storage locations in `data/overrides/locations.json`, and the planner places them as the Storage block. They never go into `fixed` of `config/farm_map.json` (the layout reports that as an error); where they stand now goes into `current`. Mark every tile an item blocks (e.g. the truck together with its order board).
 
 ## Placing and measuring
 
@@ -59,7 +59,7 @@ These buildings are not in `data/`. Their footprints and positions differ per fa
 | Placing on an occupied tile                  | not possible: the item turns red; an item goes only onto free tiles                                                                                                | in-game                 | 2026-10-28 |
 | The shop shows an item's size before placing | e.g. "3x3" for the chicken coop                                                                                                                                    | in-game                 | 2026-10-05 |
 | Measuring trick                              | 1x1 fields as a ruler; calibrated with the 4x4 dairy                                                                                                               | in-game                 | 2026-10-05 |
-| Width / height convention of this project    | width = ↘ edge, height = ↙ edge from the top corner                                                                                                              | project                 | 2026-10-05 |
+| Width / height convention of this project    | width = ↘ edge, height = ↙ edge from the top corner                                                                                                                | project                 | 2026-10-05 |
 
 ## Expansion
 

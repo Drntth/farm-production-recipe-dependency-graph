@@ -32,21 +32,23 @@ Candidates for future scraping: none needed now.
 
 ## Hand-maintained
 
-| What                                                | Where                           | How                                                  |
-| --------------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
-| Footprints the wiki lacks, `movable`, `rotatable`   | `data/overrides/locations.json` | measured in game, see `data/overrides/README.md`     |
-| Lobster pool / duck salon `base_slots`, `max_slots` | `data/overrides/locations.json` | from the page text (no infobox `slots`)              |
-| Tree / bush `lifetime_yield`, `lifetime_harvests`   | `data/overrides/locations.json` | estimate, see `docs/wiki-gaps.md`                    |
-| Honeycomb `growth_time_seconds`                     | `data/overrides/resources.json` | estimate from the wiki text, see `docs/wiki-gaps.md` |
-| Game rules (slots, mastery, costs, …)               | `docs/game-facts/*.md`          | from wiki pages and in-game observation              |
-| Game versions                                       | `docs/game-updates.md`          | after every game update                              |
-| Wiki gaps and the estimates in use                  | `docs/wiki-gaps.md`             | when a gap is found, measured or added to the wiki   |
+| What                                                            | Where                                             | How                                                  |
+| --------------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| Footprints the wiki lacks, `movable`, `rotatable`               | `data/overrides/locations.json`                   | measured in game, see `data/overrides/README.md`     |
+| Lobster pool / duck salon `base_slots`, `max_slots`             | `data/overrides/locations.json`                   | from the page text (no infobox `slots`)              |
+| Tree / bush `lifetime_yield`, `lifetime_harvests`               | `data/overrides/locations.json`                   | estimate, see `docs/wiki-gaps.md`                    |
+| Honeycomb `growth_time_seconds`                                 | `data/overrides/resources.json`                   | estimate from the wiki text, see `docs/wiki-gaps.md` |
+| Peanuts `growth_time_seconds`, squirrel house `animal_capacity` | `data/overrides/resources.json`, `locations.json` | see `docs/wiki-gaps.md`                              |
+| Barn and silo (whole entities, type `storage`)                  | `data/overrides/locations.json`                   | not in the scraped data; footprints measured in game |
+| Game rules (slots, mastery, costs, …)                           | `docs/game-facts/*.md`                            | from wiki pages and in-game observation              |
+| Game versions                                                   | `docs/game-updates.md`                            | after every game update                              |
+| Wiki gaps and the estimates in use                              | `docs/wiki-gaps.md`                               | when a gap is found, measured or added to the wiki   |
 
 ## Player-specific
 
 `config/player.json` (or the committed example): level, mastery system, barn / silo, fields, fishing spots, and per-location slots, mastery, copies, animals, beehives. See [player-profile.md](player-profile.md).
 
-`config/farm_map.json` (or the committed example): the usable farm size, the positions of the fixed buildings (farmhouse, barn, silo, mine, …), the calibrated farm screenshot and the farm plots with their unlocked state, measured by the player with `tools/farm_map_editor.html`. See the README section "Farm map".
+`config/farm_map.json` (or the committed example): the usable farm size, the positions of the fixed buildings (farmhouse, mine, truck, …; not the barn and silo, which the planner places), the calibrated farm screenshot and the farm plots with their unlocked state, measured by the player with `tools/farm_map_editor.html`. See [Farm map](tools/map-editor.md#farm-map-player-data).
 
 ## Not available
 

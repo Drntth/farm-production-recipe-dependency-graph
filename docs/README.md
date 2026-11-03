@@ -17,6 +17,18 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [player-profile.md](player-profile.md)                                   | player-specific settings, input options, profile schema                                   |
 | [user-guide.md](user-guide.md)                                           | how to use the tools: profile, map, settings, commands, outputs                           |
 | [architecture.md](architecture.md)                                       | package dependencies and data flow (Mermaid), checked against the imports by a test       |
+| [cli.md](cli.md)                                                         | every command, option and output file                                                     |
+| [settings.md](settings.md)                                               | keys of `config/design.json` and `config/planner.json` with defaults                      |
+| [tools/layout-planner.md](tools/layout-planner.md)                       | Layout Planner: blocks, fields, packing, fallback, design layer, templates                |
+| [tools/production-planner.md](tools/production-planner.md)               | Production Planner: profile, mastery, capacity, linear program, schedule                  |
+| [tools/combiner.md](tools/combiner.md)                                   | Combiner: layout sized by the plan, flow order, lookahead                                 |
+| [tools/relocation.md](tools/relocation.md)                               | relocation plan: keep / store / place                                                     |
+| [tools/map-editor.md](tools/map-editor.md)                               | farm map format and the browser map editor, step by step                                  |
+| [data-model.md](data-model.md)                                           | `data/*.json`, level limits, overrides, pydantic models                                   |
+| [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                |
+| [modules.md](modules.md)                                                 | repository tree, module roles, entry points without file IO                               |
+| [development.md](development.md)                                         | setup, checks, tests, CI, releases                                                        |
+| [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and v2.0+                                                          |
 
 ## Where knowledge lives
 

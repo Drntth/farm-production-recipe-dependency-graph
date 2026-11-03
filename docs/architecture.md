@@ -88,22 +88,29 @@ flowchart LR
     scrape --> data([data/*.json])
     overrides([data/overrides/*.json<br/>measured, estimated]) --> load[loaders]
     data --> load
-    profile([config/player.json]) --> load
+    wizard[python -m src wizard] --> profile([config/player.json])
+    data --> wizard
+    data --> examples[python -m src examples]
+    examples --> exout([config/examples/<br/>player_level_N.json])
 
     load --> gcmd[python -m src graph]
+    profile --> gcmd
     gcmd --> gout([graph.json, .csv, .graphml<br/>analysis.json])
 
     editor[tools/farm_map_editor.html] --> farmmap([config/farm_map.json])
     farmmap --> layoutcmd[python -m src layout]
     design([config/design.json<br/>config/templates/]) --> layoutcmd
     load --> layoutcmd
+    profile --> layoutcmd
     layoutcmd --> layoutout([layout.json, .md, .svg])
 
     plannercfg([config/planner.json]) --> plancmd[python -m src plan]
     load --> plancmd
+    profile --> plancmd
     plancmd --> planout([capacity.json<br/>schedule.json, .md])
 
     load --> combinecmd[python -m src combine]
+    profile --> combinecmd
     farmmap --> combinecmd
     design --> combinecmd
     plannercfg --> combinecmd
@@ -116,8 +123,13 @@ flowchart LR
 
     layoutout -.->|overlay| editor
     combout -.->|overlay| editor
+
+    facts([docs/game-facts/*.md]) --> check[python -m src check-facts]
+    wiki --> check
+    check --> factout([fact_check.md])
 ```
 
 - `python -m src all` runs graph, layout, plan and combine in this order; `relocate` is separate.
 - The Combiner runs the Layout Planner and the Production Planner itself; it does not read their output files.
-- Every generated file goes to `output/` (git-ignored).
+- Every generated file goes to `output/` (git-ignored), except the profiles of `wizard` (`config/player.json`) and `examples` (`config/examples/`).
+- The player profile is read by `config.py` (`load_player_config`), not by the data loader; without `config/player.json` the committed example is used.

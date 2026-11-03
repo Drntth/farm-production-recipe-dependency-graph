@@ -36,7 +36,7 @@ Hay Day changes regularly. This file records what is known about recent versions
 | 1.71    | 2026-06    | 14th anniversary; beach area by the sanctuary for decorations; Birthday Balloon Maker delivered again (2026-06-19)                                                 | wiki:Update, wiki:Birthday_Balloon_Maker |
 | Spring  | 2026       | quality-of-life changes; crops, axes and saws can be bought with coins                                                                                             | web:vortexgaming.io                      |
 
-Data in the repository was scraped for game version 1.73 with every wiki level (up to 126, see `data/meta.json`).
+Data in the repository was scraped for game version 1.73 with every wiki level (up to 126, see `data/meta.json`). The 1.72 Building Mastery / Workbench is not on the wiki yet, so the data holds 3-star times only.
 
 ## Known wiki gaps
 
