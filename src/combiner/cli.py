@@ -7,8 +7,8 @@ Usage
     python -m src.combiner --level 30
     python -m src.combiner --design-config my_design.json --planner-config my_planner.json
 
-Settings come from config/design.json (farm section: gap, reserve, design
-layer) and config/planner.json (production, combiner: lookahead, strategy).
+Settings come from config/design.json (gap, reserve, design layer) and
+config/planner.json (production, combiner: lookahead, strategy).
 """
 
 from __future__ import annotations

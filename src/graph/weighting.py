@@ -24,12 +24,11 @@ Weight model (v0.1)
    resource → location → resource hop that later stages can
    collapse into location-location proximity.
 
-Multi-level propagation (future)
---------------------------------
-Once the basic graph exists, a second pass can compute *effective*
-weights between any pair of locations by summing (or taking the
-maximum of) the weights of all simple paths that connect them.
-That effective weight will feed the clustering and layout heuristics.
+Multi-level propagation
+-----------------------
+``analysis.location_proximity_graph`` collapses these edges into
+location-location coupling and diffuses it over a few hops; the
+block detection uses its one-hop weights.
 """
 
 from __future__ import annotations

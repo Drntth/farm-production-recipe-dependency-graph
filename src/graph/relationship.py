@@ -1,9 +1,10 @@
 """
 Edge types and relationship helpers for the production dependency graph.
 
-The graph is a directed weighted MultiDiGraph (NetworkX) whose edges
-carry rich attributes so that later stages (clustering, layout heuristics,
-exporters) can reason about *why* two nodes are connected.
+The graph is a directed weighted DiGraph (NetworkX) with parallel edges
+merged into one. Its edges carry rich attributes so that later stages
+(clustering, layout heuristics, exporters) can reason about *why* two
+nodes are connected.
 """
 
 from __future__ import annotations

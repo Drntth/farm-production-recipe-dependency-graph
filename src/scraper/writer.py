@@ -1,4 +1,5 @@
-"""Write the three JSON data files and their metadata."""
+"""Write the data files (locations, resources, recipes, level limits, mastery
+bonuses) and meta.json."""
 
 from __future__ import annotations
 
@@ -64,7 +65,7 @@ def write_meta_file(
     """
     Write meta.json describing where and when the data came from.
 
-    Used by the game update checklist (README) to see whether the
+    Used by the game update check (docs/game-updates.md) to see whether the
     scraped data is older than the latest wiki edits or game update.
     """
     output_dir.mkdir(parents=True, exist_ok=True)

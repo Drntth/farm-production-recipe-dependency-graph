@@ -49,11 +49,13 @@ Together they form continuous dependency paths, e.g.:
          ─OUTPUTS→ cream …
 
 External recipe inputs (vouchers, premium items …) that are absent
-from resources.json are silently skipped; they never become nodes.
+from resources.json are skipped with a debug log line; they never become
+nodes.
 
 The returned object is a networkx.DiGraph with a single edge between
 any ordered pair of nodes (if multiple recipes would create the same
-edge, weights are summed and the recipe_ids are collected).
+edge, weights are summed, the recipe_ids are collected and the largest
+amount and ratio are kept).
 """
 
 from __future__ import annotations

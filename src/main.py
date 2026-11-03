@@ -1,5 +1,5 @@
 """
-Farm Production Graph - Layout Planner entry point.
+Farm Production Graph - dependency graph and analysis entry point.
 
 Usage
 -----

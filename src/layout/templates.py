@@ -7,10 +7,10 @@ files. Coordinates are tiles relative to the template's top corner, with the
 same axes as the farm map (x ↘ = width, y ↙ = height)::
 
     {
-      "width": 7,
+      "width": 9,
       "height": 5,
-      "buildings": [{"location_id": "dairy", "x": 0, "y": 0, "width": 3, "height": 3}],
-      "decorations": [[3, 0, 1, 4]]
+      "buildings": [{"location_id": "dairy", "x": 0, "y": 0, "width": 4, "height": 4}],
+      "decorations": [[4, 0, 1, 4], [0, 4, 9, 1]]
     }
 
 ``decorations`` are tile rectangles ``[x, y, width, height]`` that are only

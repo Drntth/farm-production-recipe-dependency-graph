@@ -4,7 +4,7 @@ Command-line interface for the scraper.
 Usage:
     python -m src.scraper                       # every level on the wiki
     python -m src.scraper --level 56 --output-dir data
-    python -m src.scraper --game-version 1.72
+    python -m src.scraper --game-version 1.73
 """
 
 from __future__ import annotations

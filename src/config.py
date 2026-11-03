@@ -30,7 +30,7 @@ EXAMPLE_CONFIG = CONFIG_DIR / "player.example.json"
 
 
 class MasterySystem(str, Enum):
-    """Machine mastery mechanic active for the player (see README update checklist)."""
+    """Machine mastery mechanic active for the player (see docs/game-updates.md)."""
 
     STARS = "stars"  # classic 3-star mastery
     WORKBENCH = "workbench"  # Building Mastery / Workbench (v1.72+)

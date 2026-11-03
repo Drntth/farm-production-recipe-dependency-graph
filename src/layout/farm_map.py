@@ -19,7 +19,9 @@ calibration, ``expansions`` the farm plots drawn as tile rectangles. When any
 drawn plot is marked ``unlocked``, the layout only uses unlocked plots; plots
 without cells are ignored, plots of section ``base`` count as unlocked.
 ``zones`` mark tiles by hand: ``buildable`` zones (the farm sections) limit the
-layout to them, ``blocked`` zones (water, road, forest, …) are never used.
+layout to them, ``blocked`` zones (water, road, forest, …) are never used,
+``design`` zones (existing decorations) are kept free of blocks
+(``design_zones``, on by default).
 ``current`` lists where the player's movable items stand now (the start of a
 relocation plan, ``src/relocation``); the Layout Planner ignores it.
 """
@@ -80,7 +82,7 @@ def outline_segments(tiles: set[Tile]) -> list[Segment]:
 
 
 class FixedItem(BaseModel):
-    """A building the layout planner never moves (farmhouse, barn, mine, …)."""
+    """A building the game never moves (farmhouse, mine, truck, …)."""
 
     id: str = Field(..., description="Snake_case id; a location id if it is one")
     name: str | None = None
