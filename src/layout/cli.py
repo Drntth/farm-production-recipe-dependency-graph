@@ -230,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     if settings.block_images:  # of the main layout
         images = write_block_images(main_layout, out / "blocks")
         logger.info("Wrote %d block images → %s", len(images), out / "blocks")
-    _log_summary(layout, [stem for stem, _ in runs], out)
+    _log_summary(main_layout, [stem for stem, _ in runs], out)
     return 0
 
 

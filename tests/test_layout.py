@@ -770,6 +770,28 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
+def test_cli_strategy_all_logs_main_layout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    written: dict[str, object] = {}
+    logged: list[object] = []
+    write = cli._write
+    monkeypatch.setattr(
+        cli,
+        "_write",
+        lambda lay, out, stem, s: (
+            written.update({stem: lay}),
+            write(lay, out, stem, s),
+        ),
+    )
+    monkeypatch.setattr(cli, "_log_summary", lambda lay, stems, out: logged.append(lay))
+    config = _design_config(tmp_path, strategy="all")
+    args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
+    assert cli.main(args) == 0
+    assert logged == [written["layout"]]
+
+
+@pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")
 def test_cli_strategy_flow(tmp_path: Path) -> None:
     config = _design_config(tmp_path, strategy="flow", reserve=0.1)
     args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]

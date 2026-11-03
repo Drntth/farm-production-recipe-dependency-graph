@@ -197,3 +197,14 @@ def test_export_graphml_preserves_attributes(
     assert "edge_type" in text
     assert "produces" in text or "consumes" in text
     assert "source_location_id" in text
+
+
+def test_export_graphml_keeps_barn_limit_and_description(
+    small_graph: nx.DiGraph, tmp_path: Path
+) -> None:
+    small_graph.nodes["milk"]["max_in_barn"] = 40
+    small_graph.nodes["dairy"]["description"] = "Makes cream"
+    out = export_graphml(small_graph, tmp_path / "graph.graphml")
+    nodes = nx.read_graphml(out).nodes
+    assert nodes["milk"]["max_in_barn"] == 40
+    assert nodes["dairy"]["description"] == "Makes cream"

@@ -85,6 +85,8 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
         ("lifetime_yield", "long"),
         ("lifetime_harvests", "long"),
         ("growth_time_seconds", "long"),
+        ("max_in_barn", "long"),
+        ("description", "string"),
         ("label", "string"),
     ]
     for i, (name, atype) in enumerate(node_attr_keys):
@@ -190,6 +192,8 @@ def export_graphml(G: nx.DiGraph, path: Path | str) -> Path:
             "lifetime_yield": attrs.get("lifetime_yield"),
             "lifetime_harvests": attrs.get("lifetime_harvests"),
             "growth_time_seconds": attrs.get("growth_time_seconds"),
+            "max_in_barn": attrs.get("max_in_barn"),
+            "description": attrs.get("description"),
             "label": label,
         }
         for name, value in export_attrs.items():
