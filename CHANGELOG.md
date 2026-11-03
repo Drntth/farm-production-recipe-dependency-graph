@@ -1,8 +1,17 @@
 # Changelog
 
-One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in the README roadmap. Versions before 1.0.0 have no git tag.
+One entry per version. The version is kept in `pyproject.toml`; the details of each milestone are in [docs/roadmap.md](docs/roadmap.md). Versions before 1.0.0 have no git tag.
 
 ## [Unreleased]
+
+- Docs reorganized: a short README; the tool details moved to `docs/tools/` (layout planner, production planner, combiner, relocation, map editor); new `docs/cli.md` (every option), `docs/settings.md`, `docs/data-model.md`, `docs/graph-model.md`, `docs/modules.md` (entry points without file IO), `docs/development.md` and `docs/roadmap.md`; `docs/README.md` indexes them all.
+- Docs corrected against the code: barn and silo are whole entities in the overrides and go into `current`, never `fixed`; `design.json` is one flat object; the layout groups blocks with the anchor method; schedule, capacity, relocation and combined JSON keys listed; `CONTEXT.md` gained the layout, graph and production terms.
+- Fix: the GraphML export keeps `max_in_barn` and `description`.
+- Fix: with `strategy: all` the layout summary log describes the main `layout`, not the last fixed-strategy run.
+- Stale docstrings updated (graph type, edge merge, proximity propagation, fixed items, template example); the unused `main()` in `src/__init__.py` removed.
+- `pyproject.toml` version set to 1.6.1 to match the tag.
+
+## [1.6.1] - 2026-10-29
 
 - `docs/architecture.md`: Mermaid diagrams of the package dependencies and the data flow; `tests/test_architecture.py` checks the package diagram against the real imports.
 
