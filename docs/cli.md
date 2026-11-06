@@ -30,6 +30,8 @@ python -m src migrate-map           # one-file config/farm_map.json → config/p
 python -m src farm-profile          # player, map, settings, templates → config/farm_profile.json
 python -m src all --farm-profile config/farm_profile.json   # every tool from one farm profile
 python -m src bundle                # data/ with the overrides → output/data_bundle.json
+python -m src recommend             # level recommendations 1-100 → output/recommendations/ (the web site)
+python -m src recommend --levels 1,20,40
 
 # build graph + analysis for the configured player level
 python -m src.main
@@ -86,6 +88,7 @@ output/
 ├── relocation.json                    # python -m src relocate
 ├── relocation.md
 ├── data_bundle.json                   # python -m src bundle
+├── recommendations/                   # python -m src recommend: level_N.json, level_N.svg, index.json
 └── fact_check.md                     # python -m src check-facts
 ```
 
@@ -116,5 +119,6 @@ Every command takes `--help`. The options only say what to run (level, file path
 | `check-facts`                 | `--facts-dir` (docs/game-facts), `--output-dir`, `--fail-on-findings` (exit code 3 when a row changed or its page failed)                                                                                                               |
 | `migrate-map`                 | `--map` (config/farm_map.json), `--data-dir`, `--output` (config/profile_map.json), `--base-output` (also write the geometry as a base map), `--force`                                                                                  |
 | `farm-profile`                | `--player-config`, `--map`, `--design-config`, `--planner-config` (the same defaults as the tools), `--data-dir`, `--name`, `--output` (config/farm_profile.json), `--force`                                                            |
+| `recommend`                   | `--data-dir` (data), `--levels` (1-100; ranges and lists: `1-10,40`), `--output-dir` (output/recommendations)                                                                                                                           |
 | `bundle`                      | `--data-dir` (data), `--output` (output/data_bundle.json)                                                                                                                                                                               |
 | `all`                         | `--level`, `--player-config`, `--data-dir`, `--output-dir`, `--map`, `--design-config`, `--planner-config`, `--farm-profile`; each step gets the ones it accepts                                                                        |

@@ -23,6 +23,7 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [tools/production-planner.md](tools/production-planner.md)               | Production Planner: profile, mastery, capacity, linear program, schedule                  |
 | [tools/combiner.md](tools/combiner.md)                                   | Combiner: layout sized by the plan, flow order, lookahead                                 |
 | [tools/relocation.md](tools/relocation.md)                               | relocation plan: keep / store / place                                                     |
+| [tools/recommend.md](tools/recommend.md)                                 | level recommendations and the static site (`web/`)                                        |
 | [tools/map-editor.md](tools/map-editor.md)                               | farm map format and the browser map editor, step by step                                  |
 | [data-model.md](data-model.md)                                           | `data/*.json`, level limits, overrides, pydantic models                                   |
 | [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                |

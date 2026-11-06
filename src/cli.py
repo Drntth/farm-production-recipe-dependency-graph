@@ -15,6 +15,7 @@ Usage
     python -m src migrate-map            # config/farm_map.json → config/profile_map.json
     python -m src farm-profile           # the separate files → config/farm_profile.json
     python -m src bundle                 # data/ → output/data_bundle.json
+    python -m src recommend              # output/recommendations/level_<N>.json, .svg
     python -m src all                    # graph, farm layout, plan, combined plan
 
 Every command takes the options of its tool (``python -m src <command> -h``).
@@ -51,6 +52,7 @@ COMMANDS: dict[str, tuple[str, str]] = {
     ),
     "farm-profile": ("src.farm_profile", "assemble a farm profile from the files"),
     "bundle": ("src.loaders.bundle", "write the data files as one data bundle"),
+    "recommend": ("src.recommend.cli", "write level recommendations for the web site"),
 }
 # the run order of "all", with the shared options each tool accepts
 ALL_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (

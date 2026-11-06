@@ -73,6 +73,9 @@ farm-production-recipe-dependency-graph/
 │   │   ├── cli.py                     # python -m src relocate
 │   │   ├── relocate.py                # checks, keep / store / place matching
 │   │   └── report.py                  # relocation.json / relocation.md
+│   ├── recommend/                     # level recommendations for the web site (Core API per level)
+│   │   ├── build.py                   # level_recommendation, recommendations: files per level + index
+│   │   └── cli.py                     # python -m src recommend
 │   ├── __main__.py                    # python -m src <command>
 │   ├── cli.py                         # unified CLI: every command of COMMANDS, and all
 │   ├── config.py                      # player profile: model, loader, validation
@@ -138,6 +141,9 @@ farm-production-recipe-dependency-graph/
 │   │   ├── wiki_client.py
 │   │   └── writer.py
 │   └── main.py
+├── web/                               # static site (Astro, TypeScript, Svelte): docs/tools/recommend.md
+│   ├── src/                           # pages, components, data.ts (reads output/recommendations/)
+│   └── tests/site.spec.ts             # Playwright, mobile + desktop
 ├── tools/
 │   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
@@ -175,7 +181,8 @@ farm-production-recipe-dependency-graph/
 ├── README.md
 ├── pyproject.toml                     # project metadata, version, ruff settings (not a package)
 ├── requirements.txt
-└── requirements-dev.txt               # pytest, ruff
+├── requirements-dev.txt               # pytest, ruff
+└── serve-web.sh                       # build the web site and serve it locally (Ctrl+C stops)
 
 ## Entry points without file IO
 
@@ -189,6 +196,8 @@ The Core API (`src/api`) is one call per tool. Each takes the unfiltered data (a
 | `production_plan(data, *, player=None, level=None, planner=None)`                                                 | `plan`     | the `schedule.json` payload      |
 | `combined_plan(data, *, player=None, level=None, farm_map=None, design=None, planner=None, templates=None, …)`    | `combine`  | the `combined.json` payload      |
 | `relocation_plan(data, *, layout, farm_map=None, layout_name="layout")`                                           | `relocate` | the `relocation.json` payload    |
+
+`level_recommendation(data, farm_map, level, *, game_version, core_version, data_max_level)` (`src/recommend/build.py`) calls `combined_plan` with the level-default profile and default settings; `recommendations(…, levels)` returns the files of every level and `index.json`.
 
 `templates` maps a template name to a `DesignTemplate` or its JSON. `output_dir` only makes the SVG link to the map background relative to it. The building blocks below are the same as before v2.0:
 

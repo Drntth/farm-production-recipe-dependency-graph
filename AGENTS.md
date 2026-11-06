@@ -8,7 +8,7 @@ Commit prefix: [HAYDAY-PROJECT]
 
 The project analyses Hay Day production chains. It turns locations, resources and recipes into a weighted directed graph (NetworkX). From that graph it forms named production blocks for the farm layout and plans production quantities. Overview: `README.md`; how each tool works: `docs/tools/`.
 
-- Milestones v0.3-v2.0 are done; what each brought is in `docs/roadmap.md`. Next: **v2.1** (static site); the v2+ sub-versions are in `docs/roadmap.md`, the web app design and its decisions in `docs/v2-design.md`.
+- Milestones v0.3-v2.1 are done; what each brought is in `docs/roadmap.md`. Next: **v2.2** (farm profiles and the plan in the browser); the v2+ sub-versions are in `docs/roadmap.md`, the web app design and its decisions in `docs/v2-design.md`.
 - The values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
@@ -76,6 +76,9 @@ python -m src farm-profile                # player, map, settings, templates →
 python -m src all --farm-profile config/farm_profile.json   # every tool reads the farm profile instead of the separate files
 python -m src bundle                      # data/*.json + overrides + base map → output/data_bundle.json
 python -m src wizard                      # questions → config/player.json
+python -m src recommend [--levels 1,20,40] # level recommendations → output/recommendations/ (input of web/)
+./serve-web.sh [1,20,40|stop]             # build the site and serve it locally (browser); Ctrl+C stops
+cd web && npm ci && npm run check && npm run build && npm run test:e2e   # static site: type check, build, Playwright
 python -m src examples                    # regenerate config/examples/player_level_<N>.json after a re-scrape
 # every option: docs/cli.md
 ```
@@ -101,6 +104,8 @@ python -m src examples                    # regenerate config/examples/player_le
 - `src/exporters/` - JSON / CSV / GraphML export. New node attributes must be added to the CSV column list and the GraphML key list.
 - `src/scraper/` - `wiki_client.py` (MediaWiki API: parse, wikitext, categories, allpages, revisions), `parsers/` (locations incl. infobox base slots, resources, recipes, level_limits, masteries), `durations.py`, `normalizer.py` (`normalize`, `build_level_limits`, `build_mastery_bonuses`), `writer.py`, `cli.py`, `factcheck.py` (`python -m src check-facts`: game fact rows with `wiki:` sources vs. page revisions and page numbers; the client is injectable, tests use a fake wiki).
 - `src/relocation/` - relocation plan (imports neither planner; reads the layout JSON): `relocate.py` (`load_layout`, `check_layout_map`, `check_current` (ids, movable farm items, footprint incl. rotation), `plan_relocation`: keep / store / place, reserved, surplus, missing; `new_slot_simpler`), `report.py` (`relocation.json` / `.md`), `cli.py`.
+- `src/recommend/` - level recommendations (`build.py`: `level_recommendation` runs `combined_plan` with `example_profile`, default settings and the base map with an empty profile map; `recommendations` adds `index.json`; `cli.py`: `--levels` ranges). Output stamped `recommendation` / `recommendation_index` in `src/schema.py`; `web/src/data.ts` checks the same versions.
+- `web/` - static site (Astro 7, TypeScript, one Svelte island). `src/data.ts` reads `RECOMMENDATIONS_DIR` (default `../output/recommendations`) at build time; pages `index.astro`, `levels/[level].astro`, `layouts/[level].svg.ts`; `components/Footer.astro` holds the Fan Content Policy notice and the data licence; `tests/site.spec.ts` (Playwright, mobile + desktop). npm versions exact and at least two weeks old. Generated recommendations are never committed; `.github/workflows/pages.yml` builds and deploys after green CI on `main`.
 - `src/cli.py` (+ `src/__main__.py`) - unified CLI: `python -m src <command>` dispatches to each tool's `main(argv)`; `all` runs graph → layout → plan → combine with the shared options. A new tool gets a `COMMANDS` entry.
 - `src/main.py` - graph CLI (`python -m src graph`).
 - `data/overrides/` - hand-maintained shared facts the wiki lacks; its `README.md` explains how to measure them.

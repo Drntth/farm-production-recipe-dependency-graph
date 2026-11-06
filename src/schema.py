@@ -35,6 +35,9 @@ CURRENT: dict[str, int] = {
     "profile_map": 1,
     "farm_profile": 1,
     "data_bundle": 1,
+    # outputs read by the web site (python -m src recommend)
+    "recommendation": 1,
+    "recommendation_index": 1,
 }
 # kind -> {version: migration to version + 1}
 MIGRATIONS: dict[str, dict[int, Migration]] = {}

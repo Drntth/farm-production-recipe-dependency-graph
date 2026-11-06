@@ -4,7 +4,7 @@ Setup, checks, CI and releases. Code conventions and the code map: [AGENTS.md](.
 
 ## Setup
 
-Python 3.14 or newer (`requires-python` in `pyproject.toml`; the code uses 3.14-only syntax). Node.js is optional: the map editor tests need it.
+Python 3.14 or newer (`requires-python` in `pyproject.toml`; the code uses 3.14-only syntax). Node.js 22 or newer is needed for the map editor tests and the web site (`web/`, see [Web site](#web-site)).
 
 ```bash
 python -m venv venv
@@ -43,21 +43,47 @@ Rules:
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push and pull request: Python 3.14 and Node 24, `pip install -r requirements-dev.txt`, then the three checks above.
+`.github/workflows/ci.yml` runs on every push and pull request: Python 3.14 and Node 24, `pip install -r requirements-dev.txt`, then the three checks above. Its `web` job builds the site on levels 1, 20 and 40 and runs the web checks below.
+
+## Web site
+
+The static site in `web/` (Astro, TypeScript, Svelte; [tools/recommend.md](tools/recommend.md)) is built from the level recommendations. Quick local look, the same files GitHub Pages gets:
+
+```bash
+./serve-web.sh                             # reuse output/recommendations/ (else levels 1-100), build, serve, open the browser; Ctrl+C stops
+./serve-web.sh 1,20,40                     # recompute these levels first
+./serve-web.sh stop                        # stop a server left running
+```
+
+The steps one by one are below. The npm versions are exact and at least two weeks old when added; `package-lock.json` is committed.
+
+```bash
+python -m src recommend --levels 1,20,40   # or every level: python -m src recommend (about 3 minutes)
+cd web
+npm ci
+npm run check                              # astro check: TypeScript and Svelte
+npm run build                              # dist/; RECOMMENDATIONS_DIR overrides ../output/recommendations
+npx playwright install chromium            # once
+npm run test:e2e                           # Playwright on the built site, mobile + desktop
+npm run dev                                # local server with reload
+```
+
+Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `main`. It computes levels 1-100, builds `web/dist` and deploys it to GitHub Pages. One-time setting in the repository: Settings → Pages → Source "GitHub Actions". The generated recommendations are not committed.
 
 ## Common changes
 
-| Change                    | Also update                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| New tool setting          | model field in `src/settings.py`, value in the example config, a row in [settings.md](settings.md), a test |
-| New node attribute        | the CSV column list and the GraphML key list in `src/exporters/`                                           |
-| New data field            | the pydantic model in `src/models/` (models forbid extra keys), [data-model.md](data-model.md)             |
-| Input file format change  | bump `CURRENT` in `src/schema.py`, one migration in `MIGRATIONS` and a test in `tests/test_schema.py`      |
-| New configurable location | `config/player.example.json` (`tests/test_config.py` checks it against the data)                           |
-| New CLI tool              | a `COMMANDS` entry in `src/cli.py`, [cli.md](cli.md), the diagrams in [architecture.md](architecture.md)   |
-| New tool output or input  | the Core API in `src/api/core.py` (returns every file); the tool's `cli.py` only reads and writes          |
-| How a tool works          | its page in [tools/](tools/) in the same commit                                                            |
-| Game update               | follow [game-updates.md](game-updates.md): re-scrape, run the tests, record the version and new wiki gaps  |
+| Change                    | Also update                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| New tool setting          | model field in `src/settings.py`, value in the example config, a row in [settings.md](settings.md), a test   |
+| New node attribute        | the CSV column list and the GraphML key list in `src/exporters/`                                             |
+| New data field            | the pydantic model in `src/models/` (models forbid extra keys), [data-model.md](data-model.md)               |
+| Input file format change  | bump `CURRENT` in `src/schema.py`, one migration in `MIGRATIONS` and a test in `tests/test_schema.py`        |
+| New configurable location | `config/player.example.json` (`tests/test_config.py` checks it against the data)                             |
+| New CLI tool              | a `COMMANDS` entry in `src/cli.py`, [cli.md](cli.md), the diagrams in [architecture.md](architecture.md)     |
+| Recommendation format     | bump `recommendation` / `recommendation_index` in `src/schema.py` and the version check in `web/src/data.ts` |
+| New tool output or input  | the Core API in `src/api/core.py` (returns every file); the tool's `cli.py` only reads and writes            |
+| How a tool works          | its page in [tools/](tools/) in the same commit                                                              |
+| Game update               | follow [game-updates.md](game-updates.md): re-scrape, run the tests, record the version and new wiki gaps    |
 
 ## Releases
 

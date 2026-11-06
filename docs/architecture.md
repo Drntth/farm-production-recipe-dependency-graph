@@ -19,6 +19,7 @@ flowchart TB
         planner[planner/<br/>Production Planner]
         combiner[combiner/<br/>Combiner]
         relocation[relocation/<br/>relocation plan]
+        recommend[recommend/<br/>level recommendations]
     end
     subgraph core[Core]
         config[config.py<br/>player profile]
@@ -42,12 +43,14 @@ flowchart TB
     cli -.-> scraper
     cli -.-> fprofile
     cli -.-> loaders
+    cli -.-> recommend
 
     toolcli --> api
     toolcli --> config
     toolcli --> fprofile
     toolcli --> layout
     toolcli --> loaders
+    toolcli --> recommend
     toolcli --> scraper
     toolcli --> settings
 
@@ -97,6 +100,13 @@ flowchart TB
     relocation --> layout
     relocation --> loaders
     relocation --> models
+
+    recommend --> api
+    recommend --> layout
+    recommend --> loaders
+    recommend --> planner
+    recommend --> schema
+    recommend --> settings
 
     config --> loaders
     config --> models
@@ -157,6 +167,12 @@ flowchart LR
 
     layoutout -.->|overlay| editor
     combout -.->|overlay| editor
+
+    load --> reccmd[python -m src recommend]
+    farmmap -->|base map only| reccmd
+    reccmd --> recout([recommendations/<br/>level_N.json, .svg, index.json])
+    recout --> web[web/: Astro build]
+    web --> site([static site<br/>GitHub Pages])
 
     facts([docs/game-facts/*.md]) --> check[python -m src check-facts]
     wiki --> check

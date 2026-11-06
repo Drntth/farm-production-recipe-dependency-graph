@@ -68,7 +68,7 @@ _Not to be confused with_: data set (`DataSet`, the validated models in memory)
 
 **Schema version**: the `schema_version` number an input file starts with; an older file is upgraded on load, a newer one is an error.
 
-**Level recommendation** (v2, planned): the plan and layout precomputed at build time for one level with level defaults and default settings; shown without a farm profile.
+**Level recommendation**: the plan and layout precomputed at build time for one level with level defaults and default settings, on section `base` only (`python -m src recommend`); shown on the static site without a farm profile.
 _Not to be confused with_: recommendation (one count the plan proposes)
 
 **Plot recommendation** (v2, planned): the smallest connected set of plots, unlockable in game order, that fits the blocks of a level or a farm profile.

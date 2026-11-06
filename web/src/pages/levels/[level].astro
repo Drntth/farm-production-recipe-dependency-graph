@@ -1,0 +1,194 @@
+---
+import type { GetStaticPaths } from "astro";
+import LevelPicker from "../../components/LevelPicker.svelte";
+import Base from "../../layouts/Base.astro";
+import { hours, label, loadIndex, loadLevel, url } from "../../data";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  const levels = loadIndex().levels.map((row) => row.level);
+  return levels.map((level, i) => ({
+    params: { level: String(level) },
+    props: { levels, prev: levels[i - 1], next: levels[i + 1] },
+  }));
+};
+
+interface Props {
+  levels: number[];
+  prev?: number;
+  next?: number;
+}
+const { levels, prev, next } = Astro.props;
+const level = Number(Astro.params.level);
+const rec = loadLevel(level);
+const c = rec.combined;
+const s = c.schedule;
+const blockName = new Map(c.blocks.map((b) => [b.id, b.name]));
+const notPlaced = rec.blocks_not_placed.map((id) => blockName.get(id) ?? label(id));
+const trees = Object.entries(s.recommendations.trees_and_bushes);
+const external = Object.entries(s.external_per_day);
+const svg = url(`layouts/${level}.svg`);
+---
+
+<Base title={`Level ${level} - Farm production planner`}>
+  <nav class="level-nav" aria-label="Levels">
+    {prev ? <a href={url(`levels/${prev}/`)}>← Level {prev}</a> : <span />}
+    <LevelPicker client:load levels={levels} base={import.meta.env.BASE_URL} current={level} />
+    {next ? <a href={url(`levels/${next}/`)}>Level {next} →</a> : <span />}
+  </nav>
+
+  <h1>Level {level}</h1>
+
+  <section aria-labelledby="summary">
+    <h2 id="summary">Plan</h2>
+    <dl class="figures">
+      <div><dt>Login every</dt><dd>{hours(c.summary.login_interval_hours)}</dd></div>
+      <div><dt>Logins per day</dt><dd>{Number(s.logins_per_day.toFixed(1))}</dd></div>
+      <div><dt>Production hours per hour</dt><dd>{c.summary.production_hours_per_hour}</dd></div>
+      <div>
+        <dt>Fields used</dt><dd>{s.recommendations.fields.used_by_plan} of {s.recommendations.fields.owned}</dd>
+      </div>
+      <div><dt>Blocks</dt><dd>{c.summary.blocks}</dd></div>
+    </dl>
+    {
+      trees.length > 0 && (
+        <p>
+          Trees and bushes to plant:{" "}
+          {trees.map(([id, t]) => `${label(id)} ${t.plants}`).join(", ")}.
+        </p>
+      )
+    }
+    {
+      external.length > 0 && (
+        <p>
+          Bought or caught outside the plan, per day:{" "}
+          {external.map(([id, n]) => `${label(id)} ${Number(n.toFixed(1))}`).join(", ")}.
+        </p>
+      )
+    }
+  </section>
+
+  <section aria-labelledby="logins">
+    <h2 id="logins">At each login</h2>
+    <ol class="actions">
+      {
+        s.actions_per_login.map((a) => (
+          <li>
+            <strong>{label(a.action)}</strong>
+            {a.location_id && <> {label(a.location_id)}</>}
+            {a.what && <>: {a.what}</>}
+            {a.items && a.items.length > 0 && (
+              <>
+                :{" "}
+                {a.items
+                  .map((item) => {
+                    const name = label(item.recipe_id ?? item.resource_id ?? "?");
+                    // the same wording as schedule.md
+                    if (item.every_n_logins) return `${name} 1 every ${item.every_n_logins} logins`;
+                    return `${name} ${item.count ?? item.per_login}`;
+                  })
+                  .join(", ")}
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section aria-labelledby="layout">
+    <h2 id="layout">Farm layout</h2>
+    {
+      notPlaced.length > 0 && (
+        <p class="warning" data-testid="not-placed">
+          {notPlaced.length} block{notPlaced.length > 1 ? "s do" : " does"} not fit on the starting farm area:{" "}
+          {notPlaced.join(", ")}. A recommendation of farm plots to unlock comes in a later version.
+        </p>
+      )
+    }
+    <a href={svg} class="layout-link">
+      <img src={svg} alt={`Farm layout for level ${level}`} class="layout" loading="lazy" />
+    </a>
+    <p class="muted">Open the image to zoom in.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Block</th><th>Buildings and copies</th><th class="num">Fields</th></tr>
+        </thead>
+        <tbody>
+          {
+            c.blocks.map((b) => (
+              <tr>
+                <td>
+                  {b.name}
+                  {!b.placed && <span class="muted"> (not placed)</span>}
+                </td>
+                <td>{b.locations.map((l) => `${l.name} ×${l.copies}`).join(", ")}</td>
+                <td class="num">{b.fields?.count ?? ""}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {
+    c.expansion.upcoming.length > 0 && (
+      <section aria-labelledby="upcoming">
+        <h2 id="upcoming">Coming in the next {c.expansion.lookahead_levels} levels</h2>
+        <ul>
+          {c.expansion.upcoming.map((u) => (
+            <li>
+              Level {u.unlock_level}: {label(u.location_id)} +{u.count}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <p class="muted">
+    Game version {rec.game_version ?? "?"}, planner {rec.core_version ?? "?"}.
+  </p>
+</Base>
+
+<style>
+  .level-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 8px;
+    margin: 0;
+  }
+  .figures div {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px;
+  }
+  .figures dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .figures dd {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .actions li {
+    margin-bottom: 4px;
+  }
+  .layout {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+</style>
