@@ -35,6 +35,8 @@ Astro with TypeScript and one Svelte island (the level picker). Every page is st
 | `/levels/N/`     | plan figures, trees and bushes to plant, external goods, the steps at each login, layout image and blocks, upcoming unlocks |
 | `/layouts/N.svg` | the layout image of level N                                                                                                 |
 
+The current styling is a plain placeholder: the site design will follow the portfolio site drntth.github.io ([v2-design.md](../v2-design.md#architecture)).
+
 Every page has the footer: the Supercell Fan Content Policy notice, the Hay Day Wiki data attribution (CC BY-SA 3.0) and the MIT licence of the code.
 
 The site is served under `/farm-production-recipe-dependency-graph/` on GitHub Pages. `web/tests/site.spec.ts` (Playwright, Desktop Chrome and Pixel 7) checks that the pages load, use no request to another origin and no Pyodide, show the footer and the layout image, and have no horizontal scroll. Local look: `./serve-web.sh` (Ctrl+C stops). Build and deploy: [development.md](../development.md#web-site).

@@ -181,6 +181,7 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v2.2 - Farm profiles and the plan in the browser
 
+- [ ] Site design after the portfolio site drntth.github.io (or very close to it): plan first what is taken over (colours, fonts, layout, header and footer, dark mode), then apply it to the existing pages
 - [ ] Interactive, dynamic farm profile form: fields follow the level and start from the level defaults (`null` = level default)
 - [ ] At least two farm profiles side by side in IndexedDB; JSON export / import; `navigator.storage.persist()`
 - [ ] Pyodide in a module Web Worker, loaded on the first own calculation; plan and login schedule for the active farm profile
