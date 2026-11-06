@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-06
+
 - Core API (`src/api`): plan, layout, combined plan and relocation plan as entry points without file IO (dict or data bundle in, `{"result", "files"}` out); every CLI calls them and its outputs are byte-identical to v1.6.3.
 - Farm map split into the base map (`data/base_map.json`, committed) and the profile map (`config/profile_map.json`); `python -m src migrate-map` splits a one-file map, which the tools still read with a warning. The map editor keeps the one-file format until v2.0.1.
 - Farm profile: `python -m src farm-profile` puts the player profile, profile map, settings and templates of one farm into one JSON; every tool and `all` take `--farm-profile`.
