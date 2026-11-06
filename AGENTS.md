@@ -8,7 +8,7 @@ Commit prefix: [HAYDAY-PROJECT]
 
 The project analyses Hay Day production chains. It turns locations, resources and recipes into a weighted directed graph (NetworkX). From that graph it forms named production blocks for the farm layout and plans production quantities. Overview: `README.md`; how each tool works: `docs/tools/`.
 
-- Milestones v0.3-v1.6 are done; what each brought is in `docs/roadmap.md`. Next: **v2.0+** (full application), planned there too.
+- Milestones v0.3-v1.6 are done; what each brought is in `docs/roadmap.md`. Next: **v2.0** (Core API and data model); the v2+ sub-versions are in `docs/roadmap.md`, the web app design and its decisions in `docs/v2-design.md`.
 - The values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
@@ -37,7 +37,8 @@ Game knowledge is already collected. **Before researching the game or the wiki, 
 | package diagram, data flow                         | `docs/architecture.md`                    |
 | module roles, entry points without file IO         | `docs/modules.md`                         |
 | setup, tests, CI, release steps                    | `docs/development.md`                     |
-| milestones, v2.0+ plan                             | `docs/roadmap.md`                         |
+| milestones, v2+ sub-versions                       | `docs/roadmap.md`                         |
+| web app architecture, v2 decisions                 | `docs/v2-design.md`                       |
 
 When you learn a new game fact (from the wiki, the web or the user), add a row to the matching `docs/game-facts/*.md` table in the documented format: `| Fact | Value | Source | Checked |`.
 

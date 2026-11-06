@@ -55,6 +55,19 @@ _Not to be confused with_: farm map (positions), design settings (taste)
 **Farm map**: the player's measured farm map: size, fixed items, plots, zones, background screenshot.
 _Related_: `FarmMap` (one model for every area)
 
+**Base map** (v2, planned): the part of the farm map every profile shares: size, fixed items, plots, `buildable` and `blocked` zones; geometry only, no screenshot; committed in `data/`.
+_Not to be confused with_: profile map
+
+**Profile map** (v2, planned): one farm profile's state on the base map: unlocked plots, `design` zones, current farm.
+
+**Farm profile** (v2, planned): one named, locally stored player in the web app: player profile, profile map, design and planner settings; several farm profiles simulate different players.
+_Not to be confused with_: player profile (only what the player bought, upgraded or earned)
+
+**Level recommendation** (v2, planned): the plan and layout precomputed at build time for one level with level defaults and default settings; shown without a farm profile.
+_Not to be confused with_: recommendation (one count the plan proposes)
+
+**Plot recommendation** (v2, planned): the smallest connected set of plots, unlockable in game order, that fits the blocks of a level or a farm profile.
+
 **Plot**: one farm expansion, numbered like the wiki, unlocked or not; the starting land is section `base`.
 
 **Usable tiles**: tiles the layout may use: unlocked plots, then only `buildable` zones (if any), minus `blocked` zones (and `design` zones when they are kept free).

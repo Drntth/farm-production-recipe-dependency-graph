@@ -20,7 +20,8 @@ farm-production-recipe-dependency-graph/
 │   ├── development.md                 # setup, checks, tests, CI, releases
 │   ├── graph-model.md                 # nodes, edges, weights, analysis
 │   ├── modules.md                     # this file
-│   ├── roadmap.md                     # milestones v0.3 … v2.0+
+│   ├── roadmap.md                     # milestones v0.3 … v1.6 and the v2+ sub-versions
+│   ├── v2-design.md                   # web app target architecture and v2 decisions
 │   ├── settings.md                    # config/design.json and config/planner.json keys
 │   ├── data-sources.md                # what is scraped, from where; what is manual
 │   ├── game-updates.md                # update process, known versions

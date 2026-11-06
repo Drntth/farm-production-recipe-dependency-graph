@@ -28,7 +28,8 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                |
 | [modules.md](modules.md)                                                 | repository tree, module roles, entry points without file IO                               |
 | [development.md](development.md)                                         | setup, checks, tests, CI, releases                                                        |
-| [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and v2.0+                                                          |
+| [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and the v2+ sub-versions                                           |
+| [v2-design.md](v2-design.md)                                             | web app target architecture, Pyodide measurements, data model changes, decisions          |
 
 ## Where knowledge lives
 

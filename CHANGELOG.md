@@ -4,6 +4,12 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-11-06
+
+- v2+ plan: `docs/v2-design.md` (web app architecture, Pyodide measurements, base map / profile map split, decisions) and the v2.0-v4.0 sub-versions with done criteria in `docs/roadmap.md`; `CONTEXT.md` gained the planned v2 terms.
+- README: the game data in `data/` (overrides included) is CC BY-SA 3.0 like the Hay Day Wiki, the code stays MIT; the Supercell Fan Content Policy notice is in the disclaimer.
+- `docs/game-facts/farm.md`: per-plot unlock cost ranges and totals of every expansion section from the wiki.
+
 ## [1.6.2] - 2026-11-03
 
 - Docs reorganized: a short README; the tool details moved to `docs/tools/` (layout planner, production planner, combiner, relocation, map editor); new `docs/cli.md` (every option), `docs/settings.md`, `docs/data-model.md`, `docs/graph-model.md`, `docs/modules.md` (entry points without file IO), `docs/development.md` and `docs/roadmap.md`; `docs/README.md` indexes them all.

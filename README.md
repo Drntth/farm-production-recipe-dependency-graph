@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.6.2, a local command-line platform (290 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. Next: v2.0+, see the [roadmap](docs/roadmap.md) and the [changelog](CHANGELOG.md).
+**Status:** v1.6.3, a local command-line platform (290 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. Next: v2.0, the first step of the web app plan, see the [roadmap](docs/roadmap.md), the [v2 design](docs/v2-design.md) and the [changelog](CHANGELOG.md).
 
 **New here? Start with the [user guide](docs/user-guide.md).**
 
@@ -68,14 +68,14 @@ Open `output/combined.md` and `output/combined.svg`. Every command and option: [
 | Data and graph     | [data model](docs/data-model.md), [graph model](docs/graph-model.md), [data sources](docs/data-sources.md)                                                                                                                      |
 | Code               | [architecture](docs/architecture.md), [modules](docs/modules.md), [development](docs/development.md) (setup, tests, releases), [AGENTS.md](AGENTS.md) (conventions), [CONTEXT.md](CONTEXT.md) (domain terms)                    |
 | Game knowledge     | [docs index](docs/README.md): game facts, [game updates](docs/game-updates.md), [wiki gaps](docs/wiki-gaps.md)                                                                                                                  |
-| History and plans  | [roadmap](docs/roadmap.md), [changelog](CHANGELOG.md)                                                                                                                                                                           |
+| History and plans  | [roadmap](docs/roadmap.md), [v2 design](docs/v2-design.md), [changelog](CHANGELOG.md)                                                                                                                                           |
 
 ## License
 
-MIT License
+The code is under the [MIT License](LICENSE). The game data in `data/` is derived from the [Hay Day Wiki](https://hayday.fandom.com/) and is licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), like the wiki. The hand-measured values and estimates in `data/overrides/` are the maintainer's own work and are released under the same license, because they extend the wiki data.
 
 ## Disclaimer
 
-This project is an independent fan-made analysis tool.
+This project is an independent fan-made analysis tool. This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy: <https://supercell.com/en/fan-content-policy/>.
 
 Hay Day and related assets are properties of Supercell.
