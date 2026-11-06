@@ -26,12 +26,12 @@ Only the level is required. Every missing value gets its level default: all unlo
 
 ## 3. Measure your map (optional, for a real layout)
 
-Without a map the layout is drawn on an unbounded grid: useful to see the blocks, not to rebuild the farm. For a layout on your own land, measure `config/farm_map.json` with `tools/farm_map_editor.html` (open it in a browser). The steps are in [Measuring with the map editor](tools/map-editor.md#measuring-with-the-map-editor): stitch a screenshot, calibrate it with two rows of fields, mark the fixed buildings, the unlocked plots and the zones:
+Without a map the layout is drawn on an unbounded grid: useful to see the blocks, not to rebuild the farm. For a layout on your own land, open `data/base_map.json` in `tools/farm_map_editor.html` (open the page in a browser) and mark your part of the map on your own screenshot. The steps are in [Measuring with the map editor](tools/map-editor.md#measuring-with-the-map-editor): stitch a screenshot, calibrate it with two rows of fields, mark the fixed buildings, the unlocked plots and the zones:
 
 - `blocked` (red): water, roads, paved strips; nothing is built there.
 - `design` (violet): decorations you want to keep; no block goes there, paths may cross.
 
-The editor saves one file with the measured geometry and your own state. `python -m src migrate-map` splits it: the geometry every player shares is already in `data/base_map.json`, your unlocked plots, `design` zones, current farm and screenshot go to `config/profile_map.json`, which the tools then use. The tools also read the one-file map directly (with a warning); migrate again after each save in the editor, or delete `config/profile_map.json` to use the one-file map.
+The geometry every player shares is already in `data/base_map.json`; the editor saves your unlocked plots, `design` zones, current farm and screenshot as `config/profile_map.json`, which the tools use. To continue later, open both files together. A one-file `config/farm_map.json` from before v2.0 still opens in the editor (save it again as a profile map) and the tools read it with a warning; `python -m src migrate-map` splits it too.
 
 To rebuild your farm step by step later, also mark the **current farm** (step 8): where your buildings, shelters, barn and silo stand now, and how many fields, trees and bushes you have.
 
@@ -74,7 +74,7 @@ The SVG files open in any browser. To see the layout on your own screenshot, loa
 ## 7. Typical situations
 
 - **You reached a new level:** change `level` in `config/player.json` (or run the wizard again) and run `python -m src all`. Copies unlocked within the lookahead already have space in their blocks.
-- **Rebuilding the farm:** measure the current farm in the map editor (step 8; load the combined plan in step 7 first, so the ids and sizes are offered), save `config/farm_map.json`, run `python -m src combine` and then `python -m src relocate`. In Layout Edit Mode, store everything in the Store list, then place the items of the Place list block by block. Fields, trees and bushes are counted, not measured, so they always appear under Store and Place. When the report says a new layout slot is simpler, place every item (Keep and Place) in an empty slot instead. Plan again after every re-save of the farm map, otherwise `relocate` reports that the layout belongs to another map.
+- **Rebuilding the farm:** measure the current farm in the map editor (step 8; load the combined plan in step 7 first, so the ids and sizes are offered), save `config/profile_map.json`, run `python -m src combine` and then `python -m src relocate`. In Layout Edit Mode, store everything in the Store list, then place the items of the Place list block by block. Fields, trees and bushes are counted, not measured, so they always appear under Store and Place. When the report says a new layout slot is simpler, place every item (Keep and Place) in an empty slot instead. Plan again after every re-save of the base map, otherwise `relocate` reports that the layout belongs to another map.
 - **A block "does not fit":** unlock or mark more land, lower `reserve` or `item_gap`, or try `strategy: size` in `design.json`.
 - **"barn_capacity is not set":** add your barn and silo capacity to the profile.
 - **A building "not reachable by a path":** check that the zones around it are right; a building behind a paved strip gets a path to the edge of the buildable land.

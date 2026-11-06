@@ -131,7 +131,7 @@ flowchart LR
     profile --> gcmd
     gcmd --> gout([graph.json, .csv, .graphml<br/>analysis.json])
 
-    editor[tools/farm_map_editor.html] --> farmmap([config/farm_map.json])
+    editor[tools/farm_map_editor.html] --> farmmap([data/base_map.json<br/>config/profile_map.json])
     farmmap --> layoutcmd[python -m src layout]
     design([config/design.json<br/>config/templates/]) --> layoutcmd
     load --> layoutcmd

@@ -123,11 +123,11 @@
   <h1>Map Editor</h1>
   <div class="group">
     <span class="file-btn"><button tabindex="-1">Open image…</button><input type="file" id="fileImage" accept="image/png,image/*" title="Stitched screenshot (PNG)"></span>
-    <span class="file-btn"><button tabindex="-1">Open JSON…</button><input type="file" id="fileJson" accept="application/json,.json" title="A saved farm_map.json"></span>
+    <span class="file-btn"><button tabindex="-1">Open JSON…</button><input type="file" id="fileJson" accept="application/json,.json" multiple title="data/base_map.json and config/profile_map.json (both at once), or a one-file farm_map.json from before v2.0"></span>
     <span class="file-name" id="fileName"></span>
   </div>
   <div class="group">
-    <button id="saveJsonTop" class="primary" title="Save farm_map.json (Ctrl+S)">Save JSON</button>
+    <button id="saveJsonTop" class="primary" title="Save profile_map.json (Ctrl+S)">Save profile</button>
   </div>
   <div class="group">
     <button id="zoomOut" class="icon" title="Zoom out (-)">−</button>
@@ -249,16 +249,18 @@
     <h2>6. Export</h2>
     <div class="card">
       <div class="row"><label>Image path in JSON</label><input type="text" id="bgPath" value="farm_background.png"></div>
-      <div class="hint">Relative to <code>config/farm_map.json</code>; save the screenshot next to it, e.g. <code>config/farm_background.png</code>.</div>
-      <label><input type="checkbox" id="cropOnSave" checked> crop to the map content on save, margin
+      <div class="hint">Relative to <code>config/profile_map.json</code>; save the screenshot next to it, e.g. <code>config/farm_background.png</code>.</div>
+      <div class="row"><button id="saveJson" class="primary">Save profile map</button><button id="saveBase">Save base map</button></div>
+      <div class="hint" id="baseInfo"></div>
+      <div class="hint">The <b>profile map</b> (<code>config/profile_map.json</code>) holds your part: unlocked plots, design zones, the current farm and the screenshot. The <b>base map</b> (<code>data/base_map.json</code>) holds the geometry every player shares: size, fixed buildings, plots, buildable and blocked zones. Save it only after measuring the geometry.</div>
+      <label><input type="checkbox" id="cropOnSave" checked> crop the base map to the map content, margin
         <input type="number" id="cropMargin" min="0" value="5" style="width:4em"> tiles</label>
-      <div class="hint">Cropping keeps every plot, buildable zone and building plus the margin; blocked and design zones are cut at the new edge. The editor switches to the cropped map too.</div>
-      <button id="saveJson" class="primary">Save map JSON</button>
+      <div class="hint">Only a changed geometry is cropped, on <b>Save base map</b> and the ZIP; a loaded, unchanged base map keeps its coordinates. Cropping keeps every plot, buildable zone and building plus the margin; blocked and design zones are cut at the new edge. Every coordinate of the profile map moves with it, so the profile map is saved too.</div>
     </div>
     <div class="card">
       <div class="row"><label class="grow">Piece margin (tiles)</label><input type="number" id="margin" min="0" value="1" style="max-width:70px"></div>
       <div class="row"><button id="savePng">Full map PNG</button><button id="saveZip">Plot pieces (ZIP)</button></div>
-      <div class="hint">PNG and pieces use the visible layers. The ZIP holds one PNG per plot, <code>index.json</code> (crop and tile bounds) and the map JSON.</div>
+      <div class="hint">PNG and pieces use the visible layers. The ZIP holds one PNG per plot, <code>index.json</code> (crop and tile bounds), <code>base_map.json</code> and <code>profile_map.json</code>.</div>
     </div>
   </section>
 
@@ -360,11 +362,11 @@
     <tr><td>drag</td><td>draw a building, plot, zone or current item rectangle; on a ruler / overlay point: move it (<kbd>Shift</kbd>: the r point where r and m overlap)</td></tr>
     <tr><td><kbd>Alt</kbd> + drag</td><td>erase tiles of the selected plot / zone, or template decoration tiles</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>undo the last edit of the selected plot / zone</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>save the map JSON</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>save the profile map</td></tr>
     <tr><td><kbd>\</kbd></td><td>show / hide the side panel (drag its edge to resize)</td></tr>
     <tr><td><kbd>?</kbd></td><td>this help</td></tr>
   </table>
-  <p class="hint">Everything stays in this browser; nothing is uploaded. The map is saved as <code>farm_map.json</code>.</p>
+  <p class="hint">Everything stays in this browser; nothing is uploaded. The map is saved as <code>profile_map.json</code> (your part) and <code>base_map.json</code> (the shared geometry).</p>
   <form method="dialog" style="text-align:right"><button class="primary">Close</button></form>
 </dialog>
 
@@ -445,10 +447,9 @@ const Core = (() => {
 
   // farm_map.json payload (schema: src/layout/farm_map.py)
   function toFarmMap(state, imagePath) {
-    const out = { width: null, height: null };
+    const size = state.bg ? [state.bg.width, state.bg.height] : state.size || [null, null];
+    const out = { width: size[0], height: size[1] };
     if (state.bg) {
-      out.width = state.bg.width;
-      out.height = state.bg.height;
       out.background = {
         image: imagePath,
         image_width: state.imgW,
@@ -491,6 +492,7 @@ const Core = (() => {
       imgW: json.background ? json.background.image_width : null,
       imgH: json.background ? json.background.image_height : null,
       imagePath: json.background ? json.background.image : null,
+      size: json.width == null ? null : [json.width, json.height],
       fixed: (json.fixed || []).filter(f => !legacy(f)).map(f => ({ id: f.id, name: f.name || '', rect: rectOf(f) })),
       expansions: (json.expansions || []).map(e => ({
         id: e.id, section: e.section, number: e.number == null ? null : e.number,
@@ -500,6 +502,102 @@ const Core = (() => {
       current: (json.fixed || []).filter(f => legacy(f) && f.x != null).map(f => ({ id: f.id, rect: rectOf(f), count: 1 }))
         .concat((json.current || []).map(c => ({ id: c.id, rect: rectOf(c), count: c.x == null ? (c.count || 1) : 1 }))),
     };
+  }
+
+  // ---- base map + profile map (since v2.0; schema: src/layout/farm_map.py BaseMap / ProfileMap)
+  const SCHEMA_VERSION = { base_map: 1, profile_map: 1, farm_map: 1 };
+  const ONE_FILE_KEYS = ['width', 'height', 'fixed', 'expansions'];
+  const PROFILE_KEYS = ['schema_version', 'background', 'unlocked', 'zones', 'current'];
+
+  // 'base_map', 'profile_map' or 'farm_map' (one-file map before v2.0); throws for anything else.
+  // A base map has the one-file keys but no player data (no `unlocked` flag, current farm or screenshot).
+  function mapKind(json) {
+    if (!json || typeof json !== 'object' || Array.isArray(json)) throw new Error('Not a farm map file');
+    const keys = Object.keys(json);
+    let kind;
+    if (ONE_FILE_KEYS.some(k => keys.includes(k))) {
+      const player = 'background' in json || 'current' in json
+        || (json.expansions || []).some(e => e && 'unlocked' in e)
+        || (json.zones || []).some(z => z && z.kind === 'design');
+      kind = player ? 'farm_map' : 'base_map';
+    } else if (keys.every(k => PROFILE_KEYS.includes(k))) kind = 'profile_map';
+    else throw new Error('Not a farm map file');
+    const v = json.schema_version;
+    if (v != null && v > SCHEMA_VERSION[kind]) {
+      throw new Error(`${kind} schema_version ${v} is newer than this editor (${SCHEMA_VERSION[kind]})`);
+    }
+    return kind;
+  }
+
+  // Editor state from a base map and a profile map (as merge_maps in Python).
+  function fromMaps(base, profile) {
+    const ids = new Set((base.expansions || []).map(e => e.id));
+    const unlocked = profile.unlocked || [];
+    const unknown = unlocked.filter(id => !ids.has(id)).sort();
+    if (unknown.length) throw new Error(`Unlocked plots not in the base map: ${unknown.join(', ')}`);
+    return fromFarmMap({
+      width: base.width, height: base.height, background: profile.background || null,
+      fixed: base.fixed || [],
+      expansions: (base.expansions || []).map(e => Object.assign({}, e, { unlocked: unlocked.includes(e.id) })),
+      zones: (base.zones || []).concat(profile.zones || []),
+      current: profile.current || [],
+    });
+  }
+
+  // data/base_map.json payload, keys in the order of base_map_json()
+  function toBaseMap(state) {
+    const one = toFarmMap(state, null);
+    return {
+      schema_version: SCHEMA_VERSION.base_map,
+      width: one.width,
+      height: one.height,
+      fixed: state.fixed.map(f => {
+        const r = f.rect || [null, null, null, null];
+        return { id: f.id, name: f.name || null, x: r[0], y: r[1], width: r[2], height: r[3] };
+      }),
+      expansions: state.expansions.map(e => ({ id: e.id, section: e.section, number: e.number, cells: e.cells })),
+      zones: (state.zones || []).filter(z => z.kind !== 'design').map(z => ({ id: z.id, kind: z.kind, cells: z.cells })),
+    };
+  }
+
+  // config/profile_map.json payload, keys in the order of profile_map_json() (no null values)
+  function toProfileMap(state, imagePath) {
+    const out = { schema_version: SCHEMA_VERSION.profile_map };
+    const one = toFarmMap(state, imagePath);
+    if (one.background) out.background = one.background;
+    out.unlocked = state.expansions.filter(e => e.unlocked).map(e => e.id);
+    out.zones = one.zones.filter(z => z.kind === 'design');
+    out.current = one.current.map(c => c.x == null ? c : Object.assign({}, c, { count: 1 }));
+    return out;
+  }
+
+  // JSON as Python's json.dumps (", " and ": "); numbers under FLOAT_KEYS as Python floats
+  const FLOAT_KEYS = ['origin_px', 'x_axis_px', 'y_axis_px'];
+  function pyJson(v, float = false) {
+    if (Array.isArray(v)) return '[' + v.map(x => pyJson(x, float)).join(', ') + ']';
+    if (v && typeof v === 'object') {
+      return '{' + Object.entries(v).map(([k, x]) => JSON.stringify(k) + ': ' + pyJson(x, FLOAT_KEYS.includes(k))).join(', ') + '}';
+    }
+    if (float && typeof v === 'number' && Number.isInteger(v)) return v.toFixed(1);
+    return JSON.stringify(v === undefined ? null : v);
+  }
+
+  // A map file as text, one line per object in a list (as map_json_text in src/layout/migrate_map.py).
+  function mapJsonText(data) {
+    const lines = ['{'];
+    const items = Object.entries(data);
+    items.forEach(([key, value], i) => {
+      const comma = i < items.length - 1 ? ',' : '';
+      if (Array.isArray(value) && value.some(v => v && typeof v === 'object' && !Array.isArray(v))) {
+        lines.push(`  ${JSON.stringify(key)}: [`);
+        value.forEach((item, j) => lines.push(`    ${pyJson(item)}${j < value.length - 1 ? ',' : ''}`));
+        lines.push(`  ]${comma}`);
+      } else {
+        lines.push(`  ${JSON.stringify(key)}: ${pyJson(value)}${comma}`);
+      }
+    });
+    lines.push('}');
+    return lines.join('\n') + '\n';
   }
 
   // --- minimal ZIP writer (stored, no compression; PNG is compressed already)
@@ -759,6 +857,29 @@ const Core = (() => {
     };
   }
 
+  // The geometry as the base map file holds it: cells merged, the fixed ids `defaultIds` added unplaced.
+  function geometryText(state, defaultIds = []) {
+    const known = new Set(state.fixed.map(f => f.id));
+    return mapJsonText(toBaseMap(Object.assign({}, state, {
+      fixed: state.fixed.concat(defaultIds.filter(id => !known.has(id)).map(id => ({ id, name: '', rect: null }))),
+      expansions: state.expansions.map(e => Object.assign({}, e, { cells: mergeCells(e.cells) })),
+      zones: (state.zones || []).map(z => Object.assign({}, z, { cells: mergeCells(z.cells) })),
+    })));
+  }
+  // true when `base` (a base map JSON) holds the same geometry as the editor state
+  const sameGeometry = (state, base, defaultIds = []) =>
+    !!base && geometryText(state, defaultIds) === geometryText(fromMaps(base, {}), defaultIds);
+
+  // The crop of a base map save: null when the geometry equals the loaded base map (its
+  // coordinates are kept) or the crop moves nothing; else the cropped parts, as cropMap.
+  function cropForSave(state, base, margin, defaultIds = []) {
+    if (sameGeometry(state, base, defaultIds)) return null;
+    const c = cropMap(state, margin);
+    const moved = !!c && (c.bg.width !== state.bg.width || c.bg.height !== state.bg.height
+      || c.bg.origin.some((v, i) => Math.abs(v - state.bg.origin[i]) > 1e-6));
+    return moved ? c : null;
+  }
+
   // ---- design templates (schema: src/layout/templates.py); tpl = {frame, buildings: [{id, rect}], decorations}
   // in the tiles of the surface they are drawn on (farm map or a design screenshot)
   const inside = (r, f) => r[0] >= f[0] && r[1] >= f[1] && r[0] + r[2] <= f[0] + f[2] && r[1] + r[3] <= f[1] + f[3];
@@ -818,7 +939,8 @@ const Core = (() => {
   }
 
   return { SNAKE, toSnake, tileToPx, pxToTile, calibrate, moveRect, rectFromTiles, rectCorners,
-           cropBox, bbox, toFarmMap, fromFarmMap, crc32, zip, affine3, applyAffine, invertAffine,
+           cropBox, bbox, toFarmMap, fromFarmMap, SCHEMA_VERSION, mapKind, fromMaps, toBaseMap, toProfileMap, mapJsonText,
+           geometryText, sameGeometry, cropForSave, crc32, zip, affine3, applyAffine, invertAffine,
            mergeCells, outlineSegments, cropMap, similarity2, fitAffine, alignOverlay, fromLayout, layoutMismatch, isLayoutOverlay,
            layoutSizes, sizeWarning, cutTemplate, templateWarnings, toTemplate, fromTemplate };
 })();
@@ -879,7 +1001,8 @@ if (typeof module !== 'undefined') module.exports = Core;
   const canvas = $('view'), ctx = canvas.getContext('2d');
   const state = { img: null, imgW: 0, imgH: 0, bg: null, cal: { A: null, B: null, C: null },
     fixed: FARM_IDS.map(defaultItem), expansions: [], zones: [], current: [],
-    selFixed: null, selExp: null, selZone: null, selCur: null, tab: 'calibrate' };
+    selFixed: null, selExp: null, selZone: null, selCur: null, tab: 'calibrate',
+    base: null }; // base: the loaded data/base_map.json (its JSON), compared with the measured geometry
   const view = { s: 1, tx: 0, ty: 0 };
   let drag = null, spaceDown = false, mouseImg = null;
   // reference overlay: image (not stored), matrix overlay px -> farm px, alignment points
@@ -966,7 +1089,7 @@ if (typeof module !== 'undefined') module.exports = Core;
 
   // ---------------------------------------------------------------- storage
   function save() {
-    try { localStorage.setItem(STORE_BASE, JSON.stringify({ map: Core.toFarmMap(state, $('bgPath').value), cal: state.cal })); }
+    try { localStorage.setItem(STORE_BASE, JSON.stringify({ map: Core.toFarmMap(state, $('bgPath').value), cal: state.cal, base: state.base })); }
     catch (e) { /* storage unavailable: editing still works */ }
   }
   function restore() {
@@ -975,18 +1098,69 @@ if (typeof module !== 'undefined') module.exports = Core;
       if (!raw) return;
       const data = JSON.parse(raw);
       applyFarmMap(data.map, false);
+      state.base = data.base || null;
       if (data.cal) state.cal = data.cal;
     } catch (e) { /* ignore broken storage */ }
   }
 
   function applyFarmMap(json, warnSize) {
-    const s = Core.fromFarmMap(json);
+    applyEditorState(Core.fromFarmMap(json), warnSize);
+  }
+  const withFarmIds = fixed => {
+    const known = new Set(fixed.map(f => f.id));
+    return fixed.concat(FARM_IDS.filter(id => !known.has(id)).map(defaultItem));
+  };
+  // true when no base map is loaded or the measured geometry differs from it; the loaded
+  // base map's text is computed once per base map (refreshAll asks on every change)
+  let baseGeom = { base: null, text: null };
+  function baseChanged() {
+    if (!state.base) return true;
+    if (baseGeom.base !== state.base) {
+      baseGeom = { base: state.base, text: Core.geometryText(Core.fromMaps(state.base, {}), FARM_IDS) };
+    }
+    return Core.geometryText(state, FARM_IDS) !== baseGeom.text;
+  }
+  function baseInfo() {
+    if (!state.base) return 'No base map loaded: open data/base_map.json with the profile map, or save the measured geometry as the base map.';
+    return baseChanged() ? '⚠ The geometry differs from the loaded base map: save the base map too.'
+      : 'The geometry matches the loaded base map.';
+  }
+  // Open one or more map files: base map + profile map, one of them (merged with the
+  // other part already in the editor), or a one-file map from before v2.0.
+  function openMaps(jsons) {
+    const by = {};
+    for (const j of jsons) {
+      const kind = Core.mapKind(j);
+      if (by[kind]) throw new Error(`Two ${kind} files opened`);
+      by[kind] = j;
+    }
+    if (by.farm_map) {
+      if (by.base_map || by.profile_map) throw new Error('Open a one-file farm map on its own');
+      state.base = null;
+      applyFarmMap(by.farm_map, true);
+      notify('One-file farm map from before v2.0: it is saved as profile map and base map. Open data/base_map.json too to compare the geometry.', 'info');
+      return;
+    }
+    const base = by.base_map || state.base;
+    if (!base) throw new Error('Open data/base_map.json together with the profile map');
+    // a profile map alone is merged with the loaded base map: unsaved geometry edits would be lost
+    if (!by.base_map && baseChanged()
+        && !confirm('The measured geometry differs from the loaded base map and is not saved. Open the profile map on the loaded base map anyway (the changes are lost)?')) return;
+    const profile = by.profile_map || Core.toProfileMap(state, $('bgPath').value);
+    applyEditorState(Core.fromMaps(base, profile), true);
+    state.base = base;
+    refreshAll();
+  }
+
+  function applyEditorState(s, warnSize) {
     if (warnSize && state.img && s.imgW && (s.imgW !== state.imgW || s.imgH !== state.imgH)) {
       notify(`The JSON was made for a ${s.imgW}x${s.imgH} image; the loaded image is ${state.imgW}x${state.imgH}.`);
     }
     state.bg = s.bg;
-    const known = new Set(s.fixed.map(f => f.id));
-    state.fixed = s.fixed.concat(FARM_IDS.filter(id => !known.has(id)).map(defaultItem));
+    state.size = s.size;
+    // without a loaded image keep the image size of the file, so a save stays valid
+    if (!state.img && s.imgW) { state.imgW = s.imgW; state.imgH = s.imgH; }
+    state.fixed = withFarmIds(s.fixed);
     state.expansions = s.expansions;
     state.zones = s.zones;
     state.current = s.current;
@@ -1573,6 +1747,7 @@ if (typeof module !== 'undefined') module.exports = Core;
 
   function refreshAll() {
     $('calInfo').textContent = calInfo();
+    $('baseInfo').textContent = baseInfo();
     $('fixedIds').innerHTML = state.fixed.map(f => `<option value="${esc(f.id)}">`).join('');
     $('fixedList').innerHTML = '';
     const filter = Core.toSnake($('fixedFilter').value);
@@ -1857,12 +2032,11 @@ if (typeof module !== 'undefined') module.exports = Core;
     img.src = URL.createObjectURL(file);
   };
   $('fileJson').onchange = async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    let json;
-    try { json = JSON.parse(await file.text()); }
-    catch (err) { notify('Cannot read the JSON: ' + err.message); return; }
-    applyFarmMap(json, true);
+    const files = [...e.target.files];
+    e.target.value = '';
+    if (!files.length) return;
+    try { openMaps(await Promise.all(files.map(async f => JSON.parse(await f.text())))); }
+    catch (err) { notify('Cannot open the map: ' + err.message); }
   };
 
   // ---------------------------------------------------------------- export
@@ -1887,13 +2061,16 @@ if (typeof module !== 'undefined') module.exports = Core;
   }
   const toBlob = c => new Promise((ok, fail) => c.toBlob(b => b ? ok(b) : fail(new Error('PNG export failed (image too large for this browser?)')), 'image/png'));
 
-  // Before saving: merge the cells of every plot / zone, crop the map to the farm (optional).
-  function tidyForSave() {
+  // Before saving: merge the cells of every plot / zone; with `crop`, crop a changed
+  // geometry to the farm (optional). Returns true when the crop moved the coordinates.
+  function tidyForSave(crop) {
     for (const e of state.expansions) e.cells = Core.mergeCells(e.cells);
     for (const z of state.zones) z.cells = Core.mergeCells(z.cells);
-    if ($('cropOnSave').checked) {
-      const c = Core.cropMap(state, Math.max(0, +$('cropMargin').value || 0));
-      if (c) {
+    let moved = false;
+    if (crop && $('cropOnSave').checked) {
+      const c = Core.cropForSave(state, state.base, Math.max(0, +$('cropMargin').value || 0), FARM_IDS);
+      moved = !!c;
+      if (moved) {
         state.bg = c.bg; state.fixed = c.fixed; state.expansions = c.expansions; state.zones = c.zones;
         state.current = c.current;
         state.selFixed = state.selExp = state.selZone = state.selCur = null;
@@ -1901,12 +2078,26 @@ if (typeof module !== 'undefined') module.exports = Core;
       }
     }
     refreshAll();
+    return moved;
   }
 
+  const profileText = () => Core.mapJsonText(Core.toProfileMap(state, $('bgPath').value));
+  const baseText = () => Core.mapJsonText(Core.toBaseMap(state));
+  const jsonBlob = text => new Blob([text], { type: 'application/json' });
   $('saveJson').onclick = () => {
-    tidyForSave();
-    const json = JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n';
-    download(new Blob([json], { type: 'application/json' }), 'farm_map.json');
+    tidyForSave(false);
+    download(jsonBlob(profileText()), 'profile_map.json');
+    if (baseChanged()) notify(baseInfo().replace(/^⚠ /, ''), 'info');
+  };
+  $('saveBase').onclick = () => {
+    const moved = tidyForSave(true);
+    download(jsonBlob(baseText()), 'base_map.json');
+    state.base = Core.toBaseMap(state);
+    if (moved) {
+      download(jsonBlob(profileText()), 'profile_map.json');
+      notify('The map was cropped: profile_map.json is saved too. Plan the layout again.', 'info');
+    }
+    refreshAll();
   };
   $('savePng').onclick = async () => {
     if (!state.img) return;
@@ -1915,7 +2106,7 @@ if (typeof module !== 'undefined') module.exports = Core;
   };
   $('saveZip').onclick = async () => {
     if (!state.img || !state.bg) { notify('Load and calibrate the image first.'); return; }
-    tidyForSave();
+    tidyForSave(true);
     const plots = state.expansions.filter(e => e.cells.length);
     if (!plots.length) { notify('Draw at least one plot first.'); return; }
     const margin = Math.max(0, +$('margin').value || 0);
@@ -1929,7 +2120,8 @@ if (typeof module !== 'undefined') module.exports = Core;
     }
     const enc = new TextEncoder();
     files.push({ name: 'pieces/index.json', data: enc.encode(JSON.stringify(index, null, 2) + '\n') });
-    files.push({ name: 'farm_map.json', data: enc.encode(JSON.stringify(Core.toFarmMap(state, $('bgPath').value), null, 2) + '\n') });
+    files.push({ name: 'base_map.json', data: enc.encode(baseText()) });
+    files.push({ name: 'profile_map.json', data: enc.encode(profileText()) });
     download(new Blob([Core.zip(files)], { type: 'application/zip' }), 'farm_map_pieces.zip');
   };
 

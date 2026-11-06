@@ -18,7 +18,9 @@ import pytest
 
 from src.layout.farm_map import FarmMap
 
-EDITOR = Path("tools/farm_map_editor.html")
+ROOT = Path(__file__).resolve().parents[1]
+EDITOR = ROOT / "tools" / "farm_map_editor.html"
+SHARED_BASE_MAP = ROOT / "data" / "base_map.json"
 NODE = shutil.which("node")
 
 pytestmark = pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -429,3 +431,201 @@ def test_layout_overlay_carries_block_templates(tmp_path: Path) -> None:
         "decorations": src["decorations"],
     }
     assert all(t is None for k, t in blocks.items() if k != "dairy_block")
+
+
+SPLIT_SCRIPT = r"""
+const Core = require(process.argv[2]);
+const fs = require('fs');
+const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+const [one, base, profile] = process.argv.slice(3, 6).map(read);
+const kinds = [one, base, profile].map(Core.mapKind);
+const fromOne = Core.fromFarmMap(one);
+const fromTwo = Core.fromMaps(base, profile);
+const image = one.background.image;
+const fail = f => { try { f(); return null; } catch (e) { return e.message; } };
+const shared = read(process.argv[6]);
+console.log(JSON.stringify({
+  kinds,
+  baseFromOne: Core.mapJsonText(Core.toBaseMap(fromOne)),
+  profileFromOne: Core.mapJsonText(Core.toProfileMap(fromOne, image)),
+  baseFromTwo: Core.mapJsonText(Core.toBaseMap(fromTwo)),
+  profileFromTwo: Core.mapJsonText(Core.toProfileMap(fromTwo, image)),
+  shared: Core.mapJsonText(Core.toBaseMap(Core.fromMaps(shared, {}))),
+  unknown: fail(() => Core.fromMaps(base, { unlocked: ['nowhere'] })),
+  newer: fail(() => Core.mapKind(Object.assign({}, profile, { schema_version: 99 }))),
+  junk: fail(() => Core.mapKind({ blocks: [] })),
+}));
+"""
+
+ONE_FILE_MAP = {
+    "width": 30,
+    "height": 20,
+    "background": {
+        "image": "farm_background.png",
+        "image_width": 800,
+        "image_height": 600,
+        "origin_px": [400, 100.125],
+        "x_axis_px": [20.5, 10],
+        "y_axis_px": [-20, 10.25],
+    },
+    "fixed": [
+        {
+            "id": "farmhouse",
+            "name": "Farmhouse",
+            "x": 1,
+            "y": 1,
+            "width": 4,
+            "height": 3,
+        },
+        {"id": "mine", "x": None, "y": None, "width": None, "height": None},
+    ],
+    "expansions": [
+        {
+            "id": "base_1",
+            "section": "base",
+            "number": None,
+            "unlocked": True,
+            "cells": [[0, 0, 10, 10]],
+        },
+        {
+            "id": "main_1",
+            "section": "main",
+            "number": 1,
+            "unlocked": True,
+            "cells": [[10, 0, 5, 5]],
+        },
+        {
+            "id": "main_2",
+            "section": "main",
+            "number": 2,
+            "unlocked": False,
+            "cells": [[15, 0, 5, 5]],
+        },
+    ],
+    "zones": [
+        {"id": "pond", "kind": "blocked", "cells": [[2, 6, 2, 2]]},
+        {"id": "garden", "kind": "design", "cells": [[6, 6, 2, 1]]},
+    ],
+    "current": [
+        {"id": "bakery", "x": 6, "y": 1, "width": 3, "height": 3},
+        {"id": "field", "count": 12},
+    ],
+}
+
+
+@pytest.fixture(scope="module")
+def split(tmp_path_factory) -> tuple[dict, Path, Path]:
+    """The one-file map split by `migrate-map` and by the editor."""
+    from src.layout.migrate_map import migrate
+
+    tmp = tmp_path_factory.mktemp("split")
+    one = tmp / "farm_map.json"
+    one.write_text(json.dumps(ONE_FILE_MAP), encoding="utf-8")
+    base, profile = tmp / "base_map.json", tmp / "profile_map.json"
+    migrate(one, profile, base_output=base)
+    out = _run_core(
+        tmp, SPLIT_SCRIPT, str(one), str(base), str(profile), str(SHARED_BASE_MAP)
+    )
+    return out, base, profile
+
+
+def test_editor_detects_map_kinds(split) -> None:
+    out, _, _ = split
+    assert out["kinds"] == ["farm_map", "base_map", "profile_map"]
+    assert "not in the base map: nowhere" in out["unknown"]
+    assert "newer than this editor" in out["newer"]
+    assert out["junk"] == "Not a farm map file"
+
+
+def test_editor_writes_the_files_of_migrate_map(split) -> None:
+    out, base, profile = split
+    base_text = base.read_text(encoding="utf-8")
+    profile_text = profile.read_text(encoding="utf-8")
+    # an old one-file map opened in the editor, and the two parts opened again
+    assert out["baseFromOne"] == base_text
+    assert out["profileFromOne"] == profile_text
+    assert out["baseFromTwo"] == base_text
+    assert out["profileFromTwo"] == profile_text
+
+
+def test_editor_maps_merge_to_the_one_file_map(split, tmp_path: Path) -> None:
+    from src.layout.farm_map import load_farm_map
+
+    out, _, _ = split
+    (tmp_path / "base_map.json").write_text(out["baseFromTwo"], encoding="utf-8")
+    (tmp_path / "profile_map.json").write_text(out["profileFromTwo"], encoding="utf-8")
+    merged = load_farm_map(tmp_path / "profile_map.json", tmp_path / "base_map.json")
+    assert merged.model_dump() == FarmMap.model_validate(ONE_FILE_MAP).model_dump()
+
+
+def test_editor_rewrites_the_shared_base_map_unchanged(split) -> None:
+    out, _, _ = split
+    assert out["shared"] == SHARED_BASE_MAP.read_text(encoding="utf-8")
+
+
+SAVE_SCRIPT = r"""
+const Core = require(process.argv[2]);
+const fs = require('fs');
+const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+const [one, base, profile] = process.argv.slice(3, 6).map(read);
+const s = Core.fromMaps(base, profile);
+// a building moved: the geometry differs from the base map
+const edited = Object.assign({}, s, { fixed: s.fixed.map(f => f.id === 'farmhouse'
+  ? Object.assign({}, f, { rect: [2, 1, 4, 3] }) : f) });
+const crop = c => c && { width: c.bg.width, height: c.bg.height, farmhouse: c.fixed.find(f => f.id === 'farmhouse').rect };
+const noImage = Object.assign({}, one);
+delete noImage.background;
+const plain = Core.fromFarmMap(noImage);
+console.log(JSON.stringify({
+  same: Core.sameGeometry(s, base),
+  sameWithDefaults: Core.sameGeometry(s, base, ['truck']),
+  editedSame: Core.sameGeometry(edited, base),
+  noBase: Core.sameGeometry(s, null),
+  unchanged: crop(Core.cropForSave(s, base, 0)),
+  changed: crop(Core.cropForSave(edited, base, 0)),
+  withoutBase: crop(Core.cropForSave(s, null, 0)),
+  wide: crop(Core.cropForSave(edited, base, 50)),
+  sizeWithoutImage: [Core.toFarmMap(plain, null).width, Core.toFarmMap(plain, null).height],
+  baseWithoutImage: [Core.toBaseMap(plain).width, Core.toBaseMap(plain).height],
+  schema: Core.SCHEMA_VERSION,
+}));
+"""
+
+
+@pytest.fixture(scope="module")
+def save(split, tmp_path_factory) -> dict:
+    """Save decisions of the editor on the split ONE_FILE_MAP."""
+    _, base, profile = split
+    tmp = tmp_path_factory.mktemp("save")
+    one = tmp / "farm_map.json"
+    one.write_text(json.dumps(ONE_FILE_MAP), encoding="utf-8")
+    return _run_core(tmp, SAVE_SCRIPT, str(one), str(base), str(profile))
+
+
+def test_editor_compares_the_geometry_with_the_base_map(save: dict) -> None:
+    assert save["same"] is True
+    assert save["sameWithDefaults"] is True
+    assert save["editedSame"] is False
+    assert save["noBase"] is False
+
+
+def test_editor_crops_only_a_changed_geometry(save: dict) -> None:
+    # an unchanged base map keeps its coordinates
+    assert save["unchanged"] is None
+    # changed (or no base map loaded): cropped to the plots, every rect shifted with it
+    assert save["changed"] == {"width": 20, "height": 10, "farmhouse": [2, 1, 4, 3]}
+    assert save["withoutBase"] == {"width": 20, "height": 10, "farmhouse": [1, 1, 4, 3]}
+    # a margin that reaches the map edge moves nothing
+    assert save["wide"] is None
+
+
+def test_editor_keeps_the_map_size_without_a_screenshot(save: dict) -> None:
+    # regression: without a background the size was lost on save
+    assert save["sizeWithoutImage"] == [30, 20]
+    assert save["baseWithoutImage"] == [30, 20]
+
+
+def test_editor_schema_versions_match_python(save: dict) -> None:
+    from src.schema import CURRENT
+
+    assert save["schema"] == {kind: CURRENT[kind] for kind in save["schema"]}

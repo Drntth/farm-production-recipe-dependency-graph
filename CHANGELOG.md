@@ -4,6 +4,9 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Map editor reads and writes the split map: `data/base_map.json` and `config/profile_map.json` open together (or a one-file map, which it splits) and save as two files identical to `migrate-map`; only a changed geometry is cropped, together with the profile map. It no longer writes the one-file map.
+- Fix: a map opened in the editor without its screenshot kept the image size on save (it wrote 0).
+
 ## [2.0.0] - 2026-11-06
 
 - Core API (`src/api`): plan, layout, combined plan and relocation plan as entry points without file IO (dict or data bundle in, `{"result", "files"}` out); every CLI calls them and its outputs are byte-identical to v1.6.3.

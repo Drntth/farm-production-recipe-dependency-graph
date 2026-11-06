@@ -133,7 +133,7 @@ Use them for data the wiki does not have, for example shelter and field footprin
 
 The measured farm geometry every player shares: `width`, `height`, `fixed` (the buildings the game never moves), `expansions` (the plots, without `unlocked`) and the `buildable` / `blocked` zones. It is the base map of the map editor format, without any player data; `BaseMap` (`src/layout/farm_map.py`) rejects an `unlocked` flag and `design` zones. The player's part is the profile map (next section); the tools merge the two into one `FarmMap`.
 
-`python -m src migrate-map --base-output data/base_map.json` writes it from a measured one-file map, one line per fixed item, plot and zone.
+The map editor (**Save base map**) or `python -m src migrate-map --base-output data/base_map.json` writes it, one line per fixed item, plot and zone.
 
 ## Profile map
 
@@ -156,7 +156,7 @@ The measured farm geometry every player shares: `width`, `height`, `fixed` (the 
 }
 ```
 
-`unlocked` lists plot ids of the base map (an unknown id is an error; section `base` is always unlocked), `zones` only `design` zones (existing decoration), `current` the current farm as in the one-file map. The tools look for the farm map in this order: `config/profile_map.json` merged with `DATA_DIR/base_map.json`, the one-file `config/farm_map.json` (read as it is, with a warning to run `python -m src migrate-map`), `config/farm_map.example.json`. `--map` takes either format. `migrate-map` splits a one-file map, compares its geometry with `data/base_map.json` and moves the background path so it still points at the screenshot. The map editor still writes the one-file format; until it reads and writes both parts (v2.0.1), migrate again after editing.
+`unlocked` lists plot ids of the base map (an unknown id is an error; section `base` is always unlocked), `zones` only `design` zones (existing decoration), `current` the current farm as in the one-file map. The tools look for the farm map in this order: `config/profile_map.json` merged with `DATA_DIR/base_map.json`, the one-file `config/farm_map.json` (read as it is, with a warning to run `python -m src migrate-map`), `config/farm_map.example.json`. `--map` takes either format. `migrate-map` splits a one-file map, compares its geometry with `data/base_map.json` and moves the background path so it still points at the screenshot. The map editor reads and writes both files (and reads the one-file map).
 
 ## Farm profile
 
