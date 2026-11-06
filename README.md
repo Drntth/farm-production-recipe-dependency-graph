@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v2.0.0 (Core API and data model), a local command-line platform (359 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. The map editor reads and writes the base map and the profile map (v2.0.1). Next: v2.1 of the web app plan, see the [roadmap](docs/roadmap.md), the [v2 design](docs/v2-design.md) and the [changelog](CHANGELOG.md).
+**Status:** v2.0.1 (Core API and data model), a local command-line platform (359 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. The map editor reads and writes the base map and the profile map (v2.0.1). Next: v2.1 of the web app plan, see the [roadmap](docs/roadmap.md), the [v2 design](docs/v2-design.md) and the [changelog](CHANGELOG.md).
 
 **New here? Start with the [user guide](docs/user-guide.md).**
 
