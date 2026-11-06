@@ -19,19 +19,16 @@ import logging
 import sys
 from pathlib import Path
 
-from src.config import PlayerConfig, load_player_config, validate_player_config
+from src.api import combined_plan, write_files
+from src.api.core import COMBINED_STEM as STEM
+from src.config import PlayerConfig, load_player_config
+from src.farm_profile import farm_profile_of
 from src.layout.farm_map import load_farm_map
-from src.layout.render_svg import render_svg
-from src.layout.templates import load_templates
-from src.layout.visuals import write_block_images
-from src.loaders.json_loader import load_data
+from src.layout.templates import load_template_files
+from src.loaders.json_loader import data_directory, load_data
 from src.settings import load_design_settings, load_planner_settings
 
-from .combine import combine
-from .report import combined_to_dict, combined_to_markdown
-
 logger = logging.getLogger("src.combiner")
-STEM = "combined"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -39,7 +36,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Combine the production plan and the farm layout: blocks "
         "sized by the plan, placed in processing order, one report."
     )
-    parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--data-dir", type=data_directory, default=Path("data"))
     parser.add_argument(
         "--level",
         type=int,
@@ -58,7 +55,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="farm_map",
         type=Path,
         default=None,
-        help="Farm map (default: config/farm_map.json, else config/farm_map.example.json)",
+        help="Farm map "
+        "(default: config/profile_map.json with <data-dir>/base_map.json, else the "
+        "one-file config/farm_map.json, else config/farm_map.example.json)",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
@@ -72,6 +71,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=None,
         help="Planner settings (default: config/planner.json, else the example)",
+    )
+    parser.add_argument(
+        "--farm-profile",
+        type=Path,
+        default=None,
+        help="Farm profile: player, map, settings and templates in one file "
+        "(instead of the separate files)",
     )
     return parser.parse_args(argv)
 
@@ -94,39 +100,60 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("--level must be at least 1")
         return 1
     try:
-        design, design_source = load_design_settings(args.design_config)
-        planner_settings, planner_source = load_planner_settings(args.planner_config)
+        profile = farm_profile_of(args)
     except (FileNotFoundError, ValueError) as exc:
-        logger.error("Invalid settings: %s", exc)
+        logger.error("Invalid farm profile: %s", exc)
         return 1
-    production, combiner = planner_settings.production, planner_settings.combiner
+    if profile is not None:
+        design, planner_settings = profile.design, profile.planner
+        design_source = planner_source = args.farm_profile
+    else:
+        try:
+            design, design_source = load_design_settings(args.design_config)
+            planner_settings, planner_source = load_planner_settings(
+                args.planner_config
+            )
+        except (FileNotFoundError, ValueError) as exc:
+            logger.error("Invalid settings: %s", exc)
+            return 1
     logger.info(
         "Settings: design %s, planner %s",
         design_source or "built-in defaults",
         planner_source or "built-in defaults",
     )
 
-    try:
-        player = load_player_config(args.player_config)
-    except FileNotFoundError:
-        if args.level is None:
-            logger.error("No player config found and no --level given")
+    if profile is not None:
+        player = profile.player
+    else:
+        try:
+            player = load_player_config(args.player_config)
+        except FileNotFoundError:
+            if args.level is None:
+                logger.error("No player config found and no --level given")
+                return 1
+            player = PlayerConfig(level=args.level)
+        except ValueError as exc:
+            logger.error("Invalid player config: %s", exc)
             return 1
-        player = PlayerConfig(level=args.level)
-    except ValueError as exc:
-        logger.error("Invalid player config: %s", exc)
-        return 1
     if args.level is not None:
         player = player.model_copy(update={"level": args.level})
 
     try:
-        farm_map = load_farm_map(args.farm_map)
+        farm_map = (
+            profile.farm_map(args.data_dir / "base_map.json")
+            if profile is not None
+            else load_farm_map(args.farm_map, args.data_dir / "base_map.json")
+        )
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid farm map: %s", exc)
         return 1
 
     try:
-        templates = load_templates(design.templates)
+        templates = (
+            profile.templates
+            if profile is not None
+            else load_template_files(design.templates)
+        )
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid design template: %s", exc)
         return 1
@@ -136,91 +163,26 @@ def main(argv: list[str] | None = None) -> int:
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Failed to load data: %s", exc)
         return 1
-    for issue in validate_player_config(player, full):
-        logger.warning("Player config: %s", issue)
-    max_level = _data_max_level(args.data_dir)
-    if max_level is not None and player.level + combiner.lookahead > max_level:
-        logger.info(
-            "The data covers levels up to %d; unlocks above it are not known yet",
-            max_level,
-        )
-
+    out = args.output_dir
     try:
-        combined = combine(
+        run = combined_plan(
             full,
-            player,
-            farm_map,
-            lookahead=combiner.lookahead,
-            login_interval=production.login_interval,
-            storage_share=production.storage_share,
-            min_efficiency=production.min_efficiency,
-            reserve_ratio=design.reserve,
-            gap=design.gap,
-            strategy=combiner.strategy,
-            design=design.design_layer,
-            decor_band=design.decor_band,
-            item_gap=design.item_gap,
-            path_style=design.path_style,
-            path_targets=design.path_targets,
-            design_zones=design.design_zones,
-            main_path_style=design.main_path_style,
-            main_path_width=design.main_path_width,
+            player=player,
+            farm_map=farm_map,
+            design=design,
+            planner=planner_settings,
             templates=templates,
+            data_max_level=_data_max_level(args.data_dir),
+            output_dir=out,
         )
     except (RuntimeError, ValueError) as exc:
         logger.error("%s", exc)
         return 1
-    for name in combined.run.profile.missing():
-        logger.warning("Player config: %s is not set; storage limits are unknown", name)
-    for warning in combined.warnings:
-        logger.warning("%s", warning)
-
-    data = combined.dataset
-    out = args.output_dir
-    out.mkdir(parents=True, exist_ok=True)
-    (out / f"{STEM}.json").write_text(
-        json.dumps(
-            combined_to_dict(combined, data)
-            | {
-                "settings": {
-                    "design": design.model_dump(),
-                    "production": production.model_dump(),
-                    "combiner": combiner.model_dump(),
-                }
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-    (out / f"{STEM}.md").write_text(
-        combined_to_markdown(combined, data), encoding="utf-8"
-    )
-    render_svg(combined.layout, out / f"{STEM}.svg")
-    if design.block_images:
-        images = write_block_images(combined.layout, out / f"{STEM}_blocks")
+    files = run["files"]
+    write_files(out, files)
+    images = [name for name in files if name.startswith(f"{STEM}_blocks/")]
+    if images:
         logger.info("Wrote %d block images → %s", len(images), out / f"{STEM}_blocks")
-
-    layout, plan = combined.layout, combined.run.chosen
-    logger.info(
-        "Level %d: login every %g h, %d blocks (%d not placed), strategy %s, "
-        "reserve %.0f%%",
-        combined.level,
-        plan.interval_hours,
-        len(layout.blocks),
-        len(layout.unplaced_blocks),
-        layout.strategy,
-        layout.reserve_ratio * 100,
-    )
-    if combined.flow_links:
-        top = combined.flow_links[0]
-        logger.info(
-            "Heaviest flow: %s → %s, %.1f goods/h, %s tiles apart",
-            top.source,
-            top.target,
-            top.per_hour,
-            "-" if top.distance is None else top.distance,
-        )
     logger.info("Wrote %s (.json, .md, .svg) → %s", STEM, out)
     return 0
 

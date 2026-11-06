@@ -65,12 +65,16 @@ class RelocationPlan:
 
 def load_layout(path: Path | str) -> dict[str, Any]:
     """The layout part of a ``layout.json`` or ``combined.json`` file."""
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    return layout_part(json.loads(Path(path).read_text(encoding="utf-8")), path)
+
+
+def layout_part(data: Any, source: Path | str = "layout") -> dict[str, Any]:
+    """The layout part of a parsed ``layout.json`` or ``combined.json``."""
     if not isinstance(data, dict):
         data = {}  # a list or a value: reported as not a layout below
     layout = data.get("layout") if isinstance(data.get("layout"), dict) else data
     if not isinstance(layout.get("blocks"), list) or "map" not in layout:
-        raise ValueError(f"Not a layout.json or combined.json file: {path}")
+        raise ValueError(f"Not a layout.json or combined.json file: {source}")
     return layout
 
 

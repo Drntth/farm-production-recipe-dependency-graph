@@ -21,6 +21,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from src.schema import Versioned
+
 CONFIG_DIR = Path("config")
 
 # built-in defaults; the tools take their defaults from here
@@ -60,8 +62,10 @@ class TemplateAssignment(_Strict):
     )
 
 
-class DesignSettings(_Strict):
+class DesignSettings(Versioned, _Strict):
     """config/design.json: Layout Planner and design layer of the farm."""
+
+    schema_kind = "design"
 
     gap: int = Field(DEFAULT_GAP, ge=0, description="Free tiles between blocks")
     design_layer: bool = Field(
@@ -165,7 +169,9 @@ class CombinerSettings(_Strict):
     )
 
 
-class PlannerSettings(_Strict):
+class PlannerSettings(Versioned, _Strict):
+    schema_kind = "planner"
+
     production: ProductionSettings = Field(default_factory=ProductionSettings)
     combiner: CombinerSettings = Field(default_factory=CombinerSettings)
 

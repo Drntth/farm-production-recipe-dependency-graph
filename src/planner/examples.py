@@ -26,6 +26,7 @@ from pathlib import Path
 from src.config import PlayerConfig
 from src.loaders.json_loader import DataSet, load_data
 from src.models import LocationType
+from src.schema import stamp
 
 from .profile import resolve_profile
 
@@ -61,7 +62,8 @@ def example_profile(dataset: DataSet, level: int) -> dict:
 
 
 def to_json(profile: dict) -> str:
-    """Like config/player.example.json: one line per location."""
+    """Like config/player.example.json: one line per location, versioned."""
+    profile = stamp("player", profile)
     head = {k: v for k, v in profile.items() if k != "locations"}
     lines = ["{"]
     lines += [f"  {json.dumps(k)}: {json.dumps(v)}," for k, v in head.items()]

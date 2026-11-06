@@ -52,8 +52,10 @@ Rules:
 | New tool setting          | model field in `src/settings.py`, value in the example config, a row in [settings.md](settings.md), a test |
 | New node attribute        | the CSV column list and the GraphML key list in `src/exporters/`                                           |
 | New data field            | the pydantic model in `src/models/` (models forbid extra keys), [data-model.md](data-model.md)             |
+| Input file format change  | bump `CURRENT` in `src/schema.py`, one migration in `MIGRATIONS` and a test in `tests/test_schema.py`      |
 | New configurable location | `config/player.example.json` (`tests/test_config.py` checks it against the data)                           |
 | New CLI tool              | a `COMMANDS` entry in `src/cli.py`, [cli.md](cli.md), the diagrams in [architecture.md](architecture.md)   |
+| New tool output or input  | the Core API in `src/api/core.py` (returns every file); the tool's `cli.py` only reads and writes          |
 | How a tool works          | its page in [tools/](tools/) in the same commit                                                            |
 | Game update               | follow [game-updates.md](game-updates.md): re-scrape, run the tests, record the version and new wiki gaps  |
 

@@ -773,22 +773,19 @@ def test_cli_strategy_all_writes_one_set_per_strategy(tmp_path: Path) -> None:
 def test_cli_strategy_all_logs_main_layout(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    written: dict[str, object] = {}
+    from src.api import core
+    from src.layout.describe import layout_to_dict
+
     logged: list[object] = []
-    write = cli._write
-    monkeypatch.setattr(
-        cli,
-        "_write",
-        lambda lay, out, stem, s: (
-            written.update({stem: lay}),
-            write(lay, out, stem, s),
-        ),
-    )
-    monkeypatch.setattr(cli, "_log_summary", lambda lay, stems, out: logged.append(lay))
+    monkeypatch.setattr(core, "_log_layout_summary", logged.append)
     config = _design_config(tmp_path, strategy="all")
     args = ["--level", "20", "--design-config", config, "--output-dir", str(tmp_path)]
     assert cli.main(args) == 0
-    assert logged == [written["layout"]]
+    assert len(logged) == 1
+    written = json.loads((tmp_path / "layout.json").read_text())
+    assert layout_to_dict(logged[0]) == {
+        k: v for k, v in written.items() if k != "settings"
+    }
 
 
 @pytest.mark.skipif(not HAS_REAL_DATA, reason="data/locations.json not found")

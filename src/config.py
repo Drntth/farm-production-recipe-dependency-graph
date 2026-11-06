@@ -17,9 +17,10 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.models import LocationType
+from src.schema import Versioned
 
 if TYPE_CHECKING:
     from src.loaders.json_loader import DataSet
@@ -65,7 +66,9 @@ class LocationProgress(BaseModel):
     model_config = {"extra": "forbid"}
 
 
-class PlayerConfig(BaseModel):
+class PlayerConfig(Versioned):
+    schema_kind = "player"
+
     level: int = Field(..., ge=1, description="Current player experience level")
     mastery_system: MasterySystem = MasterySystem.STARS
     # Upgraded with supplies, not by level, so they are player progress.
@@ -77,7 +80,7 @@ class PlayerConfig(BaseModel):
     fishing_spots_unlocked: int | None = Field(None, ge=0)
     locations: dict[str, LocationProgress] = Field(default_factory=dict)
 
-    model_config = {"extra": "forbid"}
+    model_config = ConfigDict(extra="forbid")
 
 
 _NO_SLOT_TYPES = {LocationType.FIELD, LocationType.TREE, LocationType.BUSH}

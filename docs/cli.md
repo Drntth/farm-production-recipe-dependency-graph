@@ -26,6 +26,10 @@ python -m src examples              # regenerate config/examples/player_level_<N
 python -m src check-facts           # docs/game-facts vs. the wiki → output/fact_check.md (network)
 python -m src relocate              # current farm → combined.json (else layout.json): output/relocation.*
 python -m src relocate --layout output/layout.json
+python -m src migrate-map           # one-file config/farm_map.json → config/profile_map.json
+python -m src farm-profile          # player, map, settings, templates → config/farm_profile.json
+python -m src all --farm-profile config/farm_profile.json   # every tool from one farm profile
+python -m src bundle                # data/ with the overrides → output/data_bundle.json
 
 # build graph + analysis for the configured player level
 python -m src.main
@@ -81,6 +85,7 @@ output/
 ├── combined_blocks/                   # the same for the combined layout
 ├── relocation.json                    # python -m src relocate
 ├── relocation.md
+├── data_bundle.json                   # python -m src bundle
 └── fact_check.md                     # python -m src check-facts
 ```
 
@@ -94,15 +99,22 @@ python -m src.scraper --game-version 1.73
 
 Every command takes `--help`. The options only say what to run (level, file paths); how a tool works is set in [settings.md](settings.md).
 
-| Command                       | Options                                                                                                                                                 |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `graph` (`src.main`)          | `--data-dir` (data), `--level` / `--max-level`, `--player-config`, `--output-dir` (output), `--formats json graphml csv` (all), `--no-analysis`         |
-| `layout` (`src.layout`)       | `--data-dir`, `--level`, `--player-config`, `--farm-map` / `--map` (config/farm_map.json, else the example), `--output-dir`, `--design-config`          |
-| `plan` (`src.planner`)        | `--data-dir`, `--level`, `--player-config`, `--output-dir`, `--planner-config`                                                                          |
-| `combine` (`src.combiner`)    | `--data-dir`, `--level`, `--player-config`, `--farm-map` / `--map`, `--output-dir`, `--design-config`, `--planner-config`                               |
-| `relocate` (`src.relocation`) | `--data-dir`, `--layout` (OUTPUT_DIR/combined.json, else layout.json), `--farm-map` / `--map`, `--output-dir`                                           |
-| `scrape` (`src.scraper`)      | `--level` / `--max-level` (every wiki level), `--output-dir` (data), `--delay` seconds between requests (0.5), `--game-version` (stored in `meta.json`) |
-| `examples`                    | `--data-dir`, `--output-dir` (config/examples)                                                                                                          |
-| `wizard`                      | `--data-dir`, `--output` (config/player.json)                                                                                                           |
-| `check-facts`                 | `--facts-dir` (docs/game-facts), `--output-dir`, `--fail-on-findings` (exit code 3 when a row changed or its page failed)                               |
-| `all`                         | `--level`, `--player-config`, `--data-dir`, `--output-dir`, `--map`, `--design-config`, `--planner-config`; each step gets the ones it accepts          |
+`--farm-profile PATH` (graph, layout, plan, combine, relocate, all) reads the player profile, the profile map, both settings files and the design templates from one farm profile ([data-model.md](data-model.md#farm-profile)). It replaces `--player-config`, `--map`, `--design-config` and `--planner-config`; giving one of them as well is an error. `--level` and `--data-dir` still apply.
+
+`--data-dir` is always the data directory (it also holds `meta.json` and `base_map.json`); a data bundle file there is an error. The bundle is read by the Core API and `load_data` ([modules.md](modules.md)).
+
+| Command                       | Options                                                                                                                                                                                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `graph` (`src.main`)          | `--data-dir` (data), `--level` / `--max-level`, `--player-config`, `--output-dir` (output), `--formats json graphml csv` (all), `--no-analysis`, `--farm-profile`                                                                       |
+| `layout` (`src.layout`)       | `--data-dir`, `--level`, `--player-config`, `--farm-map` / `--map` (config/profile_map.json with DATA_DIR/base_map.json, else the one-file config/farm_map.json, else the example), `--output-dir`, `--design-config`, `--farm-profile` |
+| `plan` (`src.planner`)        | `--data-dir`, `--level`, `--player-config`, `--output-dir`, `--planner-config`, `--farm-profile`                                                                                                                                        |
+| `combine` (`src.combiner`)    | `--data-dir`, `--level`, `--player-config`, `--farm-map` / `--map`, `--output-dir`, `--design-config`, `--planner-config`, `--farm-profile`                                                                                             |
+| `relocate` (`src.relocation`) | `--data-dir`, `--layout` (OUTPUT_DIR/combined.json, else layout.json), `--farm-map` / `--map`, `--output-dir`, `--farm-profile`                                                                                                         |
+| `scrape` (`src.scraper`)      | `--level` / `--max-level` (every wiki level), `--output-dir` (data), `--delay` seconds between requests (0.5), `--game-version` (stored in `meta.json`)                                                                                 |
+| `examples`                    | `--data-dir`, `--output-dir` (config/examples)                                                                                                                                                                                          |
+| `wizard`                      | `--data-dir`, `--output` (config/player.json)                                                                                                                                                                                           |
+| `check-facts`                 | `--facts-dir` (docs/game-facts), `--output-dir`, `--fail-on-findings` (exit code 3 when a row changed or its page failed)                                                                                                               |
+| `migrate-map`                 | `--map` (config/farm_map.json), `--data-dir`, `--output` (config/profile_map.json), `--base-output` (also write the geometry as a base map), `--force`                                                                                  |
+| `farm-profile`                | `--player-config`, `--map`, `--design-config`, `--planner-config` (the same defaults as the tools), `--data-dir`, `--name`, `--output` (config/farm_profile.json), `--force`                                                            |
+| `bundle`                      | `--data-dir` (data), `--output` (output/data_bundle.json)                                                                                                                                                                               |
+| `all`                         | `--level`, `--player-config`, `--data-dir`, `--output-dir`, `--map`, `--design-config`, `--planner-config`, `--farm-profile`; each step gets the ones it accepts                                                                        |

@@ -71,9 +71,14 @@ def render_svg(
     *,
     scale: float = 1.0,
     offset: tuple[int, int] = (0, 0),
+    href_from: Path | str | None = None,
 ) -> str:
     """
     Return the SVG text for *layout*; also write it to *path* if given.
+
+    *href_from* is where the SVG will be written when *path* is not given:
+    the background image link is made relative to it (without both, it is
+    an absolute ``file:`` URI).
 
     *scale* enlarges the displayed size (the drawing keeps its units);
     *offset* is added to the block positions in the legend, for a layout
@@ -140,7 +145,7 @@ def render_svg(
 
     # background screenshot, mapped onto the tile grid and cut to the map
     if bg is not None:
-        href = _href(fm.background_path(), path)
+        href = _href(fm.background_path(), path if path is not None else href_from)
         m = _image_matrix(bg, pt)
         out.append(
             f'<clipPath id="map-clip"><polygon points="{poly(Rect(gx0, gy0, gw, gh))}"/></clipPath>'

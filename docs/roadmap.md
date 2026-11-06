@@ -2,7 +2,7 @@
 
 Milestones with their items. Changes per released version: [CHANGELOG.md](../CHANGELOG.md).
 
-**Current status:** v1.6 (pre-2.0 hardening) is done (290 tests passing, CI on every push). Next: v2.0 (Core API and data model) of the web app plan, see [v2-design.md](v2-design.md).  
+**Current status:** v2.0 (Core API and data model) is done (351 tests passing, CI on every push): the tools run through entry points without file IO, the farm map is split into the base map and a profile map, a farm profile holds one farm in one file, the input files carry `schema_version`, and `python -m src bundle` writes the data bundle. Next: v2.0.1 (map editor for the split map), then v2.1 of the web app plan, see [v2-design.md](v2-design.md).  
 Current data set (every wiki level, up to 126): 86 locations (19 tree / bush kinds incl. the nectar and peanut bush, the squirrel house), 418 resources, 354 recipes, 228 fields over 150 levels, 80 building / shelter copies. At level 56: 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
@@ -10,7 +10,7 @@ The design layer adds paths and a decoration band (126 path tiles on the measure
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb and peanut rates, footprints above level 56, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
-Next step: v2.0. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
+Next step: v2.0.1. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
 
 ## v0.3 - Graph and block analysis (done)
 
@@ -160,12 +160,16 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v2.0 - Core API and data model
 
-- [ ] Entry points without file IO (dict in, dict out) for the plan, layout, combined plan and relocation plan; the CLI calls them, its outputs stay the same
-- [ ] Base map (committed in `data/`) and profile map split, with a migration from the one-file `farm_map.json`; the map editor reads and writes both
-- [ ] Farm profile: player profile + profile map + design and planner settings as one exchangeable JSON
-- [ ] `schema_version` in every exchanged JSON, one tested migration per bump
-- [ ] Data bundle: `data/*.json` merged with the overrides into one file per release
+- [x] Entry points without file IO (dict in, dict out) for the plan, layout, combined plan and relocation plan (`src/api`); the CLI calls them, its outputs stay the same
+- [x] Base map (committed in `data/base_map.json`) and profile map split, with a migration from the one-file `farm_map.json` (`python -m src migrate-map`); the tools read both formats
+- [x] Farm profile: player profile + profile map + design and planner settings (+ templates) as one exchangeable JSON (`python -m src farm-profile`, `--farm-profile`)
+- [x] `schema_version` in every exchanged input JSON, one tested migration per bump (`src/schema.py`)
+- [x] Data bundle: `data/*.json` merged with the overrides into one file (`python -m src bundle`, generated, not committed); the loader and the Core API read it
 - Done: every CLI output is byte-identical to v1.6.3 on the example profile; schema and migration tests pass
+
+### v2.0.1 - Map editor for the split map
+
+- [ ] The map editor reads and writes the base map and the profile map (until then it writes the one-file map; migrate again after each save)
 
 ### v2.1 - Static site and level recommendations
 

@@ -25,9 +25,11 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from src.schema import Versioned
 from src.settings import CONFIG_DIR, TemplateAssignment, TemplateMode
 
 from .farm_map import cells_to_tiles
@@ -61,7 +63,9 @@ class TemplateBuilding(BaseModel):
         return cells_to_tiles([(self.x, self.y, self.width, self.height)])
 
 
-class DesignTemplate(BaseModel):
+class DesignTemplate(Versioned):
+    schema_kind = "template"
+
     width: int = Field(..., ge=1)
     height: int = Field(..., ge=1)
     buildings: list[TemplateBuilding] = Field(default_factory=list)
@@ -69,7 +73,7 @@ class DesignTemplate(BaseModel):
         default_factory=list, description="Taken tile rectangles [x, y, w, h]"
     )
 
-    model_config = {"extra": "forbid"}
+    model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="after")
     def check_template(self) -> DesignTemplate:
@@ -129,9 +133,40 @@ def load_templates(
     directory: Path | str = TEMPLATE_DIR,
 ) -> dict[str, BlockTemplate]:
     """Block id -> loaded template, from the ``templates`` design setting."""
+    return resolve_templates(assignments, load_template_files(assignments, directory))
+
+
+def load_template_files(
+    assignments: dict[str, TemplateAssignment],
+    directory: Path | str = TEMPLATE_DIR,
+) -> dict[str, DesignTemplate]:
+    """Template name -> template, for every template the assignments use."""
     return {
-        block_id: BlockTemplate(
-            a.template, load_template(a.template, directory), a.mode
-        )
-        for block_id, a in assignments.items()
+        name: load_template(name, directory)
+        for name in dict.fromkeys(a.template for a in assignments.values())
     }
+
+
+def resolve_templates(
+    assignments: dict[str, TemplateAssignment],
+    by_name: dict[str, DesignTemplate | dict[str, Any]],
+) -> dict[str, BlockTemplate]:
+    """
+    Block id -> template, from the assignments and templates given by name.
+
+    A template may be a parsed JSON object; a missing name is an error.
+    """
+    result: dict[str, BlockTemplate] = {}
+    for block_id, a in assignments.items():
+        if a.template not in by_name:
+            raise ValueError(f"Design template not given: {a.template}")
+        tpl = by_name[a.template]
+        if not isinstance(tpl, DesignTemplate):
+            try:
+                tpl = DesignTemplate.model_validate(tpl)
+            except ValueError as exc:
+                raise ValueError(
+                    f"Invalid design template {a.template}: {exc}"
+                ) from exc
+        result[block_id] = BlockTemplate(a.template, tpl, a.mode)
+    return result

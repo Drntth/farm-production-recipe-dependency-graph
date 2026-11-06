@@ -107,27 +107,55 @@ def collage_layout(layout: Layout) -> Layout:
     return _bare(layout, width, y + row_h, moved)
 
 
+def block_images(layout: Layout, directory: Path | str | None = None) -> dict[str, str]:
+    """
+    ``<block id>.svg`` per placed block and ``collage.svg``: file name -> SVG.
+
+    *directory* is where the images will be written; only the background
+    image links depend on it.
+    """
+    out = Path(directory) if directory is not None else None
+
+    def target(name: str) -> Path | None:
+        return out / name if out is not None else None
+
+    images: dict[str, str] = {}
+    for pb in layout.blocks:
+        if pb.frame is None:
+            continue
+        name = f"{pb.block.id}.svg"
+        images[name] = render_svg(
+            block_layout(layout, pb),
+            title=f"{pb.block.name} - level {layout.level}",
+            scale=BLOCK_SCALE,
+            # the legend shows where the block sits on the farm map
+            offset=(pb.frame.x - MARGIN_TILES, pb.frame.y - MARGIN_TILES),
+            href_from=target(name),
+        )
+    images["collage.svg"] = render_svg(
+        collage_layout(layout),
+        title=f"Blocks - level {layout.level}",
+        href_from=target("collage.svg"),
+    )
+    return images
+
+
 def write_block_images(layout: Layout, directory: Path | str) -> list[Path]:
     """``<block id>.svg`` per placed block and ``collage.svg``; returns the paths."""
+    out = Path(directory)
+    images = block_images(layout, out)
+    return write_image_dir(out, images)
+
+
+def write_image_dir(directory: Path | str, images: dict[str, str]) -> list[Path]:
+    """Write *images* into *directory*; the SVGs of an earlier run there go first."""
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     for old in out.glob("*.svg"):  # a block of an earlier run may be gone
         old.unlink()
     paths = []
-    for pb in layout.blocks:
-        if pb.frame is None:
-            continue
-        path = out / f"{pb.block.id}.svg"
-        render_svg(
-            block_layout(layout, pb),
-            path,
-            title=f"{pb.block.name} - level {layout.level}",
-            scale=BLOCK_SCALE,
-            # the legend shows where the block sits on the farm map
-            offset=(pb.frame.x - MARGIN_TILES, pb.frame.y - MARGIN_TILES),
-        )
+    for name, svg in images.items():
+        path = out / name
+        path.write_text(svg, encoding="utf-8")
         paths.append(path)
-    collage = out / "collage.svg"
-    render_svg(collage_layout(layout), collage, title=f"Blocks - level {layout.level}")
-    paths.append(collage)
     return paths

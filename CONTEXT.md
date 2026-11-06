@@ -55,13 +55,18 @@ _Not to be confused with_: farm map (positions), design settings (taste)
 **Farm map**: the player's measured farm map: size, fixed items, plots, zones, background screenshot.
 _Related_: `FarmMap` (one model for every area)
 
-**Base map** (v2, planned): the part of the farm map every profile shares: size, fixed items, plots, `buildable` and `blocked` zones; geometry only, no screenshot; committed in `data/`.
+**Base map**: the part of the farm map every profile shares: size, fixed items, plots, `buildable` and `blocked` zones; geometry only, no screenshot; committed as `data/base_map.json`.
 _Not to be confused with_: profile map
 
-**Profile map** (v2, planned): one farm profile's state on the base map: unlocked plots, `design` zones, current farm.
+**Profile map**: one farm's state on the base map: unlocked plots, `design` zones, current farm, background screenshot (`config/profile_map.json`). Merged with the base map it is the farm map.
 
-**Farm profile** (v2, planned): one named, locally stored player in the web app: player profile, profile map, design and planner settings; several farm profiles simulate different players.
+**Farm profile**: one named farm in one JSON file: player profile, profile map, design and planner settings, design templates (`--farm-profile`); in the web app (v2.2) stored locally, several of them simulate different players.
 _Not to be confused with_: player profile (only what the player bought, upgraded or earned)
+
+**Data bundle**: every shared data file (`data/*.json` with the overrides merged, `base_map.json`) in one generated JSON file; a client without file access loads it in one request.
+_Not to be confused with_: data set (`DataSet`, the validated models in memory)
+
+**Schema version**: the `schema_version` number an input file starts with; an older file is upgraded on load, a newer one is an error.
 
 **Level recommendation** (v2, planned): the plan and layout precomputed at build time for one level with level defaults and default settings; shown without a farm profile.
 _Not to be confused with_: recommendation (one count the plan proposes)

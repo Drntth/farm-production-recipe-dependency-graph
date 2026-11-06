@@ -2,7 +2,7 @@
 
 Tool settings: how a tool works. They live only in config files, never in CLI options.
 
-How the tools work is set in config files, never on the command line: the CLI only says what to run (`--level`, `--player-config`, `--map`, `--design-config`, `--planner-config`, `--data-dir`, `--output-dir`). Each file has a committed example and a local, git-ignored copy that wins; without either, the built-in defaults of `src/settings.py` apply. Every run logs the file it used, and `layout*.json`, `schedule.json` and `combined.json` record the settings in a `settings` key.
+How the tools work is set in config files, never on the command line: the CLI only says what to run (`--level`, `--player-config`, `--map`, `--design-config`, `--planner-config`, `--data-dir`, `--output-dir`). Each file has a committed example and a local, git-ignored copy that wins; without either, the built-in defaults of `src/settings.py` apply. Every run logs the file it used, and `layout*.json`, `schedule.json` and `combined.json` record the settings in a `settings` key. With `--farm-profile` both settings come from the farm profile's `design` and `planner` parts. Each file may start with `"schema_version": 1` ([data-model.md](data-model.md#schema_version)); it is not a setting and is never recorded in `settings`.
 
 `config/design.json` (Layout Planner, design layer, Combiner layout): one flat object; a missing key keeps its default.
 

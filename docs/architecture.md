@@ -4,14 +4,16 @@ Two diagrams of the code base: which package imports which, and how data moves f
 
 ## Package dependencies
 
-Each node is a package or module under `src/`. A solid arrow is a static import (`A --> B`: A imports B). A dotted arrow is the unified CLI starting a tool by name (`importlib`). `tests/test_architecture.py` fails when the solid arrows differ from the real imports, so update this diagram together with the code.
+Each node is a package or module under `src/`. A solid arrow is a static import (`A --> B`: A imports B). A dotted arrow is the unified CLI starting a tool by name (`importlib`). The `cli.py` of each tool package is one node, `toolcli`: it reads the input files and writes the outputs, while `api/` runs the same steps on objects without file IO. `tests/test_architecture.py` fails when the solid arrows differ from the real imports, so update this diagram together with the code.
 
 ```mermaid
 flowchart TB
     subgraph entry[Entry points]
         cli[cli.py<br/>python -m src]
         main[main.py<br/>graph CLI]
+        toolcli[tool cli.py files<br/>file IO]
     end
+    api[api/<br/>Core API, no file IO]
     subgraph tools[Tools]
         layout[layout/<br/>Layout Planner]
         planner[planner/<br/>Production Planner]
@@ -20,10 +22,12 @@ flowchart TB
     end
     subgraph core[Core]
         config[config.py<br/>player profile]
+        fprofile[farm_profile.py<br/>farm profile]
         settings[settings.py<br/>tool settings]
         dgraph[graph/<br/>dependency graph]
         loaders[loaders/<br/>data loader]
         models[models/<br/>pydantic models]
+        schema[schema.py<br/>schema_version, migrations]
     end
     subgraph io[Data in and out]
         scraper[scraper/<br/>wiki scraper]
@@ -36,8 +40,38 @@ flowchart TB
     cli -.-> combiner
     cli -.-> relocation
     cli -.-> scraper
+    cli -.-> fprofile
+    cli -.-> loaders
+
+    toolcli --> api
+    toolcli --> config
+    toolcli --> fprofile
+    toolcli --> layout
+    toolcli --> loaders
+    toolcli --> scraper
+    toolcli --> settings
+
+    api --> combiner
+    api --> config
+    api --> layout
+    api --> loaders
+    api --> planner
+    api --> relocation
+    api --> settings
+
+    fprofile --> config
+    fprofile --> layout
+    fprofile --> schema
+    fprofile --> settings
+
+    config --> schema
+    loaders --> schema
+    settings --> schema
+    layout --> schema
+    planner --> schema
 
     main --> config
+    main --> fprofile
     main --> exporters
     main --> dgraph
     main --> loaders

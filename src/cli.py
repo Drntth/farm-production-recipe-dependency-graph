@@ -12,6 +12,9 @@ Usage
     python -m src examples               # config/examples/player_level_<N>.json
     python -m src wizard                 # interactive profile → config/player.json
     python -m src check-facts            # game fact tables vs. the wiki
+    python -m src migrate-map            # config/farm_map.json → config/profile_map.json
+    python -m src farm-profile           # the separate files → config/farm_profile.json
+    python -m src bundle                 # data/ → output/data_bundle.json
     python -m src all                    # graph, farm layout, plan, combined plan
 
 Every command takes the options of its tool (``python -m src <command> -h``).
@@ -42,15 +45,39 @@ COMMANDS: dict[str, tuple[str, str]] = {
     "examples": ("src.planner.examples", "write level-default player profiles"),
     "wizard": ("src.planner.wizard", "answer questions, get a player profile"),
     "check-facts": ("src.scraper.factcheck", "compare docs/game-facts with the wiki"),
+    "migrate-map": (
+        "src.layout.migrate_map",
+        "split a one-file farm map into base map and profile map",
+    ),
+    "farm-profile": ("src.farm_profile", "assemble a farm profile from the files"),
+    "bundle": ("src.loaders.bundle", "write the data files as one data bundle"),
 }
 # the run order of "all", with the shared options each tool accepts
 ALL_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("graph", ("level", "player_config", "data_dir", "output_dir")),
+    ("graph", ("level", "player_config", "data_dir", "output_dir", "farm_profile")),
     (
         "layout",
-        ("level", "player_config", "data_dir", "output_dir", "map", "design_config"),
+        (
+            "level",
+            "player_config",
+            "data_dir",
+            "output_dir",
+            "map",
+            "design_config",
+            "farm_profile",
+        ),
     ),
-    ("plan", ("level", "player_config", "data_dir", "output_dir", "planner_config")),
+    (
+        "plan",
+        (
+            "level",
+            "player_config",
+            "data_dir",
+            "output_dir",
+            "planner_config",
+            "farm_profile",
+        ),
+    ),
     (
         "combine",
         (
@@ -61,6 +88,7 @@ ALL_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "map",
             "design_config",
             "planner_config",
+            "farm_profile",
         ),
     ),
 )
@@ -103,6 +131,12 @@ def _all_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--map", type=Path, default=None, help="Farm map")
     parser.add_argument("--design-config", type=Path, default=None)
     parser.add_argument("--planner-config", type=Path, default=None)
+    parser.add_argument(
+        "--farm-profile",
+        type=Path,
+        default=None,
+        help="Farm profile instead of the player, map and settings files",
+    )
     return parser.parse_args(argv)
 
 

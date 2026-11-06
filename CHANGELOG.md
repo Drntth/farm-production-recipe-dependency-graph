@@ -4,6 +4,12 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Core API (`src/api`): plan, layout, combined plan and relocation plan as entry points without file IO (dict or data bundle in, `{"result", "files"}` out); every CLI calls them and its outputs are byte-identical to v1.6.3.
+- Farm map split into the base map (`data/base_map.json`, committed) and the profile map (`config/profile_map.json`); `python -m src migrate-map` splits a one-file map, which the tools still read with a warning. The map editor keeps the one-file format until v2.0.1.
+- Farm profile: `python -m src farm-profile` puts the player profile, profile map, settings and templates of one farm into one JSON; every tool and `all` take `--farm-profile`.
+- `schema_version` on every input file (player, map, settings, templates, farm profile, data bundle) with tested migrations (`src/schema.py`); a newer version is an error.
+- Data bundle: `python -m src bundle` writes `output/data_bundle.json`; `load_data` and the Core API read it.
+
 ## [1.6.3] - 2026-11-06
 
 - v2+ plan: `docs/v2-design.md` (web app architecture, Pyodide measurements, base map / profile map split, decisions) and the v2.0-v4.0 sub-versions with done criteria in `docs/roadmap.md`; `CONTEXT.md` gained the planned v2 terms.

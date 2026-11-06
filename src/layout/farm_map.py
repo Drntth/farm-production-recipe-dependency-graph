@@ -29,14 +29,30 @@ relocation plan, ``src/relocation``); the Layout Planner ignores it.
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
+
+from src.schema import Versioned, stamp
 
 CONFIG_DIR = Path("config")
-LOCAL_MAP = CONFIG_DIR / "farm_map.json"
+LOCAL_PROFILE_MAP = CONFIG_DIR / "profile_map.json"
+LOCAL_MAP = CONFIG_DIR / "farm_map.json"  # one-file map before v2.0
 EXAMPLE_MAP = CONFIG_DIR / "farm_map.example.json"
+DEFAULT_BASE_MAP = Path("data") / "base_map.json"
+# keys only a one-file map has (its geometry)
+ONE_FILE_KEYS = frozenset({"width", "height", "fixed", "expansions"})
+
+logger = logging.getLogger(__name__)
 
 
 Tile = tuple[int, int]
@@ -260,7 +276,9 @@ class Zone(BaseModel):
         return cells_to_tiles(self.cells)
 
 
-class FarmMap(BaseModel):
+class FarmMap(Versioned):
+    schema_kind = "farm_map"
+
     width: int | None = Field(None, ge=1, description="Usable tiles along the ↘ edge")
     height: int | None = Field(None, ge=1, description="Usable tiles along the ↙ edge")
     background: Background | None = None
@@ -269,7 +287,7 @@ class FarmMap(BaseModel):
     zones: list[Zone] = Field(default_factory=list)
     current: list[CurrentItem] = Field(default_factory=list)
 
-    model_config = {"extra": "forbid"}
+    model_config = ConfigDict(extra="forbid")
     _base_dir: Path = PrivateAttr(default_factory=Path)
 
     @model_validator(mode="before")
@@ -391,17 +409,180 @@ class FarmMap(BaseModel):
         return [f for f in self.fixed if f.is_placed]
 
 
+class BaseMap(Versioned):
+    """
+    The farm's geometry, the same for every player (``data/base_map.json``).
+
+    Map size, fixed buildings, every farm plot (without ``unlocked``) and the
+    ``buildable`` / ``blocked`` zones. What a player owns or built goes into
+    the :class:`ProfileMap`.
+    """
+
+    schema_kind = "base_map"
+
+    width: int | None = Field(None, ge=1)
+    height: int | None = Field(None, ge=1)
+    fixed: list[FixedItem] = Field(default_factory=list)
+    expansions: list[Expansion] = Field(default_factory=list)
+    zones: list[Zone] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def no_player_data(cls, data):
+        if isinstance(data, dict):
+            for e in data.get("expansions") or []:
+                if isinstance(e, dict) and "unlocked" in e:
+                    raise ValueError(
+                        f"Base map plot '{e.get('id')}' sets 'unlocked': "
+                        "unlocked plots belong to the profile map"
+                    )
+        return data
+
+    @field_validator("zones")
+    @classmethod
+    def no_design_zones(cls, v: list[Zone]) -> list[Zone]:
+        design = [z.id for z in v if z.kind == "design"]
+        if design:
+            raise ValueError(
+                f"Design zones belong to the profile map: {', '.join(design)}"
+            )
+        return v
+
+
+class ProfileMap(Versioned):
+    """
+    One player's part of the farm map (``config/profile_map.json``).
+
+    The unlocked plots (ids of the base map), the ``design`` zones (existing
+    decoration), the current farm and, kept locally, the calibrated
+    screenshot (``background``).
+    """
+
+    schema_kind = "profile_map"
+
+    background: Background | None = None
+    unlocked: list[str] = Field(default_factory=list, description="Plot ids")
+    zones: list[Zone] = Field(default_factory=list)
+    current: list[CurrentItem] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("zones")
+    @classmethod
+    def only_design_zones(cls, v: list[Zone]) -> list[Zone]:
+        other = [z.id for z in v if z.kind != "design"]
+        if other:
+            raise ValueError(
+                f"Only design zones belong to the profile map: {', '.join(other)} "
+                "(a one-file farm map from before v2.0? split it with "
+                "`python -m src migrate-map`)"
+            )
+        return v
+
+
+def merge_maps(base: BaseMap, profile: ProfileMap) -> FarmMap:
+    """The farm map of one player: *base* geometry plus *profile* data."""
+    plot_ids = {e.id for e in base.expansions}
+    unknown = sorted(set(profile.unlocked) - plot_ids)
+    if unknown:
+        raise ValueError(f"Unlocked plots not in the base map: {', '.join(unknown)}")
+    unlocked = set(profile.unlocked)
+    return FarmMap(
+        width=base.width,
+        height=base.height,
+        background=profile.background,
+        fixed=base.fixed,
+        expansions=[
+            e.model_copy(update={"unlocked": e.id in unlocked}) for e in base.expansions
+        ],
+        zones=[*base.zones, *profile.zones],
+        current=profile.current,
+    )
+
+
+def split_map(farm_map: FarmMap) -> tuple[BaseMap, ProfileMap]:
+    """A one-file farm map (before v2.0) as base map and profile map."""
+    base = BaseMap(
+        width=farm_map.width,
+        height=farm_map.height,
+        fixed=farm_map.fixed,
+        expansions=[
+            e.model_copy(update={"unlocked": False}) for e in farm_map.expansions
+        ],
+        zones=[z for z in farm_map.zones if z.kind != "design"],
+    )
+    profile = ProfileMap(
+        background=farm_map.background,
+        unlocked=[e.id for e in farm_map.expansions if e.unlocked],
+        zones=[z for z in farm_map.zones if z.kind == "design"],
+        current=farm_map.current,
+    )
+    return base, profile
+
+
+def base_map_json(base: BaseMap) -> dict:
+    """The JSON object of ``data/base_map.json`` (plots without ``unlocked``)."""
+    data = base.model_dump(
+        mode="json", exclude={"expansions": {"__all__": {"unlocked"}}}
+    )
+    return stamp("base_map", data)
+
+
+def profile_map_json(profile: ProfileMap) -> dict:
+    """The JSON object of ``config/profile_map.json``."""
+    data = profile.model_dump(mode="json", exclude_none=True)
+    return stamp("profile_map", data)
+
+
+def is_one_file_map(data: dict) -> bool:
+    """A farm map before v2.0: geometry and player data in one file."""
+    return bool(ONE_FILE_KEYS & data.keys())
+
+
 def default_map_path() -> Path:
-    return LOCAL_MAP if LOCAL_MAP.exists() else EXAMPLE_MAP
+    """config/profile_map.json, else config/farm_map.json, else the example."""
+    for path in (LOCAL_PROFILE_MAP, LOCAL_MAP):
+        if path.exists():
+            return path
+    return EXAMPLE_MAP
 
 
-def load_farm_map(path: Path | str | None = None) -> FarmMap:
-    """Load the farm map from *path* or the default location; empty if none."""
+def load_base_map(path: Path | str = DEFAULT_BASE_MAP) -> BaseMap:
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Base map not found: {p}")
+    return BaseMap.model_validate(json.loads(p.read_text(encoding="utf-8")))
+
+
+def load_farm_map(
+    path: Path | str | None = None, base_map: Path | str | None = None
+) -> FarmMap:
+    """
+    Load the farm map from *path* or the default location; empty if none.
+
+    A profile map is merged with the base map (*base_map*, default
+    ``data/base_map.json``). A one-file map from before v2.0 is read as it is,
+    with a warning to split it (``python -m src migrate-map``); the committed
+    example stays a one-file map without a warning.
+    """
     p = Path(path) if path is not None else default_map_path()
     if not p.exists():
         if path is not None:
             raise FileNotFoundError(f"Farm map not found: {p}")
         return FarmMap()
-    farm_map = FarmMap.model_validate(json.loads(p.read_text(encoding="utf-8")))
+    data = json.loads(p.read_text(encoding="utf-8"))
+    if isinstance(data, dict) and not is_one_file_map(data):
+        base = load_base_map(base_map if base_map is not None else DEFAULT_BASE_MAP)
+        farm_map = merge_maps(base, ProfileMap.model_validate(data))
+    else:  # a one-file map; anything else fails its validation
+        if p.resolve() != EXAMPLE_MAP.resolve():
+            logger.warning(
+                "%s is a one-file farm map from before v2.0; "
+                "split it with `python -m src migrate-map`",
+                p,
+            )
+        farm_map = FarmMap.model_validate(data)
     farm_map._base_dir = p.parent
     return farm_map

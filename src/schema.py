@@ -1,0 +1,85 @@
+"""
+Input file versions: ``schema_version`` and the migrations between versions.
+
+Every input JSON (player profile, settings, design template, farm maps, farm
+profile, data bundle) may carry ``"schema_version": N``. A file without it is
+version 1, the format of v1.6. On load, :func:`upgrade` runs the migrations
+from the file's version to the current one and drops the key, so the models
+never see it and the tool outputs do not change. Writers put it back with
+:func:`stamp`.
+
+A format change bumps ``CURRENT[kind]`` and registers one function in
+``MIGRATIONS[kind][old_version]`` that turns the old JSON object into the next
+version.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any, ClassVar
+
+from pydantic import BaseModel, model_validator
+
+Json = dict[str, Any]
+Migration = Callable[[Json], Json]
+
+KEY = "schema_version"
+# kind -> current version
+CURRENT: dict[str, int] = {
+    "player": 1,
+    "design": 1,
+    "planner": 1,
+    "template": 1,
+    "farm_map": 1,
+    "base_map": 1,
+    "profile_map": 1,
+    "farm_profile": 1,
+    "data_bundle": 1,
+}
+# kind -> {version: migration to version + 1}
+MIGRATIONS: dict[str, dict[int, Migration]] = {}
+
+
+def upgrade(
+    kind: str,
+    data: Json,
+    *,
+    current: dict[str, int] = CURRENT,
+    migrations: dict[str, dict[int, Migration]] = MIGRATIONS,
+) -> Json:
+    """*data* migrated to the current version of *kind*, without the key."""
+    target = current[kind]
+    rest = {k: v for k, v in data.items() if k != KEY}
+    version = data.get(KEY, 1)
+    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+        raise ValueError(f"{KEY} must be a positive integer, got {version!r}")
+    if version > target:
+        raise ValueError(
+            f"{kind} file has {KEY} {version}, this version reads up to {target}; "
+            "update the tools"
+        )
+    steps = migrations.get(kind, {})
+    while version < target:
+        if version not in steps:
+            raise ValueError(f"No migration for {kind} from {KEY} {version}")
+        rest = steps[version](rest)
+        version += 1
+    return rest
+
+
+def stamp(kind: str, data: Json) -> Json:
+    """*data* with the current ``schema_version`` of *kind* as its first key."""
+    return {KEY: CURRENT[kind]} | {k: v for k, v in data.items() if k != KEY}
+
+
+class Versioned(BaseModel):
+    """A model read from an input file: accepts and upgrades ``schema_version``."""
+
+    schema_kind: ClassVar[str]  # a key of CURRENT
+
+    @model_validator(mode="before")
+    @classmethod
+    def _upgrade(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            return upgrade(cls.schema_kind, data)
+        return data

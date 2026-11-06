@@ -15,21 +15,20 @@ Gap, reserve, strategy and the design layer are set in config/design.json
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 from pathlib import Path
 
-from src.config import load_player_config, validate_player_config
-from src.loaders.json_loader import load_data
-from src.settings import DesignSettings, load_design_settings
+from src.api import layout_plan, write_files
+from src.api.core import layout_stems
+from src.config import load_player_config
+from src.farm_profile import farm_profile_of
+from src.loaders.json_loader import data_directory, load_data
+from src.settings import load_design_settings
 
-from .describe import layout_to_dict, layout_to_markdown
 from .farm_map import load_farm_map
-from .planner import STRATEGIES, plan_layout
-from .render_svg import render_svg
-from .templates import load_templates
-from .visuals import write_block_images
+from .planner import STRATEGIES
+from .templates import load_template_files
 
 logger = logging.getLogger("src.layout")
 
@@ -38,7 +37,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Plan the farm layout: named blocks, footprints, isometric SVG."
     )
-    parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--data-dir", type=data_directory, default=Path("data"))
     parser.add_argument(
         "--level",
         type=int,
@@ -57,8 +56,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="farm_map",
         type=Path,
         default=None,
-        help="Farm map (default: config/farm_map.json, else "
-        "config/farm_map.example.json)",
+        help="Farm map "
+        "(default: config/profile_map.json with <data-dir>/base_map.json, else the "
+        "one-file config/farm_map.json, else config/farm_map.example.json)",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
     parser.add_argument(
@@ -68,17 +68,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Design settings (default: config/design.json, else "
         "config/design.example.json, else built-in defaults)",
     )
-    return parser.parse_args(argv)
-
-
-def _write(layout, out: Path, stem: str, settings: DesignSettings) -> None:
-    payload = layout_to_dict(layout) | {"settings": settings.model_dump()}
-    (out / f"{stem}.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    parser.add_argument(
+        "--farm-profile",
+        type=Path,
+        default=None,
+        help="Farm profile: player, map, settings and templates in one file "
+        "(instead of the separate files)",
     )
-    (out / f"{stem}.md").write_text(layout_to_markdown(layout), encoding="utf-8")
-    render_svg(layout, out / f"{stem}.svg")
+    return parser.parse_args(argv)
 
 
 # file sets an earlier run may have written: strategy "all", or the town /
@@ -93,55 +90,6 @@ def _remove_stale(out: Path, stems: list[str]) -> None:
             (out / f"{stem}{suffix}").unlink(missing_ok=True)
 
 
-def _plan(
-    data, level, player, farm_map, settings: DesignSettings, strategy: str, templates
-):
-    return plan_layout(
-        data,
-        level=level,
-        player=player,
-        farm_map=farm_map,
-        reserve_ratio=settings.reserve,
-        gap=settings.gap,
-        field_pool=settings.field_pool,
-        strategy=strategy,
-        design=settings.design_layer,
-        decor_band=settings.decor_band,
-        item_gap=settings.item_gap,
-        path_style=settings.path_style,
-        path_targets=settings.path_targets,
-        design_zones=settings.design_zones,
-        main_path_style=settings.main_path_style,
-        main_path_width=settings.main_path_width,
-        templates=templates,
-    )
-
-
-def _log_summary(layout, stems: list[str], out: Path) -> None:
-    if layout.design is not None:
-        d = layout.design
-        logger.info(
-            "Design: %d path tiles, %d decoration tiles%s%s",
-            len(d.paths),
-            len(d.decorations),
-            f"; to connection point: {', '.join(sorted(d.approached))}"
-            if d.approached
-            else "",
-            f"; not reachable: {', '.join(d.unreachable)}" if d.unreachable else "",
-        )
-    ext = layout.extent()
-    logger.info(
-        "Farm level %d: %d blocks on %d x %d tiles",
-        layout.level,
-        len(layout.blocks),
-        ext.w,
-        ext.h,
-    )
-    for pb in layout.blocks:
-        logger.info("  %s: %s", pb.block.name, ", ".join(pb.block.locations))
-    logger.info("Wrote %s (.json, .md, .svg) → %s", ", ".join(stems), out)
-
-
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(
         level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
@@ -151,24 +99,35 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("--level must be at least 1")
         return 1
     try:
-        settings, source = load_design_settings(args.design_config)
+        profile = farm_profile_of(args)
     except (FileNotFoundError, ValueError) as exc:
-        logger.error("Invalid design settings: %s", exc)
+        logger.error("Invalid farm profile: %s", exc)
         return 1
-
-    try:
-        player = load_player_config(args.player_config)
-    except FileNotFoundError:
-        if args.level is None:
-            logger.error("No player config found and no --level given")
+    if profile is not None:
+        settings, source, player = profile.design, args.farm_profile, profile.player
+    else:
+        try:
+            settings, source = load_design_settings(args.design_config)
+        except (FileNotFoundError, ValueError) as exc:
+            logger.error("Invalid design settings: %s", exc)
             return 1
-        player = None
-    except ValueError as exc:
-        logger.error("Invalid player config: %s", exc)
-        return 1
+        try:
+            player = load_player_config(args.player_config)
+        except FileNotFoundError:
+            if args.level is None:
+                logger.error("No player config found and no --level given")
+                return 1
+            player = None
+        except ValueError as exc:
+            logger.error("Invalid player config: %s", exc)
+            return 1
 
     try:
-        farm_map = load_farm_map(args.farm_map)
+        farm_map = (
+            profile.farm_map(args.data_dir / "base_map.json")
+            if profile is not None
+            else load_farm_map(args.farm_map, args.data_dir / "base_map.json")
+        )
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid farm map: %s", exc)
         return 1
@@ -179,12 +138,15 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     try:
-        templates = load_templates(settings.templates)
+        templates = (
+            profile.templates
+            if profile is not None
+            else load_template_files(settings.templates)
+        )
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Invalid design template: %s", exc)
         return 1
 
-    level = args.level if args.level is not None else player.level
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
     logger.info(
@@ -198,39 +160,27 @@ def main(argv: list[str] | None = None) -> int:
     except (FileNotFoundError, ValueError) as exc:
         logger.error("Failed to load data: %s", exc)
         return 1
-    if player is not None:
-        for problem in validate_player_config(player, full):
-            logger.warning("Player config: %s", problem)
-
-    # (output file stem, strategy); "all" adds one file set per fixed strategy
-    runs = [("layout", "auto" if settings.strategy == "all" else settings.strategy)]
-    if settings.strategy == "all":
-        runs += [(f"layout_{s}", s) for s in STRATEGIES if s != "auto"]
-
-    data = full.filter_by_max_level(level)
-    for stem, strategy in runs:
-        try:
-            layout = _plan(data, level, player, farm_map, settings, strategy, templates)
-        except ValueError as exc:
-            logger.error("%s", exc)
-            return 1
-        _write(layout, out, stem, settings)
-        if stem == "layout":
-            main_layout = layout
-        logger.info(
-            "%s: strategy %s (used: %s), reserve %.0f%%, %d blocks not placed",
-            stem,
-            strategy,
-            layout.strategy,
-            layout.reserve_ratio * 100,
-            len(layout.unplaced_blocks),
+    try:
+        run = layout_plan(
+            full,
+            player=player,
+            level=args.level,
+            farm_map=farm_map,
+            design=settings,
+            templates=templates,
+            output_dir=out,
         )
-    _remove_stale(out, [stem for stem, _ in runs])  # only after a full run
-
-    if settings.block_images:  # of the main layout
-        images = write_block_images(main_layout, out / "blocks")
+    except ValueError as exc:
+        logger.error("%s", exc)
+        return 1
+    files = run["files"]
+    stems = [stem for stem, _ in layout_stems(settings)]
+    write_files(out, files)
+    _remove_stale(out, stems)  # only after a full run
+    images = [name for name in files if name.startswith("blocks/")]
+    if images:
         logger.info("Wrote %d block images → %s", len(images), out / "blocks")
-    _log_summary(main_layout, [stem for stem, _ in runs], out)
+    logger.info("Wrote %s (.json, .md, .svg) → %s", ", ".join(stems), out)
     return 0
 
 

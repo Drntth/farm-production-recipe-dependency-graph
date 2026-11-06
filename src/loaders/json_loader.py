@@ -9,17 +9,21 @@ object ready for graph generation.
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 from pydantic import ValidationError
 
 from src.models import LevelLimits, Location, MasteryBonus, Recipe, Resource
+from src.schema import upgrade
 
 logger = logging.getLogger(__name__)
 
 OVERRIDES_DIRNAME = "overrides"
+Raw = dict[str, Any]
 
 
 class DataSet:
@@ -231,23 +235,56 @@ def _load_with_overrides(
     return raw
 
 
-def _load_level_limits(data_dir: Path) -> LevelLimits | None:
+def _read_level_limits(data_dir: Path) -> dict | None:
     path = data_dir / "level_limits.json"
     if not path.exists():
         logger.info("No level_limits.json in %s", data_dir)
         return None
-    try:
-        return LevelLimits.model_validate(json.loads(path.read_text(encoding="utf-8")))
-    except ValidationError as exc:
-        raise ValueError(f"Validation error in {path}:\n{exc}") from exc
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _load_mastery_bonuses(data_dir: Path) -> list[MasteryBonus]:
+def _read_mastery_bonuses(data_dir: Path) -> list[dict]:
     path = data_dir / "mastery_bonuses.json"
     if not path.exists():
         logger.info("No mastery_bonuses.json in %s", data_dir)
         return []
-    return _parse_entities(_load_json_file(path), MasteryBonus, "mastery_bonuses")
+    return _load_json_file(path)
+
+
+def read_raw_data(data_dir: Path | str, *, apply_data_overrides: bool = True) -> Raw:
+    """
+    The data files of *data_dir* as JSON, overrides merged, not validated.
+
+    Keys: ``locations``, ``resources``, ``recipes`` (lists), ``level_limits``
+    (object or None), ``mastery_bonuses`` (list).
+    """
+    data_dir = Path(data_dir)
+    overrides_dir = data_dir / OVERRIDES_DIRNAME if apply_data_overrides else None
+    raw: Raw = {
+        name: _load_with_overrides(data_dir, f"{name}.json", overrides_dir)
+        for name in ("locations", "resources", "recipes")
+    }
+    raw["level_limits"] = _read_level_limits(data_dir)
+    raw["mastery_bonuses"] = _read_mastery_bonuses(data_dir)
+    return raw
+
+
+def dataset_from_raw(raw: Raw) -> DataSet:
+    """Validate the JSON of :func:`read_raw_data` (or of a data bundle)."""
+    limits = raw.get("level_limits")
+    try:
+        level_limits = None if limits is None else LevelLimits.model_validate(limits)
+    except ValidationError as exc:
+        raise ValueError(f"Validation error in level_limits:\n{exc}") from exc
+    return DataSet(
+        _parse_entities(raw["locations"], Location, "locations"),
+        _parse_entities(raw["resources"], Resource, "resources"),
+        _parse_entities(raw["recipes"], Recipe, "recipes"),
+        level_limits,
+        _parse_entities(
+            raw.get("mastery_bonuses") or [], MasteryBonus, "mastery_bonuses"
+        ),
+    )
 
 
 def load_data(
@@ -264,7 +301,8 @@ def load_data(
     data_dir:
         Directory containing ``locations.json``, ``resources.json``,
         ``recipes.json`` and optionally ``level_limits.json`` and
-        ``mastery_bonuses.json``.
+        ``mastery_bonuses.json``; or a data bundle file
+        (``python -m src bundle``), which already holds the overrides.
     max_level:
         If given, only entities with ``unlock_level <= max_level`` are kept.
     apply_data_overrides:
@@ -276,25 +314,14 @@ def load_data(
         Validated, optionally filtered collection of entities.
     """
     data_dir = Path(data_dir)
-    overrides_dir = data_dir / OVERRIDES_DIRNAME if apply_data_overrides else None
-
-    logger.info("Loading data from %s", data_dir)
-
-    locations_raw = _load_with_overrides(data_dir, "locations.json", overrides_dir)
-    resources_raw = _load_with_overrides(data_dir, "resources.json", overrides_dir)
-    recipes_raw = _load_with_overrides(data_dir, "recipes.json", overrides_dir)
-
-    locations = _parse_entities(locations_raw, Location, "locations")
-    resources = _parse_entities(resources_raw, Resource, "resources")
-    recipes = _parse_entities(recipes_raw, Recipe, "recipes")
-
-    dataset = DataSet(
-        locations,
-        resources,
-        recipes,
-        _load_level_limits(data_dir),
-        _load_mastery_bonuses(data_dir),
-    )
+    if data_dir.is_file():
+        logger.info("Loading data bundle %s", data_dir)
+        dataset = dataset_from_bundle(json.loads(data_dir.read_text(encoding="utf-8")))
+    else:
+        logger.info("Loading data from %s", data_dir)
+        dataset = dataset_from_raw(
+            read_raw_data(data_dir, apply_data_overrides=apply_data_overrides)
+        )
     logger.info("Loaded %s", dataset.summary())
 
     if max_level is not None:
@@ -302,3 +329,38 @@ def load_data(
         logger.info("After max_level=%s filter: %s", max_level, dataset.summary())
 
     return dataset
+
+
+BUNDLE_LISTS = ("locations", "resources", "recipes")
+
+
+def dataset_from_bundle(bundle: Raw) -> DataSet:
+    """The DataSet of a data bundle object (any ``schema_version`` it can read)."""
+    if not isinstance(bundle, dict):
+        raise ValueError("A data bundle is a JSON object")  # noqa: TRY004
+    bundle = upgrade("data_bundle", bundle)
+    missing = [k for k in BUNDLE_LISTS if k not in bundle]
+    if missing:
+        raise ValueError(f"A data bundle needs {', '.join(missing)}")
+    wrong = [k for k in BUNDLE_LISTS if not isinstance(bundle[k], list)]
+    if not isinstance(bundle.get("mastery_bonuses") or [], list):
+        wrong.append("mastery_bonuses")
+    if wrong:
+        raise ValueError(f"Not a list in the data bundle: {', '.join(wrong)}")
+    return dataset_from_raw(bundle)
+
+
+def data_directory(value: str) -> Path:
+    """
+    ``--data-dir`` of the tool CLIs: a directory, never a data bundle file.
+
+    The bundle is for the Core API (``dataset_from_bundle``); the CLIs also
+    read ``meta.json`` and ``base_map.json`` from the directory.
+    """
+    path = Path(value)
+    if path.is_file():
+        raise argparse.ArgumentTypeError(
+            f"{path} is a file; --data-dir takes the data directory "
+            "(a data bundle is read by the Core API)"
+        )
+    return path

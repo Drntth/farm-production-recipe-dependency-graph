@@ -9,7 +9,7 @@ Planning is organised in two layers:
 - **Functional planning** (always active): production logic, blocks, quantities, schedules, capacities and processing order.
 - **Design planning** (optional): decorative elements, walkable paths between blocks, and aesthetic placement that still respects the functional constraints.
 
-**Status:** v1.6.3, a local command-line platform (290 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. Next: v2.0, the first step of the web app plan, see the [roadmap](docs/roadmap.md), the [v2 design](docs/v2-design.md) and the [changelog](CHANGELOG.md).
+**Status:** v2.0 in progress (Core API and data model done), a local command-line platform (351 tests, CI on every push). It covers every wiki level of game version 1.73: the dependency graph, a farm layout of named production blocks with paths and design templates, a production plan with a login schedule, the combined plan, a relocation plan from the current farm, and a browser-based map editor. Next: v2.0.1 (map editor for the split map) and v2.1 of the web app plan, see the [roadmap](docs/roadmap.md), the [v2 design](docs/v2-design.md) and the [changelog](CHANGELOG.md).
 
 **New here? Start with the [user guide](docs/user-guide.md).**
 
@@ -45,6 +45,7 @@ Design decisions:
 - **Layout without production.** The Layout Planner can produce a usable layout, including a graphical one, from the graph, the blocks and the building footprints alone. Production data only refines block sizes, for example how many fields or pastures a block needs.
 - **Production without layout.** The Production Planner never needs a layout.
 - **Separate UX.** Each tool has its own CLI command and its own output files. The Combiner is a third, optional step.
+
 Package dependencies and the data flow from the wiki to the output files: [docs/architecture.md](docs/architecture.md). Where each module lives: [docs/modules.md](docs/modules.md).
 
 ## Quick start

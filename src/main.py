@@ -19,8 +19,9 @@ from pathlib import Path
 
 from src.config import load_player_config, validate_player_config
 from src.exporters import export_csv, export_graphml, export_json
+from src.farm_profile import farm_profile_of
 from src.graph import analysis_summary, build_graph, graph_summary
-from src.loaders.json_loader import load_data
+from src.loaders.json_loader import data_directory, load_data
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +36,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--data-dir",
-        type=Path,
+        type=data_directory,
         default=Path("data"),
         help="Directory containing locations.json, resources.json, recipes.json",
     )
@@ -72,6 +73,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--no-analysis",
         action="store_true",
         help="Skip production-block / centrality analysis",
+    )
+    parser.add_argument(
+        "--farm-profile",
+        type=Path,
+        default=None,
+        help="Farm profile: player, map, settings and templates in one file "
+        "(instead of the separate files)",
     )
     return parser.parse_args(argv)
 
@@ -111,7 +119,16 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        player = load_player_config(args.player_config)
+        profile = farm_profile_of(args)
+    except (FileNotFoundError, ValueError) as exc:
+        logger.error("Invalid farm profile: %s", exc)
+        return 1
+    try:
+        player = (
+            profile.player
+            if profile is not None
+            else load_player_config(args.player_config)
+        )
     except FileNotFoundError:
         if args.level is None:
             logger.error("No player config found and no --level given")

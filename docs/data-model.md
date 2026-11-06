@@ -129,6 +129,78 @@ Use them for data the wiki does not have, for example shelter and field footprin
 
 `data/overrides/locations.json` holds the measured footprints, `movable` and `rotatable` values; it covers every location of the data (above level 56 partly estimates, see [docs/wiki-gaps.md](wiki-gaps.md)). [data/overrides/README.md](../data/overrides/README.md) explains how to measure footprints in the game and which edge is width and which is height.
 
+## base_map.json
+
+The measured farm geometry every player shares: `width`, `height`, `fixed` (the buildings the game never moves), `expansions` (the plots, without `unlocked`) and the `buildable` / `blocked` zones. It is the base map of the map editor format, without any player data; `BaseMap` (`src/layout/farm_map.py`) rejects an `unlocked` flag and `design` zones. The player's part is the profile map (next section); the tools merge the two into one `FarmMap`.
+
+`python -m src migrate-map --base-output data/base_map.json` writes it from a measured one-file map, one line per fixed item, plot and zone.
+
+## Profile map
+
+`config/profile_map.json` (git-ignored; `config/profile_map.example.json` is committed) is one player's state on the base map:
+
+```json
+{
+  "schema_version": 1,
+  "background": {
+    "image": "farm_background.png",
+    "image_width": 1600,
+    "image_height": 900,
+    "origin_px": [800, 40],
+    "x_axis_px": [12, 6],
+    "y_axis_px": [-12, 6]
+  },
+  "unlocked": ["main_1", "main_2"],
+  "zones": [{ "id": "garden", "kind": "design", "cells": [[30, 20, 4, 3]] }],
+  "current": [{ "id": "field", "count": 24 }]
+}
+```
+
+`unlocked` lists plot ids of the base map (an unknown id is an error; section `base` is always unlocked), `zones` only `design` zones (existing decoration), `current` the current farm as in the one-file map. The tools look for the farm map in this order: `config/profile_map.json` merged with `DATA_DIR/base_map.json`, the one-file `config/farm_map.json` (read as it is, with a warning to run `python -m src migrate-map`), `config/farm_map.example.json`. `--map` takes either format. `migrate-map` splits a one-file map, compares its geometry with `data/base_map.json` and moves the background path so it still points at the screenshot. The map editor still writes the one-file format; until it reads and writes both parts (v2.0.1), migrate again after editing.
+
+## Farm profile
+
+`config/farm_profile.json` (git-ignored) holds every player-side input of one farm:
+
+```json
+{
+  "schema_version": 1,
+  "name": "Main farm",
+  "player": { "schema_version": 1, "level": 56 },
+  "profile_map": { "schema_version": 1, "unlocked": ["main_1"] },
+  "design": { "schema_version": 1, "gap": 1 },
+  "planner": { "schema_version": 1, "production": {}, "combiner": {} },
+  "templates": {
+    "dairy_garden": { "schema_version": 1, "width": 6, "height": 5 }
+  }
+}
+```
+
+Each part has the content of its own file (player profile, profile map, `design.json`, `planner.json`, the design templates the design settings assign). `python -m src farm-profile` assembles one from the current files; `--farm-profile PATH` makes the tools read it instead of them. The farm map is the profile map merged with `DATA_DIR/base_map.json`.
+
+## Data bundle
+
+`python -m src bundle` writes `output/data_bundle.json`: one JSON object with `meta.json`, the entity files with the overrides merged, `level_limits.json`, `mastery_bonuses.json` and `base_map.json`:
+
+```json
+{
+  "schema_version": 1,
+  "meta": {},
+  "locations": [],
+  "resources": [],
+  "recipes": [],
+  "level_limits": {},
+  "mastery_bonuses": [],
+  "base_map": {}
+}
+```
+
+It is generated, not committed; write it again after a re-scrape. `load_data(<bundle file>)` and `dataset_from_bundle(obj)` give the same `DataSet` as `load_data("data")`, and the Core API takes the bundle object as its data (the combined plan reads `meta.max_level` from it).
+
+## schema_version
+
+Every input JSON (player profile, `design.json`, `planner.json`, design templates, farm maps, base map, profile map, farm profile, data bundle) may carry `"schema_version": N` as its first key; the committed examples and the files the tools write have it. A file without it is version 1, the format of v1.6. On load, `src/schema.py` runs the migrations from the file's version to the current one and drops the key, so the outputs never contain it. A newer version than the tools know is an error asking to update the tools. A format change bumps `CURRENT[kind]` and registers one migration in `MIGRATIONS[kind]`, with a test. The `data/*.json` files themselves and the output files are not versioned.
+
 ## Timing and capacity fields
 
 All durations are stored in seconds.  

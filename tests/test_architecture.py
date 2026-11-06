@@ -11,13 +11,18 @@ SRC = ROOT / "src"
 DOC = ROOT / "docs" / "architecture.md"
 # modules that only dispatch or re-export; the diagram leaves them out
 SKIPPED = {"__init__", "__main__", "cli"}
+# a tool's own cli.py is an entry point above the Core API, drawn as one node
+TOOL_CLI = "toolcli"
 # "graph" is a Mermaid keyword, so the diagram names that node differently
-NODE_IDS = {"dgraph": "graph"}
+NODE_IDS = {"dgraph": "graph", "fprofile": "farm_profile"}
 
 
 def _part(path: Path) -> str:
-    """Top-level package or module name under src/."""
-    return path.relative_to(SRC).parts[0].removesuffix(".py")
+    """Top-level package or module name under src/ (a tool's cli.py: TOOL_CLI)."""
+    parts = path.relative_to(SRC).parts
+    if len(parts) > 1 and path.name == "cli.py":
+        return TOOL_CLI
+    return parts[0].removesuffix(".py")
 
 
 def _imported(path: Path, node: ast.ImportFrom | ast.Import) -> set[str]:

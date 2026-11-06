@@ -18,11 +18,10 @@ import logging
 import sys
 from pathlib import Path
 
+from src.api import relocation_plan, write_files
+from src.farm_profile import farm_profile_of
 from src.layout.farm_map import load_farm_map
-from src.loaders.json_loader import load_data
-
-from .relocate import load_layout, plan_relocation
-from .report import new_slot_note, relocation_to_dict, relocation_to_markdown
+from src.loaders.json_loader import data_directory, load_data
 
 logger = logging.getLogger("src.relocation")
 
@@ -32,7 +31,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Relocation plan: keep / store / place lists from the current "
         "farm to the planned layout."
     )
-    parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--data-dir", type=data_directory, default=Path("data"))
     parser.add_argument(
         "--layout",
         type=Path,
@@ -46,10 +45,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         dest="farm_map",
         type=Path,
         default=None,
-        help="Farm map with the current farm (default: config/farm_map.json, else "
-        "config/farm_map.example.json)",
+        help="Farm map with the current farm "
+        "(default: config/profile_map.json with <data-dir>/base_map.json, else the "
+        "one-file config/farm_map.json, else config/farm_map.example.json)",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("output"))
+    parser.add_argument(
+        "--farm-profile",
+        type=Path,
+        default=None,
+        help="Farm profile: player, map, settings and templates in one file "
+        "(instead of the separate files)",
+    )
     return parser.parse_args(argv)
 
 
@@ -81,41 +88,25 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     try:
-        layout = load_layout(path)
-        farm_map = load_farm_map(args.farm_map)
+        layout = json.loads(path.read_text(encoding="utf-8"))
+        profile = farm_profile_of(args)
+        farm_map = (
+            profile.farm_map(args.data_dir / "base_map.json")
+            if profile is not None
+            else load_farm_map(args.farm_map, args.data_dir / "base_map.json")
+        )
         data = load_data(args.data_dir)
     except (OSError, ValueError) as exc:
         logger.error("%s", exc)
         return 1
-    if not farm_map.current:
-        logger.warning(
-            "The farm map has no current farm: measure it in tools/farm_map_editor.html"
-        )
     try:
-        plan = plan_relocation(layout, farm_map, data)
+        run = relocation_plan(
+            data, layout=layout, farm_map=farm_map, layout_name=path.as_posix()
+        )
     except ValueError as exc:
         logger.error("%s", exc)
         return 1
-
-    out.mkdir(parents=True, exist_ok=True)
-    name = path.as_posix()
-    (out / "relocation.json").write_text(
-        json.dumps(relocation_to_dict(plan, name), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    (out / "relocation.md").write_text(
-        relocation_to_markdown(plan, name), encoding="utf-8"
-    )
-    logger.info(
-        "Relocation to %s: keep %d, store %d, place %d, reserved %d",
-        name,
-        len(plan.keep),
-        sum(c.count for c in plan.store),
-        len(plan.place),
-        len(plan.reserved),
-    )
-    if note := new_slot_note(plan):
-        logger.info("%s", note)
+    write_files(out, run["files"])
     logger.info("Wrote relocation (.json, .md) → %s", out)
     return 0
 

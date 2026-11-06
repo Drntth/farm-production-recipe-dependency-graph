@@ -234,6 +234,8 @@ config/planner.json
 
 # Local farm map (measured positions of fixed buildings)
 config/farm_map.json
+config/profile_map.json
+config/farm_profile.json
 config/*.png
 config/*.zip
 # Map sources: wiki reference images (Fandom licence) and the GIMP stitching file

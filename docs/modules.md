@@ -37,7 +37,10 @@ farm-production-recipe-dependency-graph/
 │   ├── design.json                    # your own settings (git-ignored)
 │   ├── planner.json
 │   ├── farm_map.example.json          # fixed farm buildings, positions empty (committed)
-│   ├── farm_map.json                  # your measured farm map (git-ignored)
+│   ├── farm_map.json                  # one-file farm map of v1 (git-ignored; python -m src migrate-map)
+│   ├── profile_map.example.json       # unlocked plots on data/base_map.json (committed)
+│   ├── profile_map.json               # your profile map (git-ignored)
+│   ├── farm_profile.json              # your farm profile: every input in one file (git-ignored)
 │   ├── templates/                     # design templates <name>.json (git-ignored; one committed example)
 │   └── farm_background.png            # your stitched farm screenshot (git-ignored)
 ├── data/
@@ -47,6 +50,7 @@ farm-production-recipe-dependency-graph/
 │   ├── meta.json                      # scrape date, level, wiki revisions, game version
 │   ├── level_limits.json              # field grants + building / shelter copies per level
 │   ├── mastery_bonuses.json           # production speed-up per building and mastery star
+│   ├── base_map.json                  # the measured farm geometry every profile shares
 │   ├── overrides/                     # hand-maintained patches merged by the loader
 │   │   ├── README.md                  # what to fill in and how to measure it
 │   │   ├── locations.json
@@ -58,6 +62,9 @@ farm-production-recipe-dependency-graph/
 │       └── recipes.example.json
 ├── output/                            # generated exports land here
 ├── src/
+│   ├── api/                           # Core API: the tools without file IO (dict in, dict out)
+│   │   ├── core.py                    # layout_plan, production_plan, combined_plan, relocation_plan
+│   │   └── output.py                  # write_files: the CLI side
 │   ├── combiner/                      # Combiner (farm): the only place joining both planners
 │   │   ├── cli.py                     # python -m src.combiner
 │   │   ├── combine.py                 # sizing from the plan, lookahead, flows between blocks
@@ -69,6 +76,8 @@ farm-production-recipe-dependency-graph/
 │   ├── __main__.py                    # python -m src <command>
 │   ├── cli.py                         # unified CLI: every command of COMMANDS, and all
 │   ├── config.py                      # player profile: model, loader, validation
+│   ├── farm_profile.py                # farm profile model, loader, python -m src farm-profile
+│   ├── schema.py                      # schema_version of the input files, migrations
 │   ├── settings.py                    # design / planner settings: models, defaults, loader
 │   ├── exporters/
 │   │   ├── csv_exporter.py
@@ -81,7 +90,8 @@ farm-production-recipe-dependency-graph/
 │   │   ├── relationship.py
 │   │   └── weighting.py
 │   ├── loaders/
-│   │   └── json_loader.py
+│   │   ├── bundle.py                  # data bundle (python -m src bundle)
+│   │   └── json_loader.py             # data/ or a data bundle → DataSet
 │   ├── models/
 │   │   ├── level_limits.py
 │   │   ├── location.py
@@ -93,9 +103,10 @@ farm-production-recipe-dependency-graph/
 │   │   ├── cli.py                     # python -m src.layout
 │   │   ├── describe.py                # layout.md / layout.json
 │   │   ├── design.py                  # design layer: main / side paths, decoration band
-│   │   ├── farm_map.py                # config/farm_map*.json model and loader
+│   │   ├── farm_map.py                # farm map, base map, profile map: models, merge, loader
 │   │   ├── fields.py                  # dedicated fields per block (crop demand)
 │   │   ├── inventory.py               # copies per location (profile → level)
+│   │   ├── migrate_map.py             # one-file map → base map + profile map (python -m src migrate-map)
 │   │   ├── packing.py                 # greedy rectangle packing on the tile grid
 │   │   ├── planner.py                 # plan_layout(): blocks → frames → farm
 │   │   ├── render_svg.py              # isometric SVG with tile grid
@@ -132,13 +143,17 @@ farm-production-recipe-dependency-graph/
 ├── tests/
 │   ├── fixtures/wiki/                 # trimmed wiki HTML / wikitext for scraper tests
 │   ├── test_analysis.py
+│   ├── test_api.py                    # Core API vs. the CLI files
 │   ├── test_architecture.py           # docs/architecture.md diagram vs. the real imports
+│   ├── test_base_map.py               # base map / profile map split, migrate-map
+│   ├── test_bundle.py                 # data bundle vs. data/
 │   ├── test_cli.py
 │   ├── test_combiner.py
 │   ├── test_config.py
 │   ├── test_examples.py
 │   ├── test_exporters.py
 │   ├── test_factcheck.py
+│   ├── test_farm_profile.py           # farm profile vs. the separate files
 │   ├── test_farm_map_editor.py        # editor JS core via node (skipped without node)
 │   ├── test_graph_builder.py
 │   ├── test_graph_quality.py
@@ -148,6 +163,7 @@ farm-production-recipe-dependency-graph/
 │   ├── test_models.py
 │   ├── test_planner.py
 │   ├── test_relocation.py
+│   ├── test_schema.py                 # schema_version, migrations
 │   ├── test_scraper.py
 │   ├── test_settings.py
 │   ├── test_templates.py
@@ -165,6 +181,17 @@ farm-production-recipe-dependency-graph/
 
 The CLIs read files and write `output/`; the functions below take objects and return results, so other front ends can reuse them.
 
+The Core API (`src/api`) is one call per tool. Each takes the unfiltered data (a `DataSet` or a data bundle object) and the inputs as models or parsed JSON, and returns `{"result": …, "files": {"<path>": "<text>"}}`. `files` holds every output file with exactly the text the CLI writes. Each tool's `cli.py` loads the inputs, calls the API and writes `files` with `write_files(out, files)`.
+
+| Function                                                                                                          | CLI        | `result`                         |
+| ----------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------- |
+| `layout_plan(data, *, player=None, level=None, farm_map=None, design=None, templates=None, output_dir=None)`      | `layout`   | the `layout.json` payload        |
+| `production_plan(data, *, player=None, level=None, planner=None)`                                                 | `plan`     | the `schedule.json` payload      |
+| `combined_plan(data, *, player=None, level=None, farm_map=None, design=None, planner=None, templates=None, …)`    | `combine`  | the `combined.json` payload      |
+| `relocation_plan(data, *, layout, farm_map=None, layout_name="layout")`                                           | `relocate` | the `relocation.json` payload    |
+
+`templates` maps a template name to a `DesignTemplate` or its JSON. `output_dir` only makes the SVG link to the map background relative to it. The building blocks below are the same as before v2.0:
+
 | Function                                                                                  | Module                       | Returns                                                         |
 | ----------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------- |
 | `load_data(data_dir, max_level=None, *, apply_data_overrides=True)`                       | `src/loaders/json_loader.py` | `DataSet` (reads `data/`)                                       |
@@ -177,4 +204,5 @@ The CLIs read files and write `output/`; the functions below take objects and re
 | `plan_relocation(layout, farm_map, dataset)`                                              | `src/relocation/relocate.py` | `RelocationPlan` from a layout dict                             |
 | `run_wizard(dataset, ask, say)`                                                           | `src/planner/wizard.py`      | `PlayerConfig` (`ask` / `say` are injected)                     |
 
-Loaders for the other inputs: `load_player_config` (`src/config.py`), `load_design_settings` / `load_planner_settings` (`src/settings.py`), `load_farm_map` (`src/layout/farm_map.py`), `load_templates` (`src/layout/templates.py`), `load_layout` (`src/relocation/relocate.py`).
+Loaders for the other inputs: `load_player_config` (`src/config.py`), `load_design_settings` / `load_planner_settings` (`src/settings.py`), `load_farm_map` / `load_base_map` and `merge_maps` (`src/layout/farm_map.py`), `load_templates` (`src/layout/templates.py`), `load_farm_profile` (`src/farm_profile.py`), `dataset_from_bundle` (`src/loaders/json_loader.py`), `load_layout` (`src/relocation/relocate.py`).
+```
