@@ -4,6 +4,13 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-06
+
+- Level recommendations: `python -m src recommend` writes the combined plan of every level (1-100) with level defaults on section `base` to `output/recommendations/` (`level_N.json`, `level_N.svg`, `index.json`, with `schema_version`); blocks that do not fit are listed in `blocks_not_placed`.
+- Static site in `web/` (Astro, TypeScript, Svelte): a home page with every level and one page per level (plan, login steps, layout); Fan Content Policy notice and data attribution in the footer; Playwright tests on mobile and desktop.
+- `./serve-web.sh`: builds the site and serves it locally in the browser (Ctrl+C stops).
+- CI: a `web` job (recommendations for three levels, type check, build, Playwright); `pages.yml` deploys the site to GitHub Pages after a green CI run on `main`.
+
 ## [2.0.1] - 2026-11-06
 
 - Map editor reads and writes the split map: `data/base_map.json` and `config/profile_map.json` open together (or a one-file map, which it splits) and save as two files identical to `migrate-map`; only a changed geometry is cropped, together with the profile map. It no longer writes the one-file map.
