@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "siteName": "Farm layout & production",
+    "description": "Farm layout in production blocks and a production plan for every player level."
+  },
+  "ui": {
+    "skip": "Skip to content",
+    "mainNav": "Main navigation",
+    "levels": "Levels",
+    "howItWorks": "How it works",
+    "usage": "Usage",
+    "menu": "Menu",
+    "language": "Magyar nyelvű oldal",
+    "theme": "Toggle dark mode",
+    "top": "Back to top"
+  },
+  "home": {
+    "title": "Farm layout and production plan for every level",
+    "intro": "For every player level: where to place the buildings in production blocks, what to do at each login and what to produce. Each recommendation is for a player who bought nothing beyond the level (level defaults, no mastery, barn and silo not set), laid out on the starting farm area.",
+    "notPlacedNote": "From about level 36 on, not every block fits on the starting farm area; the level cards mark them. Which farm plots to unlock comes in a later version.",
+    "pickerTitle": "Go to a level",
+    "allLevels": "All levels",
+    "cardBlocks": "{n} blocks",
+    "cardLogin": "login every {t}",
+    "cardNew": "New: {names}",
+    "cardNotPlaced": "{n} not placed"
+  },
+  "picker": {
+    "label": "Level",
+    "show": "Show"
+  },
+  "level": {
+    "title": "Level {n}",
+    "nav": "Level navigation",
+    "prev": "Previous level: {n}",
+    "next": "Next level: {n}",
+    "keyBlocks": "Blocks",
+    "keyBuildings": "Buildings",
+    "keyLogins": "Logins per day",
+    "plan": "Plan details",
+    "loginEvery": "Login every",
+    "loginsPerDay": "Logins per day",
+    "productionHours": "Production hours per hour",
+    "fieldsUsed": "Fields used",
+    "fieldsOf": "{used} of {owned}",
+    "trees": "Trees and bushes to plant:",
+    "external": "Bought or caught outside the plan, per day:",
+    "logins": "At each login",
+    "everyN": "1 every {n} logins",
+    "slots": "{n} slots",
+    "layout": "Farm layout",
+    "notPlaced": "{n} block(s) do not fit on the starting farm area: {names}. A recommendation of farm plots to unlock comes in a later version.",
+    "layoutAlt": "Farm layout for level {n}",
+    "zoom": "Open the image to zoom in.",
+    "blockFields": "{n} fields",
+    "notPlacedTag": "not placed",
+    "upcoming": "Coming in the next {n} levels",
+    "upcomingItem": "Level {level}: {name} +{count}",
+    "nextLevel": "Next: level {n}",
+    "nextLevelText": "What the plan and the layout look like one level later."
+  },
+  "actions": {
+    "collect": "Collect",
+    "feed": "Feed",
+    "plant": "Plant",
+    "queue": "Queue",
+    "sell_or_deliver": "Sell or deliver"
+  },
+  "whats": {
+    "harvest ready fields, trees and bushes; collect animal goods and finished machine goods": "harvest ready fields, trees and bushes; collect animal goods and finished machine goods",
+    "harvest ready fields, trees and bushes; collect animal goods, honeycomb and finished machine goods": "harvest ready fields, trees and bushes; collect animal goods, honeycomb and finished machine goods",
+    "harvest ready fields, trees and bushes; collect animal goods, honeycomb, peanuts and finished machine goods": "harvest ready fields, trees and bushes; collect animal goods, honeycomb, peanuts and finished machine goods",
+    "harvest ready fields, trees and bushes; collect animal goods, peanuts and finished machine goods": "harvest ready fields, trees and bushes; collect animal goods, peanuts and finished machine goods"
+  },
+  "units": {
+    "hours": "{n} h",
+    "minutes": "{n} min"
+  },
+  "how": {
+    "title": "How it works",
+    "intro": "The site is computed in four steps from public game data. The same steps run on your own computer with your own farm.",
+    "graphTitle": "Graph",
+    "graphText": "Locations, goods and recipes from the Hay Day Wiki become a weighted directed graph: what each building needs and where its goods go.",
+    "blocksTitle": "Blocks",
+    "blocksText": "Buildings that trade a lot of goods form a named production block around an anchor building, with its own fields for the crops it uses.",
+    "layoutTitle": "Layout",
+    "layoutText": "The blocks are packed onto the farm area, the strongest goods flows close together, and paths connect them to the barn and the silo.",
+    "planTitle": "Plan",
+    "planText": "A linear program chooses what to produce with the level's buildings, slots and fields, and turns it into actions for each login.",
+    "more": "Every tool in detail:",
+    "docs": "tool documentation"
+  },
+  "usage": {
+    "title": "Usage",
+    "intro": "The recommendations here use level defaults. For a plan of your own farm, run the tools locally (Python 3.14).",
+    "installTitle": "Install",
+    "installText": "Clone the repository and install the requirements in a virtual environment.",
+    "wizardTitle": "Your profile",
+    "wizardText": "Answer a few questions about your level, buildings and slots; the answers go into config/player.json.",
+    "mapTitle": "Your farm map",
+    "mapText": "Open tools/farm_map_editor.html in a browser and measure your farm from a screenshot. Optional: without it the starting farm area is used.",
+    "runTitle": "Run",
+    "runText": "One command makes the graph, the farm layout, the production plan and the combined plan in output/.",
+    "more": "Every command and setting:",
+    "guide": "user guide",
+    "cli": "command reference",
+    "settings": "settings"
+  },
+  "footer": {
+    "about": "Farm layout in production blocks and a production plan for every player level, computed from public game data.",
+    "linksTitle": "Links",
+    "source": "Source code",
+    "portfolio": "Portfolio",
+    "by": "Made by",
+    "author": "Tóth Dorina Ildikó",
+    "legalTitle": "Notices",
+    "fanPolicy": "This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy:",
+    "dataBefore": "Game data from the",
+    "wiki": "Hay Day Wiki",
+    "dataMiddle": ", licensed under",
+    "dataAfter": "; the measured values and estimates added to it are released under the same licence. Code:",
+    "codeLicence": "MIT License",
+    "game": "Game {v}",
+    "planner": "Planner {v}"
+  }
+}

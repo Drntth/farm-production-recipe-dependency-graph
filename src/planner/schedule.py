@@ -130,16 +130,23 @@ def recommendations(
     return result
 
 
+# every "action" of actions(); the site translates them (web/content/*.json)
+ACTIONS = ("collect", "feed", "plant", "queue", "sell_or_deliver")
+
+
+def collect_what(feeder_goods: list[str]) -> str:
+    """The "what" of the collect step; `feeder_goods` in FEEDER_BUSHES order."""
+    goods = ["animal goods", *feeder_goods]
+    return (
+        "harvest ready fields, trees and bushes; collect "
+        f"{', '.join(goods)} and finished machine goods"
+    )
+
+
 def actions(plan: ProductionPlan, dataset: DataSet, capacity: CapacityModel) -> list:
     t = plan.interval_hours
-    goods = ["animal goods", *(g for g in FEEDER_BUSHES if g in capacity.hives)]
-    steps: list[dict] = [
-        {
-            "action": "collect",
-            "what": "harvest ready fields, trees and bushes; collect "
-            f"{', '.join(goods)} and finished machine goods",
-        }
-    ]
+    feeder = [g for g in FEEDER_BUSHES if g in capacity.hives]
+    steps: list[dict] = [{"action": "collect", "what": collect_what(feeder)}]
     animal_kinds = {LineKind.ANIMAL, LineKind.SLOT_ANIMAL}
     order = machine_order(plan, dataset)
     for loc_id in order:

@@ -14,11 +14,17 @@
   },
   "dependencies": {
     "@astrojs/svelte": "9.1.1",
+    "@fontsource-variable/fredoka": "5.3.0",
+    "@fontsource-variable/nunito": "5.3.0",
+    "@tailwindcss/vite": "4.3.3",
     "astro": "7.4.2",
-    "svelte": "5.57.2"
+    "astro-icon": "1.2.0",
+    "svelte": "5.57.2",
+    "tailwindcss": "4.3.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@iconify-json/lucide": "1.2.147",
     "@playwright/test": "1.64.1",
     "@types/node": "24.19.2",
     "typescript": "6.0.3"

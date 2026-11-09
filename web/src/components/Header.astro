@@ -1,0 +1,123 @@
+---
+// Sticky header after the portfolio pattern: barn logo and site name, nav pill
+// (Levels, How it works, Usage), language switch (same page in the other
+// language), dark mode toggle; below lg a hamburger opens a card grid.
+import { Icon } from "astro-icon/components";
+import BarnLogo from "./BarnLogo.astro";
+import { content, localePath, switchPath, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = content(lang);
+const other: Lang = lang === "en" ? "hu" : "en";
+const home = localePath(lang, "/");
+const path = Astro.url.pathname;
+const links = [
+  { href: home, label: c.ui.levels, icon: "lucide:sprout", current: path === home || path.startsWith(localePath(lang, "levels/")) },
+  { href: localePath(lang, "how-it-works/"), label: c.ui.howItWorks, icon: "lucide:workflow" },
+  { href: localePath(lang, "usage/"), label: c.ui.usage, icon: "lucide:terminal" },
+].map((l) => ({ ...l, current: l.current ?? path === l.href }));
+---
+
+<header class="sticky top-0 z-40 border-b border-line/70 bg-surface/85 backdrop-blur">
+  <nav class="container-page flex items-center justify-between gap-3 py-3" aria-label={c.ui.mainNav}>
+    <a href={home} class="flex min-w-0 items-center gap-2 font-display text-lg font-semibold">
+      <BarnLogo class="size-8 shrink-0" />
+      <span class="truncate">{c.meta.siteName}</span>
+    </a>
+
+    <ul class="nav-pill hidden lg:flex">
+      {
+        links.map((l) => (
+          <li>
+            <a href={l.href} class="nav-link" aria-current={l.current ? "page" : undefined}>
+              <Icon name={l.icon} class="size-4" aria-hidden="true" />
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <a
+        href={switchPath(path, other)}
+        hreflang={other}
+        lang={other}
+        data-lang-switch
+        aria-label={c.ui.language}
+        title={c.ui.language}
+        class="icon-btn text-xs font-semibold uppercase">{other}</a
+      >
+      <button id="theme-toggle" type="button" class="icon-btn" aria-label={c.ui.theme} title={c.ui.theme}>
+        <Icon name="lucide:moon" class="size-4 dark:hidden" aria-hidden="true" />
+        <Icon name="lucide:sun" class="hidden size-4 dark:block" aria-hidden="true" />
+      </button>
+      <button
+        id="menu-toggle"
+        type="button"
+        class="icon-btn lg:hidden"
+        aria-label={c.ui.menu}
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <Icon name="lucide:menu" class="size-4" data-open aria-hidden="true" />
+        <Icon name="lucide:x" class="hidden size-4" data-close aria-hidden="true" />
+      </button>
+    </div>
+  </nav>
+
+  <div id="mobile-menu" class="hidden border-t border-line/70 lg:hidden">
+    <ul class="container-page grid grid-cols-2 gap-2 py-4 sm:grid-cols-3">
+      {
+        links.map((l) => (
+          <li>
+            <a href={l.href} class="nav-card" aria-current={l.current ? "page" : undefined}>
+              <Icon name={l.icon} class="size-4 shrink-0 text-accent" aria-hidden="true" />
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<script>
+  document.getElementById("theme-toggle")?.addEventListener("click", () => {
+    const dark = document.documentElement.classList.toggle("dark");
+    try {
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    } catch {
+      // private mode: the choice lasts for this page only
+    }
+  });
+  // keep the section (#layout, …) when switching the language
+  document.querySelectorAll<HTMLAnchorElement>("a[data-lang-switch]").forEach((a) =>
+    a.addEventListener("click", () => {
+      a.hash = location.hash;
+    }),
+  );
+
+  // hamburger: opens the card grid; a link click or Escape closes it
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      menu.classList.toggle("hidden", !open);
+      toggle.querySelector("[data-open]")?.classList.toggle("hidden", open);
+      toggle.querySelector("[data-close]")?.classList.toggle("hidden", !open);
+    };
+    toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
+    menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>

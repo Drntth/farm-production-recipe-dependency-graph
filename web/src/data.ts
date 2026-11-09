@@ -48,6 +48,7 @@ export interface LoginAction {
   action: string;
   what?: string;
   location_id?: string;
+  slots?: number;
   items?: LoginItem[];
 }
 
@@ -131,6 +132,20 @@ export function url(path: string): string {
   return `${base}/${path.replace(/^\//, "")}`;
 }
 
-export function hours(value: number): string {
-  return value < 1 ? `${Math.round(value * 60)} min` : `${Number(value.toFixed(2))} h`;
+/** Buildings first unlocked since the previous listed level: its look-ahead (kind `new`). */
+export function newBuildings(levels: number[]): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  levels.forEach((level, i) => {
+    if (i === 0) return;
+    // listed levels may skip some (--levels 1,20,40): everything unlocked since the previous one
+    const prev = levels[i - 1];
+    const upcoming = loadLevel(prev).combined.expansion.upcoming;
+    out.set(
+      level,
+      upcoming
+        .filter((u) => u.kind === "new" && u.unlock_level > prev && u.unlock_level <= level)
+        .map((u) => u.location_id),
+    );
+  });
+  return out;
 }

@@ -1,0 +1,17 @@
+---
+// Barn silhouette logo; the same drawing as public/favicon.svg, coloured by the
+// theme tokens so it follows dark mode.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg viewBox="0 0 32 32" class={className} aria-hidden="true" focusable="false">
+  <path d="M4 15 16 6l12 9v13H4z" fill="var(--accent-2)"></path>
+  <path d="M2 14.5 16 3.5l14 11-1.6 1.9L16 7 3.6 16.4z" fill="var(--soil)"></path>
+  <rect x="14" y="10.5" width="4" height="3" rx=".5" fill="var(--surface)"></rect>
+  <rect x="10.5" y="17.5" width="11" height="10.5" fill="var(--surface)"></rect>
+  <path d="M11.5 18.5l9 9m0-9-9 9" stroke="var(--accent-2)" stroke-width="1.6" stroke-linecap="round"></path>
+  <rect x="1" y="28" width="30" height="3" rx="1.5" fill="var(--accent)"></rect>
+</svg>

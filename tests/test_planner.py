@@ -31,6 +31,7 @@ from src.planner import (
 from src.planner.cli import main
 from src.planner.quantities import login_cycle_hours, plan_production
 from src.planner.schedule import (
+    ACTIONS,
     build_schedule,
     compare_intervals,
     schedule_to_markdown,
@@ -599,6 +600,7 @@ def test_schedule_actions_and_recommendations() -> None:
     steps = schedule["actions_per_login"]
     kinds = [s["action"] for s in steps]
     assert kinds[0] == "collect" and kinds[-1] == "sell_or_deliver"
+    assert set(kinds) <= set(ACTIONS)  # the site translates only these
     assert kinds.index("feed") < kinds.index("plant") < kinds.index("queue")
     queued = [s["location_id"] for s in steps if s["action"] == "queue"]
     assert queued.index("feed_mill") < queued.index("bakery")  # upstream first

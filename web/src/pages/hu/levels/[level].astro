@@ -1,0 +1,10 @@
+---
+import { levelPaths, type LevelProps } from "../../../levelPaths";
+import Level from "../../../views/Level.astro";
+
+export const getStaticPaths = levelPaths;
+type Props = LevelProps;
+const { level, levels, prev, next } = Astro.props;
+---
+
+<Level lang="hu" level={level} levels={levels} prev={prev} next={next} />

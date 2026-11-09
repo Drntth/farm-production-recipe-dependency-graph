@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "siteName": "Farmelrendezés és termelés",
+    "description": "Farmelrendezés termelési blokkokban és termelési terv minden játékosszintre."
+  },
+  "ui": {
+    "skip": "Ugrás a tartalomra",
+    "mainNav": "Fő navigáció",
+    "levels": "Szintek",
+    "howItWorks": "Hogyan működik",
+    "usage": "Használat",
+    "menu": "Menü",
+    "language": "English version",
+    "theme": "Sötét mód be- és kikapcsolása",
+    "top": "Vissza a tetejére"
+  },
+  "home": {
+    "title": "Farmelrendezés és termelési terv minden szintre",
+    "intro": "Minden játékosszintre: hová kerüljenek az épületek termelési blokkokban, mi a teendő belépésenként, és mit érdemes gyártani. Az ajánlás olyan játékosnak szól, aki a szinten felül semmit nem vett (szint szerinti alapértékek, mastery nélkül, beállítatlan pajta és siló), és a kezdő farmterületre van elrendezve.",
+    "notPlacedNote": "Nagyjából a 36. szinttől nem fér el minden blokk a kezdő farmterületen; a szintkártyák jelölik ezeket. Hogy mely telkeket érdemes megnyitni, az egy későbbi verzióban jön.",
+    "pickerTitle": "Ugrás egy szintre",
+    "allLevels": "Minden szint",
+    "cardBlocks": "{n} blokk",
+    "cardLogin": "belépési köz: {t}",
+    "cardNew": "Új: {names}",
+    "cardNotPlaced": "{n} nem fért el"
+  },
+  "picker": {
+    "label": "Szint",
+    "show": "Mutasd"
+  },
+  "level": {
+    "title": "{n}. szint",
+    "nav": "Lapozás a szintek között",
+    "prev": "Előző szint: {n}",
+    "next": "Következő szint: {n}",
+    "keyBlocks": "Blokkok",
+    "keyBuildings": "Épületek",
+    "keyLogins": "Belépés naponta",
+    "plan": "A terv részletei",
+    "loginEvery": "Belépés",
+    "loginsPerDay": "Belépés naponta",
+    "productionHours": "Gyártási óra óránként",
+    "fieldsUsed": "Használt mezők",
+    "fieldsOf": "{used} / {owned}",
+    "trees": "Ültetendő fák és bokrok:",
+    "external": "A terven kívül vásárolt vagy fogott áru naponta:",
+    "logins": "Teendők belépésenként",
+    "everyN": "1 db {n} belépésenként",
+    "slots": "{n} hely",
+    "layout": "Farmelrendezés",
+    "notPlaced": "{n} blokk nem fér el a kezdő farmterületen: {names}. A megnyitandó telkek ajánlása egy későbbi verzióban jön.",
+    "layoutAlt": "A {n}. szint farmelrendezése",
+    "zoom": "Nagyításhoz nyisd meg a képet.",
+    "blockFields": "{n} mező",
+    "notPlacedTag": "nem fért el",
+    "upcoming": "A következő {n} szinten jön",
+    "upcomingItem": "{level}. szint: {name} +{count}",
+    "nextLevel": "Következő: {n}. szint",
+    "nextLevelText": "Így néz ki a terv és az elrendezés egy szinttel később."
+  },
+  "actions": {
+    "collect": "Begyűjtés",
+    "feed": "Etetés",
+    "plant": "Ültetés",
+    "queue": "Gyártásba adás",
+    "sell_or_deliver": "Eladás vagy szállítás"
+  },
+  "whats": {
+    "harvest ready fields, trees and bushes; collect animal goods and finished machine goods": "a kész mezők, fák és bokrok learatása; az állati termékek és a kész gépi áruk begyűjtése",
+    "harvest ready fields, trees and bushes; collect animal goods, honeycomb and finished machine goods": "a kész mezők, fák és bokrok learatása; az állati termékek, a lép és a kész gépi áruk begyűjtése",
+    "harvest ready fields, trees and bushes; collect animal goods, honeycomb, peanuts and finished machine goods": "a kész mezők, fák és bokrok learatása; az állati termékek, a lép, a mogyoró és a kész gépi áruk begyűjtése",
+    "harvest ready fields, trees and bushes; collect animal goods, peanuts and finished machine goods": "a kész mezők, fák és bokrok learatása; az állati termékek, a mogyoró és a kész gépi áruk begyűjtése"
+  },
+  "units": {
+    "hours": "{n} óra",
+    "minutes": "{n} perc"
+  },
+  "how": {
+    "title": "Hogyan működik",
+    "intro": "Az oldal négy lépésben készül nyilvános játékadatokból. Ugyanezek a lépések a saját gépeden, a saját farmoddal is lefutnak.",
+    "graphTitle": "Gráf",
+    "graphText": "A Hay Day Wiki helyszíneiből, áruiból és receptjeiből súlyozott irányított gráf lesz: mire van szüksége egy épületnek, és hová mennek az áruk.",
+    "blocksTitle": "Blokkok",
+    "blocksText": "A sok árut cserélő épületek egy horgonyépület köré szervezett, névvel ellátott termelési blokkot alkotnak, saját mezőkkel a felhasznált növényekhez.",
+    "layoutTitle": "Elrendezés",
+    "layoutText": "A blokkok a farmterületre kerülnek, a legerősebb áruforgalmúak egymás mellé, és utak kötik össze őket a pajtával és a silóval.",
+    "planTitle": "Terv",
+    "planText": "Egy lineáris program választja ki, mit gyárts a szint épületeivel, helyeivel és mezőivel, és belépésenkénti teendőkké alakítja.",
+    "more": "Minden eszköz részletesen (angolul):",
+    "docs": "eszközdokumentáció"
+  },
+  "usage": {
+    "title": "Használat",
+    "intro": "Az itteni ajánlások szint szerinti alapértékekkel számolnak. A saját farmod tervéhez futtasd az eszközöket a gépeden (Python 3.14).",
+    "installTitle": "Telepítés",
+    "installText": "Klónozd a repót, és telepítsd a függőségeket egy virtuális környezetbe.",
+    "wizardTitle": "A profilod",
+    "wizardText": "Válaszolj néhány kérdésre a szintedről, az épületeidről és a helyekről; a válaszok a config/player.json fájlba kerülnek.",
+    "mapTitle": "A farmtérképed",
+    "mapText": "Nyisd meg a tools/farm_map_editor.html fájlt egy böngészőben, és mérd le a farmodat egy képernyőképről. Nem kötelező: nélküle a kezdő farmterülettel számol.",
+    "runTitle": "Futtatás",
+    "runText": "Egy parancs elkészíti a gráfot, a farmelrendezést, a termelési tervet és az összevont tervet az output/ mappába.",
+    "more": "Minden parancs és beállítás (angolul):",
+    "guide": "felhasználói útmutató",
+    "cli": "parancsok",
+    "settings": "beállítások"
+  },
+  "footer": {
+    "about": "Farmelrendezés termelési blokkokban és termelési terv minden játékosszintre, nyilvános játékadatokból számolva.",
+    "linksTitle": "Linkek",
+    "source": "Forráskód",
+    "portfolio": "Portfólió",
+    "by": "Készítette:",
+    "author": "Tóth Dorina Ildikó",
+    "legalTitle": "Közlemények",
+    "fanPolicy": "This material is unofficial and is not endorsed by Supercell. For more information see Supercell's Fan Content Policy:",
+    "dataBefore": "A játékadatok forrása a",
+    "wiki": "Hay Day Wiki",
+    "dataMiddle": ", licenc:",
+    "dataAfter": "; a hozzáadott mért értékek és becslések ugyanezen licenc alatt érhetők el. A kód licence:",
+    "codeLicence": "MIT License",
+    "game": "Játék {v}",
+    "planner": "Tervező {v}"
+  }
+}

@@ -1,0 +1,62 @@
+---
+// "Usage": run the tools locally for an own farm, one screen; details stay in the repository docs.
+import { Icon } from "astro-icon/components";
+import Base from "../layouts/Base.astro";
+import { content, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = content(lang);
+const t = c.usage;
+const REPO = "https://github.com/Drntth/farm-production-recipe-dependency-graph";
+const DOCS = `${REPO}/blob/main/docs`;
+const steps = [
+  {
+    icon: "lucide:download",
+    title: t.installTitle,
+    text: t.installText,
+    code: `git clone ${REPO}.git\ncd farm-production-recipe-dependency-graph\npython -m venv venv && source venv/bin/activate\npip install -r requirements.txt`,
+  },
+  { icon: "lucide:user-round", title: t.wizardTitle, text: t.wizardText, code: "python -m src wizard" },
+  { icon: "lucide:map", title: t.mapTitle, text: t.mapText, code: "xdg-open tools/farm_map_editor.html" },
+  { icon: "lucide:play", title: t.runTitle, text: t.runText, code: "python -m src all" },
+];
+const links = [
+  { href: `${DOCS}/user-guide.md`, label: t.guide },
+  { href: `${DOCS}/cli.md`, label: t.cli },
+  { href: `${DOCS}/settings.md`, label: t.settings },
+];
+---
+
+<Base lang={lang} title={t.title}>
+  <h1 class="text-3xl sm:text-4xl"><span class="text-gradient">{t.title}</span></h1>
+  <p class="mt-4">{t.intro}</p>
+  <ol class="mt-8 grid gap-4 md:grid-cols-2">
+    {
+      steps.map((s, i) => (
+        <li class="card min-w-0 p-5">
+          <div class="flex items-center gap-3">
+            <span class="step-no">{i + 1}</span>
+            <Icon name={s.icon} class="size-5 text-accent" aria-hidden="true" />
+            <h2 class="text-xl">{s.title}</h2>
+          </div>
+          <p class="mt-3 text-sm">{s.text}</p>
+          <pre class="code mt-3"><code>{s.code}</code></pre>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="muted mt-8 text-sm">
+    {t.more}
+    {
+      links.map((l, i) => (
+        <>
+          {i > 0 && ", "}
+          <a href={l.href} class="text-accent underline underline-offset-2">{l.label}</a>
+        </>
+      ))
+    }
+  </p>
+</Base>

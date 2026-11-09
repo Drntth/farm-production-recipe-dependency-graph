@@ -142,8 +142,9 @@ farm-production-recipe-dependency-graph/
 │   │   └── writer.py
 │   └── main.py
 ├── web/                               # static site (Astro, TypeScript, Svelte): docs/tools/recommend.md
-│   ├── src/                           # pages, components, data.ts (reads output/recommendations/)
-│   └── tests/site.spec.ts             # Playwright, mobile + desktop
+│   ├── content/                       # UI strings: en.json, hu.json (same keys)
+│   ├── src/                           # views/, pages/ (+ pages/hu/), components/, styles/, data.ts (reads output/recommendations/), i18n.ts
+│   └── tests/site.spec.ts             # Playwright, mobile + desktop, en + hu
 ├── tools/
 │   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
@@ -173,6 +174,7 @@ farm-production-recipe-dependency-graph/
 │   ├── test_scraper.py
 │   ├── test_settings.py
 │   ├── test_templates.py
+│   ├── test_web_content.py            # web/content/<lang>.json: same keys and placeholders
 │   └── test_wizard.py
 ├── AGENTS.md                          # instructions for coding agents
 ├── CHANGELOG.md                       # one entry per version
@@ -182,7 +184,7 @@ farm-production-recipe-dependency-graph/
 ├── pyproject.toml                     # project metadata, version, ruff settings (not a package)
 ├── requirements.txt
 ├── requirements-dev.txt               # pytest, ruff
-└── serve-web.sh                       # build the web site and serve it locally (Ctrl+C stops)
+└── serve-web.sh                       # build the web site and serve it locally (--host: local network too; Ctrl+C stops)
 
 ## Entry points without file IO
 

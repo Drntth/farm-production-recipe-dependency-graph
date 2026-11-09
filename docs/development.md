@@ -52,6 +52,7 @@ The static site in `web/` (Astro, TypeScript, Svelte; [tools/recommend.md](tools
 ```bash
 ./serve-web.sh                             # reuse output/recommendations/ (else levels 1-100), build, serve, open the browser; Ctrl+C stops
 ./serve-web.sh 1,20,40                     # recompute these levels first
+./serve-web.sh --host                      # also reachable from the local network (a phone on the same Wi-Fi); prints the address
 ./serve-web.sh stop                        # stop a server left running
 ```
 

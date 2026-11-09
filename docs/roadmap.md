@@ -2,7 +2,7 @@
 
 Milestones with their items. Changes per released version: [CHANGELOG.md](../CHANGELOG.md).
 
-**Current status:** v2.0 (Core API and data model) is done (359 tests passing, CI on every push): the tools run through entry points without file IO, the farm map is split into the base map and a profile map, a farm profile holds one farm in one file, the input files carry `schema_version`, and `python -m src bundle` writes the data bundle. v2.0.1: the map editor reads and writes the base map and the profile map. v2.1 (static site and level recommendations) is done: `python -m src recommend` precomputes levels 1-100 and the site in `web/` shows them (377 tests). Next: v2.2, see [v2-design.md](v2-design.md).  
+**Current status:** v2.2 is done, not released yet (382 tests passing, CI on every push): the site follows the portfolio design with its own summer farm palette and barn logo, has English and Hungarian pages, a menu (Levels, How it works, Usage) and card grids on the home and level pages. v2.0 (Core API and data model): the tools run through entry points without file IO, the farm map is split into the base map and a profile map, a farm profile holds one farm in one file, the input files carry `schema_version`, and `python -m src bundle` writes the data bundle. v2.0.1: the map editor reads and writes the base map and the profile map. v2.1 (static site and level recommendations) is done: `python -m src recommend` precomputes levels 1-100 and the site in `web/` shows them (377 tests). Next: release v2.2, then v2.3 (site structure and farm view: layout and plan on separate pages, interactive farm view), then v2.4 (farm profiles), see [v2-design.md](v2-design.md).  
 Current data set (every wiki level, up to 126): 86 locations (19 tree / bush kinds incl. the nectar and peanut bush, the squirrel house), 418 resources, 354 recipes, 228 fields over 150 levels, 80 building / shelter copies. At level 56: 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
 The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
@@ -10,7 +10,7 @@ The design layer adds paths and a decoration band (126 path tiles on the measure
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb and peanut rates, footprints above level 56, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
-Next step: v2.2. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
+Next step: release v2.2, then v2.3. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
 
 ## v0.3 - Graph and block analysis (done)
 
@@ -179,9 +179,37 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 - [x] Fan Content Policy notice and data attribution in the footer
 - Done: every level page loads without Pyodide; Playwright passes on a mobile and a desktop viewport
 
-### v2.2 - Farm profiles and the plan in the browser
+### v2.2 - Site design and two languages
 
-- [ ] Site design after the portfolio site drntth.github.io (or very close to it): plan first what is taken over (colours, fonts, layout, header and footer, dark mode), then apply it to the existing pages
+- [x] Design after the portfolio site drntth.github.io: same stack (Tailwind CSS v4, astro-icon, self-hosted fonts), same tokens and shared classes; a game-like palette (barn red and wheat yellow for headings, buttons and links, a sky blue → grass green background, wood, soil and water as extra tones) and fonts (Fredoka for headings, Nunito for text; Hungarian headings in Nunito, as Fredoka has no ő / ű)
+- [x] Header (sticky, language switch, dark mode toggle) and footer (Fan Content Policy notice, data licence, link to the portfolio site and the source) after the portfolio pattern; static background glows
+- [x] Two languages: English at the root, Hungarian under `/hu/`; every UI string in `web/content/en.json` and `hu.json` with the same keys; game item names stay English
+- [x] The existing pages (home, level page, level picker) in the new design and in both languages
+- [x] Palette "summer farm", sampled from a farm screenshot and the Hay Day wiki theme: leaf green as the main colour (buttons, links, headings), barn red as the second, wheat, road (terracotta) and water (teal) as extra tones; own, slightly shifted values for light and dark, every text colour at least 4.5:1
+- [x] Name and description cover both tools: "Farm layout & production" (hu "Farmelrendezés és termelés"), the layout first
+- [x] Own SVG logo (barn silhouette) in the header and as favicon / touch icon
+- [x] Header menu: Levels, How it works, Usage; the source link only in the footer; a hamburger menu with a card grid on small screens (portfolio pattern)
+- [x] Home: the level picker and the open button right of the title, a full-width intro, then a card grid of the levels instead of the table
+- [x] Two short new pages in both languages: "How it works" (graph → blocks → layout → plan as four step cards) and "Usage" (own farm: install, wizard, map editor, `python -m src all`, links to the docs)
+- [x] Level page: a page header with key figures and a compact level switch (‹ N ▾ ›); a "next level" card at the end; sections in the order layout → login actions → plan details → upcoming unlocks
+- [x] Layout card: the farm image at full width, the blocks below it as a card grid (name, buildings as chips, fields and crops; the anchor is not in the recommendation JSON yet) instead of the table
+- [x] Login actions as step cards in a grid (one card per action type, icon, number, items as chips) instead of two text columns
+- [x] Game and planner version as badges in the bottom row of the footer on every page
+- Done: Playwright passes on mobile and desktop in both languages and both themes, with no horizontal scroll
+
+### v2.3 - Site structure and farm view
+
+- [ ] Layout and plan never on one page: the level page `/levels/N/` is the farm layout (the primary tool), `/levels/N/plan/` the production plan (secondary); a switch between them on both, in both languages
+- [ ] The layout page shows a short plan summary (2-3 key figures) with a link to the plan page
+- [ ] Interactive SVG farm view in the page instead of the static image and the "open the image to zoom" hint: pan and zoom with mouse and touch, clickable blocks; area outside the buildable zones faint or hidden instead of red
+- [ ] Block interactions: click a block (or its legend entry) to highlight it and grey out the others; zoom to a block; a detail panel for the selected block (buildings, copies, fields); hovering a block table row highlights the block on the map and the other way round
+- [ ] Shorter plan page: a short summary and key figures on top, the login actions grouped by building and collapsed by default
+- [ ] Realistic login schedule: the player sets a daily active window and the number of logins (planner setting); the default is a few logins a day with long production overnight, not a login every hour around the clock
+- [ ] From the portfolio site: reveal animations on scroll (respecting `prefers-reduced-motion`); the level card grid and the hamburger menu moved to v2.2
+- Done: no page shows layout and plan together; block highlight, zoom and the detail panel work with mouse, touch and keyboard; Playwright passes on mobile and desktop in both languages
+
+### v2.4 - Farm profiles and the plan in the browser
+
 - [ ] Interactive, dynamic farm profile form: fields follow the level and start from the level defaults (`null` = level default)
 - [ ] At least two farm profiles side by side in IndexedDB; JSON export / import; `navigator.storage.persist()`
 - [ ] Pyodide in a module Web Worker, loaded on the first own calculation; plan and login schedule for the active farm profile
@@ -189,31 +217,31 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 - [ ] Mobile measurement on a real phone (download, start, run)
 - Done: two farm profiles give their own plans; an exported profile imports unchanged
 
-### v2.3 - Layout view
+### v2.5 - Layout view
 
-- [ ] Layout and combined plan of a farm profile on its base map and profile map (SVG): blocks, paths, block cards, weighted flow distance
+- [ ] Layout and combined plan of a farm profile on its base map and profile map, in the v2.3 interactive farm view: blocks, paths, block cards, weighted flow distance
 - Done: the web view matches `combined.svg` for the example profile
 
-### v2.4 - Map editor, part 1
+### v2.6 - Map editor, part 1
 
 - [ ] The map editor core (`CORE-START` / `CORE-END`) as a module in the web app, tested with Vitest
 - [ ] Profile map editing on the web: unlocked plots, `design` zones, current farm; the base map is still measured in the old HTML editor
 - Done: a profile map edited on the web gives the same layout as the same map from the old editor
 
-### v2.5 - Plot recommendation
+### v2.7 - Plot recommendation
 
 - [ ] Per-plot unlock cost (supplies, permits) scraped from the wiki into `data/`; empty where the wiki lists none (`special_2018`)
 - [ ] Smallest connected set of plots, unlockable in game order, that fits the blocks of a level or farm profile; fewer plots win ties, then the lower unlock cost
 - [ ] Level recommendations laid out on the recommended plots; the farm profile view lists the plots worth unlocking
 - Done: tests on small maps check connectivity, the unlock rule and minimality
 
-### v2.6 - Interactive layout editor
+### v2.8 - Interactive layout editor
 
 - [ ] Free drag of blocks and items with mouse and touch
 - [ ] "Check" button: overlaps, path network and weighted flow distance from the core
 - Done: a dragged layout survives export / import; "Check" matches the CLI on the same layout
 
-### v2.7 - Relocation, templates, offline
+### v2.9 - Relocation, templates, offline
 
 - [ ] Relocation plan and design templates on the web
 - [ ] PWA: offline use, Pyodide files cached by a Service Worker
@@ -227,7 +255,7 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v3.0 - Public, no login
 
-- [ ] Hungarian UI, legal pages (Fan Content Policy, CC BY-SA, privacy), performance and accessibility
+- [ ] Legal pages (Fan Content Policy, CC BY-SA, privacy), performance and accessibility
 - [ ] Moving farm profiles between devices: JSON file / QR export; a Cloudflare Worker + D1 with client-side encryption only if needed
 
 ### v4.0 - Optional login
@@ -236,6 +264,7 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### Ideas without a version
 
+- Hungarian names of game items: a hand-maintained `id → name` table with the English name as the fallback
 - Optional live-order import (still secondary to the static capacity-driven core)
 - Image recognition in the map editor: find the grid and the buildings on a screenshot of a design, the player corrects the result
 

@@ -1,0 +1,42 @@
+---
+// "How it works": the four steps from game data to a level recommendation, one screen.
+import { Icon } from "astro-icon/components";
+import Base from "../layouts/Base.astro";
+import { content, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = content(lang);
+const t = c.how;
+const DOCS = "https://github.com/Drntth/farm-production-recipe-dependency-graph/tree/main/docs/tools";
+const steps = [
+  { icon: "lucide:network", title: t.graphTitle, text: t.graphText },
+  { icon: "lucide:blocks", title: t.blocksTitle, text: t.blocksText },
+  { icon: "lucide:layout-grid", title: t.layoutTitle, text: t.layoutText },
+  { icon: "lucide:list-checks", title: t.planTitle, text: t.planText },
+];
+---
+
+<Base lang={lang} title={t.title}>
+  <h1 class="text-3xl sm:text-4xl"><span class="text-gradient">{t.title}</span></h1>
+  <p class="mt-4">{t.intro}</p>
+  <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {
+      steps.map((s, i) => (
+        <li class="card p-5">
+          <div class="flex items-center gap-3">
+            <span class="step-no">{i + 1}</span>
+            <Icon name={s.icon} class="size-6 text-accent" aria-hidden="true" />
+          </div>
+          <h2 class="mt-4 text-xl">{s.title}</h2>
+          <p class="mt-2 text-sm">{s.text}</p>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="muted mt-8 text-sm">
+    {t.more} <a href={DOCS} class="text-accent underline underline-offset-2">{t.docs}</a>
+  </p>
+</Base>

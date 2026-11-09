@@ -1,122 +1,57 @@
 ---
+// Page frame: head (title, description, hreflang), theme before first paint,
+// background, header, main, footer. The pattern of the portfolio site.
+import "../styles/global.css";
+import "@fontsource-variable/fredoka";
+import "@fontsource-variable/nunito";
 import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
 import { url } from "../data";
+import { content, LANGS, switchPath, type Lang } from "../i18n";
 
 interface Props {
-  title: string;
+  lang: Lang;
+  title?: string;
   description?: string;
 }
-const { title, description = "Production plan, login schedule and farm layout per player level." } = Astro.props;
+const { lang, title, description } = Astro.props;
+const c = content(lang);
+const pageTitle = title ? `${title} - ${c.meta.siteName}` : c.meta.siteName;
+const alternate = (l: Lang) => new URL(switchPath(Astro.url.pathname, l), Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+    <meta name="description" content={description ?? c.meta.description} />
+    <meta name="theme-color" content="#3b7310" />
+    <title>{pageTitle}</title>
+    <link rel="icon" href={url("favicon.svg")} type="image/svg+xml" />
+    <link rel="icon" href={url("favicon-32.png")} type="image/png" sizes="32x32" />
+    <link rel="icon" href={url("favicon-192.png")} type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href={url("apple-touch-icon.png")} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={alternate(l)} />)}
+    <link rel="alternate" hreflang="x-default" href={alternate("en")} />
+    <script is:inline>
+      // stored choice first, else the system setting; before paint, so no flash
+      let stored = null;
+      try {
+        stored = localStorage.getItem("theme");
+      } catch {}
+      const dark = stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle("dark", dark);
+    </script>
   </head>
-  <body>
-    <header class="site-header">
-      <a href={url("/")} class="home">Farm production planner</a>
-    </header>
-    <main>
+  <body class="flex min-h-screen flex-col antialiased">
+    <a href="#main" class="skip-link">{c.ui.skip}</a>
+    <div class="bg-glows" aria-hidden="true"></div>
+    <Header lang={lang} />
+    <main id="main" class="container-page flex-1 py-8 sm:py-12">
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
   </body>
 </html>
-
-<style is:global>
-  :root {
-    color-scheme: light dark;
-    --bg: #fafaf7;
-    --fg: #1f2328;
-    --muted: #59636e;
-    --line: #d0d7de;
-    --accent: #2f6f3e;
-    --warn-bg: #fff4d6;
-    --warn-fg: #6b4b00;
-    font-family: system-ui, sans-serif;
-    line-height: 1.5;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #15181c;
-      --fg: #e6e8eb;
-      --muted: #9aa4af;
-      --line: #343b44;
-      --accent: #7cc48a;
-      --warn-bg: #3a2f10;
-      --warn-fg: #f2d48a;
-    }
-  }
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--fg);
-  }
-  main,
-  .site-header,
-  .site-footer {
-    max-width: 64rem;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
-  .site-header {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
-  }
-  .home {
-    font-weight: 600;
-    color: var(--fg);
-    text-decoration: none;
-  }
-  a {
-    color: var(--accent);
-  }
-  .site-footer {
-    margin-top: 48px;
-    padding-top: 16px;
-    padding-bottom: 24px;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-  .site-footer a {
-    overflow-wrap: anywhere;
-  }
-  .table-wrap {
-    overflow-x: auto;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  th,
-  td {
-    text-align: left;
-    padding: 4px 8px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: top;
-  }
-  td.num,
-  th.num {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-  .warning {
-    background: var(--warn-bg);
-    color: var(--warn-fg);
-    padding: 8px 12px;
-    border-radius: 6px;
-  }
-  .muted {
-    color: var(--muted);
-  }
-</style>

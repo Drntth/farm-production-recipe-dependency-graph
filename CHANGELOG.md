@@ -4,6 +4,13 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Site design after the portfolio site: Tailwind CSS v4, astro-icon, self-hosted Fredoka and Nunito; a sky blue → grass green background; sticky header with a language switch and a dark mode toggle, footer with a link to the portfolio site; wide screens use the full width (90rem container, justified text).
+- Design fixes: "summer farm" palette (leaf green, barn red, gold), name "Farm layout & production" (hu "Farmelrendezés és termelés"), barn logo and favicon; menu Levels, How it works, Usage with a hamburger card grid on small screens; level cards on the home page; level pages with key figures, a ‹ N › switch, block cards, login step cards and a next-level card; game and planner version as footer badges.
+- New pages "How it works" and "Usage" in both languages.
+- Two languages: English at the root, Hungarian under `/hu/` (UI strings in `web/content/<lang>.json`; game item names stay English).
+- `./serve-web.sh --host`: the site is reachable from the local network too (a phone on the same Wi-Fi).
+- Playwright starts `astro preview` in the foreground under a coding agent too.
+
 ## [2.1.0] - 2026-11-06
 
 - Level recommendations: `python -m src recommend` writes the combined plan of every level (1-100) with level defaults on section `base` to `output/recommendations/` (`level_N.json`, `level_N.svg`, `index.json`, with `schema_version`); blocks that do not fit are listed in `blocks_not_placed`.

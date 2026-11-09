@@ -1,16 +1,97 @@
 ---
-// Legal notices on every page: Fan Content Policy, data and code licences.
+// Footer after the portfolio pattern: about, links (site pages, source, portfolio),
+// legal notices on every page: Fan Content Policy, data and code licences;
+// game and planner version badges in the bottom row.
+import { Icon } from "astro-icon/components";
+import BarnLogo from "./BarnLogo.astro";
+import { loadIndex } from "../data";
+import { content, fill, localePath, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = content(lang);
+const f = c.footer;
+const FAN_POLICY = "https://supercell.com/en/fan-content-policy/";
+const REPO = "https://github.com/Drntth/farm-production-recipe-dependency-graph";
+const PORTFOLIO = lang === "hu" ? "https://drntth.github.io/hu/" : "https://drntth.github.io/";
+const index = loadIndex();
+const pages = [
+  { href: localePath(lang, "/"), label: c.ui.levels, icon: "lucide:sprout" },
+  { href: localePath(lang, "how-it-works/"), label: c.ui.howItWorks, icon: "lucide:workflow" },
+  { href: localePath(lang, "usage/"), label: c.ui.usage, icon: "lucide:terminal" },
+];
 ---
 
-<footer class="site-footer">
-  <p>
-    This material is unofficial and is not endorsed by Supercell. For more information see Supercell's
-    Fan Content Policy: <a href="https://supercell.com/en/fan-content-policy/">https://supercell.com/en/fan-content-policy/</a>.
-  </p>
-  <p>
-    Game data from the <a href="https://hayday.fandom.com/">Hay Day Wiki</a>, licensed under
-    <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; the measured values and
-    estimates added to it are released under the same licence. Code:
-    <a href="https://github.com/Drntth/farm-production-recipe-dependency-graph">MIT License</a>.
-  </p>
+<footer id="site-footer" class="mt-16 bg-surface/90 backdrop-blur">
+  <div class="footer-rule" aria-hidden="true"></div>
+  <div class="container-page py-10">
+    <div class="grid gap-8 md:grid-cols-[1.2fr_1fr_1.6fr]">
+      <div>
+        <a href={localePath(lang, "/")} class="flex items-center gap-2 font-display text-xl font-semibold">
+          <BarnLogo class="size-7 shrink-0" />
+          <span class="text-gradient">{c.meta.siteName}</span>
+        </a>
+        <p class="mt-3 text-sm text-muted">{f.about}</p>
+      </div>
+
+      <nav aria-label={f.linksTitle}>
+        <h2 class="footer-title">{f.linksTitle}</h2>
+        <ul class="space-y-2 text-sm">
+          {
+            pages.map((p) => (
+              <li>
+                <a href={p.href} class="footer-link">
+                  <Icon name={p.icon} class="size-4" aria-hidden="true" />
+                  {p.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a href={REPO} class="footer-link" target="_blank" rel="noopener noreferrer">
+              <Icon name="lucide:github" class="size-4" aria-hidden="true" />{f.source}
+            </a>
+          </li>
+          <li>
+            <a href={PORTFOLIO} class="footer-link" data-testid="portfolio-link">
+              <Icon name="lucide:user" class="size-4" aria-hidden="true" />{f.portfolio}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="footer-text space-y-3 text-sm text-muted">
+        <h2 class="footer-title">{f.legalTitle}</h2>
+        <p lang="en">
+          {f.fanPolicy} <a href={FAN_POLICY}>{FAN_POLICY}</a>.
+        </p>
+        <p>
+          {f.dataBefore} <a href="https://hayday.fandom.com/">{f.wiki}</a>{f.dataMiddle}{" "}
+          <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>{f.dataAfter}{" "}
+          <a href={`${REPO}/blob/main/LICENSE`}>{f.codeLicence}</a>.
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line pt-5 text-xs text-muted"
+    >
+      <p>
+        {f.by} <a href={PORTFOLIO} class="footer-link">{f.author}</a>
+      </p>
+      <p class="flex flex-wrap gap-2" data-testid="versions">
+        <span class="badge"
+          ><Icon name="lucide:tag" class="size-3" aria-hidden="true" />{fill(f.game, { v: index.game_version ?? "?" })}</span
+        >
+        <span class="badge"
+          ><Icon name="lucide:tag" class="size-3" aria-hidden="true" />{fill(f.planner, { v: index.core_version ?? "?" })}</span
+        >
+      </p>
+      <a href="#" class="footer-link">
+        <Icon name="lucide:arrow-up" class="size-4" aria-hidden="true" />{c.ui.top}
+      </a>
+    </div>
+  </div>
 </footer>

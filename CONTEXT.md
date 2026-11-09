@@ -60,7 +60,7 @@ _Not to be confused with_: profile map
 
 **Profile map**: one farm's state on the base map: unlocked plots, `design` zones, current farm, background screenshot (`config/profile_map.json`). Merged with the base map it is the farm map.
 
-**Farm profile**: one named farm in one JSON file: player profile, profile map, design and planner settings, design templates (`--farm-profile`); in the web app (v2.2) stored locally, several of them simulate different players.
+**Farm profile**: one named farm in one JSON file: player profile, profile map, design and planner settings, design templates (`--farm-profile`); in the web app (v2.4) stored locally, several of them simulate different players.
 _Not to be confused with_: player profile (only what the player bought, upgraded or earned)
 
 **Data bundle**: every shared data file (`data/*.json` with the overrides merged, `base_map.json`) in one generated JSON file; a client without file access loads it in one request.

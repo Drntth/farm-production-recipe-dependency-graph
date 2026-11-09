@@ -1,0 +1,71 @@
+---
+// Home page in one language: title with the level picker on the right, full-width intro, then a
+// card for every level (blocks, login interval, new buildings, blocks not placed).
+import { Icon } from "astro-icon/components";
+import LevelPicker from "../components/LevelPicker.svelte";
+import Base from "../layouts/Base.astro";
+import { label, loadIndex, newBuildings } from "../data";
+import { content, fill, hours, localePath, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const c = content(lang);
+const h = c.home;
+const index = loadIndex();
+const levels = index.levels.map((row) => row.level);
+const fresh = newBuildings(levels);
+---
+
+<Base lang={lang}>
+  <section class="card p-6 sm:p-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <h1 class="text-3xl sm:text-4xl"><span class="text-gradient">{h.title}</span></h1>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h2 class="font-display text-lg font-semibold">{h.pickerTitle}</h2>
+        <LevelPicker
+          client:load
+          levels={levels}
+          base={localePath(lang, "levels/")}
+          labels={{ label: c.picker.label, show: c.picker.show }}
+        />
+      </div>
+    </div>
+    <p class="mt-4">{h.intro}</p>
+    <p class="muted mt-3 text-sm">{h.notPlacedNote}</p>
+  </section>
+
+  <section class="mt-10" aria-labelledby="all-levels">
+    <h2 id="all-levels" class="section-title text-2xl">{h.allLevels}</h2>
+    <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {
+        index.levels.map((row) => {
+          const added = fresh.get(row.level) ?? [];
+          return (
+            <li>
+              <a href={localePath(lang, `levels/${row.level}/`)} class="tile h-full" data-testid="level-card">
+                <span class="flex items-center justify-between gap-2">
+                  <span class="font-display text-lg font-semibold">{fill(c.level.title, { n: row.level })}</span>
+                  <Icon name="lucide:arrow-right" class="size-4 shrink-0 text-accent" aria-hidden="true" />
+                </span>
+                <span class="muted mt-1 block text-sm">
+                  {fill(h.cardBlocks, { n: row.blocks })} · {fill(h.cardLogin, { t: hours(row.login_interval_hours, lang) })}
+                </span>
+                {added.length > 0 && (
+                  <span class="mt-2 block text-sm">
+                    <Icon name="lucide:sparkles" class="mr-1 inline size-3.5 align-[-2px] text-gold" aria-hidden="true" />
+                    {fill(h.cardNew, { names: added.map(label).join(", ") })}
+                  </span>
+                )}
+                {row.blocks_not_placed > 0 && (
+                  <span class="badge badge-warn mt-2">{fill(h.cardNotPlaced, { n: row.blocks_not_placed })}</span>
+                )}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</Base>
