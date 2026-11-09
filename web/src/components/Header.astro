@@ -15,7 +15,12 @@ const other: Lang = lang === "en" ? "hu" : "en";
 const home = localePath(lang, "/");
 const path = Astro.url.pathname;
 const links = [
-  { href: home, label: c.ui.levels, icon: "lucide:sprout", current: path === home || path.startsWith(localePath(lang, "levels/")) },
+  {
+    href: home,
+    label: c.ui.levels,
+    icon: "lucide:sprout",
+    current: path === home || path.startsWith(localePath(lang, "levels/")),
+  },
   { href: localePath(lang, "how-it-works/"), label: c.ui.howItWorks, icon: "lucide:workflow" },
   { href: localePath(lang, "usage/"), label: c.ui.usage, icon: "lucide:terminal" },
 ].map((l) => ({ ...l, current: l.current ?? path === l.href }));
@@ -29,16 +34,14 @@ const links = [
     </a>
 
     <ul class="nav-pill hidden lg:flex">
-      {
-        links.map((l) => (
-          <li>
-            <a href={l.href} class="nav-link" aria-current={l.current ? "page" : undefined}>
-              <Icon name={l.icon} class="size-4" aria-hidden="true" />
-              {l.label}
-            </a>
-          </li>
-        ))
-      }
+      {links.map((l) => (
+        <li>
+          <a href={l.href} class="nav-link" aria-current={l.current ? "page" : undefined}>
+            <Icon name={l.icon} class="size-4" aria-hidden="true" />
+            {l.label}
+          </a>
+        </li>
+      ))}
     </ul>
 
     <div class="flex shrink-0 items-center gap-2">
@@ -49,8 +52,10 @@ const links = [
         data-lang-switch
         aria-label={c.ui.language}
         title={c.ui.language}
-        class="icon-btn text-xs font-semibold uppercase">{other}</a
+        class="icon-btn text-xs font-semibold uppercase"
       >
+        {other}
+      </a>
       <button id="theme-toggle" type="button" class="icon-btn" aria-label={c.ui.theme} title={c.ui.theme}>
         <Icon name="lucide:moon" class="size-4 dark:hidden" aria-hidden="true" />
         <Icon name="lucide:sun" class="hidden size-4 dark:block" aria-hidden="true" />
@@ -71,16 +76,14 @@ const links = [
 
   <div id="mobile-menu" class="hidden border-t border-line/70 lg:hidden">
     <ul class="container-page grid grid-cols-2 gap-2 py-4 sm:grid-cols-3">
-      {
-        links.map((l) => (
-          <li>
-            <a href={l.href} class="nav-card" aria-current={l.current ? "page" : undefined}>
-              <Icon name={l.icon} class="size-4 shrink-0 text-accent" aria-hidden="true" />
-              {l.label}
-            </a>
-          </li>
-        ))
-      }
+      {links.map((l) => (
+        <li>
+          <a href={l.href} class="nav-card" aria-current={l.current ? "page" : undefined}>
+            <Icon name={l.icon} class="size-4 shrink-0 text-accent" aria-hidden="true" />
+            {l.label}
+          </a>
+        </li>
+      ))}
     </ul>
   </div>
 </header>

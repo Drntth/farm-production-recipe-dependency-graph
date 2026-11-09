@@ -1,6 +1,6 @@
 ---
 // Page frame: head (title, description, hreflang), theme before first paint,
-// background, header, main, footer. The pattern of the portfolio site.
+// background, header, main, footer, the .reveal fade-in. The pattern of the portfolio site.
 import "../styles/global.css";
 import "@fontsource-variable/fredoka";
 import "@fontsource-variable/nunito";
@@ -33,7 +33,9 @@ const alternate = (l: Lang) => new URL(switchPath(Astro.url.pathname, l), Astro.
     <link rel="icon" href={url("favicon-192.png")} type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href={url("apple-touch-icon.png")} />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
-    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={alternate(l)} />)}
+    {LANGS.map((l) => (
+      <link rel="alternate" hreflang={l} href={alternate(l)} />
+    ))}
     <link rel="alternate" hreflang="x-default" href={alternate("en")} />
     <script is:inline>
       // stored choice first, else the system setting; before paint, so no flash
@@ -43,15 +45,39 @@ const alternate = (l: Lang) => new URL(switchPath(Astro.url.pathname, l), Astro.
       } catch {}
       const dark = stored ? stored === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
       document.documentElement.classList.toggle("dark", dark);
+      // .reveal hides content only when this script runs, so pages stay readable without JavaScript
+      document.documentElement.classList.add("js");
     </script>
   </head>
   <body class="flex min-h-screen flex-col antialiased">
-    <a href="#main" class="skip-link">{c.ui.skip}</a>
+    <a href="#main" class="skip-link">
+      {c.ui.skip}
+    </a>
     <div class="bg-glows" aria-hidden="true"></div>
     <Header lang={lang} />
     <main id="main" class="container-page flex-1 py-8 sm:py-12">
       <slot />
     </main>
     <Footer lang={lang} />
+    <script>
+      // .reveal elements fade in once when they scroll into view (the CSS skips it under reduced motion)
+      const shown = (el: Element) => el.classList.add("is-visible");
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                shown(e.target);
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.1 },
+        );
+        document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+      } else {
+        document.querySelectorAll(".reveal").forEach(shown);
+      }
+    </script>
   </body>
 </html>

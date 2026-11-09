@@ -2,15 +2,15 @@
 
 Milestones with their items. Changes per released version: [CHANGELOG.md](../CHANGELOG.md).
 
-**Current status:** v2.2 is released as v2.2.0 (382 tests passing, CI on every push): the site follows the portfolio design with its own summer farm palette and barn logo, has English and Hungarian pages, a menu (Levels, How it works, Usage) and card grids on the home and level pages. v2.0 (Core API and data model): the tools run through entry points without file IO, the farm map is split into the base map and a profile map, a farm profile holds one farm in one file, the input files carry `schema_version`, and `python -m src bundle` writes the data bundle. v2.0.1: the map editor reads and writes the base map and the profile map. v2.1 (static site and level recommendations) is done: `python -m src recommend` precomputes levels 1-100 and the site in `web/` shows them (377 tests). Next: v2.3 (site structure and farm view: layout and plan on separate pages, interactive farm view), then v2.4 (farm profiles), see [v2-design.md](v2-design.md).  
+**Current status:** v2.3 is done, not yet released (394 tests and 32 Playwright checks passing): the level page is the farm layout in an interactive farm view (pan and zoom, blocks and cards highlight each other, a detail panel), the plan has its own page with the summary first and the login actions per building collapsed, the planner spreads the logins over a daily login window (default 07:00-23:00, one long night gap), and sections fade in on scroll. v2.2 is released as v2.2.0: the site follows the portfolio design with its own summer farm palette and barn logo, has English and Hungarian pages, a menu (Levels, How it works, Usage) and card grids on the home and level pages. v2.0 (Core API and data model): the tools run through entry points without file IO, the farm map is split into the base map and a profile map, a farm profile holds one farm in one file, the input files carry `schema_version`, and `python -m src bundle` writes the data bundle. v2.0.1: the map editor reads and writes the base map and the profile map. v2.1 (static site and level recommendations) is done: `python -m src recommend` precomputes levels 1-100 and the site in `web/` shows them (377 tests). Next: v2.4 (farm profiles and the plan in the browser), see [v2-design.md](v2-design.md).  
 Current data set (every wiki level, up to 126): 86 locations (19 tree / bush kinds incl. the nectar and peanut bush, the squirrel house), 418 resources, 354 recipes, 228 fields over 150 levels, 80 building / shelter copies. At level 56: 48 locations (8 tree / bush kinds incl. the nectar bush, 2 storage: barn and silo, 6 fixed, 5 on the fishing lake), 167 resources, 135 recipes (incl. 9 animal feeding recipes), 84 fields over 28 levels, 52 building / shelter copies. Every raw good has a growth time, every recipe has a base time (and a 3-star time where mastery applies), and every movable location has a footprint.  
 The Layout Planner (`python -m src.layout`) arranges 15 named blocks for level 56 (including the Storage block with the barn and silo) on the unlocked plots of the measured farm.  
-The Production Planner (`python -m src.planner`) suggests a login interval for the profile and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
+The Production Planner (`python -m src.planner`) suggests the logins per day in the player's login window and writes the quantities, recommendations and actions per login to `output/schedule.json` / `schedule.md`.  
 The design layer adds paths and a decoration band (126 path tiles on the measured farm: 86 main path, 40 side paths; the riverboat reached at its connection point). Only the farm is laid out; the town and the fishing lake are not planned.  
 The Combiner (`python -m src.combiner`) sizes the 15 blocks by the plan and places them upstream first (16 % reserve on the measured farm) in `output/combined.*`.  
 Values the wiki lacks (tree / bush yield per harvest, honeycomb and peanut rates, footprints above level 56, Workbench bonuses) are accepted estimates or player measurements collected in [docs/wiki-gaps.md](wiki-gaps.md); they refine the plans but do not block the roadmap.  
 The relocation plan (`python -m src relocate`) compares the current farm measured in the map editor with the combined plan and lists what stays, what to store and where to place every item.  
-Next step: v2.3. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
+Next step: v2.4. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
 
 ## v0.3 - Graph and block analysis (done)
 
@@ -199,13 +199,13 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v2.3 - Site structure and farm view
 
-- [ ] Layout and plan never on one page: the level page `/levels/N/` is the farm layout (the primary tool), `/levels/N/plan/` the production plan (secondary); a switch between them on both, in both languages
-- [ ] The layout page shows a short plan summary (2-3 key figures) with a link to the plan page
-- [ ] Interactive SVG farm view in the page instead of the static image and the "open the image to zoom" hint: pan and zoom with mouse and touch, clickable blocks; area outside the buildable zones faint or hidden instead of red
-- [ ] Block interactions: click a block (or its legend entry) to highlight it and grey out the others; zoom to a block; a detail panel for the selected block (buildings, copies, fields); hovering a block table row highlights the block on the map and the other way round
-- [ ] Shorter plan page: a short summary and key figures on top, the login actions grouped by building and collapsed by default
-- [ ] Realistic login schedule: the player sets a daily active window and the number of logins (planner setting); the default is a few logins a day with long production overnight, not a login every hour around the clock
-- [ ] From the portfolio site: reveal animations on scroll (respecting `prefers-reduced-motion`); the level card grid and the hamburger menu moved to v2.2
+- [x] Layout and plan never on one page: the level page `/levels/N/` is the farm layout (the primary tool), `/levels/N/plan/` the production plan (secondary); a switch between them on both, in both languages
+- [x] The layout page shows a short plan summary (2-3 key figures) with a link to the plan page
+- [x] Interactive SVG farm view in the page instead of the static image and the "open the image to zoom" hint: pan and zoom with mouse and touch, clickable blocks; area outside the buildable zones faint or hidden instead of red
+- [x] Block interactions: click a block (or its legend entry) to highlight it and grey out the others; zoom to a block; a detail panel for the selected block (buildings, copies, fields); hovering a block table row highlights the block on the map and the other way round
+- [x] Shorter plan page: a short summary and key figures on top, the login actions grouped by building and collapsed by default
+- [x] Realistic login schedule: the player sets a daily active window and the number of logins (planner setting); the default is a few logins a day with long production overnight, not a login every hour around the clock
+- [x] From the portfolio site: reveal animations on scroll (respecting `prefers-reduced-motion`); the level card grid and the hamburger menu moved to v2.2
 - Done: no page shows layout and plan together; block highlight, zoom and the detail panel work with mouse, touch and keyboard; Playwright passes on mobile and desktop in both languages
 
 ### v2.4 - Farm profiles and the plan in the browser

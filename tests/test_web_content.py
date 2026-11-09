@@ -1,10 +1,14 @@
-"""The site's UI strings: web/content/<lang>.json share every key and placeholder."""
+"""
+The site's UI strings: web/content/<lang>.json share every key and placeholder;
+the farm view keeps the block colours of the layout SVG.
+"""
 
 import json
 import re
 from itertools import combinations
 from pathlib import Path
 
+from src.layout.render_svg import PALETTE
 from src.planner.capacity import FEEDER_BUSHES
 from src.planner.schedule import ACTIONS, collect_what
 
@@ -72,3 +76,11 @@ def test_every_schedule_action_and_what_is_translated():
         data = json.loads((CONTENT / f"{lang}.json").read_text(encoding="utf-8"))
         assert set(ACTIONS) <= data["actions"].keys(), lang
         assert sorted(whats - data["whats"].keys()) == [], lang
+
+
+def test_farm_view_palette_matches_the_svg() -> None:
+    # the farm view colours the blocks like render_svg.py: keep them in sync
+    source = (CONTENT.parent / "src" / "components" / "FarmView.svelte").read_text()
+    block = re.search(r"const PALETTE = \[(.*?)\]", source, re.DOTALL)
+    assert block is not None
+    assert tuple(re.findall(r'"(#[0-9A-Fa-f]{6})"', block.group(1))) == PALETTE

@@ -6,14 +6,16 @@
     /** the level pages' path prefix in the page's language, e.g. `<base>/hu/levels/` */
     base: string;
     current?: number;
+    /** path after the level, e.g. `plan/`: the switch stays on the open tab */
+    suffix?: string;
     compact?: boolean;
     labels: { label: string; show: string };
   }
-  let { levels, base, current, compact = false, labels }: Props = $props();
+  let { levels, base, current, suffix = "", compact = false, labels }: Props = $props();
   let level = $state(current ?? levels[0]);
 
   function go() {
-    window.location.href = `${base.replace(/\/$/, "")}/${level}/`;
+    window.location.href = `${base.replace(/\/$/, "")}/${level}/${suffix}`;
   }
   function submit(event: SubmitEvent) {
     event.preventDefault();

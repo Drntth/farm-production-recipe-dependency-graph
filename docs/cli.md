@@ -88,7 +88,7 @@ output/
 ├── relocation.json                    # python -m src relocate
 ├── relocation.md
 ├── data_bundle.json                   # python -m src bundle
-├── recommendations/                   # python -m src recommend: level_N.json, level_N.svg, index.json
+├── recommendations/                   # python -m src recommend: level_N.json, level_N.svg, index.json, map.json
 └── fact_check.md                     # python -m src check-facts
 ```
 

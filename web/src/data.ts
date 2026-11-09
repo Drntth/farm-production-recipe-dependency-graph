@@ -8,7 +8,7 @@ export interface IndexRow {
   level: number;
   blocks: number;
   blocks_not_placed: number;
-  login_interval_hours: number;
+  logins_per_day: number;
 }
 
 export interface RecommendationIndex {
@@ -24,6 +24,18 @@ export interface BlockLocation {
   copies: number;
   reserved: number;
   source: string;
+  /** share of the production hours in use, 0-1 */
+  busy?: number;
+  /** product id → items per hour */
+  per_hour?: Record<string, number>;
+}
+
+/** Goods per hour from one block to another; tiles_apart null if one is not placed. */
+export interface FlowLink {
+  source: string;
+  target: string;
+  per_hour: number;
+  tiles_apart: number | null;
 }
 
 export interface Block {
@@ -32,6 +44,25 @@ export interface Block {
   placed: boolean;
   locations: BlockLocation[];
   fields: { count: number; reserved: number; crops: string[] } | null;
+}
+
+/** One placed copy on the map (tile coordinates, footprint after rotation). */
+export interface LayoutItem {
+  location_id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotated: boolean;
+  reserved: boolean;
+}
+
+/** A block as the layout placed it; `frame` is null for an unplaced block. */
+export interface LayoutBlock {
+  id: string;
+  name: string;
+  frame: { x: number; y: number; width: number; height: number } | null;
+  items: LayoutItem[];
 }
 
 export interface LoginItem {
@@ -55,7 +86,8 @@ export interface LoginAction {
 export interface Combined {
   level: number;
   summary: {
-    login_interval_hours: number;
+    logins_per_day: number;
+    login_times: string[];
     production_hours_per_hour: number;
     fields_used: number;
     blocks: number;
@@ -64,7 +96,9 @@ export interface Combined {
     reserve_ratio: number;
   };
   blocks: Block[];
+  flow_links: FlowLink[];
   weighted_flow_distance: number;
+  layout: { blocks: LayoutBlock[] };
   expansion: {
     lookahead_levels: number;
     upcoming: { location_id: string; kind: string; unlock_level: number; count: number }[];
@@ -72,6 +106,20 @@ export interface Combined {
   warnings: string[];
   schedule: {
     logins_per_day: number;
+    logins_suggested: boolean;
+    login_times: string[];
+    day_gap_hours: number;
+    night_gap_hours: number;
+    last_login: {
+      time: string;
+      items: { recipe_id?: string; location_id?: string; resource_id?: string; hours: number }[];
+    } | null;
+    login_options: {
+      logins: number;
+      longest_gap_hours: number;
+      production_hours_per_hour: number;
+      balance_per_day: number;
+    }[];
     recommendations: {
       fields: { available: number; owned: number; used_by_plan: number };
       trees_and_bushes: Record<string, { resource_id: string; plants: number; source: string }>;
@@ -91,9 +139,21 @@ export interface Recommendation {
   combined: Combined;
 }
 
+/** `map.json`: the base map every level is laid out on (rects are `[x, y, w, h]`). */
+export interface MapView {
+  schema_version: number;
+  width: number;
+  height: number;
+  usable: [number, number, number, number][];
+  usable_bounds: [number, number, number, number] | null;
+  farm_outline: [number, number, number, number][];
+  fixed: { id: string; name: string; x: number; y: number; width: number; height: number }[];
+}
+
 // the schema versions this site reads (src/schema.py)
-const INDEX_VERSION = 1;
-const LEVEL_VERSION = 1;
+const INDEX_VERSION = 2;
+const LEVEL_VERSION = 2;
+const MAP_VERSION = 1;
 
 export function recommendationsDir(): string {
   return resolve(process.cwd(), process.env.RECOMMENDATIONS_DIR ?? "../output/recommendations");
@@ -114,6 +174,10 @@ export function loadIndex(): RecommendationIndex {
 
 export function loadLevel(level: number): Recommendation {
   return readJson<Recommendation>(`level_${level}.json`, LEVEL_VERSION);
+}
+
+export function loadMap(): MapView {
+  return readJson<MapView>("map.json", MAP_VERSION);
 }
 
 export function loadLevelSvg(level: number): string {

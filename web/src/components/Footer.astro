@@ -39,24 +39,24 @@ const pages = [
       <nav aria-label={f.linksTitle}>
         <h2 class="footer-title">{f.linksTitle}</h2>
         <ul class="space-y-2 text-sm">
-          {
-            pages.map((p) => (
-              <li>
-                <a href={p.href} class="footer-link">
-                  <Icon name={p.icon} class="size-4" aria-hidden="true" />
-                  {p.label}
-                </a>
-              </li>
-            ))
-          }
+          {pages.map((p) => (
+            <li>
+              <a href={p.href} class="footer-link">
+                <Icon name={p.icon} class="size-4" aria-hidden="true" />
+                {p.label}
+              </a>
+            </li>
+          ))}
           <li>
             <a href={REPO} class="footer-link" target="_blank" rel="noopener noreferrer">
-              <Icon name="lucide:github" class="size-4" aria-hidden="true" />{f.source}
+              <Icon name="lucide:github" class="size-4" aria-hidden="true" />
+              {f.source}
             </a>
           </li>
           <li>
             <a href={PORTFOLIO} class="footer-link" data-testid="portfolio-link">
-              <Icon name="lucide:user" class="size-4" aria-hidden="true" />{f.portfolio}
+              <Icon name="lucide:user" class="size-4" aria-hidden="true" />
+              {f.portfolio}
             </a>
           </li>
         </ul>
@@ -68,29 +68,33 @@ const pages = [
           {f.fanPolicy} <a href={FAN_POLICY}>{FAN_POLICY}</a>.
         </p>
         <p>
-          {f.dataBefore} <a href="https://hayday.fandom.com/">{f.wiki}</a>{f.dataMiddle}{" "}
-          <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>{f.dataAfter}{" "}
-          <a href={`${REPO}/blob/main/LICENSE`}>{f.codeLicence}</a>.
+          {f.dataBefore} <a href="https://hayday.fandom.com/">{f.wiki}</a>
+          {f.dataMiddle} <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>
+          {f.dataAfter} <a href={`${REPO}/blob/main/LICENSE`}>{f.codeLicence}</a>.
         </p>
       </div>
     </div>
 
-    <div
-      class="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line pt-5 text-xs text-muted"
-    >
+    <div class="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-line pt-5 text-xs text-muted">
       <p>
-        {f.by} <a href={PORTFOLIO} class="footer-link">{f.author}</a>
+        {f.by}{" "}
+        <a href={PORTFOLIO} class="footer-link">
+          {f.author}
+        </a>
       </p>
       <p class="flex flex-wrap gap-2" data-testid="versions">
-        <span class="badge"
-          ><Icon name="lucide:tag" class="size-3" aria-hidden="true" />{fill(f.game, { v: index.game_version ?? "?" })}</span
-        >
-        <span class="badge"
-          ><Icon name="lucide:tag" class="size-3" aria-hidden="true" />{fill(f.planner, { v: index.core_version ?? "?" })}</span
-        >
+        <span class="badge">
+          <Icon name="lucide:tag" class="size-3" aria-hidden="true" />
+          {fill(f.game, { v: index.game_version ?? "?" })}
+        </span>
+        <span class="badge">
+          <Icon name="lucide:tag" class="size-3" aria-hidden="true" />
+          {fill(f.planner, { v: index.core_version ?? "?" })}
+        </span>
       </p>
       <a href="#" class="footer-link">
-        <Icon name="lucide:arrow-up" class="size-4" aria-hidden="true" />{c.ui.top}
+        <Icon name="lucide:arrow-up" class="size-4" aria-hidden="true" />
+        {c.ui.top}
       </a>
     </div>
   </div>

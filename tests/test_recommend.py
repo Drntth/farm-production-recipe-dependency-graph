@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from src.layout.farm_map import load_base_map
+from src.layout.farm_map import cells_to_tiles, load_base_map
 from src.loaders.json_loader import DataSet, load_data
 from src.recommend import cli as recommend_cli
 from src.recommend import level_recommendation, recommendations
-from src.recommend.build import base_farm_map
+from src.recommend.build import base_farm_map, tile_rects
 from src.schema import CURRENT, KEY
 
 DATA_DIR = Path("data")
@@ -47,7 +47,7 @@ def test_base_farm_map_unlocks_no_plot(base):
 def test_files_per_level_and_index(run):
     names = set(run["files"])
     expected = {f"level_{n}.{ext}" for n in LEVELS for ext in ("json", "svg")}
-    assert names == expected | {"index.json"}
+    assert names == expected | {"index.json", "map.json"}
     for n in LEVELS:
         assert run["files"][f"level_{n}.svg"].lstrip().startswith("<svg")
 
@@ -74,6 +74,30 @@ def test_index_rows_match_levels(run):
         rec = json.loads(run["files"][f"level_{row['level']}.json"])
         assert row["blocks"] == rec["combined"]["summary"]["blocks"]
         assert row["blocks_not_placed"] == len(rec["blocks_not_placed"])
+        summary = rec["combined"]["summary"]
+        assert row["logins_per_day"] == summary["logins_per_day"]
+        assert len(summary["login_times"]) == summary["logins_per_day"]
+
+
+def test_tile_rects_cover_the_tiles_once():
+    tiles = {(0, 0), (1, 0), (0, 1), (1, 1), (3, 1), (0, 3), (1, 3)}
+    rects = tile_rects(tiles)
+    assert rects == [[0, 0, 2, 2], [3, 1, 1, 1], [0, 3, 2, 1]]
+    assert sum(w * h for _, _, w, h in rects) == len(tiles)
+    assert cells_to_tiles([tuple(r) for r in rects]) == tiles
+
+
+def test_map_json_is_the_map_of_every_level(run, base):
+    view = json.loads(run["files"]["map.json"])
+    assert view[KEY] == CURRENT["recommendation_map"]
+    fm = base_farm_map(base)
+    assert (view["width"], view["height"]) == (fm.width, fm.height)
+    usable = cells_to_tiles([tuple(r) for r in view["usable"]])
+    assert usable == fm.usable_tiles()
+    x, y, w, h = view["usable_bounds"]
+    assert all(x <= tx < x + w and y <= ty < y + h for tx, ty in usable)
+    assert {f["id"] for f in view["fixed"]} == {f.id for f in fm.placed_fixed}
+    assert view["farm_outline"] and all(len(s) == 4 for s in view["farm_outline"])
 
 
 def test_level_recommendation_is_deterministic(data, base):
@@ -110,6 +134,7 @@ def test_cli_writes_files(tmp_path):
         "index.json",
         "level_1.json",
         "level_1.svg",
+        "map.json",
     ]
     index = json.loads((out / "index.json").read_text(encoding="utf-8"))
     assert index["core_version"] == recommend_cli.core_version()

@@ -63,6 +63,7 @@ python -m src recommend --levels 1,20,40   # or every level: python -m src recom
 cd web
 npm ci
 npm run check                              # astro check: TypeScript and Svelte
+npm run format:check                       # Prettier (Astro, Svelte, TS, CSS, JSON); npm run format fixes it
 npm run build                              # dist/; RECOMMENDATIONS_DIR overrides ../output/recommendations
 npx playwright install chromium            # once
 npm run test:e2e                           # Playwright on the built site, mobile + desktop

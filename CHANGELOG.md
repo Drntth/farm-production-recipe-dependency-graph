@@ -4,6 +4,14 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Planner: `production.login_window` (`start`, `end`, `logins`; default 07:00-23:00, `logins` suggested) replaces `login_interval`; the logins are spread over the window with one long night gap, the plan uses the exact gaps, and `schedule.json` gives the login times, the day and night gap and the long items to start at the last login. The suggestion stays at up to 8 logins a day. Planner settings schema 2 (an old interval that divides the day becomes the same logins round the clock, otherwise it is dropped with a warning).
+- Recommendations: schema 2 (`logins_per_day` and `login_times` instead of the interval) and `map.json` (the base map for the farm view).
+- Web: layout and plan on separate pages (`/levels/N/`, `/levels/N/plan/`); the level switch stays on the open tab; a short plan summary on the layout page.
+- Web: interactive farm view (Svelte): pan and zoom by mouse, touch, buttons and keys; blocks and their cards highlight each other; a selected block is zoomed to and gets a detail panel; a still map without JavaScript, the SVG as a download.
+- Web: the plan page starts with the summary and login times; the login actions are grouped by building and collapsed.
+- Web: sections fade in on scroll, not under reduced motion or without JavaScript.
+- Web: Prettier with the Astro and Svelte plugins (`npm run format`, `npm run format:check`).
+
 ## [2.2.0] - 2026-11-09
 
 - Site design after the portfolio site: Tailwind CSS v4, astro-icon, self-hosted Fredoka and Nunito; a sky blue → grass green background; sticky header with a language switch and a dark mode toggle, footer with a link to the portfolio site; wide screens use the full width (90rem container, justified text).
