@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-09
+
 - Site design after the portfolio site: Tailwind CSS v4, astro-icon, self-hosted Fredoka and Nunito; a sky blue → grass green background; sticky header with a language switch and a dark mode toggle, footer with a link to the portfolio site; wide screens use the full width (90rem container, justified text).
 - Design fixes: "summer farm" palette (leaf green, barn red, gold), name "Farm layout & production" (hu "Farmelrendezés és termelés"), barn logo and favicon; menu Levels, How it works, Usage with a hamburger card grid on small screens; level cards on the home page; level pages with key figures, a ‹ N › switch, block cards, login step cards and a next-level card; game and planner version as footer badges.
 - New pages "How it works" and "Usage" in both languages.
