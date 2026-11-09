@@ -1,5 +1,5 @@
 """
-Steady-state production quantities for one login interval.
+Steady-state production quantities for one day of logins.
 
 A linear program (scipy / HiGHS) over rates per hour:
 
@@ -11,9 +11,14 @@ A linear program (scipy / HiGHS) over rates per hour:
 
 Constraints: no good is used faster than it is made; machine time (copies)
 and queue (slots per login); animals, slots, fields and trees are served only
-at a login, so one cycle takes the growth time rounded up to whole login
-intervals; the goods made between two logins fit into the given share of the
-barn and silo (peanuts go to the silo).
+at a login, so one cycle lasts until the first login after it ends; the goods
+made between two logins fit into the given share of the barn and silo
+(peanuts go to the silo).
+
+Login gaps: the hours from each login to the next one over a day (the login
+window of the planner settings). Round the clock they are all equal; with a
+window the night is one long gap. Machines with a queue get their crafts per
+kind of gap: in a long night gap a machine stops once its queue is done.
 
 Four solves, each keeping the previous optimum (lexicographic):
 
@@ -32,7 +37,10 @@ use is reported. Recipes with non-good inputs (vouchers, diamonds) are skipped.
 from __future__ import annotations
 
 import math
+from collections import Counter
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
+from functools import cache
 
 import numpy as np
 from scipy.optimize import linprog
@@ -45,6 +53,7 @@ from .capacity import SECONDS_PER_HOUR, SILO_HIVE_GOODS, CapacityModel, LineKind
 from .profile import ResolvedProfile
 
 CROP_HARVEST = 2  # crops harvested per planting (wiki: Crops)
+HOURS_PER_DAY = 24
 _KEEP = 1 - 1e-6  # keep a previous optimum up to solver tolerance
 _MAX_BALANCE = 1e6
 _PLANNED_KINDS = {LineKind.MACHINE, LineKind.ANIMAL, LineKind.SLOT_ANIMAL}
@@ -75,7 +84,7 @@ class FruitPlan:
 
 @dataclass(frozen=True)
 class ProductionPlan:
-    interval_hours: float
+    login_gaps: list[float]  # hours from each login of a day to the next
     storage_share: float
     balance_per_hour: float
     busy_hours_per_hour: float  # production hours of machines and animals
@@ -92,14 +101,65 @@ class ProductionPlan:
     skipped_recipes: dict[str, str]
     warnings: list[str]
 
+    @property
+    def logins(self) -> int:
+        return len(self.login_gaps)
+
     def to_dict(self) -> dict:
         return asdict(self)
 
 
-def login_cycle_hours(seconds: int, interval_hours: float) -> float:
-    """Hours one cycle takes when it can only restart at a login."""
+def even_gaps(interval_hours: float) -> list[float]:
+    """Login gaps of a login every *interval_hours* round the clock."""
+    n = round(HOURS_PER_DAY / interval_hours) if interval_hours > 0 else 0
+    if n < 1 or abs(n * interval_hours - HOURS_PER_DAY) > 1e-9:
+        raise ValueError(f"interval_hours must divide 24, got {interval_hours}")
+    return [float(interval_hours)] * n
+
+
+def login_cycle_hours(seconds: int, gaps: Sequence[float]) -> float:
+    """
+    Mean hours one cycle takes when it can only restart at a login.
+
+    A cycle started at a login restarts at the first login after it ends.
+    Over the repeating days the restarts settle into a loop of logins; the
+    best loop over every starting login counts, an optimistic estimate: it
+    assumes each line is restarted at its best login. Even gaps: the duration
+    rounded up to whole gaps.
+    """
+    return _cycle_hours(seconds, tuple(gaps))
+
+
+@cache
+def _cycle_hours(seconds: int, gaps: tuple[float, ...]) -> float:
+    if not gaps or min(gaps) <= 0:
+        raise ValueError("login gaps must be positive")
     hours = seconds / SECONDS_PER_HOUR
-    return max(1, math.ceil(hours / interval_hours - 1e-9)) * interval_hours
+    if len(set(gaps)) == 1:
+        t = gaps[0]
+        return max(1, math.ceil(hours / t - 1e-9)) * t
+    n = len(gaps)
+    nxt = []  # login -> (restart login, hours until it)
+    for i in range(n):
+        elapsed, j = 0.0, i
+        while True:
+            elapsed += gaps[j]
+            j = (j + 1) % n
+            if elapsed >= hours - 1e-9:
+                break
+        nxt.append((j, elapsed))
+    best = math.inf
+    for start in range(n):
+        seen: dict[int, tuple[int, float]] = {}
+        i, cycles, total = start, 0, 0.0
+        while i not in seen:
+            seen[i] = (cycles, total)
+            i, elapsed = nxt[i]
+            cycles += 1
+            total += elapsed
+        first_cycles, first_total = seen[i]
+        best = min(best, (total - first_total) / (cycles - first_cycles))
+    return best
 
 
 class _Program:
@@ -141,13 +201,23 @@ def plan_production(
     capacity: CapacityModel,
     profile: ResolvedProfile,
     dataset: DataSet,
-    interval_hours: float,
+    login_gaps: Sequence[float],
     storage_share: float = DEFAULT_STORAGE_SHARE,
 ) -> ProductionPlan:
-    """Solve the production plan for logins every *interval_hours*."""
-    if interval_hours <= 0 or not 0 < storage_share <= 1:
-        raise ValueError("interval_hours must be > 0 and storage_share in (0, 1]")
-    t = interval_hours
+    """Solve the production plan for one day of *login_gaps* (hours, sum 24)."""
+    gaps = [float(g) for g in login_gaps]
+    if (
+        not gaps
+        or min(gaps) <= 0
+        or abs(sum(gaps) - HOURS_PER_DAY) > 1e-6
+        or not 0 < storage_share <= 1
+    ):
+        raise ValueError(
+            "login gaps must be positive and add up to 24 h, storage_share in (0, 1]"
+        )
+    # kinds of gap: (hours, how many a day); one kind = even logins
+    kinds = sorted(Counter(gaps).items())
+    longest = kinds[-1][0]
 
     # --- sources of every good ------------------------------------------
     fields = capacity.fields or 0
@@ -237,7 +307,7 @@ def plan_production(
     def fruit_rate(res_id: str) -> float:
         fruit = capacity.fruits[res_id]
         return fruit.yield_per_harvest / login_cycle_hours(
-            fruit.harvest_interval_seconds, t
+            fruit.harvest_interval_seconds, gaps
         )
 
     # balance: made - used >= balance, for every produced good
@@ -269,34 +339,55 @@ def plan_production(
     by_location: dict[str, list] = {}
     for rec in planned:
         by_location.setdefault(rec.location_id, []).append(rec)
+    # uneven gaps: crafts per gap kind (z) for machines with a queue, so the
+    # queue limits every gap on its own; x = sum(count * z) / 24
+    zs: dict[tuple[str, float], int] = {}
     for loc_id, recs in by_location.items():
         cap = capacity.locations[loc_id]
         if cap.kind == LineKind.MACHINE:
-            lp.add(
-                {xs[r.id]: times[r.id] / SECONDS_PER_HOUR for r in recs}, cap.parallel
-            )
-            if cap.queue:
-                lp.add({xs[r.id]: 1 for r in recs}, cap.queue / t)
+            if not cap.queue or len(kinds) == 1:
+                lp.add(
+                    {xs[r.id]: times[r.id] / SECONDS_PER_HOUR for r in recs},
+                    cap.parallel,
+                )
+            if cap.queue and len(kinds) == 1:
+                lp.add({xs[r.id]: 1 for r in recs}, cap.queue / longest)
+            elif cap.queue:
+                for gap, _ in kinds:
+                    for r in recs:
+                        zs[r.id, gap] = lp.var("z", f"{r.id}@{gap}")
+                    lp.add(
+                        {zs[r.id, gap]: times[r.id] / SECONDS_PER_HOUR for r in recs},
+                        cap.parallel * gap,
+                    )
+                    lp.add({zs[r.id, gap]: 1 for r in recs}, cap.queue)
+                for r in recs:
+                    link = {xs[r.id]: HOURS_PER_DAY}
+                    link.update({zs[r.id, gap]: -count for gap, count in kinds})
+                    lp.add(link, 0.0)
+                    lp.add({i: -v for i, v in link.items()}, 0.0)
         else:  # animals / slots: busy until the next login after the cycle
             lp.add(
-                {xs[r.id]: login_cycle_hours(times[r.id], t) for r in recs},
+                {xs[r.id]: login_cycle_hours(times[r.id], gaps) for r in recs},
                 cap.parallel,
             )
 
     # beehives / squirrel pairs: one good per cycle each, collected at a login
     for g, i in hs.items():
         hive = capacity.hives[g]
-        lp.add({i: login_cycle_hours(hive.cycle_seconds, t)}, hive.parallel)
+        lp.add({i: login_cycle_hours(hive.cycle_seconds, gaps)}, hive.parallel)
 
     # fields busy until the next login after growth
     crop_cycle = {
-        c: login_cycle_hours(capacity.crops[c].growth_time_seconds, t) for c in ps
+        c: login_cycle_hours(capacity.crops[c].growth_time_seconds, gaps) for c in ps
     }
     if ps:
         lp.add({i: crop_cycle[c] for c, i in ps.items()}, fields)
 
     # storage: goods made between two logins fit into the share; the fruit of
-    # owned trees comes anyway, so it only shrinks the room left for crops
+    # owned trees comes anyway, so it only shrinks the room left for crops.
+    # Silo goods come at a steady rate: the longest gap decides.
+    t = longest
     warnings: list[str] = []
     if capacity.silo_capacity is not None:
         silo_row = {i: CROP_HARVEST * t for i in ps.values()}
@@ -311,9 +402,15 @@ def plan_production(
             )
         lp.add(silo_row, max(room - fixed, 0.0))
     if capacity.barn_capacity is not None and (xs or hs):
-        barn_row = {xs[r.id]: r.output.amount * t for r in planned}
-        barn_row.update({i: t for g, i in hs.items() if g not in SILO_HIVE_GOODS})
-        lp.add(barn_row, storage_share * capacity.barn_capacity)
+        for gap, _ in kinds:  # a queued machine makes its z crafts in a gap
+            barn_row = {}
+            for r in planned:
+                if (r.id, gap) in zs:
+                    barn_row[zs[r.id, gap]] = r.output.amount
+                else:
+                    barn_row[xs[r.id]] = r.output.amount * gap
+            barn_row.update({i: gap for g, i in hs.items() if g not in SILO_HIVE_GOODS})
+            lp.add(barn_row, storage_share * capacity.barn_capacity)
 
     busy = {xs[r.id]: times[r.id] / SECONDS_PER_HOUR for r in planned}
     best = lp.solve({bal: -1})
@@ -385,12 +482,21 @@ def plan_production(
             utilization[loc_id] = clean(load / SECONDS_PER_HOUR / cap.parallel)
         else:
             load = sum(
-                recipes[r.id].per_hour * login_cycle_hours(times[r.id], t) for r in recs
+                recipes[r.id].per_hour * login_cycle_hours(times[r.id], gaps)
+                for r in recs
             )
             utilization[loc_id] = clean(load / cap.parallel)
 
+    def barn_in_gap(gap: float) -> float:
+        made = sum(
+            (x[zs[r.id, gap]] if (r.id, gap) in zs else recipes[r.id].per_hour * gap)
+            * r.output.amount
+            for r in planned
+        )
+        return made + sum(v for g, v in hive.items() if g not in SILO_HIVE_GOODS) * gap
+
     return ProductionPlan(
-        interval_hours=t,
+        login_gaps=gaps,
         storage_share=storage_share,
         balance_per_hour=clean(x[bal]),
         busy_hours_per_hour=clean(sum(x[i] * v for i, v in busy.items())),
@@ -402,13 +508,7 @@ def plan_production(
         external_per_hour=external,
         utilization=utilization,
         fields_used=clean(sum(c.fields for c in crops.values())),
-        barn_per_login=clean(
-            (
-                sum(recipes[r.id].per_hour * r.output.amount for r in planned)
-                + sum(v for g, v in hive.items() if g not in SILO_HIVE_GOODS)
-            )
-            * t
-        ),
+        barn_per_login=clean(max(barn_in_gap(gap) for gap, _ in kinds)),
         silo_per_login=clean(
             (
                 sum(c.plantings_per_hour * CROP_HARVEST for c in crops.values())

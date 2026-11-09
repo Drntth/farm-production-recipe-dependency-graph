@@ -4,7 +4,7 @@ Combiner (v0.9): the farm layout sized by the production plan.
 The only place that joins the two planners:
 
 1. The Production Planner solves the plan for the player profile (login
-   interval, quantities, recommendations).
+   times, quantities, recommendations).
 2. ``sizing_from_plan`` turns the plan into a layout ``Sizing``: recommended
    tree / bush counts, fields per crop with the locations that use each crop,
    and the goods flows between locations.
@@ -45,6 +45,7 @@ from src.settings import (
     DEFAULT_PATH_STYLE,
     DEFAULT_PATH_TARGETS,
     DEFAULT_STORAGE_SHARE,
+    LoginWindow,
 )
 
 _EPS = 1e-6
@@ -234,7 +235,7 @@ def combine(
     farm_map: FarmMap | None = None,
     *,
     lookahead: int = DEFAULT_LOOKAHEAD,
-    login_interval: float | None = None,
+    login_window: LoginWindow | None = None,
     storage_share: float = DEFAULT_STORAGE_SHARE,
     min_efficiency: float = DEFAULT_MIN_EFFICIENCY,
     reserve_ratio: float = DEFAULT_RESERVE_RATIO,
@@ -263,7 +264,7 @@ def combine(
     run = run_planner(
         player,
         data,
-        login_interval=login_interval,
+        login_window=login_window,
         storage_share=storage_share,
         min_efficiency=min_efficiency,
     )

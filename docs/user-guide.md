@@ -42,7 +42,7 @@ To keep a design you like, make a **design template** (step 9): cut it out of yo
 Settings are files, not command-line options. Copy the examples and edit them; the tools tell you in their log which file they used, and every output records the settings it was made with.
 
 - `config/design.json`: layout and design. Most useful keys: `design_layer` (paths and a decoration band), `path_style` (`straight` for fewer corners, `stepped` for diagonal staircases), `main_path_width` (2 for a wider main path to the key buildings), `main_path_style` (another style for the main path), `item_gap` (room between the buildings of a block), `reserve` (free area per block for later unlocks), `block_images`, `templates` (a design template per block, e.g. `{"dairy_block": {"template": "dairy_garden", "mode": "arrange"}}`: `reserve` keeps its area free, `arrange` puts its buildings at their template positions).
-- `config/planner.json`: `production.login_interval` (fix how often you log in; empty = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
+- `config/planner.json`: `production.login_window` (`start` and `end` of your daily active hours, `logins` per day; empty `logins` = suggested), `production.storage_share`, `combiner.lookahead` (levels ahead whose unlocks get space now).
 
 Every key with its default is in [settings.md](settings.md). Placing every block always comes first: if the blocks do not fit, the tools lower `item_gap` first, then drop the design templates and only then lower the reserve, and the report says so.
 
@@ -61,13 +61,13 @@ To keep several farms apart, put each farm's files into one farm profile: `pytho
 
 ## 6. Read the results (`output/`)
 
-| File                                    | Look at it for                                                                               |
-| --------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `combined.md`                           | the whole plan: blocks upstream → downstream, goods flows between them, expansion, schedule  |
-| `combined.svg`, `combined_blocks/*.svg` | the farm with every block; one image per block to rebuild it in the game, plus `collage.svg` |
-| `schedule.md`                           | how often to log in and what to do at every login, recommended fields, trees and bushes      |
-| `layout.md`, `layout.svg`, `blocks/`    | the layout without production sizing (graph and profile only)                                |
-| `relocation.md`                         | what stays, what to store, where to place every item, block by block (`relocate`)            |
+| File                                    | Look at it for                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `combined.md`                           | the whole plan: blocks upstream → downstream, goods flows between them, expansion, schedule                         |
+| `combined.svg`, `combined_blocks/*.svg` | the farm with every block; one image per block to rebuild it in the game, plus `collage.svg`                        |
+| `schedule.md`                           | when to log in, what to start at the last login and what to do at every login, recommended fields, trees and bushes |
+| `layout.md`, `layout.svg`, `blocks/`    | the layout without production sizing (graph and profile only)                                                       |
+| `relocation.md`                         | what stays, what to store, where to place every item, block by block (`relocate`)                                   |
 
 The SVG files open in any browser. To see the layout on your own screenshot, load `layout.json` or `combined.json` in the map editor (step 7, Layout overlay). Coordinates are tiles from the top corner of the map: x along the ↘ edge, y along the ↙ edge. The game's Layout Edit Mode shows no grid, so count tiles from a fixed building.
 

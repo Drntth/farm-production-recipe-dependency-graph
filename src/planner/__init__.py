@@ -9,7 +9,7 @@ from .mastery import MasteryModifier, StarsModifier, WorkbenchModifier, mastery_
 from .profile import LocationState, ResolvedProfile, resolve_profile
 from .quantities import ProductionPlan, plan_production
 from .run import PlanRun, run_planner
-from .schedule import build_schedule, compare_intervals, suggest_interval
+from .schedule import build_schedule, compare_logins, suggest_logins
 
 __all__ = [
     "CapacityModel",
@@ -23,10 +23,10 @@ __all__ = [
     "WorkbenchModifier",
     "build_capacity",
     "build_schedule",
-    "compare_intervals",
+    "compare_logins",
     "mastery_modifier",
     "plan_production",
     "resolve_profile",
     "run_planner",
-    "suggest_interval",
+    "suggest_logins",
 ]

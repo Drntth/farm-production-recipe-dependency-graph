@@ -71,6 +71,8 @@ _Not to be confused with_: data set (`DataSet`, the validated models in memory)
 **Level recommendation**: the plan and layout precomputed at build time for one level with level defaults and default settings, on section `base` only (`python -m src recommend`); shown on the static site without a farm profile.
 _Not to be confused with_: recommendation (one count the plan proposes)
 
+**Farm view**: the interactive map of a layout on the site (v2.3): pan, zoom, block selection with the block detail panel; the area outside the buildable zones is faint.
+
 **Plot recommendation** (v2, planned): the smallest connected set of plots, unlockable in game order, that fits the blocks of a level or a farm profile.
 
 **Plot**: one farm expansion, numbered like the wiki, unlocked or not; the starting land is section `base`.
@@ -177,13 +179,16 @@ _Not to be confused with_: gap (free tiles between blocks)
 **Design settings**: the player's chosen layout and design options, one flat object kept in the design settings file.
 _Not to be confused with_: player profile (progress), planner settings (production and Combiner parameters)
 
-**Planner settings**: production and Combiner parameters (login interval, storage share, lookahead), kept in the planner settings file.
+**Planner settings**: production and Combiner parameters (login window, storage share, lookahead), kept in the planner settings file.
 
 ## Production
 
-**Production plan**: steady-state amounts per hour for one login interval, from a linear program.
+**Production plan**: steady-state amounts per hour for one login window, from a linear program.
 
-**Login interval**: hours between two logins; fields, animals and trees are served only at a login.
+**Login window**: the daily active hours (`start`-`end`) and the number of logins spread evenly in them; the night outside it is one long gap (`login_window`). Replaces the round-the-clock login interval.
+
+**Login gap**: the time between two consecutive logins; a day has one per login, the night gap is the longest. Fields, animals and trees are served only at a login.
+_Not to be confused with_: login interval (the former even gap around the clock, no longer used)
 
 **Line**: what produces in parallel at a location: a machine copy (one item at a time, slots only queue) or an animal.
 
@@ -196,7 +201,7 @@ _Not to be confused with_: external input (voucher, diamond, lure, fishing spot:
 
 **Storage share**: the part of barn and silo that the goods made between two logins may fill (`storage_share`, default 0.5).
 
-**Min efficiency**: the share of the best production time the suggested login interval must keep (`min_efficiency`, default 0.8).
+**Min efficiency**: the share of the best production time the suggested number of logins must keep (`min_efficiency`, default 0.8); the best is taken over up to 8 logins.
 
 **Recommendation**: a count the plan proposes where the profile is open: fields, trees and bushes, feeder bushes per day.
 

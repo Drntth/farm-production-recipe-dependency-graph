@@ -123,9 +123,9 @@ farm-production-recipe-dependency-graph/
 │   │   ├── mastery.py                 # mastery modifiers: stars, workbench (placeholder)
 │   │   ├── profile.py                 # player profile with level defaults (option B)
 │   │   ├── examples.py                # level-default profiles for config/examples/
-│   │   ├── quantities.py              # linear program: steady-state rates per login interval
+│   │   ├── quantities.py              # linear program: steady-state rates for one day of login gaps
 │   │   ├── run.py                     # one planner run: profile → capacity → plans → schedule
-│   │   ├── schedule.py                # interval suggestion, recommendations, actions per login
+│   │   ├── schedule.py                # login suggestion and times, recommendations, actions per login
 │   │   └── wizard.py                  # interactive profile wizard (python -m src wizard)
 │   ├── scraper/
 │   │   ├── parsers/
@@ -143,7 +143,7 @@ farm-production-recipe-dependency-graph/
 │   └── main.py
 ├── web/                               # static site (Astro, TypeScript, Svelte): docs/tools/recommend.md
 │   ├── content/                       # UI strings: en.json, hu.json (same keys)
-│   ├── src/                           # views/, pages/ (+ pages/hu/), components/, styles/, data.ts (reads output/recommendations/), i18n.ts
+│   ├── src/                           # views/, pages/ (+ pages/hu/), components/ (FarmView.svelte: farm view), styles/, data.ts (reads output/recommendations/), i18n.ts
 │   └── tests/site.spec.ts             # Playwright, mobile + desktop, en + hu
 ├── tools/
 │   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
@@ -210,7 +210,7 @@ The Core API (`src/api`) is one call per tool. Each takes the unfiltered data (a
 | `analysis_summary(G, *, top_n=8, max_hops=…)`                                             | `src/graph/analysis.py`      | the `analysis.json` payload                                     |
 | `plan_layout(dataset, *, level, player=None, farm_map=None, …, sizing=None, templates=None)` | `src/layout/planner.py`      | `Layout`; `layout_to_dict` / `layout_to_markdown` in `describe.py` |
 | `render_svg(layout, path=None, title=None, *, scale=1.0, offset=(0, 0))`                  | `src/layout/render_svg.py`   | SVG text (also written when `path` is given)                    |
-| `run_planner(player, dataset, *, login_interval=None, storage_share=0.5, min_efficiency=0.8)` | `src/planner/run.py`         | `PlanRun`: profile, capacity, plans, chosen plan, schedule          |
+| `run_planner(player, dataset, *, login_window=None, storage_share=0.5, min_efficiency=0.8)` | `src/planner/run.py`         | `PlanRun`: profile, capacity, plans, chosen plan, schedule          |
 | `combine(full, player, farm_map=None, *, lookahead=5, …)`                                 | `src/combiner/combine.py`    | `CombinedPlan`; `combined_to_dict` / `combined_to_markdown` in `report.py` |
 | `plan_relocation(layout, farm_map, dataset)`                                              | `src/relocation/relocate.py` | `RelocationPlan` from a layout dict                             |
 | `run_wizard(dataset, ask, say)`                                                           | `src/planner/wizard.py`      | `PlayerConfig` (`ask` / `say` are injected)                     |

@@ -78,7 +78,8 @@ def combined_to_dict(combined: CombinedPlan, dataset: DataSet) -> dict[str, Any]
     return {
         "level": combined.level,
         "summary": {
-            "login_interval_hours": plan.interval_hours,
+            "logins_per_day": plan.logins,
+            "login_times": combined.run.schedule["login_times"],
             "production_hours_per_hour": round(plan.busy_hours_per_hour, 2),
             "fields_used": round(plan.fields_used, 2),
             "blocks": len(layout.blocks),
@@ -136,7 +137,8 @@ def combined_to_markdown(combined: CombinedPlan, dataset: DataSet) -> str:
         ),
         "",
         (
-            f"- Login every {plan.interval_hours:g} h; "
+            f"- {plan.logins} logins a day "
+            f"({', '.join(combined.run.schedule['login_times'])}); "
             f"{plan.busy_hours_per_hour:.1f} production hours per hour; "
             f"{round(plan.fields_used)} fields in use."
         ),

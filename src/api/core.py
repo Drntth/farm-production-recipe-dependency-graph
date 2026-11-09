@@ -291,7 +291,7 @@ def production_plan(
     run = run_planner(
         p,
         filtered,
-        login_interval=production.login_interval,
+        login_window=production.login_window,
         storage_share=production.storage_share,
         min_efficiency=production.min_efficiency,
     )
@@ -319,9 +319,10 @@ def production_plan(
         capacity.fields_source,
     )
     planner_log.info(
-        "Login every %g h: %.1f production hours per hour, %.2f spare per good "
-        "and day, %d of %s fields used",
-        chosen.interval_hours,
+        "%d logins a day (longest gap %g h): %.1f production hours per hour, "
+        "%.2f spare per good and day, %d of %s fields used",
+        chosen.logins,
+        max(chosen.login_gaps),
         chosen.busy_hours_per_hour,
         chosen.balance_per_hour * 24,
         round(chosen.fields_used),
@@ -389,7 +390,7 @@ def combined_plan(
         p,
         fm,
         lookahead=combiner.lookahead,
-        login_interval=production.login_interval,
+        login_window=production.login_window,
         storage_share=production.storage_share,
         min_efficiency=production.min_efficiency,
         reserve_ratio=settings.reserve,
@@ -435,10 +436,10 @@ def combined_plan(
 
     layout, plan = combined.layout, combined.run.chosen
     combiner_log.info(
-        "Level %d: login every %g h, %d blocks (%d not placed), strategy %s, "
+        "Level %d: %d logins a day, %d blocks (%d not placed), strategy %s, "
         "reserve %.0f%%",
         combined.level,
-        plan.interval_hours,
+        plan.logins,
         len(layout.blocks),
         len(layout.unplaced_blocks),
         layout.strategy,

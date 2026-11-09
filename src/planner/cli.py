@@ -7,7 +7,7 @@ Usage
     python -m src.planner --level 30
     python -m src.planner --planner-config my_planner.json
 
-Login interval, storage share and minimum efficiency are set in
+Login window, storage share and minimum efficiency are set in
 config/planner.json (``src/settings.py``), not on the command line.
 """
 

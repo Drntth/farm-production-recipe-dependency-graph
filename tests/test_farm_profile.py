@@ -16,7 +16,7 @@ from src.farm_profile import FarmProfile, load_farm_profile
 from src.farm_profile import main as farm_profile_main
 from src.layout import cli as layout_cli
 from src.planner import cli as planner_cli
-from src.schema import KEY
+from src.schema import CURRENT, KEY
 
 DATA_DIR = Path("data")
 pytestmark = pytest.mark.skipif(
@@ -67,7 +67,7 @@ def test_assembled_profile_holds_every_part(files: dict[str, Path]) -> None:
     data = json.loads(files["profile"].read_text(encoding="utf-8"))
     assert data[KEY] == 1 and data["name"] == "Test farm"
     for part in ("player", "profile_map", "design", "planner"):
-        assert data[part][KEY] == 1, part
+        assert data[part][KEY] == CURRENT[part], part
     assert data["templates"]["dairy_garden"][KEY] == 1
     profile = load_farm_profile(files["profile"])
     assert profile.player.level == json.loads(PLAYER.read_text())["level"]

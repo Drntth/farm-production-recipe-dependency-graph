@@ -29,14 +29,17 @@ from src.planner import (
     resolve_profile,
 )
 from src.planner.cli import main
-from src.planner.quantities import login_cycle_hours, plan_production
+from src.planner.quantities import even_gaps, login_cycle_hours, plan_production
 from src.planner.schedule import (
     ACTIONS,
+    MAX_SUGGESTED_LOGINS,
     build_schedule,
-    compare_intervals,
+    compare_logins,
+    last_login_items,
     schedule_to_markdown,
-    suggest_interval,
+    suggest_logins,
 )
+from src.settings import LoginWindow
 
 
 def _loc(loc_id: str, loc_type: str, level: int = 1, **kw) -> Location:
@@ -392,15 +395,32 @@ def _farm(
 
 
 def test_login_cycle_rounds_up_to_logins() -> None:
-    assert login_cycle_hours(120, 1) == 1  # wheat waits for the next login
-    assert login_cycle_hours(3 * 3600, 2) == 4
-    assert login_cycle_hours(4 * 3600, 2) == 4
-    assert login_cycle_hours(0, 0.5) == 0.5
+    assert login_cycle_hours(120, even_gaps(1)) == 1  # wheat waits for a login
+    assert login_cycle_hours(3 * 3600, even_gaps(2)) == 4
+    assert login_cycle_hours(4 * 3600, even_gaps(2)) == 4
+    assert login_cycle_hours(0, even_gaps(0.5)) == 0.5
+
+
+def test_login_cycle_with_uneven_gaps() -> None:
+    # logins at 0, 4, 8, 12 and 16 h: the night gap is 8 h
+    gaps = [4, 4, 4, 4, 8]
+    assert login_cycle_hours(3600, gaps) == pytest.approx(24 / 5)  # every login
+    # 5 h: 0 -> 8 -> 16 -> next 0, three cycles a day
+    assert login_cycle_hours(5 * 3600, gaps) == pytest.approx(8)
+    # 9 h: 0 -> 12 -> next 0, two cycles a day
+    assert login_cycle_hours(9 * 3600, gaps) == pytest.approx(12)
+
+
+def test_even_gaps() -> None:
+    assert even_gaps(3) == [3.0] * 8
+    for bad in (0, 5, -2):
+        with pytest.raises(ValueError):
+            even_gaps(bad)
 
 
 def test_plan_respects_balance_and_capacity() -> None:
     cap, profile, data = _farm()
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
 
     assert plan.balance_per_hour > 0
     for good, spare in plan.surplus_per_hour.items():
@@ -418,7 +438,7 @@ def test_plan_respects_balance_and_capacity() -> None:
 
 def test_plan_external_and_skipped() -> None:
     cap, profile, data = _farm()
-    plan = plan_production(cap, profile, data, interval_hours=1)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(1))
 
     assert plan.skipped_recipes["lucky_cake"] == "external input: voucher"
     # the mine has no rate: its ore is external, limited to what balance needs
@@ -433,7 +453,7 @@ def test_plan_external_and_skipped() -> None:
 def test_beehives_make_honeycomb() -> None:
     cap, profile, data = _farm()
     assert cap.hives["honeycomb"].parallel == 1  # default: one beehive
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     # one honeycomb per 35 min, collected every 2 h
     assert 0 < plan.hive_per_hour["honeycomb"] <= 0.5 + 1e-6
     assert "honeycomb" not in plan.external_per_hour
@@ -485,10 +505,10 @@ def test_squirrel_pairs_make_peanuts_into_the_silo() -> None:
     # one squirrel is no pair: no peanuts
     lone, lone_profile, _ = _squirrel_farm(animals=1)
     assert lone.hives["peanuts"].parallel == 0
-    lone_plan = plan_production(lone, lone_profile, data, interval_hours=2)
+    lone_plan = plan_production(lone, lone_profile, data, login_gaps=even_gaps(2))
     assert lone_plan.hive_per_hour.get("peanuts", 0) == pytest.approx(0)
 
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     peanuts = plan.hive_per_hour["peanuts"]
     # 5 h cycle, collected every 2 h: one peanut per 6 h at most
     assert 0 < peanuts <= 1 / 6 + 1e-6
@@ -509,33 +529,35 @@ def test_squirrel_pairs_make_peanuts_into_the_silo() -> None:
 
 def test_plan_recommends_trees_or_uses_profile() -> None:
     cap, profile, data = _farm()
-    recommended = plan_production(cap, profile, data, interval_hours=2)
+    recommended = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     assert recommended.fruits["apple"].plants_source == "recommended"
     assert recommended.fruits["apple"].plants > 0
 
     cap, profile, data = _farm(apple_trees=0)
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     assert "apple" not in plan.fruits
     assert plan.skipped_recipes["apple_pie"] == "input not available: apple"
 
 
 def test_plan_storage_share_limits_output() -> None:
     cap, profile, data = _farm(barn=10)
-    plan = plan_production(cap, profile, data, interval_hours=4, storage_share=0.5)
+    plan = plan_production(
+        cap, profile, data, login_gaps=even_gaps(4), storage_share=0.5
+    )
     assert plan.barn_per_login <= 5 + 1e-6
 
 
 def test_small_silo_with_owned_trees_still_plans() -> None:
     # 40 apple trees fill the 5 planned silo places alone: no crash, a warning
     cap, profile, data = _farm(apple_trees=40, silo=10)
-    plan = plan_production(cap, profile, data, interval_hours=12)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(12))
     assert plan.warnings and "silo" in plan.warnings[0]
     assert plan.fields_used == 0  # no room left for crops
 
 
 def test_barn_counts_honeycomb() -> None:
     cap, profile, data = _farm(barn=1000)
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     made = sum(
         r.per_hour * data.recipes[r.recipe_id].output.amount
         for r in plan.recipes.values()
@@ -551,51 +573,105 @@ def test_skipped_reason_names_only_missing_goods() -> None:
     data.recipes["apple_pie"].inputs.append(
         data.recipes["iron_bar"].inputs[0]  # iron ore: external, not "missing"
     )
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     assert plan.skipped_recipes["apple_pie"] == "input not available: apple"
 
 
-def test_suggest_interval_without_production() -> None:
+ROUND_THE_CLOCK = LoginWindow(start="00:00", end="00:00")
+
+
+def test_suggest_logins_without_production() -> None:
     cap, profile, data = _farm()
-    plans = compare_intervals(cap, profile, data, intervals=(1, 4))
+    plans = compare_logins(cap, profile, data, counts=(6, 24))
     idle = [replace(p, busy_hours_per_hour=0.0) for p in plans]
-    assert suggest_interval(idle).interval_hours == 1
+    assert suggest_logins(idle).logins == 6  # nothing to make: fewest logins
 
 
 def test_fields_without_level_limits() -> None:
     cap, profile, data = _farm()
     profile = replace(profile, fields_available=None)
-    plan = plan_production(cap, profile, data, interval_hours=2)
+    plan = plan_production(cap, profile, data, login_gaps=even_gaps(2))
     schedule = build_schedule(plan, [plan], cap, profile, data)
     assert "recommended" not in schedule["recommendations"]["fields"]
     assert "None" not in schedule_to_markdown(schedule, data)
 
 
-def test_longer_interval_produces_less() -> None:
+def test_fewer_logins_produce_less() -> None:
     cap, profile, data = _farm()
-    short, long_ = compare_intervals(cap, profile, data, intervals=(0.5, 12))
-    assert long_.busy_hours_per_hour < short.busy_hours_per_hour
-    with pytest.raises(ValueError):
-        plan_production(cap, profile, data, interval_hours=0)
+    few, many = compare_logins(cap, profile, data, ROUND_THE_CLOCK, counts=(2, 48))
+    assert few.busy_hours_per_hour < many.busy_hours_per_hour
+    for bad in ([], [12, 11], [24, 0], [25, -1]):
+        with pytest.raises(ValueError):
+            plan_production(cap, profile, data, login_gaps=bad)
 
 
-def test_suggest_interval_keeps_efficiency() -> None:
+def test_long_night_gap_limits_the_queues() -> None:
     cap, profile, data = _farm()
-    plans = compare_intervals(cap, profile, data)
-    best = max(p.busy_hours_per_hour for p in plans)
-    chosen = suggest_interval(plans, 0.8)
+    even = plan_production(cap, profile, data, login_gaps=even_gaps(2))
+    # 12 logins from 07:00 to 23:00: 16/11 h by day, 8 h at night
+    window = LoginWindow(start="07:00", end="23:00")
+    night = plan_production(cap, profile, data, login_gaps=window.gaps(12))
+    assert night.logins == even.logins == 12
+    assert night.login_gaps[-1] == pytest.approx(8)
+    assert night.busy_hours_per_hour <= even.busy_hours_per_hour + 1e-9
+
+
+def test_storage_share_holds_in_the_night_gap() -> None:
+    cap, profile, data = _farm(barn=10)
+    gaps = LoginWindow(start="07:00", end="23:00").gaps(12)
+    plan = plan_production(cap, profile, data, login_gaps=gaps, storage_share=0.5)
+    # barn_per_login is the worst gap, the 8 h night
+    assert 0 < plan.barn_per_login <= 5 + 1e-6
+
+
+def test_suggest_logins_keeps_efficiency() -> None:
+    cap, profile, data = _farm()
+    plans = compare_logins(cap, profile, data)
+    few = [p for p in plans if p.logins <= MAX_SUGGESTED_LOGINS]
+    best = max(p.busy_hours_per_hour for p in few)
+    chosen = suggest_logins(plans, 0.8)
     assert chosen.busy_hours_per_hour >= 0.8 * best
     assert all(
-        p.busy_hours_per_hour < 0.8 * best
-        for p in plans
-        if p.interval_hours > chosen.interval_hours
+        p.busy_hours_per_hour < 0.8 * best for p in plans if p.logins < chosen.logins
     )
+
+
+def test_suggest_logins_stays_at_a_few_logins() -> None:
+    # regression: busy hours grow almost linearly with logins, so the
+    # efficiency rule alone always picked the most logins (24 a day)
+    cap, profile, data = _farm()
+    plans = compare_logins(cap, profile, data)
+    assert max(p.logins for p in plans) > MAX_SUGGESTED_LOGINS
+    assert suggest_logins(plans).logins <= MAX_SUGGESTED_LOGINS
+
+
+def test_last_login_lists_the_long_items() -> None:
+    cap, profile, data = _farm()
+    window = LoginWindow(start="07:00", end="23:00")
+    plan = plan_production(cap, profile, data, login_gaps=window.gaps(24))
+    day = min(plan.login_gaps)
+    items = last_login_items(plan, cap)
+    assert items and all(i["hours"] > day for i in items)
+    assert [i["hours"] for i in items] == sorted(
+        (i["hours"] for i in items), reverse=True
+    )
+    schedule = build_schedule(plan, [plan], cap, profile, data, window, False)
+    assert schedule["login_times"][0] == "07:00"
+    assert schedule["login_times"][-1] == "23:00"
+    assert schedule["last_login"] == {"time": "23:00", "items": items}
+    assert schedule["night_gap_hours"] == 8
+    md = schedule_to_markdown(schedule, data)
+    assert "Log in **24 times a day** (set): 07:00, " in md
+    assert "## Last login (23:00)" in md
+    # even logins: no night gap, nothing special at the last login
+    even = plan_production(cap, profile, data, login_gaps=even_gaps(1))
+    assert last_login_items(even, cap) == []
 
 
 def test_schedule_actions_and_recommendations() -> None:
     cap, profile, data = _farm()
-    plans = compare_intervals(cap, profile, data, intervals=(1, 2))
-    schedule = build_schedule(plans[0], plans, cap, profile, data)
+    plans = compare_logins(cap, profile, data, ROUND_THE_CLOCK, counts=(12, 24))
+    schedule = build_schedule(plans[-1], plans, cap, profile, data, ROUND_THE_CLOCK)
 
     steps = schedule["actions_per_login"]
     kinds = [s["action"] for s in steps]
@@ -613,7 +689,9 @@ def test_schedule_actions_and_recommendations() -> None:
     json.dumps(schedule)
 
     md = schedule_to_markdown(schedule, data)
-    assert "Log in every **1 h**" in md
+    assert "Log in **24 times a day** (suggested): 00:00, 01:00, " in md
+    assert "1 h apart." in md and "Last login" not in md
+    assert [o["logins"] for o in schedule["login_options"]] == [12, 24]
     assert "**queue** Feed_Mill" in md
 
 
@@ -634,11 +712,13 @@ def test_cli_writes_schedule(tmp_path: Path) -> None:
     args = ["--player-config", str(player), "--output-dir", str(out)]
 
     settings = tmp_path / "planner.json"
-    settings.write_text(json.dumps({"production": {"login_interval": 3}}))
+    window = {"start": "07:00", "end": "23:00", "logins": 8}
+    settings.write_text(json.dumps({"production": {"login_window": window}}))
     assert main([*args, "--planner-config", str(settings)]) == 0
     schedule = json.loads((out / "schedule.json").read_text(encoding="utf-8"))
-    assert schedule["login_interval_hours"] == 3
-    assert schedule["settings"]["login_interval"] == 3
+    assert schedule["logins_per_day"] == 8 and not schedule["logins_suggested"]
+    assert len(schedule["login_times"]) == 8
+    assert schedule["settings"]["login_window"] == window
     assert (out / "schedule.md").exists()
     settings.write_text(json.dumps({"production": {"storage_share": 0}}))
     assert main([*args, "--planner-config", str(settings)]) == 1
@@ -653,7 +733,7 @@ def test_cli_reports_unsolvable_plan(
     def unsolvable(*args, **kwargs):
         raise RuntimeError("Production plan not solvable: test")
 
-    monkeypatch.setattr("src.planner.run.compare_intervals", unsolvable)
+    monkeypatch.setattr("src.planner.run.compare_logins", unsolvable)
     player = tmp_path / "player.json"
     player.write_text(json.dumps({"level": 20}))
     args = ["--player-config", str(player), "--output-dir", str(tmp_path)]

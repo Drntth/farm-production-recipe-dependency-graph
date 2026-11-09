@@ -77,13 +77,14 @@ def test_models_accept_and_hide_the_version(model, data: dict) -> None:
 
 
 def test_example_files_are_versioned() -> None:
-    for path in [
-        "config/player.example.json",
-        "config/design.example.json",
-        "config/planner.example.json",
-        "config/templates/dairy_garden.example.json",
+    for kind, path in [
+        ("player", "config/player.example.json"),
+        ("design", "config/design.example.json"),
+        ("planner", "config/planner.example.json"),
+        ("template", "config/templates/dairy_garden.example.json"),
     ]:
-        assert json.loads(Path(path).read_text(encoding="utf-8"))[KEY] == 1, path
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        assert data[KEY] == CURRENT[kind], path
 
 
 def test_loader_reads_a_versioned_file(tmp_path: Path) -> None:

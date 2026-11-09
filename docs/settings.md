@@ -47,7 +47,7 @@ How the tools work is set in config files, never on the command line: the CLI on
 ```json
 {
   "production": {
-    "login_interval": null,
+    "login_window": { "start": "07:00", "end": "23:00", "logins": null },
     "storage_share": 0.5,
     "min_efficiency": 0.8
   },
@@ -55,9 +55,11 @@ How the tools work is set in config files, never on the command line: the CLI on
 }
 ```
 
-| Key                         | Meaning                                                                       | Default |
-| --------------------------- | ----------------------------------------------------------------------------- | ------- |
-| `production.login_interval` | hours between logins; `null` = suggested                                      | null    |
-| `production.storage_share`  | share of barn and silo the goods of one interval may fill (the rest is stock) | 0.5     |
-| `production.min_efficiency` | the suggested interval keeps at least this share of the best production time  | 0.8     |
-| `combiner.lookahead`        | levels ahead whose unlocks get space now (0 = none)                           | 5       |
+| Key                              | Meaning                                                                                                    | Default |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------- |
+| `production.login_window.start`  | first login of the day (`HH:MM`)                                                                           | 07:00   |
+| `production.login_window.end`    | last login of the day (`HH:MM`); the night until `start` is one long gap; `end` = `start`: round the clock | 23:00   |
+| `production.login_window.logins` | logins per day, spread evenly from `start` to `end` (1-48); `null` = suggested                             | null    |
+| `production.storage_share`       | share of barn and silo the goods of one login gap may fill (the rest is stock)                             | 0.5     |
+| `production.min_efficiency`      | the suggested number of logins (at most 8) keeps at least this share of the best production time           | 0.8     |
+| `combiner.lookahead`             | levels ahead whose unlocks get space now (0 = none)                                                        | 5       |

@@ -169,7 +169,7 @@ The map editor (**Save base map**) or `python -m src migrate-map --base-output d
   "player": { "schema_version": 1, "level": 56 },
   "profile_map": { "schema_version": 1, "unlocked": ["main_1"] },
   "design": { "schema_version": 1, "gap": 1 },
-  "planner": { "schema_version": 1, "production": {}, "combiner": {} },
+  "planner": { "schema_version": 2, "production": {}, "combiner": {} },
   "templates": {
     "dairy_garden": { "schema_version": 1, "width": 6, "height": 5 }
   }

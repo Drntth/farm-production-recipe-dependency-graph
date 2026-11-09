@@ -15,10 +15,13 @@ version.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from typing import Any, ClassVar
 
 from pydantic import BaseModel, model_validator
+
+logger = logging.getLogger(__name__)
 
 Json = dict[str, Any]
 Migration = Callable[[Json], Json]
@@ -28,7 +31,7 @@ KEY = "schema_version"
 CURRENT: dict[str, int] = {
     "player": 1,
     "design": 1,
-    "planner": 1,
+    "planner": 2,
     "template": 1,
     "farm_map": 1,
     "base_map": 1,
@@ -36,11 +39,42 @@ CURRENT: dict[str, int] = {
     "farm_profile": 1,
     "data_bundle": 1,
     # outputs read by the web site (python -m src recommend)
-    "recommendation": 1,
-    "recommendation_index": 1,
+    "recommendation": 2,  # v2.3: login times instead of the login interval
+    "recommendation_index": 2,  # v2.3: logins_per_day instead of the interval
+    "recommendation_map": 1,
 }
+
+
+def _planner_1_to_2(data: Json) -> Json:
+    """
+    v2.3: ``production.login_window`` replaces ``production.login_interval``.
+
+    An interval that divides the day becomes the same logins round the clock
+    (``00:00``-``00:00``, ``24 / interval`` logins); otherwise, or when a login
+    window is already set, it is dropped with a warning.
+    """
+    production = data.get("production")
+    if not isinstance(production, dict) or "login_interval" not in production:
+        return data
+    rest = {k: v for k, v in production.items() if k != "login_interval"}
+    interval = production["login_interval"]
+    if interval is None:
+        return data | {"production": rest}
+    logins = 24 / interval if isinstance(interval, (int, float)) and interval > 0 else 0
+    # 48: MAX_LOGINS_PER_DAY of src/settings.py (which imports this module)
+    if "login_window" not in rest and logins.is_integer() and 1 <= logins <= 48:
+        window = {"start": "00:00", "end": "00:00", "logins": int(logins)}
+        return data | {"production": rest | {"login_window": window}}
+    logger.warning(
+        "Planner settings: login_interval %s is no longer used; set "
+        "production.login_window (start, end, logins) instead",
+        interval,
+    )
+    return data | {"production": rest}
+
+
 # kind -> {version: migration to version + 1}
-MIGRATIONS: dict[str, dict[int, Migration]] = {}
+MIGRATIONS: dict[str, dict[int, Migration]] = {"planner": {1: _planner_1_to_2}}
 
 
 def upgrade(

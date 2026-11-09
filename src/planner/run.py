@@ -10,16 +10,18 @@ from dataclasses import dataclass
 
 from src.config import PlayerConfig
 from src.loaders.json_loader import DataSet
+from src.settings import LoginWindow
 
 from .capacity import CapacityModel, build_capacity
 from .mastery import mastery_modifier
 from .profile import ResolvedProfile, resolve_profile
-from .quantities import DEFAULT_STORAGE_SHARE, ProductionPlan, plan_production
+from .quantities import DEFAULT_STORAGE_SHARE, ProductionPlan
 from .schedule import (
     DEFAULT_MIN_EFFICIENCY,
+    LOGIN_CANDIDATES,
     build_schedule,
-    compare_intervals,
-    suggest_interval,
+    compare_logins,
+    suggest_logins,
 )
 
 
@@ -27,7 +29,7 @@ from .schedule import (
 class PlanRun:
     profile: ResolvedProfile
     capacity: CapacityModel
-    plans: list[ProductionPlan]  # one per candidate interval
+    plans: list[ProductionPlan]  # one per candidate number of logins
     chosen: ProductionPlan
     schedule: dict  # the schedule.json payload
 
@@ -36,7 +38,7 @@ def run_planner(
     player: PlayerConfig,
     dataset: DataSet,
     *,
-    login_interval: float | None = None,
+    login_window: LoginWindow | None = None,
     storage_share: float = DEFAULT_STORAGE_SHARE,
     min_efficiency: float = DEFAULT_MIN_EFFICIENCY,
 ) -> PlanRun:
@@ -49,12 +51,18 @@ def run_planner(
     capacity = build_capacity(
         profile, dataset, mastery_modifier(profile.mastery_system, dataset)
     )
-    plans = compare_intervals(capacity, profile, dataset, storage_share=storage_share)
-    if login_interval is None:
-        chosen = suggest_interval(plans, min_efficiency)
+    window = login_window or LoginWindow()
+    counts = LOGIN_CANDIDATES
+    if window.logins is not None:
+        counts = (*counts, window.logins)
+    plans = compare_logins(
+        capacity, profile, dataset, window, counts, storage_share=storage_share
+    )
+    if window.logins is None:
+        chosen = suggest_logins(plans, min_efficiency)
     else:
-        chosen = plan_production(
-            capacity, profile, dataset, login_interval, storage_share
-        )
-    schedule = build_schedule(chosen, plans, capacity, profile, dataset)
+        chosen = next(p for p in plans if p.logins == window.logins)
+    schedule = build_schedule(
+        chosen, plans, capacity, profile, dataset, window, window.logins is None
+    )
     return PlanRun(profile, capacity, plans, chosen, schedule)

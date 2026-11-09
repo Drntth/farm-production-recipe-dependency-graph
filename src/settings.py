@@ -33,6 +33,9 @@ DEFAULT_STRATEGY = "auto"
 DEFAULT_DECOR_BAND = 1
 DEFAULT_STORAGE_SHARE = 0.5
 DEFAULT_MIN_EFFICIENCY = 0.8
+DEFAULT_LOGIN_START = "07:00"
+DEFAULT_LOGIN_END = "23:00"
+MAX_LOGINS_PER_DAY = 48
 DEFAULT_LOOKAHEAD = 5
 DEFAULT_COMBINER_STRATEGY = "flow"
 DEFAULT_PATH_STYLE = "shortest"
@@ -141,21 +144,77 @@ class DesignSettings(Versioned, _Strict):
         return self
 
 
-class ProductionSettings(_Strict):
-    login_interval: float | None = Field(
-        None, gt=0, description="Hours between logins; null = suggested"
+_CLOCK = r"^([01]\d|2[0-3]):[0-5]\d$"
+_DAY_MINUTES = 24 * 60
+
+
+def _minutes(clock: str) -> int:
+    hours, minutes = clock.split(":")
+    return int(hours) * 60 + int(minutes)
+
+
+def _clock(minutes: float) -> str:
+    m = round(minutes) % _DAY_MINUTES
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+
+class LoginWindow(_Strict):
+    """
+    The player's daily active hours and logins spread evenly in them.
+
+    The first login is at ``start``, the last at ``end``; the night outside
+    the window is one long gap. ``start == end`` means round the clock: the
+    logins split the whole day evenly. A window may pass midnight (22:00-02:00).
+    """
+
+    start: str = Field(DEFAULT_LOGIN_START, pattern=_CLOCK, description="First login")
+    end: str = Field(DEFAULT_LOGIN_END, pattern=_CLOCK, description="Last login")
+    logins: int | None = Field(
+        None,
+        ge=1,
+        le=MAX_LOGINS_PER_DAY,
+        description="Logins per day; null = suggested",
     )
+
+    def window_hours(self) -> float:
+        """Hours from the first to the last login (0 = round the clock)."""
+        return ((_minutes(self.end) - _minutes(self.start)) % _DAY_MINUTES) / 60
+
+    def gaps(self, logins: int) -> list[float]:
+        """Hours from each login to the next one, in order; the sum is 24."""
+        if not 1 <= logins <= MAX_LOGINS_PER_DAY:
+            raise ValueError(f"logins must be 1-{MAX_LOGINS_PER_DAY}, got {logins}")
+        window = self.window_hours()
+        if logins == 1 or window == 0:
+            return [24 / logins] * logins
+        return [window / (logins - 1)] * (logins - 1) + [24 - window]
+
+    def times(self, logins: int) -> list[str]:
+        """
+        Clock times (``HH:MM``) of the logins of one day; rounded down to the
+        minute, so logins less than a minute apart (a very short window with
+        many logins) share a time.
+        """
+        at, out = float(_minutes(self.start)), []
+        for gap in self.gaps(logins):
+            out.append(_clock(at))
+            at += gap * 60
+        return out
+
+
+class ProductionSettings(_Strict):
+    login_window: LoginWindow = Field(default_factory=LoginWindow)
     storage_share: float = Field(
         DEFAULT_STORAGE_SHARE,
         gt=0,
         le=1,
-        description="Share of barn and silo the goods of one interval may fill",
+        description="Share of barn and silo the goods of one login gap may fill",
     )
     min_efficiency: float = Field(
         DEFAULT_MIN_EFFICIENCY,
         gt=0,
         le=1,
-        description="Suggested interval keeps at least this share of the best",
+        description="Suggested logins keep at least this share of the best",
     )
 
 

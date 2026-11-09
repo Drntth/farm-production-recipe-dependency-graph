@@ -19,7 +19,7 @@ Built from the resolved profile, so it needs no layout. Game rules used
 
 Rates are upper bounds: items per hour if the location made only that
 recipe, with someone always online. ``src.planner.quantities`` shares the
-time and applies the login interval.
+time and applies the login gaps.
 """
 
 from __future__ import annotations

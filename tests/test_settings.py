@@ -33,8 +33,9 @@ def test_design_settings_reject_bad_values() -> None:
 
 
 def test_planner_settings_reject_bad_values() -> None:
-    with pytest.raises(ValidationError):
-        s.PlannerSettings(production={"login_interval": 0})
+    for window in ({"logins": 0}, {"logins": 49}, {"start": "24:00"}, {"end": "7:00"}):
+        with pytest.raises(ValidationError):
+            s.PlannerSettings(production={"login_window": window})
     with pytest.raises(ValidationError):
         s.PlannerSettings(production={"storage_share": 1.2})
     with pytest.raises(ValidationError):
@@ -110,3 +111,53 @@ def test_path_network_options_of_v1_4() -> None:
     ):
         with pytest.raises(ValidationError):
             s.DesignSettings(**bad)
+
+
+def test_login_window_gaps_and_times() -> None:
+    w = s.LoginWindow()  # 07:00-23:00
+    assert w.window_hours() == 16
+    assert w.gaps(5) == [4, 4, 4, 4, 8]  # the night is the long gap
+    assert w.times(5) == ["07:00", "11:00", "15:00", "19:00", "23:00"]
+    assert w.gaps(1) == [24] and w.times(1) == ["07:00"]
+    assert sum(s.LoginWindow(start="08:30", end="21:10").gaps(4)) == pytest.approx(24)
+
+
+def test_login_window_round_the_clock_and_past_midnight() -> None:
+    whole = s.LoginWindow(start="00:00", end="00:00")
+    assert whole.gaps(8) == [3] * 8  # the former even login interval
+    late = s.LoginWindow(start="22:00", end="02:00")
+    assert late.window_hours() == 4
+    assert late.times(3) == ["22:00", "00:00", "02:00"]
+    assert late.gaps(3) == [2, 2, 20]
+    with pytest.raises(ValueError):
+        late.gaps(0)
+
+
+def test_planner_settings_map_the_old_login_interval(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # a file without schema_version is version 1: an interval that divides
+    # the day becomes the same logins round the clock
+    old = s.PlannerSettings.model_validate({"production": {"login_interval": 3}})
+    assert old.production.login_window == s.LoginWindow(
+        start="00:00", end="00:00", logins=8
+    )
+    assert old.production.login_window.gaps(8) == [3.0] * 8
+    assert caplog.text == ""
+    s.PlannerSettings.model_validate({"production": {"login_interval": None}})
+    assert caplog.text == ""  # nothing set, nothing lost
+    # an interval that does not divide the day is dropped with a warning
+    odd = s.PlannerSettings.model_validate({"production": {"login_interval": 5}})
+    assert odd.production.login_window == s.LoginWindow()
+    assert "login_interval 5 is no longer used" in caplog.text
+    caplog.clear()
+    # a login window already set wins
+    both = s.PlannerSettings.model_validate(
+        {"production": {"login_interval": 3, "login_window": {"logins": 4}}}
+    )
+    assert both.production.login_window.logins == 4
+    assert "login_interval 3 is no longer used" in caplog.text
+    with pytest.raises(ValidationError):  # version 2 knows no login_interval
+        s.PlannerSettings.model_validate(
+            {"schema_version": 2, "production": {"login_interval": 3}}
+        )
