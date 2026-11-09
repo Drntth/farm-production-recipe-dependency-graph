@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-09
+
 - Planner: `production.login_window` (`start`, `end`, `logins`; default 07:00-23:00, `logins` suggested) replaces `login_interval`; the logins are spread over the window with one long night gap, the plan uses the exact gaps, and `schedule.json` gives the login times, the day and night gap and the long items to start at the last login. The suggestion stays at up to 8 logins a day. Planner settings schema 2 (an old interval that divides the day becomes the same logins round the clock, otherwise it is dropped with a warning).
 - Recommendations: schema 2 (`logins_per_day` and `login_times` instead of the interval) and `map.json` (the base map for the farm view).
 - Web: layout and plan on separate pages (`/levels/N/`, `/levels/N/plan/`); the level switch stays on the open tab; a short plan summary on the layout page.

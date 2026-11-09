@@ -8,7 +8,7 @@ Commit prefix: [HAYDAY-PROJECT]
 
 The project analyses Hay Day production chains. It turns locations, resources and recipes into a weighted directed graph (NetworkX). From that graph it forms named production blocks for the farm layout and plans production quantities. Overview: `README.md`; how each tool works: `docs/tools/`.
 
-- Milestones v0.3-v2.3 are done (v2.3 not yet released); what each brought is in `docs/roadmap.md`. Next: **v2.4** (farm profiles and the plan in the browser); the v2+ sub-versions are in `docs/roadmap.md`, the web app design and its decisions in `docs/v2-design.md`.
+- Milestones v0.3-v2.3 are done (v2.3 released as v2.3.0); what each brought is in `docs/roadmap.md`. Next: **v2.4** (farm profiles and the plan in the browser); the v2+ sub-versions are in `docs/roadmap.md`, the web app design and its decisions in `docs/v2-design.md`.
 - The values the wiki lacks are measured or accepted estimates in `docs/wiki-gaps.md`.
 
 ## Read first
