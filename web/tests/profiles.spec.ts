@@ -113,6 +113,12 @@ test("two farm profiles give their own plans (Pyodide)", async ({ page }, info) 
   const plan = page.getByTestId("profile-plan");
   await expect(plan.getByTestId("login-times").locator("li").first()).toHaveText(/^\d\d:\d\d$/, { timeout: 150_000 });
   const early = await plan.innerText();
+  // the first call: loading and planning timed apart (not the same number twice)
+  const [load, planning] = ((await page.getByTestId("timing").innerText()).match(/\d+(\.\d+)?/g) ?? []).map(Number);
+  expect(planning).toBeLessThan(load);
+  // the planner's notes in the page language, not the Python log text
+  await expect(page.getByTestId("notes")).toContainText("Barn capacity is not set");
+  await expect(page.getByTestId("notes")).not.toContainText("Player config");
 
   await createProfile(page, "Late", 50);
   await expect(plan).toHaveCount(0);

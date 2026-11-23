@@ -22,7 +22,8 @@
   } from "../profiles/profile";
   import { createProfileStore, requestPersist, type StoredProfile } from "../profiles/store";
   import type { FarmProfile, LocationField, LocationProgress, PlayerNumberField } from "../profiles/types";
-  import { onProgress, planFarmProfile, type Progress } from "../worker/client";
+  import { translateWarning } from "../profiles/warnings";
+  import { loadTime, onProgress, planFarmProfile, type Progress } from "../worker/client";
 
   interface Props {
     lang: Lang;
@@ -205,15 +206,15 @@
     try {
       const out = await planFarmProfile(JSON.parse(from));
       const total = (performance.now() - started) / 1000;
-      // the first call includes loading Pyodide; the worker does not split the time
-      const loadSeconds = workerLoaded ? null : total;
+      // the first call includes loading Pyodide: shown apart from the planning
+      const loadSeconds = workerLoaded ? null : loadTime();
       workerLoaded = true;
       plans[id] = {
         schedule: out.result as unknown as Combined["schedule"],
         warnings: [...new Set(out.warnings)],
         from,
         loadSeconds,
-        planSeconds: total,
+        planSeconds: loadSeconds === null ? total : Math.max(total - loadSeconds, 0),
       };
     } catch (error) {
       message = fill(t.error, { error: error instanceof Error ? error.message : String(error) });
@@ -224,6 +225,10 @@
   }
 
   const seconds = (s: number) => number(s, lang, 1);
+  const noteNames = {
+    location: (id: string) => defaults?.locations[id]?.name ?? id,
+    storage: (name: string) => (name === "barn_capacity" ? t.barn : t.silo),
+  };
 </script>
 
 <section class="card mt-8 p-4 sm:p-6" aria-labelledby="profile-list">
@@ -422,10 +427,10 @@
       </p>
       {#if stale}<p class="warning mt-3" data-testid="stale">{t.stale}</p>{/if}
       {#if plan.warnings.length > 0}
-        <details class="mt-3">
+        <details class="mt-3" data-testid="notes">
           <summary class="cursor-pointer font-semibold">{t.warnings} ({plan.warnings.length})</summary>
           <ul class="item-list mt-2">
-            {#each plan.warnings as w (w)}<li class="item">{w.replace(/^src\.[a-z_.]+: /, "")}</li>{/each}
+            {#each plan.warnings as w (w)}<li class="item">{translateWarning(w, t.notes, noteNames)}</li>{/each}
           </ul>
         </details>
       {/if}

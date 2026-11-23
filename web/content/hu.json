@@ -142,6 +142,18 @@
     "planFor": "{name} terve",
     "stale": "A farmprofil változott a terv óta: számold újra.",
     "warnings": "A tervező megjegyzései",
+    "notes": {
+      "storageNotSet": "{storage} nincs megadva: a terv nem számol a tárolóhellyel.",
+      "fieldsOver": "{value} föld van megadva, de a {level}. szinten csak {max} érhető el.",
+      "ownedOver": "{location}: {value} darab van megadva, de a {level}. szinten csak {max} érhető el.",
+      "slotsOver": "{location}: {value} hely van megadva, de csak {copies} × {per} van.",
+      "slotsNoCopy": "{location}: helyek megadva, de nincs belőle egy darab sem.",
+      "slotsNotApply": "{location}: itt nincsenek helyek.",
+      "animalsOver": "{location}: {value} állat van megadva, de csak {copies} × {per} hely van.",
+      "notUnlocked": "{location} a {unlock}. szinten nyílik meg, a farm {level}. szintű.",
+      "unknownLocation": "{location}: ismeretlen épület, kihagyva.",
+      "siloFull": "A fák és bokrok termése belépésenként {fixed} silóhelyet foglal, több mint a termelésre szánt {room}."
+    },
     "error": "A terv nem sikerült: {error}"
   },
   "actions": {

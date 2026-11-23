@@ -13,6 +13,9 @@ let nextId = 1;
 const pending = new Map<number, Pending>();
 const progressListeners = new Set<(progress: Progress) => void>();
 let ready = false;
+// worker start → `ready`: the Pyodide load time of the first call
+let startedAt = 0;
+let loadSeconds: number | null = null;
 let readyWaiters: Array<{ resolve: () => void; reject: (reason: Error) => void }> = [];
 
 function handle(message: WorkerResponse): void {
@@ -22,6 +25,7 @@ function handle(message: WorkerResponse): void {
       break;
     case "ready":
       ready = true;
+      loadSeconds = (performance.now() - startedAt) / 1000;
       readyWaiters.forEach((w) => w.resolve());
       readyWaiters = [];
       break;
@@ -50,12 +54,18 @@ function handle(message: WorkerResponse): void {
 
 function getWorker(): Worker {
   if (!worker) {
+    startedAt = performance.now();
     worker = new Worker(new URL("./planner.worker.ts", import.meta.url), {
       type: "module",
     });
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => handle(event.data);
   }
   return worker;
+}
+
+/** Seconds from the worker start to a loaded Pyodide; null until it is loaded. */
+export function loadTime(): number | null {
+  return loadSeconds;
 }
 
 /** Subscribe to the loading progress; returns the unsubscribe function. */

@@ -142,6 +142,18 @@
     "planFor": "Plan for {name}",
     "stale": "The farm profile changed since this plan: calculate again.",
     "warnings": "Notes from the planner",
+    "notes": {
+      "storageNotSet": "{storage} is not set: the plan ignores storage.",
+      "fieldsOver": "{value} fields set, but only {max} are available at level {level}.",
+      "ownedOver": "{location}: {value} copies set, but only {max} are available at level {level}.",
+      "slotsOver": "{location}: {value} slots set, but there are only {copies} × {per}.",
+      "slotsNoCopy": "{location}: slots set, but no copy is owned.",
+      "slotsNotApply": "{location}: slots do not apply here.",
+      "animalsOver": "{location}: {value} animals set, but there are only {copies} × {per} places.",
+      "notUnlocked": "{location} unlocks at level {unlock}; the farm is level {level}.",
+      "unknownLocation": "{location}: unknown building, ignored.",
+      "siloFull": "The fruit of the trees and bushes takes {fixed} silo places per login, more than the {room} meant for production."
+    },
     "error": "The plan failed: {error}"
   },
   "actions": {
