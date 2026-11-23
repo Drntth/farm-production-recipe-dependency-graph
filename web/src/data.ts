@@ -4,6 +4,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+export { label, url } from "./paths";
+
 export interface IndexRow {
   level: number;
   blocks: number;
@@ -182,18 +184,6 @@ export function loadMap(): MapView {
 
 export function loadLevelSvg(level: number): string {
   return readFileSync(resolve(recommendationsDir(), `level_${level}.svg`), "utf-8");
-}
-
-/** `apple_juice` → `Apple juice` (the level JSON carries ids only). */
-export function label(id: string): string {
-  const text = id.replaceAll("_", " ");
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-/** A path below the site base (GitHub Pages serves the site in a subdirectory). */
-export function url(path: string): string {
-  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-  return `${base}/${path.replace(/^\//, "")}`;
 }
 
 /** Buildings first unlocked since the previous listed level: its look-ahead (kind `new`). */

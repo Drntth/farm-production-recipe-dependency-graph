@@ -51,7 +51,9 @@ Own measurement in a throwaway browser spike (not in this repository; not reprod
 | Desktop, cold              | Pyodide ready 1.4 s, packages 2.6 s, first `all` run 7.5 s                 |
 | Desktop, warm              | `all` ~2 s, `combine` ("Check") ~0.9 s                                     |
 | Heap                       | 113 MB                                                                     |
-| Mobile                     | not measured yet; planned for v2.4                                         |
+| Mobile                     | not measured yet (v2.4: the "My farms" page shows load and plan time)      |
+
+Repeatable check since v2.4: `node web/scripts/pyodide-smoke.mjs` (CI job `pyodide-smoke`, Node 24, npm `pyodide` 314.0.8, packages from the CDN) plans a level-30 farm profile and compares the JSON with native CPython. Local run, 2026-11-23: identical (82903 characters); native 0.7 s; Pyodide ready 1.2 s, packages 1.4 s, `core.zip` and data bundle 2.6 s, plan 0.5 s cold / 0.4 s warm; 6.8 s in all. In headless Chromium (Playwright) the first plan of the page, download included, took about 16 s.
 
 Loading notes: only module workers work (`new Worker(url, { type: "module" })`); load networkx by its wheel URL, because its Pyodide lock entry pulls in matplotlib.
 

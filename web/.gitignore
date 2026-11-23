@@ -3,3 +3,6 @@ dist/
 .astro/
 test-results/
 playwright-report/
+
+# Generated build-time files of the browser planner (python -m src web-files)
+public/py/

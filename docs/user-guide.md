@@ -1,6 +1,6 @@
 # User guide
 
-How to get a production plan and a farm layout for your own Hay Day farm. Everything runs locally from the command line; nothing is uploaded. The tool pages in [docs/tools/](tools/) explain how the tools work inside; this guide is about using them.
+How to get a production plan and a farm layout for your own Hay Day farm. Everything runs locally from the command line; nothing is uploaded. Only a plan is quicker on the web site: the "My farms" page keeps your farm profiles in the browser and plans them there, also without uploading anything ([tools/browser-planner.md](tools/browser-planner.md)); its export is a farm profile the command line reads with `--farm-profile`. The tool pages in [docs/tools/](tools/) explain how the tools work inside; this guide is about using them.
 
 ## 1. Install
 

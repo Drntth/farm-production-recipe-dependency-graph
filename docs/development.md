@@ -60,17 +60,22 @@ The steps one by one are below. The npm versions are exact and at least two week
 
 ```bash
 python -m src recommend --levels 1,20,40   # or every level: python -m src recommend (about 3 minutes)
+python -m src web-files                    # core.zip, data bundle, level defaults → web/public/py/ ("My farms")
 cd web
 npm ci
 npm run check                              # astro check: TypeScript and Svelte
+npm test                                   # Vitest: farm profile functions and store (src/**/*.test.ts)
 npm run format:check                       # Prettier (Astro, Svelte, TS, CSS, JSON); npm run format fixes it
 npm run build                              # dist/; RECOMMENDATIONS_DIR overrides ../output/recommendations
 npx playwright install chromium            # once
 npm run test:e2e                           # Playwright on the built site, mobile + desktop
 npm run dev                                # local server with reload
+node scripts/pyodide-smoke.mjs             # the core in Pyodide vs. native CPython (network; after web-files)
 ```
 
-Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `main`. It computes levels 1-100, builds `web/dist` and deploys it to GitHub Pages. One-time setting in the repository: Settings → Pages → Source "GitHub Actions". The generated recommendations are not committed.
+The browser planner of the "My farms" page: [tools/browser-planner.md](tools/browser-planner.md).
+
+Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `main`. It computes levels 1-100, runs `python -m src web-files`, builds `web/dist` and deploys it to GitHub Pages. One-time setting in the repository: Settings → Pages → Source "GitHub Actions". The generated recommendations are not committed.
 
 ## Common changes
 

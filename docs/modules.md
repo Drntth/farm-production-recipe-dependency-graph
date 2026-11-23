@@ -63,6 +63,7 @@ farm-production-recipe-dependency-graph/
 ├── output/                            # generated exports land here
 ├── src/
 │   ├── api/                           # Core API: the tools without file IO (dict in, dict out)
+│   │   ├── browser.py                 # plan_farm_profile, level_defaults: the Pyodide worker's entry
 │   │   ├── core.py                    # layout_plan, production_plan, combined_plan, relocation_plan
 │   │   └── output.py                  # write_files: the CLI side
 │   ├── combiner/                      # Combiner (farm): the only place joining both planners
@@ -75,7 +76,8 @@ farm-production-recipe-dependency-graph/
 │   │   └── report.py                  # relocation.json / relocation.md
 │   ├── recommend/                     # level recommendations for the web site (Core API per level)
 │   │   ├── build.py                   # level_recommendation, recommendations: files per level + index
-│   │   └── cli.py                     # python -m src recommend
+│   │   ├── cli.py                     # python -m src recommend
+│   │   └── web_files.py               # python -m src web-files: core.zip, bundle, defaults for the browser planner
 │   ├── __main__.py                    # python -m src <command>
 │   ├── cli.py                         # unified CLI: every command of COMMANDS, and all
 │   ├── config.py                      # player profile: model, loader, validation
@@ -143,8 +145,9 @@ farm-production-recipe-dependency-graph/
 │   └── main.py
 ├── web/                               # static site (Astro, TypeScript, Svelte): docs/tools/recommend.md
 │   ├── content/                       # UI strings: en.json, hu.json (same keys)
-│   ├── src/                           # views/, pages/ (+ pages/hu/), components/ (FarmView.svelte: farm view), styles/, data.ts (reads output/recommendations/), i18n.ts
-│   └── tests/site.spec.ts             # Playwright, mobile + desktop, en + hu
+│   ├── scripts/pyodide-smoke.mjs      # the core in Pyodide under Node vs. native CPython
+│   ├── src/                           # views/, pages/ (+ pages/hu/), components/ (FarmView, FarmProfiles, PlanView), profiles/ (farm profiles, IndexedDB store), worker/ (Pyodide), styles/, data.ts, paths.ts, i18n.ts
+│   └── tests/                         # Playwright (site.spec.ts, profiles.spec.ts), mobile + desktop, en + hu
 ├── tools/
 │   └── farm_map_editor.html           # screenshot calibration → config/farm_map.json, PNG exports
 ├── tests/
@@ -153,6 +156,7 @@ farm-production-recipe-dependency-graph/
 │   ├── test_api.py                    # Core API vs. the CLI files
 │   ├── test_architecture.py           # docs/architecture.md diagram vs. the real imports
 │   ├── test_base_map.py               # base map / profile map split, migrate-map
+│   ├── test_browser.py                # browser glue, web-files, core.zip runs on its own
 │   ├── test_bundle.py                 # data bundle vs. data/
 │   ├── test_cli.py
 │   ├── test_combiner.py

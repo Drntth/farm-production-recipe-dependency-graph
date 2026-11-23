@@ -56,6 +56,7 @@ flowchart TB
 
     api --> combiner
     api --> config
+    api --> fprofile
     api --> layout
     api --> loaders
     api --> planner

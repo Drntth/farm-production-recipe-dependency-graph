@@ -40,6 +40,8 @@ elif [[ ! -f "$REC_DIR/index.json" ]]; then
   echo "No $REC_DIR/index.json: computing levels 1-100 (about 3 minutes)."
   "$PY" -m src recommend --output-dir "$REC_DIR"
 fi
+# the browser planner of "My farms": core.zip, data bundle, level defaults → web/public/py/
+"$PY" -m src web-files
 
 cd web
 if [[ ! -d node_modules ]]; then

@@ -210,10 +210,10 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v2.4 - Farm profiles and the plan in the browser
 
-- [ ] Interactive, dynamic farm profile form: fields follow the level and start from the level defaults (`null` = level default)
-- [ ] At least two farm profiles side by side in IndexedDB; JSON export / import; `navigator.storage.persist()`
-- [ ] Pyodide in a module Web Worker, loaded on the first own calculation; plan and login schedule for the active farm profile
-- [ ] Pyodide smoke test in CI against the native outputs
+- [x] Interactive, dynamic farm profile form: fields follow the level and start from the level defaults (`null` = level default)
+- [x] At least two farm profiles side by side in IndexedDB; JSON export / import; `navigator.storage.persist()`
+- [x] Pyodide in a module Web Worker, loaded on the first own calculation; plan and login schedule for the active farm profile
+- [x] Pyodide smoke test in CI against the native outputs
 - [ ] Mobile measurement on a real phone (download, start, run)
 - Done: two farm profiles give their own plans; an exported profile imports unchanged
 

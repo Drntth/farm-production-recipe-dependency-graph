@@ -35,6 +35,7 @@ jobs:
       - run: pip install -r requirements.txt
       # levels 1-100, a few minutes
       - run: python -m src recommend
+      - run: python -m src web-files
       - run: npm ci
         working-directory: web
       - run: npm run build

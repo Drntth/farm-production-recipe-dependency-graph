@@ -28,7 +28,7 @@ The output is deterministic: the same data and code give the same files.
 
 ## Static site (`web/`)
 
-Astro with TypeScript and two Svelte islands (the level picker and the farm view). Every page is static HTML built from `output/recommendations/` (or `RECOMMENDATIONS_DIR`); no Python and no Pyodide run in the browser.
+Astro with TypeScript and Svelte islands (the level picker and the farm view; the "My farms" page has its own, see [browser-planner.md](browser-planner.md)). Every level page is static HTML built from `output/recommendations/` (or `RECOMMENDATIONS_DIR`); no Python and no Pyodide run on it. Only the "My farms" page loads Pyodide, on its first calculation.
 
 | Page              | Content                                                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

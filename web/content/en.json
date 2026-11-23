@@ -12,7 +12,8 @@
     "menu": "Menu",
     "language": "Magyar nyelvű oldal",
     "theme": "Toggle dark mode",
-    "top": "Back to top"
+    "top": "Back to top",
+    "profiles": "My farms"
   },
   "home": {
     "title": "Farm layout and production plan for every level",
@@ -84,6 +85,64 @@
     "planTitle": "Level {n}: production plan",
     "planBrief": "The plan in brief",
     "openPlan": "Open the production plan"
+  },
+  "profiles": {
+    "title": "My farms",
+    "intro": "Describe your own farm and get its production plan. Every value starts from the level default: change only what differs on your farm. The farms stay in this browser; export them as JSON for a backup.",
+    "list": "Farm profiles",
+    "empty": "No farm profile yet. Create one below.",
+    "newTitle": "New farm profile",
+    "name": "Name",
+    "defaultName": "Farm {n}",
+    "level": "Level",
+    "create": "Create",
+    "export": "Export JSON",
+    "import": "Import JSON",
+    "remove": "Delete",
+    "confirmRemove": "Delete the farm profile \"{name}\"? Export it first if you want to keep it.",
+    "importError": "Import failed: {error}",
+    "persisted": "The browser keeps the farm profiles.",
+    "notPersisted": "The browser may delete the farm profiles when space runs low: export them as a backup.",
+    "storage": "Storage, fields and fishing",
+    "barn": "Barn capacity",
+    "silo": "Silo capacity",
+    "fields": "Fields owned",
+    "fishing": "Fishing spots unlocked",
+    "notSet": "not set",
+    "recommended": "recommended",
+    "defaultHint": "An empty field uses the level default shown in grey.",
+    "loginWindow": "Daily logins",
+    "start": "First login",
+    "end": "Last login",
+    "logins": "Logins per day",
+    "suggested": "suggested",
+    "groups": {
+      "production": "Production buildings",
+      "animal": "Animals",
+      "tree": "Trees",
+      "bush": "Bushes",
+      "other": "Other"
+    },
+    "fieldNames": {
+      "owned": "Owned",
+      "slots": "Slots",
+      "mastery_stars": "Mastery stars",
+      "animals": "Animals",
+      "beehives": "Beehives"
+    },
+    "calculate": "Calculate the plan",
+    "calculating": "Calculating…",
+    "loading": "Loading the planner ({stage}): the first time downloads about 25 MB.",
+    "stages": {
+      "runtime": "Python",
+      "packages": "packages",
+      "core": "planner"
+    },
+    "timing": "Planner loaded in {load} s, plan in {plan} s.",
+    "planFor": "Plan for {name}",
+    "stale": "The farm profile changed since this plan: calculate again.",
+    "warnings": "Notes from the planner",
+    "error": "The plan failed: {error}"
   },
   "actions": {
     "collect": "Collect",

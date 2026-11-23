@@ -12,7 +12,8 @@
     "menu": "Menü",
     "language": "English version",
     "theme": "Sötét mód be- és kikapcsolása",
-    "top": "Vissza a tetejére"
+    "top": "Vissza a tetejére",
+    "profiles": "Saját farmok"
   },
   "home": {
     "title": "Farmelrendezés és termelési terv minden szintre",
@@ -84,6 +85,64 @@
     "planTitle": "{n}. szint: termelési terv",
     "planBrief": "A terv röviden",
     "openPlan": "A termelési terv megnyitása"
+  },
+  "profiles": {
+    "title": "Saját farmok",
+    "intro": "Írd le a saját farmodat, és megkapod a termelési tervét. Minden érték a szint alapértékéből indul: csak azt írd át, ami a farmodon más. A farmok ebben a böngészőben maradnak; biztonsági mentésnek exportáld őket JSON-ba.",
+    "list": "Farmprofilok",
+    "empty": "Még nincs farmprofil. Hozz létre egyet lent.",
+    "newTitle": "Új farmprofil",
+    "name": "Név",
+    "defaultName": "{n}. farm",
+    "level": "Szint",
+    "create": "Létrehozás",
+    "export": "JSON export",
+    "import": "JSON import",
+    "remove": "Törlés",
+    "confirmRemove": "Törlöd a(z) „{name}” farmprofilt? Ha meg akarod tartani, előbb exportáld.",
+    "importError": "Az import nem sikerült: {error}",
+    "persisted": "A böngésző megőrzi a farmprofilokat.",
+    "notPersisted": "Kevés hely esetén a böngésző törölheti a farmprofilokat: exportáld őket mentésnek.",
+    "storage": "Tárolók, földek, horgászat",
+    "barn": "Pajta kapacitása",
+    "silo": "Siló kapacitása",
+    "fields": "Földek száma",
+    "fishing": "Megnyitott horgászhelyek",
+    "notSet": "nincs megadva",
+    "recommended": "ajánlott",
+    "defaultHint": "Az üres mező a szürkén látható szint-alapértéket használja.",
+    "loginWindow": "Napi belépések",
+    "start": "Első belépés",
+    "end": "Utolsó belépés",
+    "logins": "Belépések naponta",
+    "suggested": "javasolt",
+    "groups": {
+      "production": "Termelő épületek",
+      "animal": "Állatok",
+      "tree": "Fák",
+      "bush": "Bokrok",
+      "other": "Egyéb"
+    },
+    "fieldNames": {
+      "owned": "Darab",
+      "slots": "Helyek",
+      "mastery_stars": "Mesterségcsillag",
+      "animals": "Állatok",
+      "beehives": "Kaptárak"
+    },
+    "calculate": "Terv számítása",
+    "calculating": "Számolás…",
+    "loading": "A tervező betöltése ({stage}): első alkalommal kb. 25 MB letöltés.",
+    "stages": {
+      "runtime": "Python",
+      "packages": "csomagok",
+      "core": "tervező"
+    },
+    "timing": "Tervező betöltve {load} mp alatt, terv {plan} mp alatt.",
+    "planFor": "{name} terve",
+    "stale": "A farmprofil változott a terv óta: számold újra.",
+    "warnings": "A tervező megjegyzései",
+    "error": "A terv nem sikerült: {error}"
   },
   "actions": {
     "collect": "Begyűjtés",

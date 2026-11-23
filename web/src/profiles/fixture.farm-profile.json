@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "Farm B",
+  "player": {
+    "schema_version": 1,
+    "level": 40,
+    "fields_owned": 60,
+    "locations": {
+      "bakery": {
+        "slots": 7,
+        "mastery_stars": 2
+      },
+      "beehive_tree": {
+        "beehives": 2
+      }
+    }
+  },
+  "profile_map": {
+    "schema_version": 1
+  },
+  "design": {
+    "schema_version": 1
+  },
+  "planner": {
+    "schema_version": 2
+  },
+  "templates": {}
+}

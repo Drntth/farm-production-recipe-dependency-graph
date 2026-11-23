@@ -3,7 +3,7 @@
 // game item names come from the data and stay English.
 import en from "../content/en.json";
 import hu from "../content/hu.json";
-import { url } from "./data";
+import { url } from "./paths";
 
 export type Lang = "en" | "hu";
 export const LANGS: Lang[] = ["en", "hu"];
