@@ -25,9 +25,12 @@ Project knowledge that is not code and not scraped data. Read these before resea
 | [tools/relocation.md](tools/relocation.md)                               | relocation plan: keep / store / place                                                     |
 | [tools/recommend.md](tools/recommend.md)                                 | level recommendations and the static site (`web/`)                                        |
 | [tools/map-editor.md](tools/map-editor.md)                               | farm map format and the browser map editor, step by step                                  |
+| [tools/browser-planner.md](tools/browser-planner.md)                     | "My farms": farm profiles in the browser, the plan in Pyodide, `web-files`                |
 | [data-model.md](data-model.md)                                           | `data/*.json`, level limits, overrides, pydantic models                                   |
 | [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                |
 | [modules.md](modules.md)                                                 | repository tree, module roles, entry points without file IO                               |
+| [code-map.md](code-map.md)                                               | which file holds what: `config/`, `src/` packages, `web/`, `tools/`, `tests/`             |
+| [conventions.md](conventions.md)                                         | code, data model, where data goes, player profile rules                                   |
 | [development.md](development.md)                                         | setup, checks, tests, CI, releases                                                        |
 | [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and the v2+ sub-versions                                           |
 | [v2-design.md](v2-design.md)                                             | web app target architecture, Pyodide measurements, data model changes, decisions          |

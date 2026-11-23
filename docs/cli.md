@@ -32,6 +32,7 @@ python -m src all --farm-profile config/farm_profile.json   # every tool from on
 python -m src bundle                # data/ with the overrides → output/data_bundle.json
 python -m src recommend             # level recommendations 1-100 → output/recommendations/ (the web site)
 python -m src recommend --levels 1,20,40
+python -m src web-files             # core.zip, data bundle, level defaults → web/public/py/ ("My farms" page)
 
 # build graph + analysis for the configured player level
 python -m src.main
@@ -121,4 +122,40 @@ Every command takes `--help`. The options only say what to run (level, file path
 | `farm-profile`                | `--player-config`, `--map`, `--design-config`, `--planner-config` (the same defaults as the tools), `--data-dir`, `--name`, `--output` (config/farm_profile.json), `--force`                                                            |
 | `recommend`                   | `--data-dir` (data), `--levels` (1-100; ranges and lists: `1-10,40`), `--output-dir` (output/recommendations)                                                                                                                           |
 | `bundle`                      | `--data-dir` (data), `--output` (output/data_bundle.json)                                                                                                                                                                               |
+| `web-files`                   | `--data-dir` (data), `--output-dir` (web/public/py)                                                                                                                                                                                     |
 | `all`                         | `--level`, `--player-config`, `--data-dir`, `--output-dir`, `--map`, `--design-config`, `--planner-config`, `--farm-profile`; each step gets the ones it accepts                                                                        |
+
+## Quick list
+
+Copy-paste block with the commands of the development loop (setup, checks, tools, web):
+
+```bash
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt       # pytest, ruff
+
+python -m pytest                          # all tests must pass (no network needed)
+ruff check src tests                      # lint; format check: ruff format --check src tests
+python -m src all                         # unified CLI: graph, farm layout, plan, combined plan in one run
+python -m src <graph|layout|plan|combine|scrape> [options]   # one tool; same options as its own entry point below
+python -m src.main                        # graph + analysis into output/; level from the player config; validates the profile
+python -m src.main --level 30             # override the player level
+python -m src.layout                      # farm layout: output/layout.svg, layout.md, layout.json
+# settings live only in config/design.json and config/planner.json (src/settings.py), never in CLI options
+python -m src.planner                     # production plan: output/capacity.json, schedule.json, schedule.md
+python -m src.combiner                    # layout sized by the plan: output/combined.json, combined.md, combined.svg
+# tools/farm_map_editor.html: open in a browser to measure data/base_map.json + config/profile_map.json from a screenshot
+python -m src.scraper --game-version 1.73 # refresh data/*.json, level_limits.json, mastery_bonuses.json, meta.json from the Fandom wiki (every level)
+python -m src check-facts                 # docs/game-facts rows vs. the wiki → output/fact_check.md (network)
+python -m src relocate [--layout PATH]    # current farm → combined.json (else layout.json): output/relocation.json / .md; not in `all`
+python -m src migrate-map                 # one-file config/farm_map.json → config/profile_map.json (profile map; geometry in data/base_map.json)
+python -m src farm-profile                # player, map, settings, templates → config/farm_profile.json
+python -m src all --farm-profile config/farm_profile.json   # every tool reads the farm profile instead of the separate files
+python -m src bundle                      # data/*.json + overrides + base map → output/data_bundle.json
+python -m src wizard                      # questions → config/player.json
+python -m src recommend [--levels 1,20,40] # level recommendations → output/recommendations/ (input of web/)
+./serve-web.sh [--host] [1,20,40|stop]    # build the site and serve it locally (browser; --host: local network too); Ctrl+C stops
+cd web && npm ci && npm run check && npm run format:check && npm run build && npm run test:e2e   # static site: type check, Prettier, build, Playwright
+python -m src examples                    # regenerate config/examples/player_level_<N>.json after a re-scrape
+# every option: docs/cli.md
+```
