@@ -4,36 +4,37 @@ Project knowledge that is not code and not scraped data. Read these before resea
 
 ## Index
 
-| File                                                                     | Content                                                                                   |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| [game-facts/production-buildings.md](game-facts/production-buildings.md) | slots, mastery, copies, build cost and time, footprints of machines                       |
-| [game-facts/animals.md](game-facts/animals.md)                           | animal shelters, capacities, beehive tree, nectar bush, lobster pool, duck salon          |
-| [game-facts/farm.md](game-facts/farm.md)                                 | fields, trees, bushes, farm buildings, layout edit mode, measured footprints              |
-| [game-facts/storage.md](game-facts/storage.md)                           | barn and silo capacity and upgrades                                                       |
-| [game-facts/fishing-lake.md](game-facts/fishing-lake.md)                 | fishing lake buildings, spots                                                             |
-| [game-updates.md](game-updates.md)                                       | game versions, what changed, update checklist                                             |
-| [wiki-gaps.md](wiki-gaps.md)                                             | data the wiki lacks: value in use (estimate or measured), status, wiki contribution TODO  |
-| [data-sources.md](data-sources.md)                                       | which wiki pages and categories the scraper reads, what is scraped vs. manual vs. profile |
-| [player-profile.md](player-profile.md)                                   | player-specific settings, input options, profile schema                                   |
-| [user-guide.md](user-guide.md)                                           | how to use the tools: profile, map, settings, commands, outputs                           |
-| [architecture.md](architecture.md)                                       | package dependencies and data flow (Mermaid), checked against the imports by a test       |
-| [cli.md](cli.md)                                                         | every command, option and output file                                                     |
-| [settings.md](settings.md)                                               | keys of `config/design.json` and `config/planner.json` with defaults                      |
-| [tools/layout-planner.md](tools/layout-planner.md)                       | Layout Planner: blocks, fields, packing, fallback, design layer, templates                |
-| [tools/production-planner.md](tools/production-planner.md)               | Production Planner: profile, mastery, capacity, linear program, schedule                  |
-| [tools/combiner.md](tools/combiner.md)                                   | Combiner: layout sized by the plan, flow order, lookahead                                 |
-| [tools/relocation.md](tools/relocation.md)                               | relocation plan: keep / store / place                                                     |
-| [tools/recommend.md](tools/recommend.md)                                 | level recommendations and the static site (`web/`)                                        |
-| [tools/map-editor.md](tools/map-editor.md)                               | farm map format and the browser map editor, step by step                                  |
-| [tools/browser-planner.md](tools/browser-planner.md)                     | "My farms": farm profiles in the browser, the plan in Pyodide, `web-files`                |
-| [data-model.md](data-model.md)                                           | `data/*.json`, level limits, overrides, pydantic models                                   |
-| [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                |
-| [modules.md](modules.md)                                                 | repository tree, module roles, entry points without file IO                               |
-| [code-map.md](code-map.md)                                               | which file holds what: `config/`, `src/` packages, `web/`, `tools/`, `tests/`             |
-| [conventions.md](conventions.md)                                         | code, data model, where data goes, player profile rules                                   |
-| [development.md](development.md)                                         | setup, checks, tests, CI, releases                                                        |
-| [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and the v2+ sub-versions                                           |
-| [v2-design.md](v2-design.md)                                             | web app target architecture, Pyodide measurements, data model changes, decisions          |
+| File                                                                     | Content                                                                                                          |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [game-facts/production-buildings.md](game-facts/production-buildings.md) | slots, mastery, copies, build cost and time, footprints of machines                                              |
+| [game-facts/animals.md](game-facts/animals.md)                           | animal shelters, capacities, beehive tree, nectar bush, lobster pool, duck salon                                 |
+| [game-facts/farm.md](game-facts/farm.md)                                 | fields, trees, bushes, farm buildings, layout edit mode, measured footprints                                     |
+| [game-facts/storage.md](game-facts/storage.md)                           | barn and silo capacity and upgrades                                                                              |
+| [game-facts/fishing-lake.md](game-facts/fishing-lake.md)                 | fishing lake buildings, spots                                                                                    |
+| [game-updates.md](game-updates.md)                                       | game versions, what changed, update checklist                                                                    |
+| [wiki-gaps.md](wiki-gaps.md)                                             | data the wiki lacks: value in use (estimate or measured), status, wiki contribution TODO                         |
+| [data-sources.md](data-sources.md)                                       | which wiki pages and categories the scraper reads, what is scraped vs. manual vs. profile                        |
+| [player-profile.md](player-profile.md)                                   | player-specific settings, input options, profile schema                                                          |
+| [user-guide.md](user-guide.md)                                           | how to use the tools: profile, map, settings, commands, outputs                                                  |
+| [architecture.md](architecture.md)                                       | package dependencies and data flow (Mermaid), checked against the imports by a test                              |
+| [cli.md](cli.md)                                                         | every command, option and output file                                                                            |
+| [settings.md](settings.md)                                               | keys of `config/design.json` and `config/planner.json` with defaults                                             |
+| [tools/layout-planner.md](tools/layout-planner.md)                       | Layout Planner: blocks, fields, packing, fallback, design layer, templates                                       |
+| [tools/production-planner.md](tools/production-planner.md)               | Production Planner: profile, mastery, capacity, linear program, schedule                                         |
+| [tools/combiner.md](tools/combiner.md)                                   | Combiner: layout sized by the plan, flow order, lookahead                                                        |
+| [tools/relocation.md](tools/relocation.md)                               | relocation plan: keep / store / place                                                                            |
+| [tools/recommend.md](tools/recommend.md)                                 | level recommendations and the static site (`web/`)                                                               |
+| [tools/map-editor.md](tools/map-editor.md)                               | farm map format and the browser map editor, step by step                                                         |
+| [tools/browser-planner.md](tools/browser-planner.md)                     | "My farms": farm profiles in the browser, the plan in Pyodide, `web-files`                                       |
+| [data-model.md](data-model.md)                                           | `data/*.json`, level limits, overrides, pydantic models                                                          |
+| [graph-model.md](graph-model.md)                                         | graph nodes, edge kinds, weights, analysis                                                                       |
+| [modules.md](modules.md)                                                 | repository tree, module roles, entry points without file IO                                                      |
+| [code-map.md](code-map.md)                                               | which file holds what: `config/`, `src/` packages, `web/`, `tools/`, `tests/`                                    |
+| [conventions.md](conventions.md)                                         | code, data model, where data goes, player profile rules                                                          |
+| [development.md](development.md)                                         | setup, checks, tests, CI, releases                                                                               |
+| [roadmap.md](roadmap.md)                                                 | milestones v0.3 … v1.6 and the v2+ sub-versions                                                                  |
+| [v2-design.md](v2-design.md)                                             | web app target architecture, Pyodide measurements, data model changes, decisions                                 |
+| [ui-design.md](ui-design.md)                                             | interface rules: input types, validation, concept icons, item drawings, language, export reminder, accessibility |
 
 ## Where knowledge lives
 

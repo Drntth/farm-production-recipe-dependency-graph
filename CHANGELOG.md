@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Docs: interface rules for v2.5 in `docs/ui-design.md` (input rules, validation and error messages, concept icons and legend, item drawings, language, export reminder, accessibility and its tests); new terms in `CONTEXT.md`; Hungarian game item names decided against (the game has no Hungarian).
+
 ## [2.4.0] - 2026-11-23
 
 - Docs: `AGENTS.md` is shorter for coding agents. The code map, the conventions and the full command list moved to `docs/code-map.md`, `docs/conventions.md` and `docs/cli.md` (quick list); the index in `docs/README.md` lists them.

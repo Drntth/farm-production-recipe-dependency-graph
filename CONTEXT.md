@@ -96,6 +96,27 @@ _Not to be confused with_: layout item (where a copy should stand), fixed item (
 
 **Relocation plan**: keep / store / place lists that turn the current farm into a layout (`python -m src relocate`). Keep: a current item exactly at a layout item of its id. Store: every other current item. Place: the remaining layout items, grouped by block.
 
+**Profile check**: the one validation of a farm profile against the level limits and the input rules; the form, the import and loading a stored profile all use it. An invalid profile is kept but not planned; an invalid import is refused with the list of wrong fields.
+_Not to be confused with_: schema version check (file format only, not the values)
+
+**Input rule**: how one profile field is entered: a dropdown for 5-10 valid values, a button row for 2-4 (mastery stars, beehives), otherwise a whole number with a range (barn and silo in steps of 25). The first dropdown entry is the level default or "recommended" (`null`). Kept in `docs/ui-design.md`.
+_Related_: level default
+
+**Invalid value**: a field value outside its input rule; shown with a short message at the field and in the form summary, never stored.
+
+**Item drawing**: an own-made SVG picture of a game object (building, shelter, animal, tree, bush, field, barn, silo, good) that looks like the in-game one so the player recognises it; one file per data `id`; never a game screenshot or asset. Where none exists yet, a neutral **placeholder drawing** and the name are shown.
+_Not to be confused with_: concept icon
+
+**Concept icon**: a Lucide icon with a short visible label for an idea of the interface (copies, slots, mastery star, logins, fishing, export), not for a game object; the full name in the accessible name and, on devices with a pointer, a tooltip.
+_Related_: legend (the collapsed list of concept icons and their meaning on a page)
+
+**Game item name**: the English in-game name of a game object; shown in English on every page, as the game has no Hungarian; every other text of the site is in both languages.
+
+**Last export**: when a farm profile was last saved to a file; kept beside the profile in browser storage, not in the profile file.
+
+**Export reminder**: the notice on a farm profile when it changed since its last export and that export is older than 7 days or missing; the export file is the backup, as the browser may delete stored data.
+_Related_: last export
+
 ## Layout
 
 **`Block`**: locations placed as one movable unit: a production block, the Storage block or the Shared fields block.

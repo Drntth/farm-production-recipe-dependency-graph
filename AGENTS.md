@@ -38,6 +38,7 @@ The project analyses Hay Day production chains. It turns locations, resources an
 | setup, tests, CI, release steps                    | `docs/development.md`                     |
 | milestones, v2+ sub-versions                       | `docs/roadmap.md`                         |
 | web app architecture, v2 decisions                 | `docs/v2-design.md`                       |
+| input types, icons, drawings, accessibility rules  | `docs/ui-design.md`                       |
 
 When you learn a new game fact (from the wiki, the web or the user), add a row to the matching `docs/game-facts/*.md` table in the documented format: `| Fact | Value | Source | Checked |`.
 
