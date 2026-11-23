@@ -156,7 +156,7 @@ Next step: v2.4. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
 
 ## v2+ - Web app (planned)
 
-Target architecture, measurements and decisions: [v2-design.md](v2-design.md). Every sub-version is usable on its own and ends with green CI, a `CHANGELOG.md` entry and a tag. A risky sub-version starts with a spike. From v2.5 on, every screen follows the interface rules in `docs/ui-design.md`, and a sub-version that changes the interface is done only when Playwright passes on phone, tablet and desktop and the owner has checked it on a real phone.
+Target architecture, measurements and decisions: [v2-design.md](v2-design.md). Every sub-version is usable on its own and ends with green CI, a `CHANGELOG.md` entry and a tag. A risky sub-version starts with a spike. From v2.5 on, every screen follows the interface rules in `docs/ui-design.md`, and a sub-version that changes the interface is done only when Playwright passes on phone, tablet and desktop and the live-site tests (`npm run test:live`) pass after the deploy; a real phone is needed only for what no test covers (an emulated Chromium is not every phone browser).
 
 ### v2.0 - Core API and data model
 
@@ -227,8 +227,9 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 - [ ] Usage page for the web app first (level pages, My farms, export as the backup), the CLI second
 - [ ] Data safety: the page shows the last export and reminds to export, as the browser may delete stored data (? to verify: how long Safari keeps script-written storage without a visit, and whether `navigator.storage.persist()` changes it)
 - [ ] Accessibility baseline (WCAG 2.2 AA): contrast, touch targets, labels, keyboard, reduced motion; an automated check in Playwright (a new dependency such as axe-core needs approval)
-- [ ] Decide on Hungarian game item names (see "Ideas without a version") and item pictures (licence ?)
-- Done: `docs/ui-design.md` exists; the form accepts only valid values; Playwright passes on phone, tablet and desktop in both languages and themes with no sideways scroll; the owner checked it on a real phone
+- [ ] Pictures drawn for this site: most places that ask for or show a building, animal, tree, bush or good (for example the chicken coop) get a small own-made drawing (SVG) that looks like the in-game object, so the player recognises exactly what is meant; never a game screenshot or a game asset (Supercell Fan Content Policy), only similar drawings made here; one style and palette, recorded in `docs/ui-design.md`
+- [ ] Decide on Hungarian game item names (see "Ideas without a version")
+- Done: `docs/ui-design.md` exists; the form accepts only valid values; Playwright passes on phone, tablet and desktop in both languages and themes with no sideways scroll, also with large text; the live-site tests pass after the deploy
 
 ### v2.6 - Layout view
 
