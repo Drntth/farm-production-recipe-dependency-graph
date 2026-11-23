@@ -72,7 +72,9 @@ const alternate = (l: Lang) => new URL(switchPath(Astro.url.pathname, l), Astro.
               }
             }
           },
-          { threshold: 0.1 },
+          // any height: shown once its top is in the upper 90% of the screen
+          // (a ratio threshold never fires for a section many screens tall)
+          { threshold: 0, rootMargin: "0px 0px -10% 0px" },
         );
         document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
       } else {

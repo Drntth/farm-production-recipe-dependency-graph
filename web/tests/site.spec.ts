@@ -327,6 +327,19 @@ test("sections below the fold fade in when scrolled to, at once under reduced mo
   await expect(page.locator(".reveal").last()).toHaveCSS("opacity", "1");
 });
 
+test("a section taller than ten screens shows as soon as its top is in view", async ({ page }) => {
+  // the level grid with every level on a phone: 10% of it is more than a screen
+  await page.addInitScript(() => {
+    const style = document.createElement("style");
+    style.textContent = "[aria-labelledby=all-levels] { min-height: 30000px; }";
+    (document.head ?? document.documentElement).appendChild(style);
+  });
+  await page.goto("");
+  const grid = page.locator("section[aria-labelledby=all-levels]");
+  await expect(grid).toBeInViewport();
+  await expect(grid).toHaveClass(/is-visible/);
+});
+
 test("main menu reaches every page; a phone gets a hamburger", async ({ page, isMobile }) => {
   for (const [home, how, usage] of [
     ["./", "How it works", "Usage"],

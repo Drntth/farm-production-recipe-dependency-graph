@@ -8,6 +8,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 - Web: "My farms" page (`/profiles/`, `/hu/profiles/`): farm profiles kept in the browser (IndexedDB, `navigator.storage.persist()`), several side by side, JSON export and import (the farm profile file of `python -m src farm-profile`); a form that follows the level, empty fields = level default, the daily login window.
 - Web: the plan of a farm profile in the browser: the Python core in Pyodide in a module Web Worker, loaded on the first calculation only; plan view like the level plan page, the planner's notes, the time it took, an out-of-date mark after an edit.
 - `python -m src web-files`: `core.zip`, data bundle and level defaults for the browser planner (`web/public/py/`, git-ignored); `src/api/browser.py` (`plan_farm_profile`, `level_defaults`). `./serve-web.sh` and the Pages build run it.
+- Fix: a section many screens tall (the level grid with every level on a phone) stayed blank while scrolled; it now fades in as soon as its top is in view.
+- Fix: `./serve-web.sh --host` listened on every address and printed the VPN one; it now listens only on the LAN / Wi-Fi address (not localhost, not a VPN tunnel) and prints it.
 - CI: `pyodide-smoke` job (the core in Pyodide under Node vs. native CPython); Vitest unit tests for the web profile code (`npm test`).
 
 ## [2.3.0] - 2026-11-09
