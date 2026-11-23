@@ -12,10 +12,13 @@
     labels: { label: string; show: string };
   }
   let { levels, base, current, suffix = "", compact = false, labels }: Props = $props();
-  let level = $state(current ?? levels[0]);
+  const initial = current ?? levels[0];
+  let select: HTMLSelectElement;
 
+  // read the select itself, not a bound state: a level picked before the
+  // island loaded (slow phone) is in the DOM, and hydration must not reset it
   function go() {
-    window.location.href = `${base.replace(/\/$/, "")}/${level}/${suffix}`;
+    window.location.href = `${base.replace(/\/$/, "")}/${select.value}/${suffix}`;
   }
   function submit(event: SubmitEvent) {
     event.preventDefault();
@@ -28,11 +31,11 @@
   <select
     id="level-select"
     class={compact ? "field font-display text-lg font-semibold" : "field"}
-    bind:value={level}
+    bind:this={select}
     onchange={compact ? go : undefined}
   >
     {#each levels as n (n)}
-      <option value={n}>{n}</option>
+      <option value={n} selected={n === initial}>{n}</option>
     {/each}
   </select>
   {#if !compact}

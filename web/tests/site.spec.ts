@@ -113,6 +113,23 @@ test("level picker opens the chosen level in the page's language", async ({ page
   }
 });
 
+test("a level chosen before the picker's script loads is kept", async ({ page }) => {
+  // a slow phone: the player picks a level while the island is still loading
+  let release!: () => void;
+  const held = new Promise<void>((r) => (release = r));
+  await page.route(/\/_astro\/LevelPicker\.[^/]*\.js$/, async (route) => {
+    await held;
+    await route.continue();
+  });
+  await page.goto("./", { waitUntil: "domcontentloaded" });
+  const last = await page.locator("#level-select option").last().getAttribute("value");
+  await page.selectOption("#level-select", last!);
+  release();
+  await page.waitForFunction(() => !document.querySelector("astro-island[ssr]"));
+  await page.getByRole("button", { name: "Show" }).click();
+  await expect(page).toHaveURL(new RegExp(`/levels/${last}/$`));
+});
+
 test("the level switch on a level page opens the chosen and the next level", async ({ page }) => {
   await page.goto(await firstLevel(page, "hu/"));
   const last = await page.locator("#level-select option").last().getAttribute("value");
