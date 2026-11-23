@@ -156,6 +156,7 @@ python -m src wizard                      # questions → config/player.json
 python -m src recommend [--levels 1,20,40] # level recommendations → output/recommendations/ (input of web/)
 ./serve-web.sh [--host] [1,20,40|stop]    # build the site and serve it locally (browser; --host: local network too); Ctrl+C stops
 cd web && npm ci && npm run check && npm run format:check && npm run build && npm run test:e2e   # static site: type check, Prettier, build, Playwright
+cd web && npm run test:perf && npm run test:live   # mobile timing (emulated) and every test against the live site (network)
 python -m src examples                    # regenerate config/examples/player_level_<N>.json after a re-scrape
 # every option: docs/cli.md
 ```

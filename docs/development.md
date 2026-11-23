@@ -64,18 +64,33 @@ python -m src web-files                    # core.zip, data bundle, level defaul
 cd web
 npm ci
 npm run check                              # astro check: TypeScript and Svelte
-npm test                                   # Vitest: farm profile functions and store (src/**/*.test.ts)
+npm test                                   # Vitest: farm profile functions, store, planner notes (src/**/*.test.ts)
 npm run format:check                       # Prettier (Astro, Svelte, TS, CSS, JSON); npm run format fixes it
 npm run build                              # dist/; RECOMMENDATIONS_DIR overrides ../output/recommendations
 npx playwright install chromium            # once
 npm run test:e2e                           # Playwright on the built site, mobile + tablet + desktop
+npm run test:perf                          # mobile timing, emulated phone (network; test-results/perf.json)
+npm run test:live                          # every Playwright test against GitHub Pages (network; after the deploy)
 npm run dev                                # local server with reload
 node scripts/pyodide-smoke.mjs             # the core in Pyodide vs. native CPython (network; after web-files)
 ```
 
 The browser planner of the "My farms" page: [tools/browser-planner.md](tools/browser-planner.md).
 
-Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `main`. It computes levels 1-100, runs `python -m src web-files`, builds `web/dist` and deploys it to GitHub Pages. One-time setting in the repository: Settings → Pages → Source "GitHub Actions". The generated recommendations are not committed.
+Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `main`. It computes levels 1-100, runs `python -m src web-files`, builds `web/dist` and deploys it to GitHub Pages. One-time setting in the repository: Settings → Pages → Source "GitHub Actions". The generated recommendations are not committed. After the deploy its `live-check` job runs every Playwright test against the live site with `SITE_URL`, checks that `version.json` holds the deployed commit, and writes the mobile timing into the run summary; it needs the network, so it runs with `continue-on-error`: check its result after each deploy.
+
+## Automated checks instead of manual ones
+
+| Manual check before                    | Automated                                                                                                                                           |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the form fits a phone and a tablet     | `tests/profiles.spec.ts`: no sideways scroll on the phone, tablet and desktop projects, at 130% and 160% text (the phone at 360 CSS px)             |
+| no English left on the Hungarian pages | `tests/language.spec.ts`: no English string of `content/en.json` (that has a Hungarian text) on any `/hu/` page, menus and closed sections included |
+| the planner's notes and timing         | `src/profiles/warnings.test.ts` (Vitest) and the Pyodide test of `tests/profiles.spec.ts`                                                           |
+| a level picked on a slow phone         | `tests/site.spec.ts`: a level chosen before the picker's script loads is kept                                                                       |
+| mobile timing                          | `tests/perf.spec.ts` (`npm run test:perf`): 4x CPU slowdown, Wi-Fi-like network; cold, warm and after a reload, with budgets                        |
+| the live site is the new build         | `tests/live.spec.ts` (`npm run test:live`, CI `live-check`): `version.json` holds the expected commit                                               |
+
+Limits: the emulation is Chromium, not every phone browser, and its CPU slowdown hardly reaches the planner's WebAssembly worker, so `perf.json` tracks changes between runs and is not a phone measurement. A real phone is needed only for what these tests do not cover.
 
 ## Common changes
 

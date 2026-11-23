@@ -57,6 +57,8 @@ ruff check src tests && ruff format --check src tests
 python -m src all                         # graph, layout, plan, combined plan in one run
 ```
 
+Web interface changes are checked by tests, not by hand: `cd web && npm run test:e2e` locally, `npm run test:live` against GitHub Pages after the deploy (the Pages `live-check` job runs it too). Details: [docs/development.md](docs/development.md#automated-checks-instead-of-manual-ones).
+
 Every other command (single tools, scraper, web, map editor): [docs/cli.md](docs/cli.md#quick-list) and [docs/development.md](docs/development.md).
 
 ## Conventions (short)

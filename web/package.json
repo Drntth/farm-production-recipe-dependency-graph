@@ -12,6 +12,8 @@
     "check": "astro check",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:perf": "PERF=1 playwright test tests/perf.spec.ts --project mobile",
+    "test:live": "SITE_URL=${SITE_URL:-https://drntth.github.io/farm-production-recipe-dependency-graph/} playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

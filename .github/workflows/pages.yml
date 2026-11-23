@@ -56,3 +56,36 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  # The deployed site: the expected build, every Playwright test against it and the
+  # mobile timing (test-results/perf.json in the run summary). Needs the network
+  # and the CDN, so a failure does not fail the deploy: check the result by hand.
+  live-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: web
+    env:
+      SITE_URL: https://drntth.github.io/farm-production-recipe-dependency-graph/
+      EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha }}
+      PERF: "1"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - if: always()
+        run: |
+          echo "## Mobile timing (emulated, seconds)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat test-results/perf.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "no perf.json" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

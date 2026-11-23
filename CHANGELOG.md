@@ -13,7 +13,11 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 - Fix: the farm profile form fits a phone and a tablet: one card per location instead of a wide table, full-width inputs, numeric keypad; the grey placeholders say who gives the value ("planner sets", "not set" = no limit, a number = level default) and the hint explains them.
 - Fix: the first calculation showed the same number as load time and plan time; the Pyodide load (worker start to ready) and the planning are now timed apart.
 - Fix: the planner's notes stayed English on the Hungarian page; the known notes (storage not set, values above the level limit, silo filled by trees) are shown in the page language (`web/src/profiles/warnings.ts`), an unknown one stays English.
+- Fix: a level picked on the home page before its picker script loaded (a slow phone) opened level 1; the picker now reads the select itself.
+- Tests: automated checks instead of the manual phone check: large text (130%, 160%), no English UI text on the Hungarian pages, a level picked before the script loads, an emulated mobile timing (`npm run test:perf`, `test-results/perf.json`), every Playwright test against the live site (`npm run test:live`, `SITE_URL`) with a build check (`version.json` holds the commit).
+- CI: the Pages workflow's `live-check` job runs the live-site tests and the mobile timing after each deploy (`continue-on-error`, the timing in the run summary).
 - Tests: Playwright tablet project (Galaxy Tab S4) next to mobile and desktop; the profile form and the plan are checked for sideways scrolling.
+- Docs: v2.5 gets own-made drawings of buildings, animals, trees, bushes and goods (never game screenshots or assets); the interface sub-versions are done when the live-site tests pass, a real phone only for what no test covers; the owner's phone measurement is in `v2-design.md`.
 - Docs: roadmap gets v2.5 (UI/UX design: interface rules, dropdowns and validation, icons, accessibility, a Usage page for the web app, data safety); layout view and the later sub-versions shift by one (v2.6-v2.10); offline gets the data / core update for stored profiles.
 - CI: `pyodide-smoke` job (the core in Pyodide under Node vs. native CPython); Vitest unit tests for the web profile code (`npm test`).
 

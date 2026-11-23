@@ -40,5 +40,7 @@ Pyodide loads only on the first calculation; the level pages never load it (`tes
 ## Checks
 
 - `npm test` (Vitest): profile functions, migration, export → import, the store with a Map backend, the note translation (and that the Python messages it copies still exist).
-- `tests/profiles.spec.ts` (Playwright): two profiles kept over a reload, the form follows the level, export → import unchanged, a bad file, the form fits a phone and a tablet (no sideways scrolling); on desktop two profiles planned in Pyodide and the plan checked at phone width (needs the network).
+- `tests/profiles.spec.ts` (Playwright): two profiles kept over a reload, the form follows the level, export → import unchanged, a bad file, the form fits a phone and a tablet (no sideways scrolling); 130% and 160% text; on desktop two profiles planned in Pyodide and the plan checked at phone width (needs the network).
+- `tests/language.spec.ts`: no English UI text on the Hungarian pages, "My farms" included.
+- `tests/perf.spec.ts` (`npm run test:perf`, network): cold, warm and after-reload timing on an emulated phone, written to `test-results/perf.json`; limits in [development.md](../development.md#automated-checks-instead-of-manual-ones).
 - `node web/scripts/pyodide-smoke.mjs` (after `python -m src web-files`; network): plans a fixed farm profile in Pyodide under Node and compares the JSON with native CPython character by character; the `pyodide-smoke` CI job runs it with `continue-on-error` (it needs the CDN), so check its result by hand. `tests/test_browser.py` checks that the worker, the smoke test, `package.json` and `requirements.txt` pin the same Pyodide and networkx versions.

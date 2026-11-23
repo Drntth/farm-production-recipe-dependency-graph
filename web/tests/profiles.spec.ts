@@ -76,6 +76,23 @@ test("the farm profile form fits a phone and a tablet", async ({ page }) => {
   await expect(form.locator('[data-location] input[placeholder="a tervező adja"]').first()).toBeVisible();
 });
 
+for (const scale of [1.3, 1.6]) {
+  test(`the farm profile form fits with large text (${scale * 100}%)`, async ({ page }) => {
+    // the narrowest common Android width (CSS px) on the phone project
+    if (test.info().project.name === "mobile") await page.setViewportSize({ width: 360, height: 780 });
+    // Android text scaling: a larger root font size, every rem grows with it
+    await page.addInitScript((s) => {
+      document.addEventListener("DOMContentLoaded", () => (document.documentElement.style.fontSize = `${16 * s}px`));
+    }, scale);
+    await page.goto("hu/profiles/");
+    await createProfile(page, "Nagy betű", 60);
+    await page
+      .getByTestId("profile-form")
+      .evaluate((el) => el.querySelectorAll("details").forEach((d) => (d.open = true)));
+    await expectNoSidewaysScroll(page);
+  });
+}
+
 test("an exported farm profile imports unchanged", async ({ page }) => {
   await page.goto("hu/profiles/");
   await createProfile(page, "Export", 25);
