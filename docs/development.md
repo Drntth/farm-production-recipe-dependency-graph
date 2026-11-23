@@ -68,7 +68,7 @@ npm test                                   # Vitest: farm profile functions and 
 npm run format:check                       # Prettier (Astro, Svelte, TS, CSS, JSON); npm run format fixes it
 npm run build                              # dist/; RECOMMENDATIONS_DIR overrides ../output/recommendations
 npx playwright install chromium            # once
-npm run test:e2e                           # Playwright on the built site, mobile + desktop
+npm run test:e2e                           # Playwright on the built site, mobile + tablet + desktop
 npm run dev                                # local server with reload
 node scripts/pyodide-smoke.mjs             # the core in Pyodide vs. native CPython (network; after web-files)
 ```

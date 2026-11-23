@@ -248,10 +248,10 @@
 
   <form class="mt-5 flex flex-wrap items-end gap-3" onsubmit={create} data-testid="new-profile">
     <h3 class="w-full text-lg">{t.newTitle}</h3>
-    <label class="grid gap-1">
+    <label class="grid min-w-0 grow gap-1 sm:grow-0">
       <span class="text-sm font-semibold">{t.name}</span>
       <input
-        class="field"
+        class="field w-full min-w-0"
         bind:value={newName}
         maxlength="60"
         placeholder={fill(t.defaultName, { n: records.length + 1 })}
@@ -285,10 +285,10 @@
     <p class="muted mt-2 text-sm">{t.defaultHint}</p>
 
     <div class="mt-4 flex flex-wrap gap-3">
-      <label class="grid gap-1">
+      <label class="grid min-w-0 grow gap-1 sm:grow-0">
         <span class="text-sm font-semibold">{t.name}</span>
         <input
-          class="field"
+          class="field w-full min-w-0"
           maxlength="60"
           value={profile.name ?? ""}
           onchange={(e) => save(setName(profile, e.currentTarget.value.trim()))}
@@ -311,11 +311,12 @@
     <h3 class="mt-6 text-lg">{t.storage}</h3>
     <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {#each PLAYER_FIELDS as [field, key, min] (field)}
-        <label class="grid gap-1">
+        <label class="grid min-w-0 gap-1">
           <span class="text-sm font-semibold">{t[key]}</span>
           <input
-            class="field"
+            class="field w-full min-w-0"
             type="number"
+            inputmode="numeric"
             {min}
             value={profile.player[field] ?? ""}
             placeholder={field === "fields_owned" && levelDefaults.fields_owned != null
@@ -331,10 +332,10 @@
     <h3 class="mt-6 text-lg">{t.loginWindow}</h3>
     <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {#each [["start", "07:00"], ["end", "23:00"]] as [field, fallback] (field)}
-        <label class="grid gap-1">
+        <label class="grid min-w-0 gap-1">
           <span class="text-sm font-semibold">{t[field as "start" | "end"]}</span>
           <input
-            class="field"
+            class="field w-full min-w-0"
             type="time"
             value={loginWindow(profile)[field as LoginWindowField] ?? fallback}
             onchange={(e) =>
@@ -348,11 +349,12 @@
           />
         </label>
       {/each}
-      <label class="grid gap-1">
+      <label class="grid min-w-0 gap-1">
         <span class="text-sm font-semibold">{t.logins}</span>
         <input
-          class="field"
+          class="field w-full min-w-0"
           type="number"
+          inputmode="numeric"
           min="1"
           max="24"
           value={loginWindow(profile).logins ?? ""}
@@ -367,42 +369,33 @@
         <summary class="cursor-pointer font-display text-lg font-semibold">
           {t.groups[g.group]} ({g.rows.length})
         </summary>
-        <div class="table-wrap mt-2">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th scope="col">{t.name}</th>
-                {#each FIELDS.filter((f) => g.rows.some((r) => r.fields.includes(f))) as f (f)}
-                  <th scope="col">{t.fieldNames[f as keyof typeof t.fieldNames]}</th>
+        <!-- one card per location: fits a phone without sideways scrolling -->
+        <ul class="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {#each g.rows as row (row.id)}
+            <li class="tile min-w-0 p-3" data-location={row.id}>
+              <span class="font-display font-semibold">{row.name}</span>
+              <div class="mt-2 grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-2">
+                {#each row.fields as f (f)}
+                  <label class="grid min-w-0 gap-1">
+                    <span class="muted text-xs font-semibold">{t.fieldNames[f as keyof typeof t.fieldNames]}</span>
+                    <input
+                      class="field w-full min-w-0"
+                      type="number"
+                      inputmode="numeric"
+                      min={BOUNDS[f]?.[0]}
+                      max={BOUNDS[f]?.[1]}
+                      aria-label={`${row.name}: ${t.fieldNames[f as keyof typeof t.fieldNames]}`}
+                      value={profile.player.locations?.[row.id]?.[f] ?? ""}
+                      placeholder={row.values[f] == null ? t.recommended : String(row.values[f])}
+                      onchange={(e) => save(setLocationValue(profile, row.id, f, parse(e.currentTarget.value)))}
+                      data-field={f}
+                    />
+                  </label>
                 {/each}
-              </tr>
-            </thead>
-            <tbody>
-              {#each g.rows as row (row.id)}
-                <tr data-location={row.id}>
-                  <th scope="row">{row.name}</th>
-                  {#each FIELDS.filter((f) => g.rows.some((r) => r.fields.includes(f))) as f (f)}
-                    <td>
-                      {#if row.fields.includes(f)}
-                        <input
-                          class="field w-20"
-                          type="number"
-                          min={BOUNDS[f]?.[0]}
-                          max={BOUNDS[f]?.[1]}
-                          aria-label={`${row.name}: ${t.fieldNames[f as keyof typeof t.fieldNames]}`}
-                          value={profile.player.locations?.[row.id]?.[f] ?? ""}
-                          placeholder={row.values[f] == null ? t.recommended : String(row.values[f])}
-                          onchange={(e) => save(setLocationValue(profile, row.id, f, parse(e.currentTarget.value)))}
-                          data-field={f}
-                        />
-                      {/if}
-                    </td>
-                  {/each}
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
+              </div>
+            </li>
+          {/each}
+        </ul>
       </details>
     {/each}
 

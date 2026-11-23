@@ -10,6 +10,9 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 - `python -m src web-files`: `core.zip`, data bundle and level defaults for the browser planner (`web/public/py/`, git-ignored); `src/api/browser.py` (`plan_farm_profile`, `level_defaults`). `./serve-web.sh` and the Pages build run it.
 - Fix: a section many screens tall (the level grid with every level on a phone) stayed blank while scrolled; it now fades in as soon as its top is in view.
 - Fix: `./serve-web.sh --host` listened on every address and printed the VPN one; it now listens only on the LAN / Wi-Fi address (not localhost, not a VPN tunnel) and prints it.
+- Fix: the farm profile form fits a phone and a tablet: one card per location instead of a wide table, full-width inputs, numeric keypad; the grey placeholders say who gives the value ("planner sets", "not set" = no limit, a number = level default) and the hint explains them.
+- Tests: Playwright tablet project (Galaxy Tab S4) next to mobile and desktop; the profile form and the plan are checked for sideways scrolling.
+- Docs: roadmap gets v2.5 (UI/UX design: interface rules, dropdowns and validation, icons, accessibility, a Usage page for the web app, data safety); layout view and the later sub-versions shift by one (v2.6-v2.10); offline gets the data / core update for stored profiles.
 - CI: `pyodide-smoke` job (the core in Pyodide under Node vs. native CPython); Vitest unit tests for the web profile code (`npm test`).
 
 ## [2.3.0] - 2026-11-09

@@ -24,13 +24,13 @@ test("two farm profiles side by side, kept over a reload; the form follows the l
 
   const form = page.getByTestId("profile-form");
   // a level-40 location missing at level 10
-  const rows40 = await form.locator("tr[data-location]").count();
+  const rows40 = await form.locator("[data-location]").count();
   await page
     .getByTestId("profile-tabs")
     .getByRole("tab", { name: /^Small / })
     .click();
   await expect(form.getByRole("heading", { level: 2 })).toHaveText("Small");
-  expect(await form.locator("tr[data-location]").count()).toBeLessThan(rows40);
+  expect(await form.locator("[data-location]").count()).toBeLessThan(rows40);
 
   // empty = level default (the placeholder); a value is stored
   const fields = page.getByTestId("player-fields_owned");
@@ -51,10 +51,35 @@ test("two farm profiles side by side, kept over a reload; the form follows the l
   expect(requests.filter((u) => /pyodide/i.test(u))).toEqual([]);
 });
 
+/** Inputs and the page itself fit the screen width: nothing to scroll sideways. */
+async function expectNoSidewaysScroll(page: Page) {
+  const overflow = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    const out = [...document.querySelectorAll("main input:not(.sr-only), main button, main summary")]
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ r }) => r.width > 0 && (r.left < -1 || r.right > width + 1))
+      .map(({ el }) => el.getAttribute("aria-label") ?? el.getAttribute("data-testid") ?? el.outerHTML.slice(0, 60));
+    return { page: document.documentElement.scrollWidth - width, out };
+  });
+  expect(overflow.out).toEqual([]);
+  expect(overflow.page).toBeLessThanOrEqual(0);
+}
+
+test("the farm profile form fits a phone and a tablet", async ({ page }) => {
+  await page.goto("hu/profiles/");
+  await createProfile(page, "Telefon", 60);
+  const form = page.getByTestId("profile-form");
+  await form.evaluate((el) => el.querySelectorAll("details").forEach((d) => (d.open = true)));
+  await expectNoSidewaysScroll(page);
+  // the placeholders say who gives the value
+  await expect(page.getByTestId("player-barn_capacity")).toHaveAttribute("placeholder", "nincs megadva");
+  await expect(form.locator('[data-location] input[placeholder="a tervező adja"]').first()).toBeVisible();
+});
+
 test("an exported farm profile imports unchanged", async ({ page }) => {
   await page.goto("hu/profiles/");
   await createProfile(page, "Export", 25);
-  const beehives = page.locator('tr[data-location="beehive_tree"] input[data-field="beehives"]');
+  const beehives = page.locator('[data-location="beehive_tree"] input[data-field="beehives"]');
   if (await beehives.count()) {
     await beehives.fill("2");
     await beehives.blur();
@@ -99,4 +124,9 @@ test("two farm profiles give their own plans (Pyodide)", async ({ page }, info) 
   await page.getByTestId("player-fields_owned").fill("3");
   await page.getByTestId("player-fields_owned").blur();
   await expect(page.getByTestId("stale")).toBeVisible();
+
+  // the plan on a phone: nothing to scroll sideways
+  await page.setViewportSize({ width: 390, height: 844 });
+  await plan.evaluate((el) => el.querySelectorAll("details").forEach((d) => (d.open = true)));
+  await expectNoSidewaysScroll(page);
 });

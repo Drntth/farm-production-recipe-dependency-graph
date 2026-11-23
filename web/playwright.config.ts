@@ -1,4 +1,4 @@
-// End-to-end tests of the built site (npm run build first), mobile and desktop.
+// End-to-end tests of the built site (npm run build first): desktop, phone and tablet.
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 4321;
@@ -12,6 +12,8 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["Pixel 7"] } },
+    // the game runs on phones and tablets: a Chromium tablet, portrait
+    { name: "tablet", use: { ...devices["Galaxy Tab S4"] } },
   ],
   webServer: {
     command: `npm run preview -- --port ${PORT}`,

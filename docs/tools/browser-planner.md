@@ -19,7 +19,7 @@ The level-default profile is the one of `python -m src examples` (`example_profi
 `web/src/components/FarmProfiles.svelte` (a `client:only` island):
 
 1. **Farm profiles**: a list with one tab per profile, a "new profile" form (name, level) and JSON import. Every change is written to IndexedDB at once; the first write asks for `navigator.storage.persist()` and the page says whether the browser keeps the data.
-2. **Form**: name, level, barn / silo capacity, fields, fishing spots, the daily login window (first and last login, logins per day) and one table per location type (production, animals, trees, bushes, other) with the fields that apply. An empty field means the level default, shown as the placeholder; a level change drops the overrides of locations not unlocked at the new level.
+2. **Form**: name, level, barn / silo capacity, fields, fishing spots, the daily login window (first and last login, logins per day) and one collapsible group per location type (production, animals, trees, bushes, other) with a card per location and the fields that apply; the cards and full-width inputs fit a phone and a tablet without sideways scrolling. An empty field uses the grey placeholder: a number is the level default, "planner sets" means the planner computes it (trees, bushes, logins), "not set" means no limit (barn, silo, fishing spots); a level change drops the overrides of locations not unlocked at the new level.
 3. **Plan**: "Calculate the plan" sends the profile to the worker and shows the plan like the level plan page (`PlanView.svelte`): key figures, login times, the last login, trees and bushes, outside goods, the login actions per building (collapsed), the planner's notes, and the time it took. A plan made before the profile changed is marked as out of date.
 
 The exported file is the farm profile JSON of `python -m src farm-profile` ([cli.md](../cli.md)), so `python -m src plan --farm-profile <file>` reads it too, and an import of an export is unchanged.
@@ -39,5 +39,5 @@ Pyodide loads only on the first calculation; the level pages never load it (`tes
 ## Checks
 
 - `npm test` (Vitest): profile functions, migration, export → import, the store with a Map backend.
-- `tests/profiles.spec.ts` (Playwright): two profiles kept over a reload, the form follows the level, export → import unchanged, a bad file; on desktop two profiles planned in Pyodide (needs the network).
+- `tests/profiles.spec.ts` (Playwright): two profiles kept over a reload, the form follows the level, export → import unchanged, a bad file, the form fits a phone and a tablet (no sideways scrolling); on desktop two profiles planned in Pyodide and the plan checked at phone width (needs the network).
 - `node web/scripts/pyodide-smoke.mjs` (after `python -m src web-files`; network): plans a fixed farm profile in Pyodide under Node and compares the JSON with native CPython character by character; the `pyodide-smoke` CI job runs it with `continue-on-error` (it needs the CDN), so check its result by hand. `tests/test_browser.py` checks that the worker, the smoke test, `package.json` and `requirements.txt` pin the same Pyodide and networkx versions.
