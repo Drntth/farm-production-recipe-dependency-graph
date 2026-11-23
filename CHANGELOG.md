@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-23
+
 - Docs: `AGENTS.md` is shorter for coding agents. The code map, the conventions and the full command list moved to `docs/code-map.md`, `docs/conventions.md` and `docs/cli.md` (quick list); the index in `docs/README.md` lists them.
 - Web: "My farms" page (`/profiles/`, `/hu/profiles/`): farm profiles kept in the browser (IndexedDB, `navigator.storage.persist()`), several side by side, JSON export and import (the farm profile file of `python -m src farm-profile`); a form that follows the level, empty fields = level default, the daily login window.
 - Web: the plan of a farm profile in the browser: the Python core in Pyodide in a module Web Worker, loaded on the first calculation only; plan view like the level plan page, the planner's notes, the time it took, an out-of-date mark after an edit.
