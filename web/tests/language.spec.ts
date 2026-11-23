@@ -70,7 +70,7 @@ test.describe("Hungarian pages have no English UI text", () => {
 
   test("hu/levels/<n>/ and its plan", async ({ page }) => {
     await page.goto("hu/");
-    const href = await page.getByTestId("level-card").nth(20).getAttribute("href");
+    const href = await page.getByTestId("level-card").last().getAttribute("href");
     await page.goto(href!);
     await expectHungarian(page);
     await page.goto(`${href}plan/`);
