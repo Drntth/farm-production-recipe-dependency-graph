@@ -6,7 +6,7 @@ Target architecture of the web app (v2) and what v3 / v4 build on. The sub-versi
 
 - v2: a free static web app for the maintainer's own use and testing; v3: public, no login; v4: optional login.
 - Reuse the Python core unchanged: graph, Layout Planner, Production Planner, Combiner, relocation plan.
-- Mobile and desktop alike; English and Hungarian UI from v2.2 (game item names stay English).
+- Phone, tablet and desktop alike, as the game is played on phones and tablets; the interface rules are in `ui-design.md` from v2.5. English and Hungarian UI from v2.2 (game item names stay English).
 - No server-side data in v2: everything stays in the browser, JSON export is the backup.
 - The CLI stays the developer tool: tests, scrape, build-time precompute.
 
@@ -84,14 +84,14 @@ v2.0 adds entry points without file IO: dicts in, dicts out. The CLI and the Pyo
 
 ## Plot recommendation
 
-A new layout step: from the base map plots, pick the smallest connected set that fits the blocks of a level or farm profile and that can be unlocked in game order (from level 22, each plot next to an unlocked one; see [game-facts/farm.md](game-facts/farm.md)). Ties go to fewer plots, then to the lower unlock cost: the wiki lists the expansion supplies (and permits) per plot for every section except `special_2018` ([game-facts/farm.md](game-facts/farm.md)); v2.7 brings them into `data/` through the scraper, and a plot without a listed cost stays empty. The level recommendations use it once it exists; before that they are laid out on section `base` only.
+A new layout step: from the base map plots, pick the smallest connected set that fits the blocks of a level or farm profile and that can be unlocked in game order (from level 22, each plot next to an unlocked one; see [game-facts/farm.md](game-facts/farm.md)). Ties go to fewer plots, then to the lower unlock cost: the wiki lists the expansion supplies (and permits) per plot for every section except `special_2018` ([game-facts/farm.md](game-facts/farm.md)); v2.8 brings them into `data/` through the scraper, and a plot without a listed cost stays empty. The level recommendations use it once it exists; before that they are laid out on section `base` only.
 
 ## Site structure and farm view
 
 The layout is the primary tool, the production plan the secondary one, so the site never shows them on one page (v2.3):
 
 - Pages per level: `/levels/N/` the farm layout, `/levels/N/plan/` the production plan (same under `/hu/`); a switch between them. The layout page carries only a short plan summary (2-3 key figures) and a link.
-- Farm view: an interactive SVG rendered in the page (one Svelte island) from the layout JSON, not the static `layouts/N.svg` image. Pan and zoom with Pointer Events; blocks are clickable; the area outside the buildable zones is faint or hidden. The same component later shows farm profiles (v2.5) and becomes the editor (v2.8).
+- Farm view: an interactive SVG rendered in the page (one Svelte island) from the layout JSON, not the static `layouts/N.svg` image. Pan and zoom with Pointer Events; blocks are clickable; the area outside the buildable zones is faint or hidden. The same component later shows farm profiles (v2.6) and becomes the editor (v2.9).
 - Block interactions: highlight one block and grey out the others (click on the block or its legend entry), zoom to a block, a detail panel (buildings, copies, fields), hover links between the block table and the map. Keyboard reachable.
 - Plan page: short summary first, login actions grouped by building and collapsed by default (`<details>`).
 - Login schedule: a planner setting for the daily active window and the number of logins replaces the round-the-clock hourly interval; the default is a few logins a day.
@@ -113,7 +113,7 @@ Decided for v2.2 after a review of the first design:
 
 - pytest and ruff for the core, unchanged.
 - Vitest for the TypeScript code: state, migrations, the map editor core as a module.
-- Playwright end-to-end tests with a mobile and a desktop viewport: load, farm profile, "Check", export / import.
+- Playwright end-to-end tests with a phone, a tablet and a desktop viewport, with no sideways scroll: load, farm profile, "Check", export / import.
 - Pyodide smoke test as its own CI job (node + npm `pyodide`, needs the network): runs the core and compares the outputs with the native run, because the Pyodide package versions differ from the pinned ones.
 - A web ↔ core boundary test in the spirit of `tests/test_architecture.py`: the web app calls only the Core API.
 
@@ -147,3 +147,4 @@ Decided for v2.2 after a review of the first design:
 | 2026-11-06 | v2.2 reopened for design fixes: summer farm palette, name "Farm layout & production", barn logo, menu (Levels, How it works, Usage), card grids, level page header; card grid and hamburger move from v2.3                                              |
 | 2026-11-09 | v2.3 login schedule: `production.login_window` (`start`, `end`, `logins`; `null` = suggested) replaces `login_interval`; planner config schema bump with a migration; the plan uses the exact daily gaps                                                |
 | 2026-11-09 | v2.3 farm view: own pan / zoom code with Pointer Events (no dependency); the buildable area comes from one map file written by `recommend`                                                                                                              |
+| 2026-11-23 | New v2.5 (UI/UX design): interface rules researched and kept in `docs/ui-design.md` (input types, validation, icons, text density, accessibility, phone / tablet / desktop checks); the later sub-versions shift by one (v2.6-v2.10)                    |

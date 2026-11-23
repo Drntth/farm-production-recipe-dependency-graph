@@ -156,7 +156,7 @@ Next step: v2.4. Changes per version: [CHANGELOG.md](../CHANGELOG.md).
 
 ## v2+ - Web app (planned)
 
-Target architecture, measurements and decisions: [v2-design.md](v2-design.md). Every sub-version is usable on its own and ends with green CI, a `CHANGELOG.md` entry and a tag. A risky sub-version starts with a spike.
+Target architecture, measurements and decisions: [v2-design.md](v2-design.md). Every sub-version is usable on its own and ends with green CI, a `CHANGELOG.md` entry and a tag. A risky sub-version starts with a spike. From v2.5 on, every screen follows the interface rules in `docs/ui-design.md`, and a sub-version that changes the interface is done only when Playwright passes on phone, tablet and desktop and the owner has checked it on a real phone.
 
 ### v2.0 - Core API and data model
 
@@ -214,37 +214,51 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 - [x] At least two farm profiles side by side in IndexedDB; JSON export / import; `navigator.storage.persist()`
 - [x] Pyodide in a module Web Worker, loaded on the first own calculation; plan and login schedule for the active farm profile
 - [x] Pyodide smoke test in CI against the native outputs
+- [x] The farm profile form fits a phone and a tablet: one card per location, full-width inputs, placeholders that say who gives the value; Playwright tablet project
 - [ ] Mobile measurement on a real phone (download, start, run)
 - Done: two farm profiles give their own plans; an exported profile imports unchanged
 
-### v2.5 - Layout view
+### v2.5 - UI/UX design
+
+- [ ] Research from public sources (WCAG 2.2, the form chapters of Material Design and Apple HIG, the game's own interface): who uses the site on which device, input type per field, validation and error messages, icons and their meaning, text density, touch target size; the rules in a new `docs/ui-design.md`, the decisions in `v2-design.md`
+- [ ] Farm profile form by the rules: a dropdown where the valid values are few (level, mastery stars, slots, beehives, logins per day, copies up to the known maximum); every remaining number validated (whole number, range) with a short message, nothing stored while invalid; an import is validated the same way
+- [ ] Icons with short labels instead of long text (copies, slots, mastery star, barn, silo, fields, fishing, logins); a short legend instead of the paragraph hint; full labels kept for screen readers
+- [ ] Every page (home, level layout and plan, How it works, Usage, My farms) reviewed against `docs/ui-design.md`: less text, icons, empty, loading and error states
+- [ ] Usage page for the web app first (level pages, My farms, export as the backup), the CLI second
+- [ ] Data safety: the page shows the last export and reminds to export, as the browser may delete stored data (? to verify: how long Safari keeps script-written storage without a visit, and whether `navigator.storage.persist()` changes it)
+- [ ] Accessibility baseline (WCAG 2.2 AA): contrast, touch targets, labels, keyboard, reduced motion; an automated check in Playwright (a new dependency such as axe-core needs approval)
+- [ ] Decide on Hungarian game item names (see "Ideas without a version") and item pictures (licence ?)
+- Done: `docs/ui-design.md` exists; the form accepts only valid values; Playwright passes on phone, tablet and desktop in both languages and themes with no sideways scroll; the owner checked it on a real phone
+
+### v2.6 - Layout view
 
 - [ ] Layout and combined plan of a farm profile on its base map and profile map, in the v2.3 interactive farm view: blocks, paths, block cards, weighted flow distance
 - Done: the web view matches `combined.svg` for the example profile
 
-### v2.6 - Map editor, part 1
+### v2.7 - Map editor, part 1
 
 - [ ] The map editor core (`CORE-START` / `CORE-END`) as a module in the web app, tested with Vitest
 - [ ] Profile map editing on the web: unlocked plots, `design` zones, current farm; the base map is still measured in the old HTML editor
 - Done: a profile map edited on the web gives the same layout as the same map from the old editor
 
-### v2.7 - Plot recommendation
+### v2.8 - Plot recommendation
 
 - [ ] Per-plot unlock cost (supplies, permits) scraped from the wiki into `data/`; empty where the wiki lists none (`special_2018`)
 - [ ] Smallest connected set of plots, unlockable in game order, that fits the blocks of a level or farm profile; fewer plots win ties, then the lower unlock cost
 - [ ] Level recommendations laid out on the recommended plots; the farm profile view lists the plots worth unlocking
 - Done: tests on small maps check connectivity, the unlock rule and minimality
 
-### v2.8 - Interactive layout editor
+### v2.9 - Interactive layout editor
 
 - [ ] Free drag of blocks and items with mouse and touch
 - [ ] "Check" button: overlaps, path network and weighted flow distance from the core
 - Done: a dragged layout survives export / import; "Check" matches the CLI on the same layout
 
-### v2.9 - Relocation, templates, offline
+### v2.10 - Relocation, templates, offline
 
 - [ ] Relocation plan and design templates on the web
 - [ ] PWA: offline use, Pyodide files cached by a Service Worker
+- [ ] A data or core update reaches cached pages and stored farm profiles: version check, stored profiles migrated against the new data (removed or renamed locations, a new maximum level)
 - [ ] The old HTML map editor retired once base map measuring works on the web
 - Done: the app works offline after the first visit
 
@@ -255,7 +269,7 @@ Target architecture, measurements and decisions: [v2-design.md](v2-design.md). E
 
 ### v3.0 - Public, no login
 
-- [ ] Legal pages (Fan Content Policy, CC BY-SA, privacy), performance and accessibility
+- [ ] Legal pages (Fan Content Policy, CC BY-SA, privacy), performance budget and an accessibility audit (the baseline is v2.5)
 - [ ] Moving farm profiles between devices: JSON file / QR export; a Cloudflare Worker + D1 with client-side encryption only if needed
 
 ### v4.0 - Optional login

@@ -11,7 +11,7 @@ The plan and layout for every level with level defaults (`src/recommend/`, `pyth
 3. **Settings**: the built-in defaults of `config/design*.json` and `config/planner*.json`, with `block_images` off; no design template.
 4. **Plan**: `combined_plan` of the Core API; the files of one level are its `combined.json` payload and `combined.svg`.
 
-Blocks that do not fit on section `base` stay unplaced (from about level 36 on, game version 1.73); `blocks_not_placed` lists them and the site shows a warning. A plot recommendation that unlocks the plots they need is planned for v2.7.
+Blocks that do not fit on section `base` stay unplaced (from about level 36 on, game version 1.73); `blocks_not_placed` lists them and the site shows a warning. A plot recommendation that unlocks the plots they need is planned for v2.8.
 
 `--levels` takes ranges and lists (`1-100`, `1,20,40`, `1-10,40`). A level above the data is an error. The run takes about three minutes for 1-100; the logs of the planners are muted, the command logs the levels with unplaced blocks.
 
