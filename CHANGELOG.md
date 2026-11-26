@@ -4,6 +4,8 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-11-26
+
 - Web: the farm profile form validates every value (whole numbers, ranges, steps, the level's copy and field limits): invalid values are marked, listed with links, not stored and block Calculate; an import with invalid values is refused with the list; a stored invalid profile loads with its fields marked. Dropdowns and button rows where the input rules name them; the limits come from `python -m src web-files` (`defaults.json` schema 2: `limits` per level, `animal_capacity`, `max_slots`).
 - Web: the farm profile form has concept icons with a visible keyword, a closed legend (icons and empty fields) (beehives: `hexagon`, Lucide has no bee icon) and own-made item drawings on the location cards and the barn, silo and fishing spot fields (a light tile on the dark theme; the cards keep one column of full-width fields and one row of value buttons on a phone).
 - Web: data safety on My farms: each farm profile shows its last export (kept beside the profile in IndexedDB, not in the file) and an export reminder with its own export button when the profile changed since an export older than 7 days or was never exported; `navigator.storage.persist()` is asked once and its result kept silently.
