@@ -153,3 +153,133 @@ test("two farm profiles give their own plans (Pyodide)", async ({ page }, info) 
   await plan.evaluate((el) => el.querySelectorAll("details").forEach((d) => (d.open = true)));
   await expectNoSidewaysScroll(page);
 });
+
+// Icons, legend and item drawings: the keyword is visible next to an icon and part of the accessible name
+// (WCAG 2.5.3); the drawings are decorative because the name is printed next to them. Independent of the
+// number of levels: the level is a fixed one that exists in every data set (25 of 40).
+for (const { lang, path, owned } of [
+  { lang: "en", path: "profiles/", owned: "Owned" },
+  { lang: "hu", path: "hu/profiles/", owned: "Darab" },
+]) {
+  test.describe(`icons, legend and drawings (${lang})`, () => {
+    test("the legend is closed and lists the icons and what an empty field means", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Legend", 25);
+      const legend = page.getByTestId("legend");
+      expect(await legend.evaluate((el) => (el as HTMLDetailsElement).open)).toBe(false);
+      await legend.locator("summary").click();
+      await expect(legend.locator("ul").first().locator("li")).toHaveCount(13);
+      await expect(legend.locator("ul").first().locator("li svg").first()).toBeVisible();
+      await expect(legend.getByText(owned, { exact: false }).first()).toBeVisible();
+      await expect(legend.locator("ul").last().locator("li")).toHaveCount(3);
+    });
+
+    test("each location card shows its item drawing, decorative (the name is printed)", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Drawings", 25);
+      const cards = await page.locator("[data-location]").count();
+      expect(cards).toBeGreaterThan(0);
+      await expect(page.locator("[data-location] .item-drawing")).toHaveCount(cards);
+      await expect(page.locator("[data-location] .item-drawing[aria-hidden='true']")).toHaveCount(cards);
+      expect(await page.locator("[data-location] .item-drawing svg").count()).toBeGreaterThanOrEqual(cards);
+    });
+
+    test("a field has its icon and keyword, and the accessible name contains the keyword", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Keyword", 25);
+      const field = page.locator('[data-location] [data-field="owned"]').first();
+      await expect(field).toHaveAttribute("aria-label", new RegExp(owned));
+      const label = field.locator("xpath=ancestor::label[1]");
+      await expect(label).toContainText(owned);
+      expect(await label.locator("svg").count()).toBeGreaterThan(0);
+    });
+
+    test("every location field has its concept icon, beehives too", async ({ page }) => {
+      await page.goto(path);
+      // the beehive tree opens at level 39; the form data holds every game level
+      await createProfile(page, "Every icon", 40);
+      const beehives = page.locator('[data-location] fieldset[data-field="beehives"]');
+      await expect(beehives).toHaveCount(1);
+      await expect(beehives.locator("legend svg")).toHaveCount(1);
+      for (const f of ["owned", "slots", "mastery_stars", "animals"]) {
+        const field = page.locator(`[data-location] [data-field="${f}"]`).first();
+        const holder = field.locator("xpath=ancestor-or-self::*[self::label or self::fieldset][1]");
+        if (await field.count()) expect(await holder.locator("svg").count(), f).toBeGreaterThan(0);
+      }
+    });
+
+    test("storage fields keep their names and show the barn, silo and fishing drawings", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Storage", 25);
+      for (const field of ["barn_capacity", "silo_capacity", "fishing_spots_unlocked"]) {
+        const input = page.getByTestId(`player-${field}`);
+        const label = input.locator("xpath=ancestor::label[1]");
+        await expect(label.locator(".item-drawing[aria-hidden='true']")).toHaveCount(1);
+        await expect(input).toHaveAttribute("aria-label", /\S/);
+      }
+    });
+
+    test("an invalid value shows the invalid icon in its message and in the summary", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Icons", 25);
+      const barn = page.getByTestId("player-barn_capacity");
+      await barn.fill("60");
+      await barn.blur();
+      await expect(page.locator("p.field-error").first().locator("svg")).toHaveCount(1);
+      await expect(page.getByTestId("invalid-summary").locator("svg")).toHaveCount(1);
+    });
+
+    test("the full name and explanation show on hover only where a pointer can hover", async ({ page }) => {
+      await page.goto(path);
+      await createProfile(page, "Tooltip", 25);
+      const concept = page
+        .locator('[data-location] [data-field="owned"]')
+        .first()
+        .locator("xpath=ancestor::label[1]")
+        .locator(".concept")
+        .first();
+      const tip = concept.locator(".concept-tip");
+      const canHover = await page.evaluate(() => matchMedia("(hover: hover)").matches);
+      if (canHover) {
+        await concept.hover();
+        await expect(tip).toBeVisible();
+      } else {
+        await expect(tip).toBeHidden();
+      }
+    });
+  });
+}
+
+// The location cards on a phone, in both themes: the drawing fills its tile, a button row stays
+// one short block (the value buttons side by side), and a dropdown shows its whole selected text.
+for (const theme of ["light", "dark"]) {
+  test(`location cards fit a phone (${theme})`, async ({ page }, info) => {
+    test.skip(info.project.name !== "mobile", "the phone layout");
+    await page.addInitScript((t) => localStorage.setItem("theme", t), theme);
+    await page.goto("hu/profiles/");
+    // the beehive tree opens at level 39; the form data holds every game level
+    await createProfile(page, "Phone", 40);
+    const card = page.locator("[data-location]").first();
+
+    const drawing = card.locator(".item-drawing");
+    const tile = await drawing.boundingBox();
+    const svg = await drawing.locator("svg").boundingBox();
+    expect(svg!.width, "drawing inside its tile").toBeGreaterThanOrEqual(tile!.width * 0.7);
+
+    const stars = card.locator('fieldset[data-field="mastery_stars"] label');
+    const tops = await stars.evaluateAll((els) => els.slice(1).map((e) => Math.round(e.getBoundingClientRect().top)));
+    expect(new Set(tops).size, "the star buttons in one row").toBe(1);
+
+    for (const select of await card.locator("select").all()) {
+      const fits = await select.evaluate((el: HTMLSelectElement) => {
+        const ctx = document.createElement("canvas").getContext("2d")!;
+        ctx.font = getComputedStyle(el).font;
+        const text = ctx.measureText(el.selectedOptions[0].text).width;
+        const cs = getComputedStyle(el);
+        const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        return text <= inner;
+      });
+      expect(fits, "the selected text of a dropdown is not cut").toBe(true);
+    }
+  });
+}

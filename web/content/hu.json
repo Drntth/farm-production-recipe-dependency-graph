@@ -110,7 +110,6 @@
     "fishing": "Megnyitott horgászhelyek",
     "notSet": "nincs megadva",
     "recommended": "a tervező adja",
-    "defaultHint": "Az üres mező a szürke értéket használja: a szám a szint alapértéke, „a tervező adja” azt jelenti, hogy a számot a tervező számolja ki neked (földek, fák, bokrok, belépések), a „nincs megadva” pedig azt, hogy nincs korlát (pajta és siló nélkül a terv nem számol a tárolóhellyel).",
     "loginWindow": "Napi belépések",
     "start": "Első belépés",
     "end": "Utolsó belépés",
@@ -154,7 +153,91 @@
       "unknownLocation": "{location}: ismeretlen épület, kihagyva.",
       "siloFull": "A fák és bokrok termése belépésenként {fixed} silóhelyet foglal, több mint a termelésre szánt {room}."
     },
-    "error": "A terv nem sikerült: {error}"
+    "error": "A terv nem sikerült: {error}",
+    "levelDefault": "szint alapértéke ({value})",
+    "importRefused": "A fájl nem lett importálva, semmi nem lett mentve. Hibás értékek:",
+    "validation": {
+      "wholeNumber": "Egész számot adj meg",
+      "range": "{min} és {max} között",
+      "max": "Legfeljebb {max} a(z) {level}. szinten",
+      "min": "Legalább {min}",
+      "step": "{step}-esével ({min}, {next}, …)",
+      "summary": "{n} mező hibás"
+    },
+    "legend": {
+      "title": "Jelmagyarázat",
+      "empty": "Az üres mező jelentése:",
+      "levelDefault": "szürke szám: a szint alapértéke",
+      "recommended": "„a tervező adja”: a tervező számolja ki (földek, fák, bokrok, belépések)",
+      "notSet": "„nincs megadva”: nincs korlát; pajta és siló nélkül a terv nem számol a tárolóhellyel"
+    },
+    "concepts": {
+      "copies": {
+        "keyword": "Darab",
+        "name": "Darab",
+        "help": "Hány darabot birtokolsz: épületből vagy állattartóból, illetve ültetett fából vagy bokorból."
+      },
+      "slots": {
+        "keyword": "Helyek",
+        "name": "Helyek",
+        "help": "Egy épület egy darabjának termelési helyei: 1-től a maximumig."
+      },
+      "stars": {
+        "keyword": "Csillagok",
+        "name": "Mesterségcsillagok",
+        "help": "Az épület mesterségcsillagai, 0 és 3 között."
+      },
+      "animals": {
+        "keyword": "Állatok",
+        "name": "Állatok",
+        "help": "A tartott állatok, legfeljebb a darabok által adott helyek."
+      },
+      "beehives": {
+        "keyword": "Kaptárak",
+        "name": "Kaptárak",
+        "help": "A méhfa kaptárai, 1 és 4 között."
+      },
+      "fields": {
+        "keyword": "Földek",
+        "name": "Földek száma",
+        "help": "A birtokolt földek száma; a szint adja a maximumot."
+      },
+      "fishing": {
+        "keyword": "Horgászhelyek",
+        "name": "Horgászhelyek, megnyitva",
+        "help": "A megnyitott horgászhelyek, 0 és 15 között."
+      },
+      "logins": {
+        "keyword": "Belépések",
+        "name": "Belépések naponta",
+        "help": "Napi belépések a belépési ablakon belül, 1 és 24 között. Üresen a tervező adja."
+      },
+      "loginWindow": {
+        "keyword": "Napi belépések",
+        "name": "Belépési ablak",
+        "help": "Az első és az utolsó belépés; a tervező ebbe az ablakba osztja a belépéseket."
+      },
+      "export": {
+        "keyword": "Export",
+        "name": "JSON export",
+        "help": "A farmprofilt fájlba menti."
+      },
+      "import": {
+        "keyword": "Import",
+        "name": "JSON import",
+        "help": "Farmprofil-fájlt tölt be; a hibás fájlt nem fogadja el."
+      },
+      "invalid": {
+        "keyword": "Hibás",
+        "name": "Hibás érték",
+        "help": "A szabályon kívüli érték; nem mentődik el."
+      },
+      "loading": {
+        "keyword": "Betöltés",
+        "name": "A tervező betöltése",
+        "help": "A tervező töltődik (csak első alkalommal)."
+      }
+    }
   },
   "actions": {
     "collect": "Begyűjtés",
@@ -189,7 +272,20 @@
   },
   "usage": {
     "title": "Használat",
-    "intro": "Az itteni ajánlások szint szerinti alapértékekkel számolnak. A saját farmod tervéhez futtasd az eszközöket a gépeden (Python 3.14).",
+    "intro": "A webalkalmazás minden szint tervét mutatja, a saját farmjaidat pedig ebben a böngészőben tárolja. A parancssori eszközök ugyanezeket a terveket számolják ki a saját gépeden.",
+    "webTitle": "Webalkalmazás",
+    "levelsTitle": "Szintoldalak",
+    "levelsText": "Minden szint farmelrendezése és termelési terve: a blokkok, a naponkénti bejelentkezések száma és az, hogy mit kell tenni minden bejelentkezéskor.",
+    "levelsLink": "Minden szint",
+    "farmsTitle": "Saját farmok",
+    "farmsText": "Írd le a saját farmodat: a szintjét, az épületeit és a slotjait. Minden farmnak saját terve van; a farmok csak ebben a böngészőben tárolódnak.",
+    "farmsLink": "Saját farmok megnyitása",
+    "exportTitle": "Export: a mentés",
+    "exportText": "A böngésző törölheti az oldalhoz tárolt adatokat. Módosítás után exportáld a farmjaidat fájlba, őrizd meg a fájlt, és importálással állíthatod vissza a farmot.",
+    "iosTitle": "iPhone és iPad: hozzáadás a főképernyőhöz",
+    "iosText": "A Safari törli annak az oldalnak az adatait, amelyet 7 napig nem látogattak. A főképernyőhöz adás (Megosztás, majd Főképernyőhöz adás) segíthet, de nem garantált: a mentés az exportált fájl marad.",
+    "cliTitle": "Parancssor (a saját gépeden)",
+    "cliText": "Ugyanezek a lépések futnak a saját gépeden, a saját farmprofiloddal. A webalkalmazáshoz nincs szükség parancssorra.",
     "installTitle": "Telepítés",
     "installText": "Klónozd a repót, és telepítsd a függőségeket egy virtuális környezetbe.",
     "wizardTitle": "A profilod",

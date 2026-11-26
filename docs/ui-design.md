@@ -49,6 +49,7 @@ Bounds come from the data (`level_limits.json`, `animal_capacity`) and the game 
 - Import: a file with an invalid value is refused; the message lists location, field, value and the valid range. Nothing is stored.
 - Stored profile with an invalid value (an older version, edited by hand): loaded, the fields marked as above, not planned until fixed.
 - The schema version check stays first; it only checks the file format.
+- An empty field is the level default (grey placeholder), except the level: the level must not be empty, it is always a whole number in range.
 
 Message templates (both languages in `web/content/*.json`, same keys):
 
@@ -58,6 +59,7 @@ Message templates (both languages in `web/content/*.json`, same keys):
 | `range`       | Between {min} and {max}               | {min} és {max} között                  |
 | `max`         | At most {max} at level {level}        | Legfeljebb {max} a(z) {level}. szinten |
 | `step`        | In steps of {step} ({min}, {next}, …) | {step}-esével ({min}, {next}, …)       |
+| `min`         | At least {min}                        | Legalább {min}                         |
 | `summary`     | {n} fields are invalid                | {n} mező hibás                         |
 
 ## Concept icons and legend
@@ -74,6 +76,7 @@ Message templates (both languages in `web/content/*.json`, same keys):
 | slots                 | `list-ordered`        |
 | mastery star          | `star`                |
 | animals               | `paw-print`           |
+| beehives              | `hexagon`             |
 | fields                | `wheat`               |
 | fishing spots         | `fishing-hook`        |
 | logins per day        | `log-in`              |
@@ -91,7 +94,7 @@ Checked in `@iconify-json/lucide` 1.2.147 (2026-11-23): every name above exists.
 ## Item drawings
 
 - An **item drawing** is an own-made SVG that looks like the in-game object, so the player recognises it. Never a game screenshot, a game asset or a trace of one (Supercell Fan Content Policy).
-- Style: flat fills, a thick dark outline (2 px at 24 px), 2-3 fills from the site palette (`--wood`, `--soil`, `--grass`, `--wheat`, `--sky`, `--water`, `--accent`, `--gold`), a slight three-quarter view like the game, `viewBox="0 0 24 24"`, readable at 24 px and 48 px, on the light and the dark theme.
+- Style: a small 3D object in a slight three-quarter view, light from the top left: front face in the base colour, top face lighter, side face darker (plain hex tones, up to 5 fills). Dark outline `var(--outline, #2a2116)` on both themes (never `--fg`), outer outline about 1.1 at 24 px, inner detail lines about 0.7 (fill contrast where a line would merge), `viewBox="0 0 24 24"`. The drawing must show what the building makes or what the animal or object is; readable at 24 px and 48 px. On the dark theme `ItemDrawing` puts the drawing on a light rounded tile (the SVG stays transparent). Fills are the light-theme palette values as plain hex, not `var()`: the dark theme's `--sky` and `--grass` are near-black and would break the drawings.
 - Files: `web/src/assets/items/<id>.svg`, named by the data `id` (the fishing spot, a profile field and no location, is `fishing_spot.svg`); written by hand, no embedded raster, no text.
 - Where a drawing is missing: a neutral **placeholder drawing** and the game item name.
 - Tests: every drawing is valid SVG with the 24 × 24 viewBox; a missing one falls back to the placeholder.
@@ -175,6 +178,7 @@ Review checklist for a changed page:
 - Safari: whether a home-screen web app or a granted `persist()` lifts the 7-day deletion has no primary source. Not needed further: the export reminder treats every browser as if it may delete the data.
 - Fishing spot drawing: `fishing_spot.svg` (no location `id`; the profile field is `fishing_spots_unlocked`).
 - Animals icon: `paw-print`.
+- Beehives icon (2026-11-26): `hexagon` (a honeycomb cell); Lucide has no bee or beehive icon.
 
 ## Sources
 

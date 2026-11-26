@@ -103,6 +103,7 @@ flowchart TB
     relocation --> models
 
     recommend --> api
+    recommend --> config
     recommend --> layout
     recommend --> loaders
     recommend --> planner

@@ -110,7 +110,6 @@
     "fishing": "Fishing spots unlocked",
     "notSet": "not set",
     "recommended": "planner sets",
-    "defaultHint": "An empty field uses the grey value: a number is the level default, \"planner sets\" means the planner works the number out for you (fields, trees, bushes, logins), \"not set\" means no limit (without barn and silo the plan ignores storage).",
     "loginWindow": "Daily logins",
     "start": "First login",
     "end": "Last login",
@@ -154,7 +153,91 @@
       "unknownLocation": "{location}: unknown building, ignored.",
       "siloFull": "The fruit of the trees and bushes takes {fixed} silo places per login, more than the {room} meant for production."
     },
-    "error": "The plan failed: {error}"
+    "error": "The plan failed: {error}",
+    "levelDefault": "level default ({value})",
+    "importRefused": "The file was not imported, nothing was stored. Invalid values:",
+    "validation": {
+      "wholeNumber": "Enter a whole number",
+      "range": "Between {min} and {max}",
+      "max": "At most {max} at level {level}",
+      "min": "At least {min}",
+      "step": "In steps of {step} ({min}, {next}, …)",
+      "summary": "{n} fields are invalid"
+    },
+    "legend": {
+      "title": "Legend",
+      "empty": "An empty field means:",
+      "levelDefault": "a grey number: the level default",
+      "recommended": "“planner sets”: the planner works the number out (fields, trees, bushes, logins)",
+      "notSet": "“not set”: no limit; without barn and silo the plan ignores storage"
+    },
+    "concepts": {
+      "copies": {
+        "keyword": "Owned",
+        "name": "Owned",
+        "help": "How many you own: copies of a building or animal shelter, or planted trees and bushes."
+      },
+      "slots": {
+        "keyword": "Slots",
+        "name": "Slots",
+        "help": "Production slots of one copy of the building, from 1 up to its maximum."
+      },
+      "stars": {
+        "keyword": "Stars",
+        "name": "Mastery stars",
+        "help": "Mastery stars of the building, 0 to 3."
+      },
+      "animals": {
+        "keyword": "Animals",
+        "name": "Animals",
+        "help": "Animals in the shelters, at most the places the copies give."
+      },
+      "beehives": {
+        "keyword": "Beehives",
+        "name": "Beehives",
+        "help": "Beehives of the beehive tree, 1 to 4."
+      },
+      "fields": {
+        "keyword": "Fields",
+        "name": "Fields owned",
+        "help": "Fields you own; the level sets the maximum."
+      },
+      "fishing": {
+        "keyword": "Fishing spots",
+        "name": "Fishing spots unlocked",
+        "help": "Fishing spots you have unlocked, 0 to 15."
+      },
+      "logins": {
+        "keyword": "Logins",
+        "name": "Logins per day",
+        "help": "Logins per day inside the login window, 1 to 24. Empty: the planner sets it."
+      },
+      "loginWindow": {
+        "keyword": "Daily logins",
+        "name": "Login window",
+        "help": "First and last login of the day; the planner spreads the logins between them."
+      },
+      "export": {
+        "keyword": "Export",
+        "name": "Export JSON",
+        "help": "Saves the farm profile as a file."
+      },
+      "import": {
+        "keyword": "Import",
+        "name": "Import JSON",
+        "help": "Loads a farm profile file; an invalid file is refused."
+      },
+      "invalid": {
+        "keyword": "Invalid",
+        "name": "Invalid value",
+        "help": "A value outside the rules; it is not stored."
+      },
+      "loading": {
+        "keyword": "Loading",
+        "name": "Loading the planner",
+        "help": "The planner is loading (first time only)."
+      }
+    }
   },
   "actions": {
     "collect": "Collect",
@@ -189,7 +272,20 @@
   },
   "usage": {
     "title": "Usage",
-    "intro": "The recommendations here use level defaults. For a plan of your own farm, run the tools locally (Python 3.14).",
+    "intro": "The web app shows the plans for every level and keeps your own farms in this browser. The command-line tools compute the same plans on your own computer.",
+    "webTitle": "Web app",
+    "levelsTitle": "Level pages",
+    "levelsText": "The farm layout and the production plan for every level: the blocks, the logins per day and what to do at each login.",
+    "levelsLink": "All levels",
+    "farmsTitle": "My farms",
+    "farmsText": "Describe your own farm: its level, buildings and slots. Each farm keeps its own plan; the farms are stored in this browser only.",
+    "farmsLink": "Open My farms",
+    "exportTitle": "Export: the backup",
+    "exportText": "The browser may delete the data it keeps for this site. Export your farms to a file after each change, keep the file, and import it to restore a farm.",
+    "iosTitle": "iPhone and iPad: add to the Home Screen",
+    "iosText": "Safari deletes the data of a site that was not visited for 7 days. Adding the site to the Home Screen (Share, then Add to Home Screen) may help, but it is not a guarantee: the exported file stays the backup.",
+    "cliTitle": "Command line (your own computer)",
+    "cliText": "The same steps run on your computer with your own farm profile. The web app does not need the command line.",
     "installTitle": "Install",
     "installText": "Clone the repository and install the requirements in a virtual environment.",
     "wizardTitle": "Your profile",

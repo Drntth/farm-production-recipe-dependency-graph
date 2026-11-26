@@ -4,6 +4,13 @@ One entry per version. The version is kept in `pyproject.toml`; the details of e
 
 ## [Unreleased]
 
+- Web: the farm profile form validates every value (whole numbers, ranges, steps, the level's copy and field limits): invalid values are marked, listed with links, not stored and block Calculate; an import with invalid values is refused with the list; a stored invalid profile loads with its fields marked. Dropdowns and button rows where the input rules name them; the limits come from `python -m src web-files` (`defaults.json` schema 2: `limits` per level, `animal_capacity`, `max_slots`).
+- Web: the farm profile form has concept icons with a visible keyword, a closed legend (icons and empty fields) (beehives: `hexagon`, Lucide has no bee icon) and own-made item drawings on the location cards and the barn, silo and fishing spot fields (a light tile on the dark theme; the cards keep one column of full-width fields and one row of value buttons on a phone).
+- Web: the Usage page starts with the web app (level pages, My farms, export as the backup, iOS Home Screen help); the command line is in a closed section.
+- Web: main controls (buttons, fields, navigation pills, farm block titles, icon buttons) are at least 44 CSS px.
+- Fix: the language switch's accessible name contains its visible code; level key figures use valid definition-list markup; Usage code blocks scroll with the keyboard.
+- Tests: accessibility checks with axe (`@axe-core/playwright` 4.14.0, WCAG 2.2 A/AA) on every page, both languages and themes (`web/tests/a11y.spec.ts`); touch targets (44 CSS px), reduced motion and failing scripts (`web/tests/states.spec.ts`).
+- Tests: validation tests in Playwright (desktop, phone, tablet, English and Hungarian), unit tests for the check module (`web/src/profiles/check.test.ts`).
 - Docs: interface rules for v2.5 in `docs/ui-design.md` (input rules, validation and error messages, concept icons and legend, item drawings, language, export reminder, accessibility and its tests); new terms in `CONTEXT.md`; Hungarian game item names decided against (the game has no Hungarian).
 
 ## [2.4.0] - 2026-11-23

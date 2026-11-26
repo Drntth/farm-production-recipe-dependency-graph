@@ -27,6 +27,7 @@
   --soil: #6b4a2b;
   --warn-bg: #fff1d0;
   --warn-fg: #6b4700;
+  --danger: #b42318;
 }
 .dark {
   color-scheme: dark;
@@ -48,6 +49,7 @@
   --soil: #8c6a48;
   --warn-bg: #352a0e;
   --warn-fg: #f2d48a;
+  --danger: #ff8a7a;
 }
 
 /* Fredoka has no ő / ű: Hungarian pages set headings in Nunito, so no word mixes two fonts */
@@ -226,6 +228,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    min-height: 2.75rem; /* 44 CSS px touch target */
     border-radius: 0.6rem;
     padding: 0.55rem 1rem;
     font-size: 0.9rem;
@@ -260,8 +263,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    /* 44 CSS px: the touch target of a main control (ui-design.md) */
+    width: 2.75rem;
+    height: 2.75rem;
     border: 1px solid var(--line);
     border-radius: 0.6rem;
     background: color-mix(in srgb, var(--surface) 70%, transparent);
@@ -287,6 +291,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    min-height: 2.75rem; /* 44 CSS px touch target */
     border-radius: 9999px;
     padding: 0.4rem 0.8rem;
     font-size: 0.875rem;
@@ -494,8 +499,22 @@
     border-radius: 0.6rem;
     background: var(--surface);
     color: var(--fg);
+    min-height: 2.75rem; /* 44 CSS px touch target */
     padding: 0.5rem 0.75rem;
     font: inherit;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
+  }
+  .field-error {
+    color: var(--danger);
+    font-weight: 600;
+  }
+  .error-summary {
+    border: 1px solid var(--danger);
+    border-radius: 0.8rem;
+    padding: 0.75rem 1rem;
   }
   .field:focus {
     outline: none;
@@ -535,5 +554,36 @@
       transition: none;
       transform: none;
     }
+  }
+}
+
+/* concept icons: the keyword sits next to the icon; the full name and explanation show
+   on pointers with hover only (nothing needed is only in the tooltip: see the legend) */
+.concept {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.concept-tip {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 10;
+  width: max-content;
+  max-width: 16rem;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.3;
+}
+@media (hover: hover) {
+  .concept:hover > .concept-tip {
+    display: block;
   }
 }

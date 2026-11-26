@@ -75,6 +75,26 @@ def test_defaults_file_covers_every_level(bundle: dict):
     assert set(defaults["locations"]) >= set(defaults["levels"]["3"]["locations"])
 
 
+def test_defaults_carry_the_form_limits(bundle: dict):
+    # the bounds of the farm profile form: copies and fields per level, shelter
+    # capacity and slots per location, all from the data (not from the page)
+    data = dataset_from_bundle(bundle)
+    defaults = build_defaults(bundle, range(1, 4))
+    assert defaults["schema_version"] == 2
+    limits = defaults["limits"]
+    assert list(limits) == ["1", "2", "3"]
+    assert limits["3"]["fields"] == data.level_limits.fields_at(3)
+    assert limits["3"]["copies"]["chicken_coop"] == data.level_limits.instances_at(
+        "chicken_coop", 3
+    )
+    assert limits["1"]["copies"]["chicken_coop"] == 1
+    chicken = defaults["locations"]["chicken_coop"]
+    assert chicken["animal_capacity"] == data.locations["chicken_coop"].animal_capacity
+    # a machine with slots: the machine default of 9 (feed mill unlocks at level 2)
+    assert defaults["locations"]["feed_mill"]["max_slots"] == 9
+    assert "max_slots" not in defaults["locations"].get("field", {})
+
+
 def test_core_files_exclude_scraper_and_tests():
     names = set(core_files())
     assert "src/api/browser.py" in names

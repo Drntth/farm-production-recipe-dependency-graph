@@ -34,6 +34,7 @@ ruff format --check src tests           # formatting (ruff format src tests fixe
 | Map editor JS core | `tests/test_farm_map_editor.py` runs the functions between `CORE-START` / `CORE-END` of the editor in node; skipped without node |
 | Architecture       | `tests/test_architecture.py` compares the package diagram in `architecture.md` with the real imports                             |
 | Generated examples | `tests/test_examples.py` fails when `config/examples/` is stale: regenerate with `python -m src examples`                        |
+| Web icons          | `web/src/components/icon-data.ts` is generated and committed; `Icon.test.ts` fails when it is stale: in `web/` run `node scripts/generate-icon-data.mjs` |
 
 Rules:
 
@@ -81,14 +82,16 @@ Deploy: `.github/workflows/pages.yml` runs after a green CI run of a push to `ma
 
 ## Automated checks instead of manual ones
 
-| Manual check before                    | Automated                                                                                                                                           |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| the form fits a phone and a tablet     | `tests/profiles.spec.ts`: no sideways scroll on the phone, tablet and desktop projects, at 130% and 160% text (the phone at 360 CSS px)             |
-| no English left on the Hungarian pages | `tests/language.spec.ts`: no English string of `content/en.json` (that has a Hungarian text) on any `/hu/` page, menus and closed sections included |
-| the planner's notes and timing         | `src/profiles/warnings.test.ts` (Vitest) and the Pyodide test of `tests/profiles.spec.ts`                                                           |
-| a level picked on a slow phone         | `tests/site.spec.ts`: a level chosen before the picker's script loads is kept                                                                       |
-| mobile timing                          | `tests/perf.spec.ts` (`npm run test:perf`): 4x CPU slowdown, Wi-Fi-like network; cold, warm and after a reload, with budgets                        |
-| the live site is the new build         | `tests/live.spec.ts` (`npm run test:live`, CI `live-check`): `version.json` holds the expected commit                                               |
+| Manual check before                    | Automated                                                                                                                                                                                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the form fits a phone and a tablet     | `tests/profiles.spec.ts`: no sideways scroll on the phone, tablet and desktop projects, at 130% and 160% text (the phone at 360 CSS px)                                                                                                         |
+| no English left on the Hungarian pages | `tests/language.spec.ts`: no English string of `content/en.json` (that has a Hungarian text) on any `/hu/` page, menus and closed sections included                                                                                             |
+| the planner's notes and timing         | `src/profiles/warnings.test.ts` (Vitest) and the Pyodide test of `tests/profiles.spec.ts`                                                                                                                                                       |
+| a level picked on a slow phone         | `tests/site.spec.ts`: a level chosen before the picker's script loads is kept                                                                                                                                                                   |
+| mobile timing                          | `tests/perf.spec.ts` (`npm run test:perf`): 4x CPU slowdown, Wi-Fi-like network; cold, warm and after a reload, with budgets                                                                                                                    |
+| the live site is the new build         | `tests/live.spec.ts` (`npm run test:live`, CI `live-check`): `version.json` holds the expected commit                                                                                                                                           |
+| the pages meet WCAG 2.2 A/AA (axe)     | `web/tests/a11y.spec.ts`: home, a level page (layout and plan), How it works, Usage and My farms in both languages, both themes, phone and desktop; the main controls at least 44 CSS px on the phone; no motion under `prefers-reduced-motion` |
+| a failed script leaves the page usable | `web/tests/states.spec.ts`: the level and home pages with an island script aborted (`route.abort`); the plan tab without any script                                                                                                             |
 
 Limits: the emulation is Chromium, not every phone browser, and its CPU slowdown hardly reaches the planner's WebAssembly worker, so `perf.json` tracks changes between runs and is not a phone measurement. A real phone is needed only for what these tests do not cover.
 

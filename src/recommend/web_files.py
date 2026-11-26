@@ -10,8 +10,13 @@ Writes ``core.zip`` (the ``src`` modules ``src.api.browser`` needs, found by
 following the imports), ``data_bundle.json`` (``python -m src bundle``) and
 ``defaults.json`` (the level defaults of levels 1 to the data's max level)::
 
-    {"schema_version": 1, "locations": {"<id>": {"name", "type"}},
-     "levels": {"<N>": <level-default player profile>}}
+    {"schema_version": 2, "locations": {"<id>": {"name", "type",
+        "animal_capacity"?, "max_slots"?}},
+     "levels": {"<N>": <level-default player profile>},
+     "limits": {"<N>": {"fields": <int>|null, "copies": {"<id>": <int>}}}}
+
+``limits`` are the bounds of the farm profile form per level: the fields
+granted and the copies unlocked (``level_limits.json``).
 
 The files are generated and git-ignored.
 """
@@ -26,8 +31,9 @@ import zipfile
 from pathlib import Path
 
 from src.api.browser import level_defaults
+from src.config import MAX_SLOTS_PER_COPY
 from src.loaders.bundle import build_bundle
-from src.loaders.json_loader import data_directory
+from src.loaders.json_loader import data_directory, dataset_from_bundle
 
 logger = logging.getLogger("src.recommend")
 
@@ -95,14 +101,35 @@ def write_core_zip(target: Path, entry: str = ENTRY) -> list[str]:
 
 
 def build_defaults(bundle: dict, levels: range) -> dict:
-    """The level defaults of *levels*; location names and types are shared."""
+    """The level defaults and form limits of *levels*; location facts are shared."""
+    data = dataset_from_bundle(bundle)
     locations: dict[str, dict] = {}
     profiles: dict[str, dict] = {}
     for level in levels:
         one = level_defaults(bundle, level)
         locations |= one["locations"]
         profiles[str(level)] = one["profile"]
-    return {"schema_version": 1, "locations": locations, "levels": profiles}
+    for loc_id, entry in locations.items():
+        loc = data.locations[loc_id]
+        if loc.animal_capacity is not None:
+            entry["animal_capacity"] = loc.animal_capacity
+        if loc.base_slots is not None:
+            entry["max_slots"] = loc.max_slots or MAX_SLOTS_PER_COPY
+    grants = data.level_limits
+    ids = sorted({i.location_id for i in grants.location_instances}) if grants else []
+    limits = {
+        str(level): {
+            "fields": grants.fields_at(level) if grants else None,
+            "copies": {i: grants.instances_at(i, level) for i in ids},
+        }
+        for level in levels
+    }
+    return {
+        "schema_version": 2,
+        "locations": locations,
+        "levels": profiles,
+        "limits": limits,
+    }
 
 
 def _dump(obj: dict) -> str:
