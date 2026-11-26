@@ -381,7 +381,8 @@ test("main menu reaches every page; a phone gets a hamburger", async ({ page, is
       await expect(page).toHaveURL(url);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
       await expect(header.locator('[aria-current="page"]').first()).toContainText(name);
-      await expect(page.locator("ol > li").first()).toBeVisible();
+      // first list of the page: on Usage the CLI steps sit in a closed section, the web cards come first
+      await expect(page.locator("main :is(ol, ul) > li").first()).toBeVisible();
       await noHorizontalScroll(page);
     }
   }

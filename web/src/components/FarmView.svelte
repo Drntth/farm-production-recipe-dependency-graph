@@ -572,6 +572,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    min-height: 2.75rem; /* 44 CSS px touch target */
     text-align: left;
     font: inherit;
     cursor: pointer;

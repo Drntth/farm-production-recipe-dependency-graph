@@ -148,12 +148,10 @@ const itemName = (item: Pick<LoginItem, "recipe_id" | "resource_id">) =>
     </div>
     <dl class="mt-5 grid grid-cols-3 gap-3" data-testid="key-figures">
       {keys.map((k) => (
-        <div class="tile flex items-center gap-3">
-          <Icon name={k.icon} class="hidden size-6 shrink-0 text-accent sm:block" aria-hidden="true" />
-          <div>
-            <dt class="muted text-xs sm:text-sm">{k.name}</dt>
-            <dd class="font-display text-2xl font-semibold">{k.value}</dd>
-          </div>
+        <div class="tile grid grid-cols-[auto_1fr] items-center gap-x-3">
+          <Icon name={k.icon} class="row-span-2 hidden size-6 text-accent sm:block" aria-hidden="true" />
+          <dt class="col-start-2 muted text-xs sm:text-sm">{k.name}</dt>
+          <dd class="col-start-2 font-display text-2xl font-semibold">{k.value}</dd>
         </div>
       ))}
     </dl>
