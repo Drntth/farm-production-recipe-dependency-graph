@@ -9,6 +9,8 @@ export interface StoredProfile {
   profile: FarmProfile;
   /** epoch milliseconds of the last write */
   updated: number;
+  /** epoch milliseconds of the last export; kept here, never in the profile file */
+  exported?: number;
 }
 
 export interface Backend {
@@ -53,6 +55,8 @@ export interface ProfileStore {
   get(id: string): Promise<StoredProfile | undefined>;
   /** Writes (insert or replace) and stamps `updated`. */
   put(id: string, profile: FarmProfile): Promise<StoredProfile>;
+  /** Stamps `exported` (the profile was saved to a file); `updated` stays. */
+  markExported(id: string): Promise<StoredProfile | undefined>;
   remove(id: string): Promise<void>;
   getActiveId(): Promise<string | undefined>;
   setActiveId(id: string | undefined): Promise<void>;
@@ -83,7 +87,17 @@ export function createProfileStore(backend: Backend = idbBackend(), now: () => n
       return record && current(record);
     },
     async put(id, profile) {
+      const before = (await backend.get(PROFILE_PREFIX + id)) as StoredProfile | undefined;
       const record: StoredProfile = { id, profile, updated: now() };
+      // a write keeps the last export: only an export changes it
+      if (before?.exported !== undefined) record.exported = before.exported;
+      await backend.set(PROFILE_PREFIX + id, record);
+      return record;
+    },
+    async markExported(id) {
+      const before = (await backend.get(PROFILE_PREFIX + id)) as StoredProfile | undefined;
+      if (!before) return undefined;
+      const record = { ...before, exported: now() };
       await backend.set(PROFILE_PREFIX + id, record);
       return record;
     },

@@ -411,6 +411,13 @@
     background: color-mix(in srgb, var(--accent) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   }
+  .notice-warn {
+    padding: 0.75rem;
+    color: var(--warn-fg);
+    background: var(--warn-bg);
+    border: 1px solid color-mix(in srgb, var(--warn-fg) 30%, transparent);
+    border-radius: 0.75rem;
+  }
   .badge-warn {
     color: var(--warn-fg);
     background: var(--warn-bg);

@@ -41,6 +41,18 @@ describe("profile store", () => {
     await store.remove("a");
     expect(await store.getActiveId()).toBeUndefined();
   });
+
+  it("keeps the export time beside the profile, through later writes", async () => {
+    const store = fixture();
+    await store.put("a", newFarmProfile("A", 5));
+    expect((await store.get("a"))?.exported).toBeUndefined();
+    const marked = await store.markExported("a");
+    expect(marked).toMatchObject({ updated: 1001, exported: 1002 });
+    await store.put("a", newFarmProfile("A", 6));
+    expect(await store.get("a")).toMatchObject({ updated: 1003, exported: 1002 });
+    // the export time is not part of the profile file
+    expect(JSON.stringify((await store.get("a"))?.profile)).not.toContain("exported");
+  });
 });
 
 describe("stored profiles at an older schema version", () => {

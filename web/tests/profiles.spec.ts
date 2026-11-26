@@ -283,3 +283,38 @@ for (const theme of ["light", "dark"]) {
     }
   });
 }
+
+// Data safety (docs/ui-design.md): the last export shows on the profile, and a reminder
+// asks for an export when the profile changed since an export older than 7 days (or none).
+for (const path of ["profiles/", "hu/profiles/"]) {
+  test(`the last export and the export reminder (${path})`, async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-11-01T10:00:00Z") });
+    await page.goto(path);
+    await createProfile(page, "Backup", 25);
+    const reminder = page.getByTestId("export-reminder");
+    const last = page.getByTestId("last-export");
+    await expect(reminder).toBeVisible();
+    await expect(last).toHaveAttribute("data-exported", "never");
+
+    // the reminder's own button exports
+    await Promise.all([page.waitForEvent("download"), reminder.getByRole("button").click()]);
+    await expect(reminder).toBeHidden();
+    await expect(last).toHaveAttribute("data-exported", "yes");
+
+    // a change within 7 days: no reminder
+    const barn = page.getByTestId("player-barn_capacity");
+    await barn.fill("500");
+    await barn.blur();
+    await expect(reminder).toBeHidden();
+
+    // 8 days later a change brings it back; the export time survives a reload
+    await page.clock.fastForward(8 * 24 * 3600_000);
+    await barn.fill("525");
+    await barn.blur();
+    await expect(reminder).toBeVisible();
+    await expect(last).toContainText("8");
+    await page.reload();
+    await expect(page.getByTestId("export-reminder")).toBeVisible();
+    await expect(page.getByTestId("last-export")).toHaveAttribute("data-exported", "yes");
+  });
+}

@@ -34,6 +34,7 @@
     type FieldRange,
   } from "../profiles/check";
   import { createProfileStore, requestPersist, type StoredProfile } from "../profiles/store";
+  import { lastExportAgo, needsReminder } from "../profiles/backup";
   import type { FarmProfile, LocationProgress, PlayerNumberField } from "../profiles/types";
   import { translateWarning } from "../profiles/warnings";
   import { loadTime, onProgress, planFarmProfile, type Progress } from "../worker/client";
@@ -144,7 +145,10 @@
   let defaults = $state<Defaults | null>(null);
   let records = $state<StoredProfile[]>([]);
   let activeId = $state<string | undefined>(undefined);
-  let persisted = $state<boolean | null>(null);
+  /** persist() is asked once, after the first save; its result is kept silently (ui-design.md) */
+  let persistAsked = false;
+  /** the clock of the last export text and the reminder, refreshed every minute and after a write */
+  let now = $state(Date.now());
   let message = $state("");
   /** typed text of the invalid fields, not stored: path → text and the value that was checked */
   let drafts = $state<Record<string, { text: string; value: number | null }>>({});
@@ -159,6 +163,7 @@
 
   const maxLevel = $derived(defaults ? Math.max(...Object.keys(defaults.levels).map(Number)) : 1);
   const active = $derived(records.find((r) => r.id === activeId));
+  const remind = $derived(!!active && needsReminder(active, now));
   const profile = $derived(active?.profile);
   const levelDefaults = $derived(profile && defaults ? defaults.levels[String(profile.player.level)] : undefined);
   const grouped = $derived.by(() => {
@@ -193,6 +198,7 @@
 
   onMount(() => {
     const off = onProgress((p) => (progress = p));
+    const tick = setInterval(() => (now = Date.now()), 60_000);
     (async () => {
       const response = await fetch(url("py/defaults.json"));
       defaults = (await response.json()) as Defaults;
@@ -200,7 +206,10 @@
       const saved = await store.getActiveId();
       activeId = records.some((r) => r.id === saved) ? saved : records[0]?.id;
     })().catch((error) => (message = String(error)));
-    return off;
+    return () => {
+      off();
+      clearInterval(tick);
+    };
   });
 
   async function save(next: FarmProfile, id = activeId) {
@@ -208,7 +217,11 @@
     // a plain copy: IndexedDB cannot clone Svelte's state proxies
     const record = await store.put(id, $state.snapshot(next) as FarmProfile);
     records = [record, ...records.filter((r) => r.id !== id)];
-    if (persisted === null) persisted = await requestPersist();
+    now = Date.now();
+    if (!persistAsked) {
+      persistAsked = true;
+      await requestPersist();
+    }
   }
 
   async function select(id: string) {
@@ -250,8 +263,8 @@
     }
   }
 
-  function download() {
-    if (!profile) return;
+  async function download() {
+    if (!profile || !active) return;
     const blob = new Blob([exportJson(profile)], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -259,6 +272,10 @@
     link.download = `${stem}.farm-profile.json`;
     link.click();
     URL.revokeObjectURL(link.href);
+    // the export time stays beside the profile in IndexedDB, never in the file
+    const record = await store.markExported(active.id);
+    if (record) records = records.map((r) => (r.id === record.id ? record : r));
+    now = Date.now();
   }
 
   async function upload(event: Event) {
@@ -590,9 +607,6 @@
       </ul>
     </div>
   {/if}
-  {#if persisted !== null}
-    <p class="muted mt-3 text-sm" data-testid="persisted">{persisted ? t.persisted : t.notPersisted}</p>
-  {/if}
 </section>
 
 {#if profile && levelDefaults}
@@ -606,6 +620,28 @@
         <button type="button" class="btn btn-ghost" onclick={remove}>{t.remove}</button>
       </div>
     </div>
+    {#if active}
+      <p
+        class="muted mt-2 flex items-center gap-2 text-sm"
+        data-testid="last-export"
+        data-exported={active.exported === undefined ? "never" : "yes"}
+      >
+        <Icon name="hard-drive-download" size={16} />
+        {active.exported === undefined
+          ? t.lastExportNever
+          : fill(t.lastExport, { when: lastExportAgo(active.exported, now, lang) })}
+      </p>
+    {/if}
+    {#if remind}
+      <!-- a notice, not a dialog: the browser may delete stored data, a file survives -->
+      <div class="notice-warn mt-3 flex flex-wrap items-center gap-3" role="status" data-testid="export-reminder">
+        <Icon name="triangle-alert" size={20} />
+        <p class="min-w-0 flex-[1_1_12rem] text-left text-sm">{t.reminder}</p>
+        <button type="button" class="btn btn-primary" onclick={download}
+          ><Icon name="download" size={18} /> {t.export}</button
+        >
+      </div>
+    {/if}
     <details class="legend mt-3" data-testid="legend">
       <summary class="flex cursor-pointer items-center gap-2 font-semibold">
         <Icon name="info" size={18} />
